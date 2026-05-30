@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.netlify/
+.wrangler/
+.turbo/
+.vite/
+coverage/
+*.local
+.env
+.env.*
+!.env.example
+server.out.log
+server.err.log
