@@ -1,0 +1,184 @@
+@import '../../desktop/src/styles.css';
+
+.home-panel {
+  gap: 17px;
+  padding: 76px 18px 34px;
+}
+
+.admini-logo {
+  height: clamp(58px, 18vw, 82px);
+  width: clamp(58px, 18vw, 82px);
+}
+
+.logo-name {
+  font-size: clamp(58px, 18vw, 88px);
+  letter-spacing: -0.075em;
+  margin-left: clamp(-11px, -3vw, -7px);
+}
+
+.primary-tagline {
+  font-size: clamp(12px, 3.35vw, 15px);
+  margin: 6px 0 4px;
+  max-width: calc(100vw - 28px);
+  white-space: nowrap;
+}
+
+.time-greeting {
+  font-size: clamp(13px, 3.4vw, 16px);
+}
+
+.time-stamp {
+  align-items: center;
+  gap: 5px;
+  justify-items: center;
+}
+
+.time-stamp span {
+  font-size: clamp(44px, 15vw, 68px);
+}
+
+.time-stamp small {
+  font-size: 13px;
+}
+
+.split-auth {
+  display: block;
+  min-height: 100dvh;
+}
+
+.split-auth .auth-story {
+  align-content: center;
+  border-bottom: 0;
+  justify-items: center;
+  min-height: 42dvh;
+  padding: 72px 20px 24px;
+  text-align: center;
+}
+
+.split-auth .auth-story .logo-lockup {
+  gap: 0;
+  justify-items: center;
+}
+
+.split-auth .auth-story .admini-logo {
+  height: clamp(44px, 13vw, 62px);
+  width: clamp(44px, 13vw, 62px);
+}
+
+.split-auth .auth-story .logo-name {
+  font-size: clamp(44px, 13.5vw, 66px);
+}
+
+.split-auth .time-stamp {
+  justify-items: center;
+}
+
+.split-auth .time-stamp span {
+  font-size: clamp(48px, 15vw, 74px);
+}
+
+.auth-story > .story-tagline {
+  color: #2f4937;
+  font-family: var(--brand-font);
+  font-size: clamp(14px, 3.7vw, 17px);
+  font-weight: 760;
+  letter-spacing: 0.015em;
+  line-height: 1.25;
+  max-width: calc(100vw - 32px);
+  white-space: nowrap;
+}
+
+.auth-story > .story-tagline-small {
+  font-size: clamp(12px, 3vw, 14px);
+  max-width: calc(100vw - 32px);
+}
+
+.split-auth .auth-conversation {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0 0 74px;
+  min-height: auto;
+}
+
+.product-credit {
+  bottom: 14px;
+  font-size: 12px;
+  left: 16px;
+}
+
+.bubble-actions {
+  width: 100%;
+}
+
+.bubble-actions button {
+  flex: 1;
+  max-width: 150px;
+}
+
+.breath-button {
+  right: 14px;
+  top: 12px;
+}
+
+.visual-mode-button {
+  bottom: 14px;
+  height: 31px;
+  right: 14px;
+  width: 54px;
+}
+
+.auth-story,
+.auth-conversation {
+  padding: 26px 20px;
+}
+
+.auth-story > p,
+.auth-conversation h1,
+.big-question {
+  font-size: clamp(29px, 8.8vw, 42px);
+}
+
+.provider-boxes {
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(58px, 1fr));
+}
+
+.provider-boxes button {
+  border-radius: 18px;
+}
+
+.provider-icon {
+  height: 28px;
+  width: 28px;
+}
+
+.minimal-form input,
+.big-question input {
+  font-size: 24px;
+}
+
+.session-bar {
+  gap: 10px;
+  padding: 0 12px;
+}
+
+.session-bar div {
+  gap: 8px;
+  min-width: 0;
+}
+
+.session-bar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.integrations-page {
+  padding: 16px;
+}
+
+.integration-grid {
+  grid-template-columns: 1fr;
+}

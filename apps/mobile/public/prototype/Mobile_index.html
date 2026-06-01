@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FAFAFA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>AdminI — School Admin Capture</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@400;500;600;700&family=Unbounded:wght@400;500;600;700&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./Mobile_base.css">
+  <link rel="stylesheet" href="./Mobilestyle.css">
+</head>
+<body>
+  <!-- Skip to content -->
+  <a href="#main-content" class="sr-only">Skip to content</a>
+
+  <div class="app-shell">
+
+    <!-- ===== STATUS BAR ===== -->
+    <header class="status-bar">
+      <div class="status-bar__brand">
+        <div class="status-bar__logo">Admin<span>I</span></div>
+      </div>
+      <div class="status-bar__meta">
+        <span class="status-bar__date" id="current-date">Sat, Feb 28</span>
+        <span class="status-bar__time" id="current-time">9:53 AM</span>
+      </div>
+    </header>
+
+    <!-- ===== PULSE NOTIFICATION BANNER ===== -->
+    <div class="pulse-banner" id="pulse-banner">
+      <span class="pulse-banner__dot"></span>
+      <span>Observation notes — 2nd grade Math?</span>
+      <div class="pulse-banner__actions">
+        <button class="pulse-banner__btn pulse-banner__btn--primary" onclick="App.goToCapture('voice')">Voice</button>
+        <button class="pulse-banner__btn pulse-banner__btn--secondary" onclick="App.goToCapture('tap')">Tap</button>
+        <button class="pulse-banner__btn pulse-banner__btn--ghost" onclick="App.dismissPulseBanner()">Skip</button>
+      </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="app-content" id="main-content">
+
+      <!-- ========== CAPTURE TAB ========== -->
+      <div class="tab-view active" id="view-capture">
+        <div class="capture-view">
+
+          <!-- Mode Toggle -->
+          <div class="mode-toggle" role="tablist" aria-label="Capture mode">
+            <button class="mode-toggle__btn active" role="tab" aria-selected="true" id="btn-voice" onclick="App.setMode('voice')">Voice</button>
+            <button class="mode-toggle__btn" role="tab" aria-selected="false" id="btn-tap" onclick="App.setMode('tap')">Tap</button>
+            <div class="mode-toggle__slider" id="mode-slider"></div>
+          </div>
+
+          <!-- VOICE MODE -->
+          <div class="voice-mode" id="voice-mode">
+            <p class="voice-mode__prompt">Tap to capture</p>
+
+            <!-- Mic Button -->
+            <div class="mic-container" id="mic-container">
+              <div class="mic-ring mic-ring--1"></div>
+              <div class="mic-ring mic-ring--2"></div>
+              <div class="mic-ring mic-ring--3"></div>
+              <button class="mic-btn" id="mic-btn" aria-label="Start voice recording" onclick="App.toggleRecording()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" x2="12" y1="19" y2="22"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Transcription Area -->
+            <div class="transcription-area" id="transcription-area">
+              <div class="transcription-area__text" id="transcription-text"></div>
+              <span class="transcription-area__cursor" id="transcription-cursor"></span>
+            </div>
+
+            <!-- AI Suggestion Card -->
+            <div class="ai-suggestion" id="ai-suggestion">
+              <div class="ai-suggestion__header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                AI Analysis
+              </div>
+              <div class="ai-suggestion__meta" id="ai-meta"></div>
+              <div class="ai-suggestion__task" id="ai-task"></div>
+              <div class="ai-suggestion__step" id="ai-step">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                <span id="ai-step-text"></span>
+              </div>
+              <div class="ai-suggestion__actions">
+                <button class="btn btn--primary" onclick="App.confirmCapture()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Confirm
+                </button>
+                <button class="btn btn--secondary" onclick="App.editCapture()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- Recent Captures -->
+            <div class="recent-captures" id="recent-captures-voice">
+              <div class="recent-captures__title">Recent Captures</div>
+              <div id="recent-list-voice"></div>
+            </div>
+          </div>
+
+          <!-- TAP MODE -->
+          <div class="tap-mode" id="tap-mode">
+
+            <!-- Quick Captures (dynamically rendered) -->
+            <div class="quick-captures" id="quick-captures-container">
+              <!-- Rendered by App.renderQuickCaptures() -->
+            </div>
+
+            <!-- Word Board (dynamically rendered) -->
+            <div class="word-board" id="word-board">
+              <!-- Rendered by App.renderWordBoard() -->
+            </div>
+
+            <!-- Selected Area -->
+            <div class="selected-area" id="selected-area">
+              <span class="selected-area__label" id="selected-label">Tap words above to build your capture...</span>
+            </div>
+
+            <!-- Quick Detail Input -->
+            <div class="quick-detail">
+              <input type="text" class="quick-detail__input" id="quick-detail-input" placeholder="Add quick detail..." autocomplete="off">
+              <button class="btn btn--icon btn--ghost" aria-label="Show keyboard" onclick="App.focusDetail()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></svg>
+              </button>
+            </div>
+
+            <!-- AI Preview -->
+            <div class="ai-preview" id="ai-preview">
+              <div class="ai-preview__header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                AI Task Preview
+              </div>
+              <div class="ai-preview__empty" id="ai-preview-text">Select words to see task preview...</div>
+            </div>
+
+            <!-- Capture Button -->
+            <button class="btn btn--primary btn--large" id="tap-capture-btn" onclick="App.submitTapCapture()" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Capture
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========== DASHBOARD TAB ========== -->
+      <div class="tab-view" id="view-dashboard">
+        <div class="dashboard-view">
+
+          <div class="dashboard__greeting">
+            <h1>Good morning, Mr. Mitchell</h1>
+            <p>Westfield Academy — Tuesday, March 10</p>
+          </div>
+
+          <!-- KPI Cards (dynamically rendered) -->
+          <div class="kpi-scroll" id="kpi-scroll">
+            <!-- Rendered by App.renderKPICards() -->
+          </div>
+
+          <!-- Pulse Countdown -->
+          <div class="pulse-countdown">
+            <div class="pulse-countdown__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="pulse-countdown__text">
+              <div class="pulse-countdown__label">Next Pulse</div>
+              <div class="pulse-countdown__title">Leadership team huddle</div>
+            </div>
+            <div class="pulse-countdown__time" id="pulse-timer">23m</div>
+          </div>
+
+          <!-- Priority Queue -->
+          <div class="priority-queue">
+            <div class="section-title">
+              <h2>Priority Queue</h2>
+              <button class="section-title__action">View all</button>
+            </div>
+
+            <div class="priority-card" id="priority-1">
+              <div class="priority-card__content">
+                <div class="priority-dot priority-dot--urgent"></div>
+                <div>
+                  <div class="priority-card__title">Review AIG identification data — Dana Lewis follow-up</div>
+                  <div class="priority-card__meta">
+                    <span class="pill pill--student">Academic</span>
+                    <span class="pill pill--high">High</span>
+                    <span class="priority-card__due">10:00 AM</span>
+                    <span class="priority-card__source">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
+                      Canvas LMS
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="priority-card" id="priority-2">
+              <div class="priority-card__content">
+                <div class="priority-dot priority-dot--high"></div>
+                <div>
+                  <div class="priority-card__title">Regional accreditation evidence binder — compile artifacts</div>
+                  <div class="priority-card__meta">
+                    <span class="pill pill--compliance">Compliance</span>
+                    <span class="pill pill--high">High</span>
+                    <span class="priority-card__due">11:00 AM</span>
+                    <span class="priority-card__source">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
+                      Email
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="priority-card" id="priority-3">
+              <div class="priority-card__content">
+                <div class="priority-dot priority-dot--high"></div>
+                <div>
+                  <div class="priority-card__title">2nd grade field trip permission forms — collect by Friday</div>
+                  <div class="priority-card__meta">
+                    <span class="pill pill--student">Student</span>
+                    <span class="pill pill--normal">Normal</span>
+                    <span class="priority-card__due">2:00 PM</span>
+                    <span class="priority-card__source">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      Tap
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="activity-feed">
+            <div class="section-title">
+              <h2>Recent Activity</h2>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--capture">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+              </div>
+              <div class="activity-item__content">
+                <div class="activity-item__text">Voice capture: Bus 47 late again — email transportation</div>
+                <div class="activity-item__time">9:12 AM</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--task">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="activity-item__content">
+                <div class="activity-item__text">Completed: Morning arrival walkthrough</div>
+                <div class="activity-item__time">7:30 AM</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--capture">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              </div>
+              <div class="activity-item__content">
+                <div class="activity-item__text">Tap capture: Teacher + Request + Schedule</div>
+                <div class="activity-item__time">8:45 AM</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--pulse">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <div class="activity-item__content">
+                <div class="activity-item__text">Pulse responded: 3rd grade Math PLC takeaways</div>
+                <div class="activity-item__time">8:30 AM</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--capture">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+              </div>
+              <div class="activity-item__content">
+                <div class="activity-item__text">Voice capture: Follow up with Dana on 4th grade reading data</div>
+                <div class="activity-item__time">7:50 AM</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========== TASKS TAB ========== -->
+      <div class="tab-view" id="view-tasks">
+        <div class="tasks-view">
+          <div class="tasks-view__header">
+            <h1 class="tasks-view__title">Tasks</h1>
+            <div class="filter-pills" role="tablist" aria-label="Task filters">
+              <button class="filter-pill active" data-filter="all" onclick="App.filterTasks('all', this)">All</button>
+              <button class="filter-pill" data-filter="today" onclick="App.filterTasks('today', this)">Today</button>
+              <button class="filter-pill" data-filter="week" onclick="App.filterTasks('week', this)">This Week</button>
+              <button class="filter-pill" data-filter="delegated" onclick="App.filterTasks('delegated', this)">Delegated</button>
+            </div>
+          </div>
+
+          <div class="task-list" id="task-list">
+            <!-- Task 1 -->
+            <div class="task-item" data-filter-tags="all today">
+              <div class="task-item__row">
+                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <div class="task-item__body">
+                  <div class="task-item__title">Review AIG identification data — Dana Lewis</div>
+                  <div class="task-item__footer">
+                    <span class="pill pill--student">Academic</span>
+                    <span class="priority-dot priority-dot--urgent"></span>
+                    <span class="task-item__due">Due: 10:00 AM</span>
+                    <svg class="task-item__source-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task 2 -->
+            <div class="task-item" data-filter-tags="all today">
+              <div class="task-item__row">
+                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <div class="task-item__body">
+                  <div class="task-item__title">Accreditation evidence binder — compile by Friday</div>
+                  <div class="task-item__footer">
+                    <span class="pill pill--compliance">Compliance</span>
+                    <span class="priority-dot priority-dot--high"></span>
+                    <span class="task-item__due">Due: 11:00 AM</span>
+                    <svg class="task-item__source-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task 3 -->
+            <div class="task-item" data-filter-tags="all today">
+              <div class="task-item__row">
+                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <div class="task-item__body">
+                  <div class="task-item__title">2nd grade field trip permission forms</div>
+                  <div class="task-item__footer">
+                    <span class="pill pill--student">Student</span>
+                    <span class="priority-dot priority-dot--high"></span>
+                    <span class="task-item__due">Due: 2:00 PM</span>
+                    <svg class="task-item__source-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task 4 -->
+            <div class="task-item" data-filter-tags="all today delegated">
+              <div class="task-item__row">
+                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <div class="task-item__body">
+                  <div class="task-item__title">Budget request: K-2 math manipulatives</div>
+                  <div class="task-item__footer">
+                    <span class="pill pill--budget">Budget</span>
+                    <span class="priority-dot priority-dot--normal"></span>
+                    <span class="task-item__due">Due: 3:00 PM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task 5 -->
+            <div class="task-item" data-filter-tags="all week">
+              <div class="task-item__row">
+                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <div class="task-item__body">
+                  <div class="task-item__title">Parent conference — Tanya Webb's son progress</div>
+                  <div class="task-item__footer">
+                    <span class="pill pill--student">Student</span>
+                    <span class="priority-dot priority-dot--normal"></span>
+                    <span class="task-item__due">Due: Wed, Mar 11</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task 6 -->
+            <div class="task-item" data-filter-tags="all week">
+              <div class="task-item__row">
+                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <div class="task-item__body">
+                  <div class="task-item__title">Staff PD planning — data-driven instruction workshop</div>
+                  <div class="task-item__footer">
+                    <span class="pill pill--staff">Staff</span>
+                    <span class="priority-dot priority-dot--normal"></span>
+                    <span class="task-item__due">Due: Fri, Mar 13</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task 7 (completed) -->
+            <div class="task-item completed" data-filter-tags="all today">
+              <div class="task-item__row">
+                <button class="task-item__checkbox checked" onclick="App.toggleTask(this)" aria-label="Mark incomplete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <div class="task-item__body">
+                  <div class="task-item__title">Morning arrival walkthrough — bus loop</div>
+                  <div class="task-item__footer">
+                    <span class="pill pill--student">Student</span>
+                    <span class="priority-dot priority-dot--low"></span>
+                    <span class="task-item__due">Completed 7:30 AM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Add Button -->
+        <button class="fab" id="tasks-fab" aria-label="Add new task" onclick="App.showAddTask()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+        </button>
+      </div>
+
+      <!-- ========== PULSE TAB ========== -->
+      <div class="tab-view" id="view-pulse">
+        <div class="pulse-view">
+          <h1 class="pulse-view__title">Today's Pulses</h1>
+          <p class="pulse-view__subtitle">Your contextual check-in prompts for the day</p>
+
+          <!-- Pulse Stats -->
+          <div class="pulse-stats">
+            <div class="pulse-stat">
+              <div class="pulse-stat__value">5/7</div>
+              <div class="pulse-stat__label">Responded</div>
+            </div>
+            <div class="pulse-stat">
+              <div class="pulse-stat__value">1</div>
+              <div class="pulse-stat__label">Skipped</div>
+            </div>
+            <div class="pulse-stat">
+              <div class="pulse-stat__value">1</div>
+              <div class="pulse-stat__label">Upcoming</div>
+            </div>
+          </div>
+
+          <!-- Pulse Timeline -->
+          <div class="pulse-timeline">
+            <div class="pulse-item">
+              <div class="pulse-item__dot pulse-item__dot--responded">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="pulse-item__content">
+                <div class="pulse-item__time">7:30 AM</div>
+                <div class="pulse-item__prompt">Morning arrival smooth? Bus loop concerns?</div>
+                <div class="pulse-item__status">Responded with voice capture</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-item__dot pulse-item__dot--responded">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="pulse-item__content">
+                <div class="pulse-item__time">8:00 AM</div>
+                <div class="pulse-item__prompt">3rd grade Math PLC takeaways?</div>
+                <div class="pulse-item__status">Responded with 2 captures</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-item__dot pulse-item__dot--responded">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="pulse-item__content">
+                <div class="pulse-item__time">8:30 AM</div>
+                <div class="pulse-item__prompt">Walkthrough follow-up notes? 1st grade ELA block?</div>
+                <div class="pulse-item__status">Responded with tap capture</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-item__dot pulse-item__dot--responded">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="pulse-item__content">
+                <div class="pulse-item__time">9:00 AM</div>
+                <div class="pulse-item__prompt">AIG screening update from Dana?</div>
+                <div class="pulse-item__status">Responded with voice capture</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-item__dot pulse-item__dot--skipped">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+              </div>
+              <div class="pulse-item__content">
+                <div class="pulse-item__time">9:30 AM</div>
+                <div class="pulse-item__prompt">Specials rotation running on time?</div>
+                <div class="pulse-item__status">Skipped</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-item__dot pulse-item__dot--responded">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="pulse-item__content">
+                <div class="pulse-item__time">9:45 AM</div>
+                <div class="pulse-item__prompt">Observation notes — 2nd grade Math (Ms. Cho)?</div>
+                <div class="pulse-item__status">Responded with voice capture</div>
+              </div>
+            </div>
+
+            <!-- Active Pulse -->
+            <div class="pulse-item pulse-item--active">
+              <div class="pulse-item__dot pulse-item__dot--active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <div class="pulse-item__content">
+                <div class="pulse-item__time">10:15 AM</div>
+                <div class="pulse-item__prompt">Leadership team huddle — key decisions?</div>
+                <div class="pulse-item__status" style="color: var(--color-primary); font-weight: 600;">Active now</div>
+                <div class="pulse-item__actions">
+                  <button class="btn btn--primary" onclick="App.goToCapture('voice')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                    Voice
+                  </button>
+                  <button class="btn btn--secondary" onclick="App.goToCapture('tap')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Tap
+                  </button>
+                  <button class="btn btn--ghost">Skip</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Day Structure -->
+          <div class="day-structure">
+            <div class="day-structure__title">Your Day Structure</div>
+            <div class="day-map">
+              <div class="day-map__block day-map__block--done" title="7:30 AM">7:30</div>
+              <div class="day-map__block day-map__block--done" title="8:00 AM">8:00</div>
+              <div class="day-map__block day-map__block--done" title="8:30 AM">8:30</div>
+              <div class="day-map__block day-map__block--done" title="9:00 AM">9:00</div>
+              <div class="day-map__block day-map__block--done" title="9:30 AM" style="opacity:0.5">9:30</div>
+              <div class="day-map__block day-map__block--done" title="9:45 AM">9:45</div>
+              <div class="day-map__block day-map__block--active" title="10:15 AM">10:15</div>
+            </div>
+          </div>
+
+          <!-- Pulse Notifications Toggle -->
+          <div class="pulse-settings-toggle">
+            <span class="pulse-settings-toggle__label">Pulse Notifications</span>
+            <div class="toggle-switch active" onclick="App.toggleSwitch(this)" role="switch" aria-checked="true" tabindex="0">
+              <div class="toggle-switch__knob"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== MORE TAB ========== -->
+      <div class="tab-view" id="view-more">
+
+        <!-- Main Menu -->
+        <div class="more-view" id="more-menu">
+          <h1 class="more-view__title">More</h1>
+
+          <div class="menu-list">
+            <button class="menu-item" onclick="App.showSubView('observations')">
+              <div class="menu-item__icon menu-item__icon--observations">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              <div class="menu-item__text">
+                Observations
+                <div class="menu-item__desc">Classroom walkthroughs &amp; timestamped notes</div>
+              </div>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </button>
+
+            <button class="menu-item" onclick="App.showSubView('integrations')">
+              <div class="menu-item__icon menu-item__icon--integrations">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m2 12 10-6 10 6"/><path d="m2 12 10 6 10-6"/></svg>
+              </div>
+              <div class="menu-item__text">
+                Integrations
+                <div class="menu-item__desc">Connect SIS, LMS, and other platforms</div>
+              </div>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </button>
+
+            <button class="menu-item" onclick="App.showSubView('settings')">
+              <div class="menu-item__icon menu-item__icon--settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <div class="menu-item__text">Settings</div>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </button>
+
+            <button class="menu-item" onclick="App.showSubView('help')">
+              <div class="menu-item__icon menu-item__icon--help">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+              </div>
+              <div class="menu-item__text">Help & Support</div>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </button>
+
+            <button class="menu-item" onclick="App.showSubView('about')">
+              <div class="menu-item__icon menu-item__icon--about">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              </div>
+              <div class="menu-item__text">About AdminI</div>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Settings Sub-View -->
+        <div class="sub-view" id="subview-settings">
+          <div class="sub-view__header">
+            <button class="sub-view__back" aria-label="Go back" onclick="App.hideSubView()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 class="sub-view__title">Settings</h2>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section__title">Profile</div>
+            <div class="settings-item">
+              <span class="settings-item__label">Name</span>
+              <span class="settings-item__value">James Mitchell</span>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">School</span>
+              <span class="settings-item__value">Westfield Academy</span>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">Role</span>
+              <span class="settings-item__value">ES Principal</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section__title">Appearance</div>
+            <div class="settings-item">
+              <span class="settings-item__label">Theme</span>
+              <div class="toggle-switch" id="theme-toggle" onclick="App.toggleTheme()" role="switch" aria-checked="false" aria-label="Dark mode" tabindex="0">
+                <div class="toggle-switch__knob"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section__title">Notifications</div>
+            <div class="settings-item">
+              <span class="settings-item__label">Pulse Reminders</span>
+              <div class="toggle-switch active" onclick="App.toggleSwitch(this)" role="switch" aria-checked="true" tabindex="0">
+                <div class="toggle-switch__knob"></div>
+              </div>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">Task Due Alerts</span>
+              <div class="toggle-switch active" onclick="App.toggleSwitch(this)" role="switch" aria-checked="true" tabindex="0">
+                <div class="toggle-switch__knob"></div>
+              </div>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">Capture Confirmations</span>
+              <div class="toggle-switch" onclick="App.toggleSwitch(this)" role="switch" aria-checked="false" tabindex="0">
+                <div class="toggle-switch__knob"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section__title">Capture</div>
+            <div class="settings-item">
+              <span class="settings-item__label">Board Customization</span>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">Default Capture Mode</span>
+              <span class="settings-item__value">Voice</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section__title">Privacy</div>
+            <div class="settings-item">
+              <span class="settings-item__label">Data Retention</span>
+              <span class="settings-item__value">90 days</span>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">Export My Data</span>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Integrations Sub-View -->
+        <div class="sub-view" id="subview-integrations">
+          <div class="sub-view__header">
+            <button class="sub-view__back" aria-label="Go back" onclick="App.hideSubView()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 class="sub-view__title">Integrations</h2>
+          </div>
+          <div style="padding: 0 var(--space-4);">
+            <div class="menu-list">
+              <div class="menu-item">
+                <div class="menu-item__icon" style="background: rgba(37, 99, 235, 0.1); color: #2563EB;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+                </div>
+                <div class="menu-item__text">
+                  Infinite Campus SIS
+                  <div class="menu-item__desc" style="color: var(--color-success);">Connected</div>
+                </div>
+              </div>
+              <div class="menu-item">
+                <div class="menu-item__icon" style="background: rgba(5,150,105,0.1); color: #059669;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                </div>
+                <div class="menu-item__text">
+                  Google Classroom
+                  <div class="menu-item__desc" style="color: var(--color-success);">Connected</div>
+                </div>
+              </div>
+              <div class="menu-item">
+                <div class="menu-item__icon" style="background: rgba(202,138,4,0.1); color: #CA8A04;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                </div>
+                <div class="menu-item__text">
+                  Outlook Calendar
+                  <div class="menu-item__desc" style="color: var(--color-text-faint);">Not connected</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help Sub-View -->
+        <div class="sub-view" id="subview-help">
+          <div class="sub-view__header">
+            <button class="sub-view__back" aria-label="Go back" onclick="App.hideSubView()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 class="sub-view__title">Help & Support</h2>
+          </div>
+          <div style="padding: 0 var(--space-4);">
+            <div class="menu-list">
+              <button class="menu-item"><div class="menu-item__text">Getting Started Guide</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item"><div class="menu-item__text">Using Voice Capture</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item"><div class="menu-item__text">Customizing Your Board</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item"><div class="menu-item__text">Understanding Pulses</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item"><div class="menu-item__text">Contact Support</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- About Sub-View -->
+        <div class="sub-view" id="subview-about">
+          <div class="sub-view__header">
+            <button class="sub-view__back" aria-label="Go back" onclick="App.hideSubView()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 class="sub-view__title">About AdminI</h2>
+          </div>
+          <div style="padding: var(--space-8) var(--space-4); text-align: center;">
+            <div style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; color: var(--color-primary); margin-bottom: var(--space-2);">Admin<span style="font-weight: 400; color: var(--color-text-muted);">I</span></div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-1);">Version 2.1.0 (Mobile)</div>
+            <div style="font-size: var(--text-xs); color: var(--color-text-faint); margin-bottom: var(--space-6);">Intelligent School Administration</div>
+            <p style="font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; max-width: 280px; margin: 0 auto;">AdminI helps school administrators capture, organize, and act on information faster through voice and tap capture with AI-powered task generation.</p>
+          </div>
+        </div>
+
+        <!-- Observations Sub-View -->
+        <div class="sub-view" id="subview-observations">
+          <div class="sub-view__header">
+            <button class="sub-view__back" aria-label="Go back" onclick="App.hideSubView()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 class="sub-view__title">Observations</h2>
+          </div>
+
+          <!-- Setup Phase -->
+          <div class="mob-obs-setup" id="mobObsSetup">
+            <div class="mob-obs-notebook">
+              <div class="mob-obs-margin"></div>
+              <div class="mob-obs-content">
+                <div class="mob-obs-section-title">New Observation</div>
+
+                <div class="mob-obs-field">
+                  <div class="mob-obs-label">Period / Block</div>
+                  <div class="mob-obs-pills" id="mobObsPeriodPills"></div>
+                </div>
+
+                <div class="mob-obs-field">
+                  <div class="mob-obs-label">Grade Level</div>
+                  <div class="mob-obs-pills" id="mobObsGradePills"></div>
+                </div>
+
+                <div class="mob-obs-field hidden" id="mobObsSubjectField">
+                  <div class="mob-obs-label">Subject</div>
+                  <div class="mob-obs-pills" id="mobObsSubjectPills"></div>
+                </div>
+
+                <div class="mob-obs-field hidden" id="mobObsTeacherField">
+                  <div class="mob-obs-label">Teacher</div>
+                  <div class="mob-obs-pills" id="mobObsTeacherPills"></div>
+                </div>
+
+                <div class="mob-obs-start hidden" id="mobObsStartRow">
+                  <button class="btn btn--primary mob-obs-start-btn" id="mobObsStartBtn">Begin Observation</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent -->
+            <div class="mob-obs-recent">
+              <div class="mob-obs-label" style="padding: 0 var(--space-4); margin-bottom: var(--space-2);">Recent Observations</div>
+              <div id="mobObsPastList"></div>
+            </div>
+          </div>
+
+          <!-- Live Phase -->
+          <div class="mob-obs-live hidden" id="mobObsLive">
+            <div class="mob-obs-notebook mob-obs-notebook--live">
+              <div class="mob-obs-margin"></div>
+              <div class="mob-obs-content">
+                <!-- Header -->
+                <div class="mob-obs-live-header">
+                  <div>
+                    <div class="mob-obs-live-teacher" id="mobObsLiveTeacher"></div>
+                    <div class="mob-obs-live-meta" id="mobObsLiveMeta"></div>
+                  </div>
+                  <div class="mob-obs-timer">
+                    <div class="mob-obs-timer-dot"></div>
+                    <span id="mobObsTimer">00:00</span>
+                  </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="mob-obs-tags" id="mobObsTags">
+                  <div class="mob-obs-tag-row">
+                    <div class="mob-obs-tag-label">Instruction</div>
+                    <div class="mob-obs-tag-pills">
+                      <button class="mob-obs-tag" data-tag="I Do">I Do</button>
+                      <button class="mob-obs-tag" data-tag="We Do">We Do</button>
+                      <button class="mob-obs-tag" data-tag="You Do">You Do</button>
+                      <button class="mob-obs-tag" data-tag="Warm-up">Warm-up</button>
+                      <button class="mob-obs-tag" data-tag="HW Review">HW Review</button>
+                    </div>
+                  </div>
+                  <div class="mob-obs-tag-row">
+                    <div class="mob-obs-tag-label">Engagement</div>
+                    <div class="mob-obs-tag-pills">
+                      <button class="mob-obs-tag" data-tag="On-task">On-task</button>
+                      <button class="mob-obs-tag" data-tag="Off-task">Off-task</button>
+                      <button class="mob-obs-tag" data-tag="Outbursts">Outbursts</button>
+                      <button class="mob-obs-tag" data-tag="Collaborative">Collaborative</button>
+                    </div>
+                  </div>
+                  <div class="mob-obs-tag-row">
+                    <div class="mob-obs-tag-label">Environment</div>
+                    <div class="mob-obs-tag-pills">
+                      <button class="mob-obs-tag" data-tag="Board setup">Board setup</button>
+                      <button class="mob-obs-tag" data-tag="Learning target">Learning target</button>
+                      <button class="mob-obs-tag" data-tag="Anchor charts">Anchor charts</button>
+                      <button class="mob-obs-tag" data-tag="Pacing">Pacing</button>
+                    </div>
+                  </div>
+                  <div class="mob-obs-tag-row">
+                    <div class="mob-obs-tag-label">Staff / Other</div>
+                    <div class="mob-obs-tag-pills">
+                      <button class="mob-obs-tag" data-tag="Para present">Para present</button>
+                      <button class="mob-obs-tag" data-tag="Para disengaged">Para disengaged</button>
+                      <button class="mob-obs-tag" data-tag="Redirection">Redirection</button>
+                      <button class="mob-obs-tag" data-tag="Proximity">Proximity</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Note Type + Input -->
+                <div class="mob-obs-entry">
+                  <div class="mob-obs-type-row">
+                    <button class="mob-obs-type active" data-type="observation">Obs</button>
+                    <button class="mob-obs-type" data-type="recommendation">Rec</button>
+                    <button class="mob-obs-type" data-type="quote">Quote</button>
+                  </div>
+                  <textarea class="mob-obs-input" id="mobObsInput" rows="2" placeholder="Type your observation note..."></textarea>
+                  <button class="btn btn--primary mob-obs-stamp" id="mobObsStamp">Stamp</button>
+                </div>
+
+                <!-- Timeline -->
+                <div class="mob-obs-timeline" id="mobObsTimeline">
+                  <div class="mob-obs-empty">Tap Stamp to log your first note</div>
+                </div>
+
+                <!-- End -->
+                <button class="btn btn--outline mob-obs-end" id="mobObsEnd">End Observation</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary Phase -->
+          <div class="mob-obs-summary hidden" id="mobObsSummary">
+            <div class="mob-obs-notebook mob-obs-notebook--summary">
+              <div class="mob-obs-margin"></div>
+              <div class="mob-obs-content">
+                <div class="mob-obs-summary-header">
+                  <div class="mob-obs-summary-title" id="mobObsSummaryTitle"></div>
+                  <div class="mob-obs-summary-meta" id="mobObsSummaryMeta"></div>
+                </div>
+
+                <div class="mob-obs-insight" id="mobObsInsights"></div>
+
+                <div class="mob-obs-tag-summary">
+                  <div class="mob-obs-label">Tags Used</div>
+                  <div class="mob-obs-tag-summary-pills" id="mobObsSummaryTags"></div>
+                </div>
+
+                <div class="mob-obs-full-timeline">
+                  <div class="mob-obs-label">Full Timeline</div>
+                  <div id="mobObsSummaryTimeline"></div>
+                </div>
+
+                <button class="btn btn--primary mob-obs-new" id="mobObsNew">New Observation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- ===== BOTTOM TAB BAR ===== -->
+    <nav class="tab-bar" role="tablist" aria-label="Main navigation">
+      <button class="tab-bar__item active" data-tab="capture" onclick="App.switchTab('capture')" role="tab" aria-selected="true" aria-label="Capture">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        </svg>
+        <span>Capture</span>
+      </button>
+      <button class="tab-bar__item" data-tab="dashboard" onclick="App.switchTab('dashboard')" role="tab" aria-selected="false" aria-label="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9" rx="1"/>
+          <rect x="14" y="3" width="7" height="5" rx="1"/>
+          <rect x="14" y="12" width="7" height="9" rx="1"/>
+          <rect x="3" y="16" width="7" height="5" rx="1"/>
+        </svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="tab-bar__item" data-tab="tasks" onclick="App.switchTab('tasks')" role="tab" aria-selected="false" aria-label="Tasks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span>Tasks</span>
+      </button>
+      <button class="tab-bar__item" data-tab="pulse" onclick="App.switchTab('pulse')" role="tab" aria-selected="false" aria-label="Pulse">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        <span>Pulse</span>
+      </button>
+      <button class="tab-bar__item" data-tab="more" onclick="App.switchTab('more')" role="tab" aria-selected="false" aria-label="More">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="1"/>
+          <circle cx="19" cy="12" r="1"/>
+          <circle cx="5" cy="12" r="1"/>
+        </svg>
+        <span>More</span>
+      </button>
+    </nav>
+
+    <!-- ===== NOTIFICATION BANNER (slide down) ===== -->
+    <div class="notification-banner" id="notification-banner">
+      <div class="notification-banner__content">
+        <span class="notification-banner__icon">&#x1F514;</span>
+        <span class="notification-banner__text" id="notification-text">Walkthrough complete. Any follow-ups?</span>
+      </div>
+      <div class="notification-banner__actions">
+        <button class="btn btn--primary" style="font-size: var(--text-xs); padding: var(--space-1-5) var(--space-3); min-height: 36px;" onclick="App.goToCapture('voice'); App.hideNotification();">Voice Capture</button>
+        <button class="btn btn--secondary" style="font-size: var(--text-xs); padding: var(--space-1-5) var(--space-3); min-height: 36px;" onclick="App.goToCapture('tap'); App.hideNotification();">Tap Capture</button>
+        <button class="btn btn--ghost" style="font-size: var(--text-xs); padding: var(--space-1-5) var(--space-3); min-height: 36px;" onclick="App.hideNotification();">Skip</button>
+      </div>
+    </div>
+
+    <!-- ===== BOTTOM SHEET (Add Task) — Swipe Carousel ===== -->
+    <div class="bottom-sheet-overlay" id="bottom-sheet-overlay" onclick="App.hideBottomSheet()"></div>
+    <div class="bottom-sheet" id="bottom-sheet">
+      <div class="bottom-sheet__handle"></div>
+
+      <!-- Step indicators -->
+      <div class="sheet-steps">
+        <div class="sheet-step active" data-step="0"></div>
+        <div class="sheet-step" data-step="1"></div>
+      </div>
+
+      <!-- Swipe track -->
+      <div class="sheet-carousel" id="sheet-carousel">
+
+        <!-- PAGE 1: Title + Label -->
+        <div class="sheet-page" data-page="0">
+          <div class="bottom-sheet__title">New Task</div>
+          <div style="margin-bottom: var(--space-4);">
+            <input type="text" class="quick-detail__input" placeholder="What needs to get done?" style="width:100%" id="new-task-input">
+          </div>
+          <div class="bottom-sheet__section-label">Label</div>
+          <div class="label-grid">
+            <button class="label-pill active" data-label="student" onclick="App.setNewTaskLabel(this)">
+              <span class="label-pill__dot" style="background:#059669"></span>Student
+            </button>
+            <button class="label-pill" data-label="instructional" onclick="App.setNewTaskLabel(this)">
+              <span class="label-pill__dot" style="background:#2563EB"></span>Instructional
+            </button>
+            <button class="label-pill" data-label="compliance" onclick="App.setNewTaskLabel(this)">
+              <span class="label-pill__dot" style="background:#7C3AED"></span>Compliance
+            </button>
+            <button class="label-pill" data-label="staff" onclick="App.setNewTaskLabel(this)">
+              <span class="label-pill__dot" style="background:#EA580C"></span>Staff
+            </button>
+            <button class="label-pill" data-label="facilities" onclick="App.setNewTaskLabel(this)">
+              <span class="label-pill__dot" style="background:#CA8A04"></span>Facilities
+            </button>
+            <button class="label-pill" data-label="budget" onclick="App.setNewTaskLabel(this)">
+              <span class="label-pill__dot" style="background:#DC2626"></span>Budget
+            </button>
+          </div>
+          <div class="bottom-sheet__section-label">Due</div>
+          <div class="due-picker">
+            <button class="due-chip active" data-due="today" onclick="App.setDue(this)">Today</button>
+            <button class="due-chip" data-due="tomorrow" onclick="App.setDue(this)">Tomorrow</button>
+            <button class="due-chip" data-due="this-week" onclick="App.setDue(this)">This Week</button>
+            <button class="due-chip" data-due="custom" onclick="App.toggleCustomDue()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </button>
+          </div>
+          <div class="due-custom" id="due-custom-row" style="display:none">
+            <input type="date" class="due-input" id="due-date-input">
+            <input type="time" class="due-input" id="due-time-input">
+          </div>
+          <div class="due-time-row" id="due-time-row">
+            <span class="due-time-label">Time (optional)</span>
+            <div class="due-time-chips">
+              <button class="due-chip due-chip--sm" data-time="" onclick="App.setDueTime(this)">None</button>
+              <button class="due-chip due-chip--sm" data-time="9:00 AM" onclick="App.setDueTime(this)">9 AM</button>
+              <button class="due-chip due-chip--sm" data-time="12:00 PM" onclick="App.setDueTime(this)">12 PM</button>
+              <button class="due-chip due-chip--sm" data-time="3:00 PM" onclick="App.setDueTime(this)">3 PM</button>
+              <button class="due-chip due-chip--sm" data-time="EOD" onclick="App.setDueTime(this)">EOD</button>
+            </div>
+          </div>
+          <!-- Duplicate detection banner -->
+          <div class="dup-banner" id="dup-banner"></div>
+          <div class="sheet-page1-actions">
+            <button class="btn btn--primary sheet-add" onclick="App.addNewTask()" id="sheet-add-btn" disabled>Add Task</button>
+            <div class="sheet-swipe-hint" id="sheet-swipe-hint">
+              <span>Swipe to set priority</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE 2: Priority + Submit -->
+        <div class="sheet-page" data-page="1">
+          <div class="bottom-sheet__title">Set Priority</div>
+          <div class="sheet-summary" id="sheet-summary"></div>
+          <div class="bottom-sheet__section-label">How urgent is this?</div>
+          <div class="priority-grid">
+            <button class="priority-card-pick active" data-priority="normal" onclick="App.setNewTaskPriority(this)">
+              <span class="priority-card-pick__dot priority-dot--normal"></span>
+              <span class="priority-card-pick__label">Normal</span>
+              <span class="priority-card-pick__desc">Handle when you can</span>
+            </button>
+            <button class="priority-card-pick" data-priority="high" onclick="App.setNewTaskPriority(this)">
+              <span class="priority-card-pick__dot priority-dot--high"></span>
+              <span class="priority-card-pick__label">High</span>
+              <span class="priority-card-pick__desc">Needs attention today</span>
+            </button>
+            <button class="priority-card-pick" data-priority="urgent" onclick="App.setNewTaskPriority(this)">
+              <span class="priority-card-pick__dot priority-dot--urgent"></span>
+              <span class="priority-card-pick__label">Urgent</span>
+              <span class="priority-card-pick__desc">Act on it now</span>
+            </button>
+          </div>
+          <div class="sheet-actions">
+            <button class="btn btn--primary sheet-add" onclick="App.addNewTask()">Add Task</button>
+          </div>
+          <div class="sheet-swipe-hint" style="opacity:1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            <span>Swipe back to edit</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== BOTTOM SHEET (Add Word) ===== -->
+    <div class="bottom-sheet-overlay" id="add-word-overlay" onclick="App.hideAddWordSheet()"></div>
+    <div class="bottom-sheet" id="add-word-sheet">
+      <div class="bottom-sheet__handle"></div>
+      <div class="bottom-sheet__content">
+        <div class="bottom-sheet__title" id="add-word-title">Add Word</div>
+        <div style="margin-bottom: var(--space-3);">
+          <input type="text" class="quick-detail__input" placeholder="Type a new word..." style="width:100%" id="add-word-input" autocomplete="off">
+        </div>
+        <button class="btn btn--primary btn--large" onclick="App.confirmAddWord()">Add Word</button>
+      </div>
+    </div>
+
+    <!-- ===== BOTTOM SHEET (KPI Detail) ===== -->
+    <div class="kpi-detail-overlay" id="kpi-detail-overlay" onclick="App.hideKPIDetail()"></div>
+    <div class="kpi-detail-sheet" id="kpi-detail-sheet">
+      <div class="kpi-detail-sheet__handle"></div>
+      <div class="kpi-detail-sheet__header">
+        <div class="kpi-detail-sheet__title" id="kpi-detail-title">Details</div>
+      </div>
+      <div class="kpi-detail-sheet__content" id="kpi-detail-content">
+        <!-- Dynamic content -->
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../shared/admini-privacy-layer.js"></script>
+  <script src="./Mobile_app.js"></script>
+</body>
+</html>
