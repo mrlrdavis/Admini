@@ -251,7 +251,124 @@
     navigateTo('integrations');
   }
 
-  window.AdminiPrototype = { applyUserProfile, openIntegrationsSetup, openIntegrationsPanel };
+  window.AdminiPrototype = { applyUserProfile, navigateTo, openIntegrationsSetup, openIntegrationsPanel };
+
+  function taskBridgeRequest(type, payload) {
+    return new Promise((resolve, reject) => {
+      if (window.parent === window) {
+        reject(new Error('Task persistence requires the signed-in AdminI app shell.'));
+        return;
+      }
+      const requestId = `task_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const timeout = window.setTimeout(() => {
+        window.removeEventListener('message', onMessage);
+        reject(new Error('Task request timed out.'));
+      }, 15000);
+
+      function onMessage(event) {
+        const data = event.data || {};
+        if (data.requestId !== requestId || data.type !== `${type}:result`) return;
+        window.clearTimeout(timeout);
+        window.removeEventListener('message', onMessage);
+        if (data.ok) resolve(data);
+        else reject(new Error(data.error || 'Task request failed.'));
+      }
+
+      window.addEventListener('message', onMessage);
+      window.parent.postMessage({ type, requestId, ...payload }, '*');
+    });
+  }
+
+  function formatTaskDue(dueAt) {
+    if (!dueAt) return 'No due date';
+    const date = new Date(dueAt);
+    if (Number.isNaN(date.getTime())) return 'No due date';
+    return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function parseTaskCategory(description) {
+    const match = String(description || '').match(/^Category:\s*([^\n]+)/i);
+    return match ? match[1].trim() : 'Student';
+  }
+
+  function normalizeTaskStatus(status) {
+    return String(status || 'open').replace(/_/g, '-');
+  }
+
+  function persistedTaskToDesktopTask(task) {
+    const category = parseTaskCategory(task.description);
+    const status = normalizeTaskStatus(task.status);
+    return {
+      id: task.id,
+      title: task.title,
+      task: task.title,
+      category,
+      pill: `pill-${category.toLowerCase()}`,
+      priority: task.priority || 'normal',
+      source: 'AdminI',
+      sourceIcon: 'tap',
+      due: formatTaskDue(task.dueAt),
+      assignedTo: 'Me',
+      status,
+      completed: status === 'completed'
+    };
+  }
+
+  function applyPersistedTasks(tasks) {
+    const normalized = (tasks || []).map(persistedTaskToDesktopTask);
+    allTasks.splice(0, allTasks.length, ...normalized);
+    priorityTasks.splice(0, priorityTasks.length, ...normalized.filter((task) => task.status !== 'completed'));
+    renderKPIs();
+    renderPriorityQueue();
+    renderTasksView();
+  }
+
+  async function loadPersistedTasks() {
+    try {
+      const result = await taskBridgeRequest('tasks:list', {});
+      applyPersistedTasks(result.tasks || []);
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
+  async function persistTaskStatus(taskId, completed) {
+    if (!taskId) return;
+    try {
+      const result = await taskBridgeRequest('tasks:update-status', {
+        id: taskId,
+        status: completed ? 'completed' : 'open'
+      });
+      const updated = persistedTaskToDesktopTask(result.task);
+      const replace = (list) => {
+        const index = list.findIndex((task) => task.id === taskId);
+        if (index >= 0) list.splice(index, 1, updated);
+      };
+      replace(allTasks);
+      replace(priorityTasks);
+      if (completed) {
+        const index = priorityTasks.findIndex((task) => task.id === taskId);
+        if (index >= 0) priorityTasks.splice(index, 1);
+      } else if (!priorityTasks.some((task) => task.id === taskId)) {
+        priorityTasks.unshift(updated);
+      }
+      renderKPIs();
+    } catch (error) {
+      openDrawer('Task update failed', 'Persistence error', emptyDrawerContent('Task was not saved', error.message || 'Please try again.'));
+      loadPersistedTasks();
+    }
+  }
+
+  async function createPersistedTask(input) {
+    const result = await taskBridgeRequest('tasks:create', { task: input });
+    const created = persistedTaskToDesktopTask(result.task);
+    allTasks.unshift(created);
+    priorityTasks.unshift(created);
+    renderKPIs();
+    renderPriorityQueue();
+    renderTasksView();
+    return created;
+  }
 
   // Word board categories (mutable copy for editing)
   const defaultWordBoard = [
@@ -592,6 +709,8 @@
   function renderKPIs() {
     const row = document.getElementById('kpiRow');
     if (!row) return;
+    kpis[0].value = allTasks.filter((task) => task.status !== 'completed').length;
+    kpis[1].value = allTasks.filter((task) => task.status === 'open' || task.status === 'in-progress').length;
     row.innerHTML = kpis.map((k, i) => `
       <div class="kpi-card" data-kpi-index="${i}" tabindex="0" role="button" aria-label="View ${k.label} details">
         <div class="kpi-label">${k.label}
@@ -732,7 +851,7 @@
 
     container.innerHTML = filtered.map(t => `
       <div class="task-item">
-        <div class="task-checkbox" tabindex="0" role="checkbox" aria-checked="false" aria-label="Complete task"></div>
+        <div class="task-checkbox${t.completed ? ' checked' : ''}" data-task-id="${t.id || ''}" tabindex="0" role="checkbox" aria-checked="${t.completed ? 'true' : 'false'}" aria-label="Complete task">${t.completed ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
         <div class="task-content">
           <div class="task-title">${t.title}</div>
           <div class="task-meta">
@@ -762,6 +881,7 @@
           cb.innerHTML = '';
           cb.closest('.task-item').style.opacity = '1';
         }
+        persistTaskStatus(cb.dataset.taskId, checked);
       });
     });
   }
@@ -797,7 +917,7 @@
         <div class="capture-empty">
           <div style="font-weight:700;margin-bottom:6px;">No captures yet</div>
           <div style="color:var(--color-text-muted);">You haven't created any captures yet. Use the Capture view to add your first one.</div>
-          <div style="margin-top:10px;"><button class="btn btn-primary" onclick="navigateTo('capture')">Go to Capture</button></div>
+          <div style="margin-top:10px;"><button class="btn btn-primary" onclick="window.AdminiPrototype?.navigateTo?.('capture')">Go to Capture</button></div>
         </div>
       `;
       return;
@@ -903,7 +1023,7 @@
     tbody.innerHTML = filtered.map(t => {
       const pillClass = 'pill-' + t.category.toLowerCase();
       return `<tr>
-        <td><div class="task-checkbox" tabindex="0" role="checkbox" aria-checked="false" aria-label="Complete"></div></td>
+        <td><div class="task-checkbox${t.completed ? ' checked' : ''}" data-task-id="${t.id || ''}" tabindex="0" role="checkbox" aria-checked="${t.completed ? 'true' : 'false'}" aria-label="Complete">${t.completed ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div></td>
         <td style="font-weight:500;">${t.task}</td>
         <td><span class="category-pill ${pillClass}">${t.category}</span></td>
         <td><span class="priority-dot ${t.priority}"></span> ${t.priority.charAt(0).toUpperCase() + t.priority.slice(1)}</td>
@@ -926,6 +1046,7 @@
           cb.innerHTML = '';
           cb.closest('tr').style.opacity = '1';
         }
+        persistTaskStatus(cb.dataset.taskId, checked);
       });
     });
   }
@@ -1111,6 +1232,24 @@
     if (confirmBtn) confirmBtn.disabled = false;
   }
 
+  function selectedWordsToTaskInput() {
+    const detail = document.getElementById('tapDetail');
+    const detailText = detail ? detail.value.trim() : '';
+    const who = selectedWords['Who'] || 'Item';
+    const what = selectedWords['What'] || 'Follow-up';
+    const domain = selectedWords['Domain'] || 'Student';
+    const location = selectedWords['Location'] || '';
+    const priorityWord = String(selectedWords['Priority'] || 'Normal').toLowerCase();
+    const priority = priorityWord === 'urgent' ? 'urgent' : priorityWord === 'high' ? 'high' : priorityWord === 'low' ? 'low' : 'normal';
+    const locationText = location ? ` at ${location}` : '';
+    const detailSuffix = detailText ? `: ${detailText}` : '';
+    return {
+      title: `${what} - ${who}${locationText}${detailSuffix}`,
+      description: `Category: ${domain}\nCreated from tap capture.${detailText ? `\nDetail: ${detailText}` : ''}`,
+      priority
+    };
+  }
+
   // Mic button interaction
   const micBtn = document.getElementById('micBtn');
   const micLabel = document.getElementById('micLabel');
@@ -1151,18 +1290,25 @@
   // Tap confirm
   const tapConfirmBtn = document.getElementById('tapConfirmBtn');
   if (tapConfirmBtn) {
-    tapConfirmBtn.addEventListener('click', () => {
+    tapConfirmBtn.addEventListener('click', async () => {
       const content = document.getElementById('tapPreviewContent');
       if (content) {
-        content.innerHTML = '<div style="color:var(--color-success);font-weight:600;display:flex;align-items:center;gap:var(--space-2);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Task saved successfully!</div>';
         tapConfirmBtn.disabled = true;
-        setTimeout(() => {
-          document.querySelectorAll('.word-btn.selected').forEach(b => b.classList.remove('selected'));
-          const detail = document.getElementById('tapDetail');
-          if (detail) detail.value = '';
-          selectedWords = {};
-          updateTapPreview({});
-        }, 1500);
+        content.innerHTML = '<div style="color:var(--color-text-muted);font-weight:600;">Saving task...</div>';
+        try {
+          await createPersistedTask(selectedWordsToTaskInput());
+          content.innerHTML = '<div style="color:var(--color-success);font-weight:600;display:flex;align-items:center;gap:var(--space-2);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Task saved successfully!</div>';
+          setTimeout(() => {
+            document.querySelectorAll('.word-btn.selected').forEach(b => b.classList.remove('selected'));
+            const detail = document.getElementById('tapDetail');
+            if (detail) detail.value = '';
+            selectedWords = {};
+            updateTapPreview({});
+          }, 1500);
+        } catch (error) {
+          content.innerHTML = `<div style="color:var(--color-error);font-weight:600;">${error.message || 'Task could not be saved.'}</div>`;
+          tapConfirmBtn.disabled = false;
+        }
       }
     });
   }
@@ -1711,6 +1857,115 @@
     renderObservationsView();
   }
 
+  function emptyDrawerContent(title, body) {
+    return `
+      <div style="padding:var(--space-6);text-align:center;color:var(--color-text-muted);">
+        <div style="font-weight:700;color:var(--color-text);margin-bottom:var(--space-2);">${title}</div>
+        <div style="font-size:var(--text-sm);line-height:1.5;">${body}</div>
+      </div>
+    `;
+  }
+
+  function focusSettingRow(labelText) {
+    navigateTo('settings');
+    requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll('#view-settings .setting-row')].find((candidate) => (
+        candidate.querySelector('.setting-label')?.textContent?.trim() === labelText
+      ));
+      row?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row?.classList.add('setting-row--focus');
+      setTimeout(() => row?.classList.remove('setting-row--focus'), 1600);
+    });
+  }
+
+  function openBoardCustomization() {
+    navigateTo('capture');
+    requestAnimationFrame(() => {
+      if (!wordBoardEditMode) toggleWordBoardEditMode();
+      document.getElementById('wordBoard')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  function downloadExportData() {
+    const profileRows = [...document.querySelectorAll('#view-settings .setting-row')].map((row) => ({
+      label: row.querySelector('.setting-label')?.textContent?.trim() || '',
+      value: row.querySelector('.setting-desc')?.textContent?.trim() || ''
+    })).filter((row) => row.label);
+    const rows = [
+      ['section', 'field', 'value'],
+      ...profileRows.map((row) => ['settings', row.label, row.value]),
+      ['tasks', 'count', String(allTasks.length)],
+      ['captures', 'count', String(captures.length)],
+      ['observations', 'count', String(obsState.notes.length)],
+      ['integrations', 'selected', integrations.map((item) => item.name).join('; ')]
+    ];
+    const csv = rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `admini-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function requestResetUserData() {
+    const confirmed = window.confirm('Delete local AdminI user data and return to onboarding?');
+    if (!confirmed) return;
+    parent.postMessage({ type: 'reset-user-data' }, '*');
+  }
+
+  function bindStaticActions() {
+    const bindClick = (id, handler) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', handler);
+    };
+
+    bindClick('notificationsBtn', () => openDrawer('Notifications', 'Your alert center', emptyDrawerContent('No notifications yet', 'Notifications will appear after your connected systems, captures, or Pulse prompts create something for you to review.')));
+    bindClick('searchBtn', () => openDrawer('Search', 'Find tasks, captures, and observations', `
+      <div style="display:grid;gap:var(--space-3);">
+        <input type="search" aria-label="Search AdminI" placeholder="Search your AdminI data..." style="width:100%;padding:var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-text);">
+        ${emptyDrawerContent('No searchable data yet', 'Search results will appear after you add captures, tasks, observations, or connected system data.')}
+      </div>
+    `));
+    bindClick('priorityViewAllBtn', () => navigateTo('tasks'));
+    bindClick('timelineFullDayBtn', () => navigateTo('pulse'));
+    bindClick('allCapturesBtn', () => navigateTo('capture'));
+    bindClick('insightDetailsBtn', () => openDrawer('Patterns & Insights', 'Generated from your activity', emptyDrawerContent('No insights yet', 'AdminI will surface patterns after you add captures, tasks, observations, or connected system data.')));
+    bindClick('voiceHistoryBtn', () => openDrawer('Voice History', 'Saved voice captures', emptyDrawerContent('No voice captures yet', 'Use Voice Capture to record and confirm an entry. Saved voice captures will appear here.')));
+    bindClick('keyboardToggle', () => {
+      navigateTo('capture');
+      requestAnimationFrame(() => {
+        const detail = document.getElementById('tapDetail');
+        detail?.focus();
+        detail?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+    bindClick('editDayStructureBtn', () => focusSettingRow('Active Hours'));
+    bindClick('pulseSettingsBtn', () => focusSettingRow('Pulse Frequency'));
+    bindClick('obsViewAllBtn', () => openDrawer('Recent Observations', 'Observation history', emptyDrawerContent('No observations yet', 'Begin an observation and stamp notes to create your first observation record.')));
+    bindClick('obsPrintBtn', () => window.print());
+    bindClick('manageWordsBtn', openBoardCustomization);
+    bindClick('customizeBoardBtn', openBoardCustomization);
+    bindClick('exportDataBtn', downloadExportData);
+    bindClick('deleteAccountBtn', requestResetUserData);
+
+    document.querySelectorAll('[data-settings-action]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openDrawer('Edit setup information', 'User-provided profile data', emptyDrawerContent('Managed through signup and setup', 'Display name, school, email, role, and setup information come from the user-provided signup and onboarding flow. To retest it, use Delete Account to clear local data and return to onboarding.'));
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      const taskAction = event.target.closest?.('.task-action-btn');
+      if (!taskAction) return;
+      const action = taskAction.getAttribute('aria-label') || 'Task action';
+      openDrawer(action, 'Task action', emptyDrawerContent('No task selected', 'Create or import tasks first. Then this action will apply to the selected user-created task.'));
+    });
+  }
+
   /* ============================================
      INITIALIZE ALL VIEWS
      ============================================ */
@@ -1725,6 +1980,8 @@
   renderPulseView();
   renderIntegrationsView();
   renderObservationsView();
+  bindStaticActions();
+  loadPersistedTasks();
 
   // Tap detail input updates preview
   const tapDetail = document.getElementById('tapDetail');

@@ -53,6 +53,99 @@ const App = (function () {
     byGrade: []
   };
 
+  function taskBridgeRequest(type, payload) {
+    return new Promise((resolve, reject) => {
+      if (window.parent === window) {
+        reject(new Error('Task persistence requires the signed-in AdminI app shell.'));
+        return;
+      }
+      const requestId = `task_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const timeout = window.setTimeout(() => {
+        window.removeEventListener('message', onMessage);
+        reject(new Error('Task request timed out.'));
+      }, 15000);
+
+      function onMessage(event) {
+        const data = event.data || {};
+        if (data.requestId !== requestId || data.type !== `${type}:result`) return;
+        window.clearTimeout(timeout);
+        window.removeEventListener('message', onMessage);
+        if (data.ok) resolve(data);
+        else reject(new Error(data.error || 'Task request failed.'));
+      }
+
+      window.addEventListener('message', onMessage);
+      window.parent.postMessage({ type, requestId, ...payload }, '*');
+    });
+  }
+
+  function formatTaskDue(dueAt) {
+    if (!dueAt) return 'No due date';
+    const date = new Date(dueAt);
+    if (Number.isNaN(date.getTime())) return 'No due date';
+    return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function parseTaskLabels(description) {
+    const match = String(description || '').match(/^Labels:\s*([^\n]+)/i);
+    return match ? match[1].split(',').map((label) => label.trim()).filter(Boolean) : ['student'];
+  }
+
+  function persistedTaskToMobileTask(task) {
+    return {
+      id: task.id,
+      title: task.title,
+      priority: task.priority || 'normal',
+      status: task.status || 'open',
+      due: formatTaskDue(task.dueAt),
+      labels: parseTaskLabels(task.description)
+    };
+  }
+
+  function applyPersistedTasks(tasks) {
+    tasksToday.splice(0, tasksToday.length, ...(tasks || []).map(persistedTaskToMobileTask));
+    unresolvedItems.splice(0, unresolvedItems.length, ...tasksToday.filter((task) => task.status !== 'completed'));
+    renderTaskList();
+    renderKPICards();
+  }
+
+  async function loadPersistedTasks() {
+    try {
+      const result = await taskBridgeRequest('tasks:list', {});
+      applyPersistedTasks(result.tasks || []);
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
+  async function createPersistedTask(input) {
+    const result = await taskBridgeRequest('tasks:create', { task: input });
+    const created = persistedTaskToMobileTask(result.task);
+    tasksToday.unshift(created);
+    unresolvedItems.unshift(created);
+    renderTaskList();
+    renderKPICards();
+    return created;
+  }
+
+  async function persistTaskStatus(taskId, completed) {
+    if (!taskId) return;
+    try {
+      const result = await taskBridgeRequest('tasks:update-status', {
+        id: taskId,
+        status: completed ? 'completed' : 'open'
+      });
+      const updated = persistedTaskToMobileTask(result.task);
+      const index = tasksToday.findIndex((task) => task.id === taskId);
+      if (index >= 0) tasksToday.splice(index, 1, updated);
+      unresolvedItems.splice(0, unresolvedItems.length, ...tasksToday.filter((task) => task.status !== 'completed'));
+      renderKPICards();
+    } catch (error) {
+      showToast(error.message || 'Task update failed');
+      loadPersistedTasks();
+    }
+  }
+
   // Word icon map
   const wordIcons = {
     'Parent': '👤', 'Student': '🎒', 'Teacher': '📚', 'Staff': '🏫', 'Counselor': '💬', 'Visitor': '🚪',
@@ -183,6 +276,7 @@ const App = (function () {
     initHashRouting();
     startPulseTimer();
     initMobObs();
+    loadPersistedTasks();
     window.AdminiPrototype = { applyUserProfile };
   }
 
@@ -981,6 +1075,12 @@ const App = (function () {
   function renderKPICards() {
     const scroll = document.getElementById('kpi-scroll');
     if (!scroll) return;
+    const activeTasks = tasksToday.filter((task) => task.status !== 'completed');
+    const unresolved = unresolvedItems.filter((task) => task.status !== 'completed');
+    const tasksKpi = kpiData.find((item) => item.id === 'tasks');
+    const unresolvedKpi = kpiData.find((item) => item.id === 'unresolved');
+    if (tasksKpi) tasksKpi.value = String(activeTasks.length);
+    if (unresolvedKpi) unresolvedKpi.value = String(unresolved.length);
 
     scroll.innerHTML = kpiData.map(kpi => `
       <button class="kpi-card${kpi.accent ? ' kpi-card--accent' : ''}" onclick="App.showKPIDetail('${kpi.id}')" aria-label="View ${kpi.label} details">
@@ -1186,6 +1286,41 @@ const App = (function () {
   // =========================================
   // TASKS
   // =========================================
+  function renderTaskList() {
+    const taskList = document.getElementById('task-list');
+    if (!taskList) return;
+    if (!tasksToday.length) {
+      taskList.innerHTML = emptyState('No tasks yet', 'Use capture or the add task button to create your first task.');
+      return;
+    }
+
+    taskList.innerHTML = tasksToday.map((task) => {
+      const labels = task.labels && task.labels.length ? task.labels : ['student'];
+      const pillsHTML = labels.map((key) => {
+        const text = labelMap[key] || key;
+        return `<span class="pill pill--${key}">${text}</span>`;
+      }).join('');
+      const completed = task.status === 'completed';
+      return `
+        <div class="task-item${completed ? ' completed' : ''}" data-filter-tags="all today ${labels.join(' ')}" style="animation: slideUp 300ms var(--ease-golden)">
+          <div class="task-item__row">
+            <button class="task-item__checkbox${completed ? ' checked' : ''}" data-task-id="${task.id || ''}" onclick="App.toggleTask(this)" aria-label="${completed ? 'Mark incomplete' : 'Mark complete'}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="${completed ? '' : 'display:none'}"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <div class="task-item__body">
+              <div class="task-item__title">${escapeHTML(task.title)}</div>
+              <div class="task-item__footer">
+                ${pillsHTML}
+                <span class="priority-dot priority-dot--${task.priority}"></span>
+                <span class="task-item__due">${task.due || 'No due date'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   function filterTasks(filter, btn) {
     // Update pill states
     document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
@@ -1220,6 +1355,7 @@ const App = (function () {
       // Haptic
       if (navigator.vibrate) navigator.vibrate(30);
     }
+    persistTaskStatus(checkbox.dataset.taskId, !isChecked);
   }
 
   function showAddTask() {
@@ -1312,6 +1448,33 @@ const App = (function () {
     }
     if (state.newTaskTime) return `${dueDay} ${state.newTaskTime}`;
     return dueDay;
+  }
+
+  function buildDueAt() {
+    const now = new Date();
+    if (state.newTaskDue === 'custom') {
+      const dateVal = document.getElementById('due-date-input')?.value;
+      const timeVal = document.getElementById('due-time-input')?.value || '17:00';
+      if (!dateVal) return undefined;
+      return new Date(`${dateVal}T${timeVal}`).toISOString();
+    }
+    const due = new Date(now);
+    if (state.newTaskDue === 'tomorrow') due.setDate(due.getDate() + 1);
+    if (state.newTaskDue === 'this-week') due.setDate(due.getDate() + 7);
+    if (state.newTaskTime) {
+      const match = state.newTaskTime.match(/^(\d+)(?::(\d+))?\s*(AM|PM)$/i);
+      if (match) {
+        let hour = Number(match[1]);
+        const minute = Number(match[2] || 0);
+        const meridiem = match[3].toUpperCase();
+        if (meridiem === 'PM' && hour < 12) hour += 12;
+        if (meridiem === 'AM' && hour === 12) hour = 0;
+        due.setHours(hour, minute, 0, 0);
+      }
+    } else {
+      due.setHours(17, 0, 0, 0);
+    }
+    return due.toISOString();
   }
 
   /* ---- Carousel navigation ---- */
@@ -1469,37 +1632,22 @@ const App = (function () {
     state.dupConfirmed = false;
     if (dupBanner) { dupBanner.classList.remove('visible'); dupBanner.innerHTML = ''; }
 
-    commitTask(title);
+    commitTask(title).catch((error) => {
+      const addBtn = document.getElementById('sheet-add-btn');
+      if (addBtn) addBtn.disabled = false;
+      showToast(error.message || 'Task could not be saved');
+    });
   }
 
-  function commitTask(title) {
-    const taskList = document.getElementById('task-list');
-    const priorityClass = state.newTaskPriority;
-
-    const pillsHTML = state.newTaskLabels.map(key => {
-      const text = labelMap[key] || key;
-      return `<span class="pill pill--${key}">${text}</span>`;
-    }).join('');
-
-    const taskHTML = `
-      <div class="task-item" data-filter-tags="all today" style="animation: slideUp 300ms var(--ease-golden)">
-        <div class="task-item__row">
-          <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-          </button>
-          <div class="task-item__body">
-            <div class="task-item__title">${escapeHTML(title)}</div>
-            <div class="task-item__footer">
-              ${pillsHTML}
-              <span class="priority-dot priority-dot--${priorityClass}"></span>
-              <span class="task-item__due">${buildDueString() || 'Just added'}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    taskList.insertAdjacentHTML('afterbegin', taskHTML);
+  async function commitTask(title) {
+    const addBtn = document.getElementById('sheet-add-btn');
+    if (addBtn) addBtn.disabled = true;
+    await createPersistedTask({
+      title,
+      description: `Labels: ${state.newTaskLabels.join(', ')}\nCreated from mobile task entry.`,
+      priority: state.newTaskPriority,
+      dueAt: buildDueAt()
+    });
     const input = document.getElementById('new-task-input');
     if (input) input.value = '';
     hideBottomSheet();
@@ -1620,6 +1768,10 @@ const App = (function () {
 
   function simulateUpload() {
     showToast('Camera/upload would open here');
+  }
+
+  function showHelpTopic(topic) {
+    showToast(`${topic} will open from AdminI help content when it is added.`);
   }
 
   // =========================================
@@ -1980,6 +2132,7 @@ const App = (function () {
     toggleRecording,
     confirmCapture,
     editCapture,
+    renderWordBoard,
     tapWord,
     removeWord,
     quickCapture,
@@ -1998,6 +2151,7 @@ const App = (function () {
     removeQuickCapture,
     saveAsQuickCapture,
     showKPIDetail,
+    renderKPICards,
     hideKPIDetail,
     filterTasks,
     toggleTask,
@@ -2011,9 +2165,11 @@ const App = (function () {
     showSubView,
     hideSubView,
     simulateUpload,
+    showHelpTopic,
     toggleTheme,
     toggleSwitch,
     dismissPulseBanner,
+    hideBottomSheet,
     hideNotification,
     showNotification,
     initMobObs,

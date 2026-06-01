@@ -75,36 +75,13 @@ body,
 }
 
 .logo-lockup {
-  align-items: end;
   display: inline-flex;
-  gap: 0;
-  justify-items: center;
-  line-height: 0.78;
+  justify-content: center;
+  line-height: 0.84;
 }
 
 .split-auth .logo-lockup {
   justify-items: center;
-}
-
-.admini-logo {
-  flex: 0 0 auto;
-  height: clamp(112px, 13.5vw, 176px);
-  overflow: visible;
-  padding: 0;
-  transform: translate(0.02em, 0.28em);
-  width: clamp(112px, 13.5vw, 176px);
-}
-
-.admini-logo-body {
-  fill: #111111;
-  filter: drop-shadow(0 6px 10px rgba(50, 82, 55, 0.2));
-  stroke: none;
-  stroke-linejoin: round;
-}
-
-.admini-logo-hole {
-  fill: #ffffff;
-  stroke: none;
 }
 
 .logo-name {
@@ -113,19 +90,13 @@ body,
   font-size: clamp(84px, 11.5vw, 154px);
   font-weight: 900;
   letter-spacing: -0.065em;
-  line-height: 0.78;
-  margin: 0 0 0 clamp(-18px, -1.35vw, -10px);
+  line-height: 0.84;
+  margin: 0;
   text-shadow: 0 10px 26px rgba(45, 38, 64, 0.06);
 }
 
-.visual-night .logo-name,
-.visual-night .admini-logo-body {
+.visual-night .logo-name {
   color: #f9f8f0;
-  fill: #f9f8f0;
-}
-
-.visual-night .admini-logo-hole {
-  fill: #373d35;
 }
 
 .time-greeting {

@@ -259,12 +259,7 @@
   font-weight: 700;
   font-size: var(--text-lg);
   color: var(--color-primary);
-  letter-spacing: -0.02em;
-}
-
-.status-bar__logo span {
-  font-weight: 400;
-  color: var(--color-text-muted);
+  letter-spacing: 0;
 }
 
 .status-bar__meta {

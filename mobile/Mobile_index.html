@@ -25,7 +25,7 @@
     <!-- ===== STATUS BAR ===== -->
     <header class="status-bar">
       <div class="status-bar__brand">
-        <div class="status-bar__logo">Admin<span>I</span></div>
+        <div class="status-bar__logo">AdminI</div>
       </div>
       <div class="status-bar__meta">
         <span class="status-bar__date" id="current-date"></span>
@@ -189,7 +189,7 @@
           <div class="priority-queue">
             <div class="section-title">
               <h2>Priority Queue</h2>
-              <button class="section-title__action">View all</button>
+              <button class="section-title__action" onclick="App.switchTab('tasks')">View all</button>
             </div>
 
             <div class="capture-empty"><div class="capture-empty__title">No tasks yet</div><div class="capture-empty__desc">New tasks will appear after you capture or add them.</div></div>
@@ -514,11 +514,11 @@
           </div>
           <div style="padding: 0 var(--space-4);">
             <div class="menu-list">
-              <button class="menu-item"><div class="menu-item__text">Getting Started Guide</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
-              <button class="menu-item"><div class="menu-item__text">Using Voice Capture</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item" onclick="App.showHelpTopic('Getting Started Guide')"><div class="menu-item__text">Getting Started Guide</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item" onclick="App.showHelpTopic('Using Voice Capture')"><div class="menu-item__text">Using Voice Capture</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
               <button class="menu-item" onclick="App.openBoardCustomization()"><div class="menu-item__text">Customizing Your Board</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
-              <button class="menu-item"><div class="menu-item__text">Understanding Pulses</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
-              <button class="menu-item"><div class="menu-item__text">Contact Support</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item" onclick="App.showHelpTopic('Understanding Pulses')"><div class="menu-item__text">Understanding Pulses</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item" onclick="App.showHelpTopic('Contact Support')"><div class="menu-item__text">Contact Support</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
             </div>
           </div>
         </div>
@@ -532,7 +532,7 @@
             <h2 class="sub-view__title">About AdminI</h2>
           </div>
           <div style="padding: var(--space-8) var(--space-4); text-align: center;">
-            <div style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; color: var(--color-primary); margin-bottom: var(--space-2);">Admin<span style="font-weight: 400; color: var(--color-text-muted);">I</span></div>
+            <div style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; color: var(--color-primary); margin-bottom: var(--space-2);">AdminI</div>
             <div style="font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-1);">Version 2.1.0 (Mobile)</div>
             <div style="font-size: var(--text-xs); color: var(--color-text-faint); margin-bottom: var(--space-6);">Intelligent School Administration</div>
             <p style="font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; max-width: 280px; margin: 0 auto;">AdminI helps school administrators capture, organize, and act on information faster through voice and tap capture with AI-powered task generation.</p>

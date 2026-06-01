@@ -237,30 +237,24 @@ html, body {
   flex-shrink: 0;
 }
 
-.sidebar-brand .logo-mark {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-}
-
 .sidebar-brand .brand-text {
   font-family: var(--font-logo);
   font-weight: 700;
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
-  letter-spacing: -0.01em;
-}
-
-.sidebar-brand .brand-text span {
-  color: var(--color-primary);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .sidebar-collapsed .brand-text {
   display: none;
+}
+
+.setting-row--focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
 }
 
 .sidebar-nav {

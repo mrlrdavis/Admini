@@ -2,13 +2,17 @@ import { integrationCatalog } from '@admini/integrations';
 import { clearAdminiBrowserState, createIndexedDbStorage, nowIso, type IntegrationCatalogItem, type IntegrationProvider } from '@admini/shared';
 import { useEffect, useMemo, useState, useRef, type FormEvent } from 'react';
 import {
+  createTask,
   getCurrentUser,
   isSupabaseConfigured,
+  listTasks,
   signInWithOAuthProvider,
   signInWithPassword,
   sendPasswordReset,
   signOut,
   signUpWithPassword,
+  updateTaskStatus,
+  type CreateTaskInput,
   type AuthUser
 } from './supabase';
 
@@ -29,6 +33,8 @@ type OnboardingAnswers = {
   focus: string;
   systems: string[];
 };
+
+type TaskStatusInput = 'open' | 'in_progress' | 'completed' | 'archived';
 
 let hoverAudioContext: AudioContext | null = null;
 const defaultReturningUserTagline = "we'll take it from here";
@@ -126,6 +132,15 @@ export function App() {
     setOnboardingComplete(true);
   }
 
+  async function resetUserData() {
+    await clearAdminiBrowserState();
+    await signOut().catch(() => undefined);
+    setShowIntegrations(false);
+    setOnboardingComplete(null);
+    setOnboardingAnswers(null);
+    setUser(null);
+  }
+
   if (loadingUser) return <div className="auth-page auth-page-home"><LogoLockup /><p>Checking session...</p></div>;
   if (!user) return <AuthScreen onAuthenticated={setUser} />;
   if (onboardingComplete === null) return <div className="auth-page auth-page-home"><LogoLockup /><p>Preparing your workspace...</p></div>;
@@ -145,6 +160,10 @@ export function App() {
       onSignOut={() => {
         signOut().finally(() => setUser(null));
       }}
+      onResetUserData={resetUserData}
+      onListTasks={listTasks}
+      onCreateTask={createTask}
+      onUpdateTaskStatus={updateTaskStatus}
     />
   );
 }
@@ -347,11 +366,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
 function LogoLockup() {
   return (
     <div className="logo-lockup" aria-label="Admini">
-      <svg className="admini-logo" aria-hidden="true" viewBox="0 0 120 120" role="img">
-        <path className="admini-logo-body" d="M26 96C36 61 43 39 53 21c6-11 20-11 26 0 10 18 17 40 27 75 3 11-10 18-19 11-5-4-8-12-11-21H57c-3 9-6 17-11 21-9 7-23 0-20-11Z" />
-        <path className="admini-logo-hole" d="M61 56c1-7 3-13 5-18 2 5 4 11 5 18 1 5-2 8-5 8s-6-3-5-8Z" />
-      </svg>
-      <p className="logo-name" aria-hidden="true">dminI.</p>
+      <p className="logo-name">AdminI.</p>
     </div>
   );
 }
@@ -664,6 +679,10 @@ function playBubbleSound() {
   oscillator.stop(hoverAudioContext.currentTime + 0.13);
 }
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 function ProtectedWorkspace({
   appName,
   prototypePath,
@@ -675,7 +694,11 @@ function ProtectedWorkspace({
   onCompleteOnboarding,
   showIntegrations,
   onToggleIntegrations,
-  onSignOut
+  onSignOut,
+  onResetUserData,
+  onListTasks,
+  onCreateTask,
+  onUpdateTaskStatus
 }: {
   appName: string;
   prototypePath: string;
@@ -688,6 +711,10 @@ function ProtectedWorkspace({
   showIntegrations: boolean;
   onToggleIntegrations: () => void;
   onSignOut: () => void;
+  onResetUserData: () => void;
+  onListTasks: () => Promise<unknown>;
+  onCreateTask: (task: CreateTaskInput) => Promise<unknown>;
+  onUpdateTaskStatus: (id: string, status: TaskStatusInput) => Promise<unknown>;
 }) {
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const userPayload = useMemo(() => ({
@@ -707,13 +734,43 @@ function ProtectedWorkspace({
       if (data.type === 'request-signout') {
         onSignOut();
       }
+      if (data.type === 'reset-user-data') {
+        onResetUserData();
+      }
       if (data.type === 'open-integrations') {
         onToggleIntegrations();
+      }
+      if (data.type === 'tasks:list') {
+        void onListTasks()
+          .then((tasks) => {
+            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:list:result', requestId: data.requestId, ok: true, tasks }, '*');
+          })
+          .catch((error: unknown) => {
+            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:list:result', requestId: data.requestId, ok: false, error: getErrorMessage(error) }, '*');
+          });
+      }
+      if (data.type === 'tasks:create') {
+        void onCreateTask(data.task as CreateTaskInput)
+          .then((task) => {
+            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:create:result', requestId: data.requestId, ok: true, task }, '*');
+          })
+          .catch((error: unknown) => {
+            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:create:result', requestId: data.requestId, ok: false, error: getErrorMessage(error) }, '*');
+          });
+      }
+      if (data.type === 'tasks:update-status') {
+        void onUpdateTaskStatus(String(data.id), data.status as TaskStatusInput)
+          .then((task) => {
+            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:update-status:result', requestId: data.requestId, ok: true, task }, '*');
+          })
+          .catch((error: unknown) => {
+            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:update-status:result', requestId: data.requestId, ok: false, error: getErrorMessage(error) }, '*');
+          });
       }
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [onSignOut, onToggleIntegrations]);
+  }, [onCreateTask, onListTasks, onResetUserData, onSignOut, onToggleIntegrations, onUpdateTaskStatus]);
 
   useEffect(() => {
     frameRef.current?.contentWindow?.postMessage(userPayload, '*');

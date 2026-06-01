@@ -17,17 +17,7 @@
     <!-- ============ SIDEBAR ============ -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <!-- AdminI Logo SVG -->
-        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="8" fill="var(--color-primary)"/>
-          <text x="16" y="22.5" text-anchor="middle" font-family="'Unbounded', sans-serif" font-size="18" font-weight="400" fill="white" letter-spacing="-0.5">A</text>
-          <circle cx="24" cy="8" r="2" fill="#C4B5FD" opacity="0.8"/>
-          <circle cx="24" cy="8" r="2" fill="none" stroke="#C4B5FD" stroke-width="0.8" opacity="0.4">
-            <animate attributeName="r" values="2;5;2" dur="3s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite"/>
-          </circle>
-        </svg>
-        <div class="brand-text">Admin<span>I</span></div>
+        <div class="brand-text">AdminI</div>
       </div>
 
       <nav class="sidebar-nav" aria-label="Main navigation">
@@ -82,10 +72,10 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="icon-btn notif-dot" aria-label="Notifications">
+        <button class="icon-btn notif-dot" id="notificationsBtn" aria-label="Notifications">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </button>
-        <button class="icon-btn" aria-label="Search">
+        <button class="icon-btn" id="searchBtn" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
         <button class="icon-btn" data-theme-toggle aria-label="Switch to dark mode">
@@ -111,7 +101,7 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Priority Queue</div>
-              <button class="btn btn-ghost btn-sm">View all</button>
+              <button class="btn btn-ghost btn-sm" id="priorityViewAllBtn">View all</button>
             </div>
             <div class="card-body" id="priorityQueue"></div>
           </div>
@@ -120,7 +110,7 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Today's Timeline</div>
-              <button class="btn btn-ghost btn-sm">Full day</button>
+              <button class="btn btn-ghost btn-sm" id="timelineFullDayBtn">Full day</button>
             </div>
             <div class="card-body">
               <div class="timeline" id="timeline"></div>
@@ -134,7 +124,7 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Recent Captures</div>
-              <button class="btn btn-ghost btn-sm">All captures</button>
+              <button class="btn btn-ghost btn-sm" id="allCapturesBtn">All captures</button>
             </div>
             <div class="card-body" id="recentCaptures"></div>
           </div>
@@ -143,7 +133,7 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Patterns &amp; Insights</div>
-              <button class="btn btn-ghost btn-sm">Details</button>
+              <button class="btn btn-ghost btn-sm" id="insightDetailsBtn">Details</button>
             </div>
             <div class="card-body" id="insights"></div>
           </div>
@@ -233,7 +223,7 @@
             <div class="card" style="margin-bottom: var(--space-4);">
               <div class="card-header">
                 <div class="card-title">Your Day Map</div>
-                <button class="btn btn-ghost btn-sm">Edit Day Structure</button>
+                <button class="btn btn-ghost btn-sm" id="editDayStructureBtn">Edit Day Structure</button>
               </div>
               <div class="card-body-padded">
                 <div class="pulse-daymap" id="pulseDaymap"></div>
@@ -246,7 +236,7 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Pulse Checkpoints</div>
-              <button class="btn btn-ghost btn-sm">Settings</button>
+              <button class="btn btn-ghost btn-sm" id="pulseSettingsBtn">Settings</button>
             </div>
             <div class="card-body-padded" id="pulseCheckpoints"></div>
           </div>
@@ -349,7 +339,7 @@
             <div class="card">
               <div class="card-header">
                 <div class="card-title">Recent Observations</div>
-                <button class="btn btn-ghost btn-sm">View All</button>
+                <button class="btn btn-ghost btn-sm" id="obsViewAllBtn">View All</button>
               </div>
               <div class="card-body" id="obsPastList"></div>
             </div>
@@ -535,28 +525,28 @@
               <div class="setting-label">Display Name</div>
               <div class="setting-desc">Not provided</div>
             </div>
-            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" data-settings-action="profile-display-name">Edit</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">School</div>
               <div class="setting-desc">Not provided</div>
             </div>
-            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" data-settings-action="profile-school">Edit</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">Email</div>
               <div class="setting-desc">Not provided</div>
             </div>
-            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" data-settings-action="profile-email">Edit</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">Role</div>
               <div class="setting-desc">Not provided</div>
             </div>
-            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" data-settings-action="profile-role">Edit</button>
           </div>
         </div>
 
@@ -567,14 +557,14 @@
               <div class="setting-label">Active Hours</div>
               <div class="setting-desc">7:30 AM – 4:30 PM</div>
             </div>
-            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" data-settings-action="pulse-active-hours">Edit</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">Pulse Frequency</div>
               <div class="setting-desc">Every 2 hours</div>
             </div>
-            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" data-settings-action="pulse-frequency">Edit</button>
           </div>
           <div class="setting-row">
             <div>
@@ -628,14 +618,14 @@
               <div class="setting-label">Custom Words</div>
               <div class="setting-desc">Add school-specific terms to word board</div>
             </div>
-            <button class="btn btn-secondary btn-sm">Manage Words</button>
+            <button class="btn btn-secondary btn-sm" id="manageWordsBtn">Manage Words</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">Board Layout</div>
               <div class="setting-desc">Arrange categories and button order</div>
             </div>
-            <button class="btn btn-secondary btn-sm">Customize</button>
+            <button class="btn btn-secondary btn-sm" id="customizeBoardBtn">Customize</button>
           </div>
         </div>
 
@@ -658,14 +648,14 @@
               <div class="setting-label">Export Data</div>
               <div class="setting-desc">Download all your data as CSV</div>
             </div>
-            <button class="btn btn-secondary btn-sm">Export</button>
+            <button class="btn btn-secondary btn-sm" id="exportDataBtn">Export</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">Delete Account</div>
               <div class="setting-desc">Permanently remove all data</div>
             </div>
-            <button class="btn btn-error btn-sm">Delete</button>
+            <button class="btn btn-error btn-sm" id="deleteAccountBtn">Delete</button>
           </div>
         </div>
 
