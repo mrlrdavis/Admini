@@ -143,139 +143,115 @@
   }
 
   /* ============================================
-     SAMPLE DATA
+     USER-PROVIDED DATA ONLY
      ============================================ */
 
   // KPIs
   const kpis = [
-    { label: 'Tasks Today', value: 9, suffix: '', delta: '+2', direction: 'up', data: [4, 6, 5, 8, 7, 7, 9] },
-    { label: 'Unresolved Items', value: 4, suffix: '', delta: '-1', direction: 'down', data: [8, 7, 6, 5, 5, 5, 4] },
-    { label: 'Meetings Today', value: 5, suffix: '', delta: '+1', direction: 'up', data: [3, 4, 3, 5, 4, 4, 5] },
-    { label: 'Staff Coverage', value: 97, suffix: '%', delta: '+2.1%', direction: 'up', data: [93, 91, 95, 94, 96, 95, 97] },
-    { label: 'Attendance', value: 94.8, suffix: '%', delta: '+0.3%', direction: 'up', data: [93.5, 94.0, 93.8, 94.2, 94.5, 94.6, 94.8] }
+    { label: 'Tasks Today', value: 0, suffix: '', delta: '0', direction: 'flat', data: [0, 0, 0, 0, 0, 0, 0] },
+    { label: 'Unresolved Items', value: 0, suffix: '', delta: '0', direction: 'flat', data: [0, 0, 0, 0, 0, 0, 0] },
+    { label: 'Meetings Today', value: 0, suffix: '', delta: '0', direction: 'flat', data: [0, 0, 0, 0, 0, 0, 0] },
+    { label: 'Staff Coverage', value: 0, suffix: '%', delta: '0', direction: 'flat', data: [0, 0, 0, 0, 0, 0, 0] },
+    { label: 'Attendance', value: 0, suffix: '%', delta: '0', direction: 'flat', data: [0, 0, 0, 0, 0, 0, 0] }
   ];
 
   // Priority Queue tasks
-  const priorityTasks = [
-    { title: 'Bus 47 late again — email transportation dept', category: 'Compliance', pill: 'pill-compliance', source: 'voice', due: '7:30 AM', sourceIcon: 'mic', priority: 'urgent' },
-    { title: 'Parent Tanya Webb called — wants conference re: son\'s progress', category: 'Student', pill: 'pill-student', source: 'voice', due: '11:45 AM', sourceIcon: 'mic', priority: 'high' },
-    { title: 'Ms. Vega needs sub coverage Thursday — dentist appt', category: 'Staff', pill: 'pill-staff', source: 'email', due: 'Today', sourceIcon: 'email', priority: 'high' },
-    { title: 'Regional accreditation evidence binder — due Friday', category: 'Compliance', pill: 'pill-compliance', source: 'pulse', due: 'Friday', sourceIcon: 'pulse', priority: 'high' },
-    { title: 'Follow up with Dana on 4th grade reading data', category: 'Instructional', pill: 'pill-instructional', source: 'tap', due: '9:00 AM', sourceIcon: 'tap', priority: 'normal' },
-    { title: 'Ceiling tile loose near Room 108 — maintenance request', category: 'Facilities', pill: 'pill-facilities', source: 'voice', due: 'Today', sourceIcon: 'mic', priority: 'normal' },
-    { title: 'Budget request: manipulatives for K-2 math', category: 'Budget', pill: 'pill-budget', source: 'email', due: 'Tomorrow', sourceIcon: 'email', priority: 'normal' },
-    { title: 'Special ed compliance — IEP reviews due this week', category: 'Student', pill: 'pill-student', source: 'email', due: 'This Week', sourceIcon: 'email', priority: 'normal' }
-  ];
+  const priorityTasks = [];
 
   // Timeline events
-  const timelineEvents = [
-    { time: '7:15', event: 'Morning Arrival Walkthrough', desc: 'Bus loop, carline, front entrance', dot: '' },
-    { time: '7:45', event: 'Grade-Level PLC — 3rd Grade Math', desc: 'Data review with Ms. Drake & Mr. Watts', dot: '' },
-    { time: '8:15', event: 'Pulse: Morning arrival smooth?', desc: '', dot: 'pulse-dot' },
-    { time: '8:30', event: 'Classroom Walkthrough — 1st Grade ELA', desc: 'Ms. Cho\'s guided reading block', dot: 'current' },
-    { time: '9:00', event: 'Meeting with Dana Lewis', desc: 'AIG program review & screening data', dot: '' },
-    { time: '9:45', event: 'Observation — 2nd Grade Math', desc: 'Ms. Nash — number bonds lesson', dot: '' },
-    { time: '10:30', event: 'Leadership Team Huddle', desc: 'Weekly check-in with Dana', dot: '' },
-    { time: '11:00', event: 'Lunch Duty', desc: 'Cafeteria supervision', dot: '' },
-    { time: '11:30', event: 'Pulse: Walkthrough follow-up notes?', desc: '', dot: 'pulse-dot' },
-    { time: '11:45', event: 'Parent Conference — Tanya Webb', desc: 'Room 204 — re: son\'s progress', dot: '' },
-    { time: '12:30', event: 'Classroom Walkthrough — K Reading', desc: 'Ms. Lawson — center rotations', dot: '' },
-    { time: '1:15', event: 'Staff PD Planning Meeting', desc: 'Data-driven instruction workshop prep', dot: '' },
-    { time: '2:00', event: 'Dismissal Walkthrough', desc: 'Bus loop & carline', dot: '' },
-    { time: '2:30', event: 'Debrief with Dana', desc: 'Observation feedback prep', dot: '' },
-    { time: '2:45', event: 'Pulse: Specials rotation running on time?', desc: '', dot: 'pulse-dot' }
-  ];
+  const timelineEvents = [];
 
-  // Recent Captures
-  const captures = [
-    { type: 'Voice', time: '9:30 AM', text: '"Ceiling tile loose near Room 108 — submit maintenance request before students return from specials."', icon: 'mic' },
-    { type: 'Tap', time: '8:45 AM', text: 'Staff → Sub Request → Thursday — "Ms. Vega dentist appointment"', icon: 'tap' },
-    { type: 'Voice', time: '8:12 AM', text: '"Follow up with Dana on 4th grade reading data. EOG benchmarks coming up — need intervention plan."', icon: 'mic' }
-  ];
+  // Recent Captures: start empty for new users
+  const captures = [];
 
   // Insights
-  const insightsData = [
-    { text: 'Bus 47 has been late 3 times this week — pattern flagged', meta: 'Consider follow-up with CMS transportation', type: 'warning' },
-    { text: '4th grade reading benchmark scores dropped 4% — review with Dana', meta: 'Correlates with staffing changes in January', type: 'warning' },
-    { text: '97% staff coverage — highest this semester', meta: 'Sub requests down 20% vs last month', type: 'success' },
-    { text: '4 Pulse checkpoints completed today (90% response rate)', meta: 'Above your 80% weekly average', type: 'info' }
-  ];
+  const insightsData = [];
 
   // Full task list
-  const allTasks = [
-    { task: 'Bus 47 late again — email transportation', category: 'Compliance', priority: 'urgent', source: 'Voice', due: 'Today 7:30 AM', assignedTo: 'Mr. Mitchell', status: 'open' },
-    { task: 'Parent conference — Tanya Webb', category: 'Student', priority: 'high', source: 'Voice', due: 'Today 11:45 AM', assignedTo: 'Mr. Mitchell', status: 'open' },
-    { task: 'Ms. Vega sub coverage Thursday', category: 'Staff', priority: 'high', source: 'Email', due: 'Today', assignedTo: 'Mr. Mitchell', status: 'open' },
-    { task: 'Accreditation evidence binder — due Friday', category: 'Compliance', priority: 'high', source: 'Pulse', due: 'Friday', assignedTo: 'Dana Lewis', status: 'in-progress' },
-    { task: 'Follow up with Dana — 4th grade reading data', category: 'Instructional', priority: 'normal', source: 'Tap', due: 'Today 9:00 AM', assignedTo: 'Mr. Mitchell', status: 'open' },
-    { task: 'Ceiling tile loose — Room 108', category: 'Facilities', priority: 'normal', source: 'Voice', due: 'Today', assignedTo: 'Maintenance', status: 'delegated' },
-    { task: 'Budget request: K-2 math manipulatives', category: 'Budget', priority: 'normal', source: 'Email', due: 'Tomorrow', assignedTo: 'Mr. Mitchell', status: 'open' },
-    { task: 'IEP reviews — compliance deadline', category: 'Student', priority: 'normal', source: 'Email', due: 'This Week', assignedTo: 'EC Team', status: 'in-progress' },
-    { task: 'Staff PD planning — data-driven instruction', category: 'Instructional', priority: 'normal', source: 'Calendar', due: 'Today 1:15 PM', assignedTo: 'Mr. Mitchell', status: 'open' },
-    { task: 'Update specials rotation schedule', category: 'Staff', priority: 'low', source: 'Email', due: 'This Week', assignedTo: 'Dana Lewis', status: 'delegated' },
-    { task: 'Technology lab Chromebook inventory', category: 'Facilities', priority: 'low', source: 'Tap', due: 'This Week', assignedTo: 'Tech Coordinator', status: 'in-progress' },
-    { task: '2nd grade cohort field trip forms collected', category: 'Student', priority: 'low', source: 'Email', due: 'Friday', assignedTo: 'Ms. Nash', status: 'completed' },
-    { task: 'Morning arrival safety audit — bus loop', category: 'Compliance', priority: 'normal', source: 'Voice', due: 'Last Week', assignedTo: 'Mr. Mitchell', status: 'completed' },
-    { task: 'Teacher eval — Ms. Cho observation', category: 'Instructional', priority: 'high', source: 'Calendar', due: 'Last Week', assignedTo: 'Mr. Mitchell', status: 'completed' }
-  ];
+  const allTasks = [];
 
   // Staff Coverage data
-  const staffCoverage = [
-    { name: 'Ms. Vega', position: 'ELA, Grade 3', status: 'absent', reason: 'Personal Day', sub: 'Mrs. Doyle', covered: true },
-    { name: 'Ms. Cho', position: 'General, Grade 1', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Mr. Watts', position: 'ELA, Grade 3', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Ms. Drake', position: 'Math, Grade 3', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Ms. Lawson', position: 'General, K', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Mr. Diaz', position: 'General, K', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Ms. Nash', position: 'General, Grade 2', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Mr. Quinn', position: 'Math, Grade 4', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Ms. Pratt', position: 'Math, Grade 4', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Dana Lewis', position: 'Asst. Principal', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Ms. Perry', position: 'General, Grade 1', status: 'present', reason: '', sub: '', covered: true },
-    { name: 'Mr. Kemp', position: 'ELA, Grade 4', status: 'present', reason: '', sub: '', covered: true }
-  ];
+  const staffCoverage = [];
 
   const attendanceData = {
-    enrolled: 435,
-    present: 412,
-    absent: 23,
-    tardy: 9,
-    byGrade: [
-      { grade: 'K', pct: 95.2 },
-      { grade: '1st', pct: 94.9 },
-      { grade: '2nd', pct: 94.5 },
-      { grade: '3rd', pct: 95.8 },
-      { grade: '4th', pct: 93.7 }
-    ]
+    enrolled: 0,
+    present: 0,
+    absent: 0,
+    tardy: 0,
+    byGrade: []
   };
 
-  const meetingsToday = [
-    { time: '7:45 AM', title: 'Grade-Level PLC — 3rd Grade Math', location: 'Room 312', duration: '30 min', desc: 'Data review with Ms. Drake & Mr. Watts' },
-    { time: '9:00 AM', title: 'Meeting with Dana Lewis', location: 'Main Office', duration: '45 min', desc: 'AIG program review & screening data' },
-    { time: '10:30 AM', title: 'Leadership Team Huddle', location: 'Conference Room', duration: '30 min', desc: 'Weekly check-in with Dana' },
-    { time: '11:45 AM', title: 'Parent Conference — Tanya Webb', location: 'Room 204', duration: '30 min', desc: 'Re: son\'s academic progress' },
-    { time: '1:15 PM', title: 'Staff PD Planning Meeting', location: 'Media Center', duration: '45 min', desc: 'Data-driven instruction workshop prep' }
-  ];
+  const meetingsToday = [];
 
   // Pulse checkpoints
-  const pulseCheckpoints = [
-    { time: '8:15 AM', message: 'Morning arrival smooth? Any carline or bus loop issues?', status: 'responded', response: 'Bus 47 late again — 12 min. Emailed transportation. Carline smooth otherwise.' },
-    { time: '9:45 AM', message: '3rd grade Math PLC takeaways? Anything to action?', status: 'responded', response: 'Ms. Drake\'s number talk strategy working well. Share with grade 2 team.' },
-    { time: '11:30 AM', message: 'Walkthrough follow-up notes? Any observations to log?', status: 'pending', response: '' },
-    { time: '1:00 PM', message: 'AIG screening update? Any actions from Dana meeting?', status: 'pending', response: '' },
-    { time: '2:45 PM', message: 'Specials rotation running on time? Any schedule conflicts?', status: 'skipped', response: '' }
-  ];
+  const pulseCheckpoints = [];
 
   // Integrations
-  const integrations = [
-    { name: 'Canvas LMS', desc: 'Learning Management System', status: 'connected', lastSync: '3m ago', on: true, icon: 'book' },
-    { name: 'Infinite Campus', desc: 'Student Information System', status: 'connected', lastSync: '2m ago', on: true, icon: 'database' },
-    { name: 'Google Workspace', desc: 'Email, Calendar & Drive', status: 'connected', lastSync: '1m ago', on: true, icon: 'mail' },
-    { name: 'AdvancED Platform', desc: 'Accreditation Platform', status: 'connected', lastSync: '1h ago', on: true, icon: 'folder' },
-    { name: 'State DOE Reporting', desc: 'State Compliance & Reporting', status: 'pending', lastSync: 'Setup required', on: false, icon: 'calendar' },
-    { name: 'Remind', desc: 'SMS & Parent Communication', status: 'available', lastSync: 'Not connected', on: false, icon: 'message' },
-    { name: 'Otter.ai', desc: 'Meeting Transcripts', status: 'available', lastSync: 'Not connected', on: false, icon: 'headphones' }
-  ];
+  const integrations = [];
+  const integrationNameMap = {
+    schoology: 'Schoology',
+    infinite_campus: 'Infinite Campus',
+    google_workspace: 'Google Workspace',
+    microsoft_365: 'Microsoft 365 / Outlook',
+    apple_school_manager: 'Apple School Manager'
+  };
+
+  function setText(selector, value) {
+    document.querySelectorAll(selector).forEach((el) => {
+      el.textContent = value;
+    });
+  }
+
+  function applyUserProfile(profile) {
+    const name = profile?.name || profile?.email || '';
+    const schoolName = profile?.schoolName || 'Not provided';
+    const role = profile?.role || 'Not provided';
+    const email = profile?.email || 'Not provided';
+    const initials = name
+      ? name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+      : 'A';
+
+    setText('.user-name', name);
+    setText('.user-school', schoolName);
+    setText('.user-avatar', initials);
+
+    const settingRows = [...document.querySelectorAll('#view-settings .setting-row')];
+    settingRows.forEach((row) => {
+      const label = row.querySelector('.setting-label')?.textContent?.trim();
+      const desc = row.querySelector('.setting-desc');
+      if (!desc) return;
+      if (label === 'Display Name') desc.textContent = name || 'Not provided';
+      if (label === 'School') desc.textContent = schoolName;
+      if (label === 'Email') desc.textContent = email;
+      if (label === 'Role') desc.textContent = role;
+    });
+
+    integrations.length = 0;
+    (profile?.systems || []).forEach((provider) => {
+      integrations.push({
+        name: integrationNameMap[provider] || provider,
+        desc: 'Selected during setup',
+        status: 'available',
+        lastSync: 'Not connected',
+        on: false,
+        icon: provider.includes('google') || provider.includes('microsoft') ? 'mail' : 'database'
+      });
+    });
+    renderIntegrationsView();
+  }
+
+  function openIntegrationsSetup() {
+    navigateTo('settings');
+    requestAnimationFrame(() => {
+      document.getElementById('settings-integrations')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  function openIntegrationsPanel() {
+    navigateTo('integrations');
+  }
+
+  window.AdminiPrototype = { applyUserProfile, openIntegrationsSetup, openIntegrationsPanel };
 
   // Word board categories (mutable copy for editing)
   const defaultWordBoard = [
@@ -289,6 +265,33 @@
   // Deep copy for mutable state
   let wordBoard = JSON.parse(JSON.stringify(defaultWordBoard));
   let wordBoardEditMode = false;
+  const customWordIcons = {};
+  const wordIconChoices = ['Pin', 'Person', 'School', 'Alert', 'Star', 'Check', 'Calendar', 'Clock', 'Note', 'Flag'];
+  const wordIconSymbols = {
+    Pin: '•',
+    Person: '@',
+    School: '#',
+    Alert: '!',
+    Star: '*',
+    Check: '+',
+    Calendar: '[]',
+    Clock: 'o',
+    Note: '=',
+    Flag: '>'
+  };
+
+  function getWordIcon(category, word) {
+    const customIcon = customWordIcons[`${category}:${word}`];
+    if (customIcon) return customIcon;
+    const defaults = {
+      Who: '@',
+      What: '=',
+      Priority: '!',
+      Domain: '#',
+      Location: '>'
+    };
+    return defaults[category] || '•';
+  }
 
   /* ============================================
      SOURCE ICON SVGS
@@ -723,7 +726,7 @@
     }
 
     if (filtered.length === 0) {
-      container.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No tasks match the selected filters</div>';
+      container.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No tasks yet. New tasks will appear after you capture or add them.</div>';
       return;
     }
 
@@ -770,6 +773,10 @@
   function renderTimeline() {
     const container = document.getElementById('timeline');
     if (!container) return;
+    if (!timelineEvents.length) {
+      container.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No schedule items yet.</div>';
+      return;
+    }
     container.innerHTML = timelineEvents.map(e => `
       <div class="timeline-item">
         <div class="timeline-dot ${e.dot}"></div>
@@ -785,6 +792,17 @@
   function renderCaptures() {
     const container = document.getElementById('recentCaptures');
     if (!container) return;
+    if (!captures || captures.length === 0) {
+      container.innerHTML = `
+        <div class="capture-empty">
+          <div style="font-weight:700;margin-bottom:6px;">No captures yet</div>
+          <div style="color:var(--color-text-muted);">You haven't created any captures yet. Use the Capture view to add your first one.</div>
+          <div style="margin-top:10px;"><button class="btn btn-primary" onclick="navigateTo('capture')">Go to Capture</button></div>
+        </div>
+      `;
+      return;
+    }
+
     container.innerHTML = captures.map(c => `
       <div class="capture-item">
         <div class="capture-header">
@@ -799,6 +817,10 @@
   function renderInsights() {
     const container = document.getElementById('insights');
     if (!container) return;
+    if (!insightsData.length) {
+      container.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No insights yet. Admini will surface patterns after you add captures and tasks.</div>';
+      return;
+    }
     container.innerHTML = insightsData.map(ins => `
       <div class="insight-item">
         <div class="insight-icon ${ins.type}">
@@ -874,6 +896,10 @@
     const tbody = document.getElementById('taskTableBody');
     if (!tbody) return;
     const filtered = filter === 'all' ? allTasks : allTasks.filter(t => t.category.toLowerCase() === filter);
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);">No tasks yet. Add tasks from Capture or the task tools.</td></tr>';
+      return;
+    }
     tbody.innerHTML = filtered.map(t => {
       const pillClass = 'pill-' + t.category.toLowerCase();
       return `<tr>
@@ -926,7 +952,10 @@
         <div class="word-board-row" data-cat-index="${catIdx}">
           ${cat.words.map((w, wIdx) => `
             <div class="word-btn-wrapper${wordBoardEditMode ? ' editing' : ''}">
-              <button class="word-btn" data-category="${cat.label}" data-word="${w}" data-cat-index="${catIdx}" data-word-index="${wIdx}">${w}</button>
+              <button class="word-btn" data-category="${cat.label}" data-word="${w}" data-cat-index="${catIdx}" data-word-index="${wIdx}">
+                <span class="word-btn-icon">${getWordIcon(cat.label, w)}</span>
+                <span>${w}</span>
+              </button>
               ${wordBoardEditMode ? `<button class="word-remove-btn" data-cat-index="${catIdx}" data-word-index="${wIdx}" aria-label="Remove ${w}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>` : ''}
@@ -987,6 +1016,9 @@
           inputContainer.className = 'word-add-input-container';
           inputContainer.innerHTML = `
             <input type="text" class="word-add-input" placeholder="New word..." maxlength="20" autofocus>
+            <select class="word-add-icon" aria-label="Choose icon">
+              ${wordIconChoices.map((name) => `<option value="${wordIconSymbols[name]}">${wordIconSymbols[name]} ${name}</option>`).join('')}
+            </select>
             <button class="word-add-confirm" aria-label="Confirm">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
@@ -996,12 +1028,14 @@
           btn.style.display = 'none';
 
           const input = inputContainer.querySelector('.word-add-input');
+          const iconSelect = inputContainer.querySelector('.word-add-icon');
           const confirm = inputContainer.querySelector('.word-add-confirm');
 
           function addWord() {
             const val = input.value.trim();
             if (val) {
               wordBoard[catIdx].words.push(val);
+              customWordIcons[`${wordBoard[catIdx].label}:${val}`] = iconSelect.value;
               renderWordBoard();
             } else {
               inputContainer.remove();
@@ -1036,20 +1070,10 @@
     renderWordBoard();
   }
 
-  function resetWordBoard() {
-    wordBoard = JSON.parse(JSON.stringify(defaultWordBoard));
-    renderWordBoard();
-  }
-
   // Bind edit board button
   const editBoardBtn = document.getElementById('editBoardBtn');
   if (editBoardBtn) {
     editBoardBtn.addEventListener('click', toggleWordBoardEditMode);
-  }
-
-  const resetBoardBtn = document.getElementById('resetBoardBtn');
-  if (resetBoardBtn) {
-    resetBoardBtn.addEventListener('click', resetWordBoard);
   }
 
   function updateTapPreview(selected) {
@@ -1104,22 +1128,7 @@
         micLabel.textContent = 'Recording...';
         transcriptionArea.innerHTML = '<span style="color:var(--color-text-faint)">Listening...</span>';
         if (aiSuggestion) aiSuggestion.style.display = 'none';
-
-        // Simulate transcription after delay
-        setTimeout(() => {
-          if (isRecording) {
-            transcriptionArea.innerHTML = '"The 3rd grade math team needs additional manipulatives for the fractions unit next week. Also, Mr. Colon mentioned the projector in Room 204 is flickering again."';
-            if (confirmCaptureBtn) confirmCaptureBtn.disabled = false;
-          }
-        }, 2000);
-
-        // Show AI suggestion
-        setTimeout(() => {
-          if (isRecording && aiSuggestion) {
-            aiSuggestion.style.display = 'block';
-            aiSuggestionText.innerHTML = '<strong>Category:</strong> Instructional + Facilities &middot; <strong>Priority:</strong> Normal &middot; <strong>Actions:</strong> Create 2 tasks — (1) Order math manipulatives, (2) Submit projector repair ticket for Room 204';
-          }
-        }, 3000);
+        if (confirmCaptureBtn) confirmCaptureBtn.disabled = true;
       } else {
         micBtn.classList.remove('recording');
         micLabel.textContent = 'Tap to record';
@@ -1192,6 +1201,9 @@
     // Checkpoints
     const cpContainer = document.getElementById('pulseCheckpoints');
     if (cpContainer) {
+      if (!pulseCheckpoints.length) {
+        cpContainer.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No Pulse checkpoints yet. Add your schedule or captures to create prompts.</div>';
+      } else {
       cpContainer.innerHTML = pulseCheckpoints.map(cp => `
         <div class="pulse-checkpoint">
           <div class="pulse-status-icon ${cp.status}">
@@ -1207,15 +1219,16 @@
           <span class="status-badge ${cp.status === 'responded' ? 'completed' : cp.status === 'pending' ? 'in-progress' : 'open'}">${cp.status}</span>
         </div>
       `).join('');
+      }
     }
 
     // Stats
     const statsContainer = document.getElementById('pulseStats');
     if (statsContainer) {
       const stats = [
-        { value: '83%', label: 'Response Rate' },
-        { value: '4.2', label: 'Captures / Pulse' },
-        { value: '12', label: 'Insights Generated' }
+        { value: '0%', label: 'Response Rate' },
+        { value: '0', label: 'Captures / Pulse' },
+        { value: '0', label: 'Insights Generated' }
       ];
       statsContainer.innerHTML = stats.map(s => `
         <div class="pulse-stat-card">
@@ -1232,6 +1245,10 @@
   function renderIntegrationsView() {
     const grid = document.getElementById('integrationGrid');
     if (!grid) return;
+    if (!integrations.length) {
+      grid.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No systems selected yet. Use first time setup or Integrations to choose what to connect.</div>';
+      return;
+    }
     grid.innerHTML = integrations.map(intg => `
       <div class="integration-card">
         <div class="integration-top">
@@ -1259,30 +1276,8 @@
      OBSERVATIONS & WALKTHROUGHS
      ============================================ */
   
-  // Teacher roster data — Westfield Academy Elementary (K-4)
-  const teacherRoster = {
-    'K': {
-      'General': ['Ms. Lawson', 'Mr. Diaz', 'Ms. Chen']
-    },
-    '1st': {
-      'General': ['Ms. Cho', 'Ms. Perry', 'Ms. Tate']
-    },
-    '2nd': {
-      'General': ['Ms. Nash', 'Mr. Lyons', 'Ms. Ford']
-    },
-    '3rd': {
-      'Math': ['Ms. Drake', 'Mr. Watts'],
-      'ELA': ['Ms. Vega', 'Ms. Hale'],
-      'Science': ['Ms. Drake', 'Mr. Watts'],
-      'Social Studies': ['Ms. Vega', 'Ms. Hale']
-    },
-    '4th': {
-      'Math': ['Mr. Quinn', 'Ms. Pratt'],
-      'ELA': ['Ms. Avery', 'Mr. Kemp'],
-      'Science': ['Mr. Quinn', 'Ms. Pratt'],
-      'Social Studies': ['Ms. Avery', 'Mr. Kemp']
-    }
-  };
+  // Teacher roster data from connected systems
+  const teacherRoster = {};
 
   // Observation state
   let obsState = {
@@ -1298,12 +1293,8 @@
     activeTags: []   // Currently toggled tags
   };
 
-  // Past observations — Westfield ES sample walkthroughs
-  const pastObservations = [
-    { teacher: 'Ms. Cho', grade: '2nd', subject: 'Math', period: 'Period 2', date: 'Mar 6, 2026', duration: '18 min', initials: 'RC', notes: 10 },
-    { teacher: 'Mr. Watts', grade: '3rd', subject: 'ELA', period: 'Period 1', date: 'Mar 5, 2026', duration: '22 min', initials: 'MW', notes: 8 },
-    { teacher: 'Ms. Lawson', grade: 'K', subject: 'General', period: 'Morning', date: 'Mar 4, 2026', duration: '15 min', initials: 'ML', notes: 6 },
-  ];
+  // Past observations from user inputs
+  const pastObservations = [];
 
   function renderObservationsView() {
     // Render period pills
@@ -1325,17 +1316,24 @@
     const gradePills = document.getElementById('obsGradePills');
     if (gradePills) {
       const grades = Object.keys(teacherRoster);
+      if (!grades.length) {
+        gradePills.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);">No roster connected yet. Connect a roster system or enter observation details after setup.</div>';
+      } else {
       gradePills.innerHTML = grades.map(g =>
         `<button class="obs-pill" data-grade="${g}">${g}</button>`
       ).join('');
       gradePills.querySelectorAll('.obs-pill').forEach(btn => {
         btn.addEventListener('click', () => selectGrade(btn.dataset.grade));
       });
+      }
     }
 
-    // Render past observations
+  // Past observations from user inputs
     const pastList = document.getElementById('obsPastList');
     if (pastList) {
+      if (!pastObservations.length) {
+        pastList.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);padding:var(--space-4);">No observations yet.</div>';
+      } else {
       pastList.innerHTML = pastObservations.map(o => `
         <div class="obs-past-item">
           <div class="obs-past-avatar">${o.initials}</div>
@@ -1346,6 +1344,7 @@
           <div class="obs-past-duration">${o.duration}</div>
         </div>
       `).join('');
+      }
     }
 
     // Wire up stamp button
@@ -1740,3 +1739,9 @@
   }
 
 })();
+
+
+
+
+
+

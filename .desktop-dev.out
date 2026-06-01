@@ -1,0 +1,33 @@
+
+> admini@0.1.0 dev:desktop
+> npm run dev -w @admini/desktop
+
+
+> @admini/desktop@0.1.0 dev
+> vite --host 127.0.0.1 --port 5173
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m242[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5173[22m/desktop/[39m
+[2m11:53:38 AM[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+Re-optimizing dependencies because vite config has changed
+[2m11:53:38 AM[22m [36m[1m[vite][22m[39m server restarted.
+[2m11:53:51 AM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Desktop_index.html[22m
+[2m3:01:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m3:01:13 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m3:01:23 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m3:02:11 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m3:02:25 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m3:10:15 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m3:10:19 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m3:10:34 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Desktop_index.html[22m
+[2m3:12:42 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Desktop_index.html[22m
+[2m3:19:22 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Desktop_index.html[22m
+[2m3:19:25 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Desktop_index.html[22m
+[2m3:19:37 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Desktop_index.html[22m
+[2m3:22:35 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Desktop_index.html[22m
+[2m3:27:58 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m5:28:50 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m5:28:53 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m5:29:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m

@@ -24,11 +24,8 @@ const App = (function () {
   // =========================================
   // QUICK CAPTURES DATA
   // =========================================
-  const defaultQuickCaptures = [
-    { id: 'qc1', label: 'Parent + Concern + Hallway', combo: { who: 'Parent', what: 'Concern', where: 'Hallway' } },
-    { id: 'qc2', label: 'Student + Incident + Safety', combo: { who: 'Student', what: 'Incident', domain: 'Safety' } },
-    { id: 'qc3', label: 'Staff + Request + Schedule', combo: { who: 'Staff', what: 'Request', domain: 'Schedule' } }
-  ];
+  // No default quick captures for real users — start empty
+  const defaultQuickCaptures = [];
 
   let quickCaptures = JSON.parse(JSON.stringify(defaultQuickCaptures));
 
@@ -36,54 +33,24 @@ const App = (function () {
   // DASHBOARD DATA
   // =========================================
   const kpiData = [
-    { id: 'tasks', value: '9', label: 'Tasks', accent: false },
-    { id: 'unresolved', value: '4', label: 'Unresolved', accent: true },
-    { id: 'meetings', value: '5', label: 'Meetings', accent: false },
-    { id: 'attendance', value: '97.1%', label: 'Attendance', accent: false },
-    { id: 'staff-coverage', value: '96%', label: 'Staff Coverage', accent: false }
+    { id: 'tasks', value: '0', label: 'Tasks', accent: false },
+    { id: 'unresolved', value: '0', label: 'Unresolved', accent: false },
+    { id: 'meetings', value: '0', label: 'Meetings', accent: false },
+    { id: 'attendance', value: '0%', label: 'Attendance', accent: false },
+    { id: 'staff-coverage', value: '0%', label: 'Staff Coverage', accent: false }
   ];
 
-  const tasksToday = [
-    { title: 'Review AIG identification data \u2014 Dana Lewis follow-up', due: '10:00 AM', priority: 'Urgent', status: 'open' },
-    { title: 'Regional accreditation evidence binder \u2014 compile artifacts', due: '11:00 AM', priority: 'High', status: 'open' },
-    { title: '2nd grade field trip permission forms \u2014 collect by Friday', due: '2:00 PM', priority: 'High', status: 'open' },
-    { title: 'Budget request: K-2 math manipulatives', due: '3:00 PM', priority: 'Normal', status: 'open' },
-    { title: 'Morning arrival walkthrough \u2014 bus loop', due: '7:30 AM', priority: 'Low', status: 'completed' }
-  ];
+  const tasksToday = [];
 
-  const unresolvedItems = [
-    { title: 'Accreditation evidence binder \u2014 missing 3rd grade artifacts', status: 'In Progress', age: '2h', priority: 'High' },
-    { title: 'IEP review \u2014 2nd grade compliance deadline', status: 'Open', age: '1d', priority: 'High' },
-    { title: 'Technology lab schedule conflict \u2014 specials rotation', status: 'Open', age: '3h', priority: 'Normal' },
-    { title: 'Parent conference request \u2014 Tanya Webb', status: 'Open', age: '1d', priority: 'Normal' }
-  ];
+  const unresolvedItems = [];
 
-  const meetingsToday = [
-    { time: '7:45 AM', title: '3rd Grade Math PLC', location: 'PLC Room', duration: '45 min' },
-    { time: '9:00 AM', title: 'AIG Program Review \u2014 Dana Lewis', location: 'Main Office', duration: '30 min' },
-    { time: '10:30 AM', title: 'Leadership Team Huddle', location: 'Conference Room', duration: '30 min' },
-    { time: '11:45 AM', title: 'Parent Conference \u2014 Room 204', location: 'Room 204', duration: '30 min' },
-    { time: '1:15 PM', title: 'Staff PD Planning Meeting', location: 'Media Center', duration: '45 min' }
-  ];
+  const meetingsToday = [];
 
-  const staffCoverage = [
-    { name: 'Ms. Vega', position: 'ELA, 3rd Grade', status: 'absent', reason: 'Dentist \u2014 sub needed Thursday', sub: 'Ms. Hale (covering)' },
-    { name: 'Mr. Diaz', position: 'General, K', status: 'present' },
-    { name: 'Ms. Cho', position: 'General, 1st Grade', status: 'present' },
-    { name: 'Ms. Nash', position: 'General, 2nd Grade', status: 'present' },
-    { name: 'Mr. Watts', position: 'Math/Science, 3rd Grade', status: 'present' },
-    { name: 'Mr. Quinn', position: 'Math/Science, 4th Grade', status: 'present' },
-    { name: 'Ms. Avery', position: 'ELA/SS, 4th Grade', status: 'present' },
-    { name: 'Dana Lewis', position: 'AP / AIG Coord.', status: 'present' }
-  ];
+  const staffCoverage = [];
 
   const attendanceData = {
-    enrolled: 436, present: 423, absent: 13, tardy: 5,
-    byGrade: [
-      { grade: 'K', pct: 97.8 }, { grade: '1st', pct: 97.2 },
-      { grade: '2nd', pct: 96.5 }, { grade: '3rd', pct: 97.1 },
-      { grade: '4th', pct: 96.0 }
-    ]
+    enrolled: 0, present: 0, absent: 0, tardy: 0,
+    byGrade: []
   };
 
   // Word icon map
@@ -94,6 +61,19 @@ const App = (function () {
     'Safety': '🛡️', 'Academic': '📖', 'Behavior': '🤝', 'Facilities': '🏗️', 'Budget': '💰', 'Schedule': '📅', 'Health': '❤️',
     'Office': '🏢', 'Hallway': '🚶', 'Cafeteria': '🍽️', 'Gym': '🏀', 'Classroom': '✏️', 'Playground': '🎡', 'Parking': '🅿️', 'Library': '📕'
   };
+
+  const wordIconChoices = [
+    { label: 'Pin', icon: '&#128204;' },
+    { label: 'Person', icon: '&#128100;' },
+    { label: 'School', icon: '&#127979;' },
+    { label: 'Alert', icon: '&#9888;' },
+    { label: 'Star', icon: '&#11088;' },
+    { label: 'Check', icon: '&#9989;' },
+    { label: 'Calendar', icon: '&#128197;' },
+    { label: 'Clock', icon: '&#9200;' },
+    { label: 'Note', icon: '&#128221;' },
+    { label: 'Flag', icon: '&#128681;' }
+  ];
 
   // Quick capture icon SVGs
   const qcIcons = [
@@ -111,35 +91,8 @@ const App = (function () {
     isRecording: false,
     recordingInterval: null,
     selectedWords: {},          // { who: 'Parent', what: 'Concern', ... }
-    recentCaptures: [
-      {
-        time: '9:12 AM',
-        text: 'Bus 47 was 12 minutes late again \u2014 email transportation',
-        mode: 'voice',
-        category: 'Facilities',
-        priority: 'Normal',
-        categoryClass: 'facilities',
-        priorityClass: 'normal'
-      },
-      {
-        time: '8:45 AM',
-        text: 'Follow up with Dana on 4th grade reading data',
-        mode: 'tap',
-        category: 'Academic',
-        priority: 'Normal',
-        categoryClass: 'staff',
-        priorityClass: 'normal'
-      },
-      {
-        time: '7:50 AM',
-        text: 'Ceiling tile loose near Room 108 \u2014 submit maintenance request',
-        mode: 'voice',
-        category: 'Facilities',
-        priority: 'High',
-        categoryClass: 'facilities',
-        priorityClass: 'high'
-      }
-    ],
+    // No demo captures — empty for new users
+    recentCaptures: [],
     theme: null,
     boardEditing: false,
     qcEditing: false,
@@ -152,39 +105,68 @@ const App = (function () {
     transcriptionText: '',
     transcriptionTimeout: null,
     pulseTimer: 23,
-    addingWordCat: null   // category currently adding a word to
+    addingWordCat: null,  // category currently adding a word to
+    addWordIcon: wordIconChoices[0].icon
   };
 
+  function emptyState(title, description) {
+    return `
+      <div class="capture-empty">
+        <div class="capture-empty__title">${title}</div>
+        <div class="capture-empty__desc">${description}</div>
+      </div>
+    `;
+  }
+
+  function clearStaticDemoContent() {
+    document.querySelectorAll('.priority-queue .priority-card').forEach((el) => el.remove());
+    document.querySelector('.priority-queue')?.insertAdjacentHTML('beforeend', emptyState('No tasks yet', 'New tasks will appear after you capture or add them.'));
+    document.querySelector('.activity-feed')?.querySelectorAll('.activity-item').forEach((el) => el.remove());
+    document.querySelector('.activity-feed')?.insertAdjacentHTML('beforeend', emptyState('No activity yet', 'Activity will appear after you create captures, tasks, or observations.'));
+    const taskList = document.getElementById('task-list');
+    if (taskList) taskList.innerHTML = emptyState('No tasks yet', 'Use capture or the add task button to create your first task.');
+    const pulseTimeline = document.querySelector('.pulse-timeline');
+    if (pulseTimeline) pulseTimeline.innerHTML = emptyState('No Pulse checkpoints yet', 'Add schedule or capture context to create Pulse prompts.');
+    document.querySelectorAll('.pulse-stat__value').forEach((el) => { el.textContent = '0'; });
+    const pulseCountdownTitle = document.querySelector('.pulse-countdown__title');
+    if (pulseCountdownTitle) pulseCountdownTitle.textContent = 'No Pulse scheduled';
+  }
+
+  function setProfileText(profile) {
+    const name = profile?.name || profile?.email || '';
+    const schoolName = profile?.schoolName || 'Not provided';
+    const role = profile?.role || 'Not provided';
+    const greeting = getTimeGreeting();
+    const greetingEl = document.getElementById('greeting');
+    if (greetingEl) greetingEl.innerHTML = `${greeting}, <span id="user-id"></span>`;
+    const userEl = document.getElementById('user-id');
+    if (userEl) userEl.textContent = name;
+    const greetingSubtext = document.querySelector('.dashboard__greeting p');
+    if (greetingSubtext) greetingSubtext.textContent = `${schoolName} - ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`;
+    const profileRows = [...document.querySelectorAll('#subview-settings .settings-item')];
+    profileRows.forEach((row) => {
+      const label = row.querySelector('.settings-item__label')?.textContent?.trim();
+      const value = row.querySelector('.settings-item__value');
+      if (!value) return;
+      if (label === 'Name') value.textContent = name || 'Not provided';
+      if (label === 'School') value.textContent = schoolName;
+      if (label === 'Role') value.textContent = role;
+    });
+  }
+
+  function getTimeGreeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  function applyUserProfile(profile) {
+    setProfileText(profile);
+  }
+
   // Sample transcription phrases for demo
-  const sampleTranscriptions = [
-    {
-      text: 'Just spoke with Dana about the AIG identification data \u2014 we need to review the 3rd and 4th grade screening results before the deadline next week.',
-      category: 'Academic',
-      categoryClass: 'staff',
-      priority: 'High',
-      priorityClass: 'high',
-      task: 'Review AIG screening data with Dana Lewis',
-      step: 'Pull 3rd and 4th grade benchmark scores from Canvas LMS'
-    },
-    {
-      text: 'Parent Tanya Webb called \u2014 wants to schedule a conference about her son\'s progress in 2nd grade. He\'s been struggling with reading comprehension.',
-      category: 'Student',
-      categoryClass: 'student',
-      priority: 'Normal',
-      priorityClass: 'normal',
-      task: 'Schedule parent conference with Tanya Webb',
-      step: 'Check calendar availability this week and respond'
-    },
-    {
-      text: 'Ms. Vega needs sub coverage Thursday for a dentist appointment \u2014 need to arrange coverage for her 3rd grade ELA classes.',
-      category: 'Staff',
-      categoryClass: 'staff',
-      priority: 'Normal',
-      priorityClass: 'normal',
-      task: 'Arrange sub coverage for Ms. Vega \u2014 Thursday',
-      step: 'Contact substitute coordinator and confirm coverage'
-    }
-  ];
+  const sampleTranscriptions = [];
 
   // =========================================
   // INITIALIZATION
@@ -193,6 +175,7 @@ const App = (function () {
     initTheme();
     updateClock();
     setInterval(updateClock, 30000);
+    clearStaticDemoContent();
     renderRecentCaptures();
     renderWordBoard();
     renderQuickCaptures();
@@ -200,11 +183,11 @@ const App = (function () {
     initHashRouting();
     startPulseTimer();
     initMobObs();
+    window.AdminiPrototype = { applyUserProfile };
   }
 
   function initTheme() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    state.theme = prefersDark ? 'dark' : 'light';
+    state.theme = 'light';
     document.documentElement.setAttribute('data-theme', state.theme);
     updateThemeToggle();
   }
@@ -344,7 +327,12 @@ const App = (function () {
     transText.textContent = '';
     cursor.style.display = 'inline-block';
 
-    // Pick a random sample transcription
+    if (!sampleTranscriptions.length) {
+      transText.textContent = 'Listening...';
+      return;
+    }
+
+    // Use captured input when transcription services are connected.
     const sample = sampleTranscriptions[Math.floor(Math.random() * sampleTranscriptions.length)];
     const words = sample.text.split(' ');
     let wordIndex = 0;
@@ -445,6 +433,16 @@ const App = (function () {
   function renderRecentCaptures() {
     const list = document.getElementById('recent-list-voice');
     if (!list) return;
+    if (!state.recentCaptures || state.recentCaptures.length === 0) {
+      list.innerHTML = `
+        <div class="capture-empty">
+          <div class="capture-empty__title">No captures yet</div>
+          <div class="capture-empty__desc">You haven't created any captures yet. Start with a voice or tap capture to see them here.</div>
+          <div style="margin-top:10px;"><button class="btn btn--primary" onclick="App.switchTab('capture')">Create your first capture</button></div>
+        </div>
+      `;
+      return;
+    }
 
     list.innerHTML = state.recentCaptures.slice(0, 5).map(cap => `
       <div class="capture-card">
@@ -532,8 +530,62 @@ const App = (function () {
       `;
     }).join('');
 
+    const bottomBar = isEditing ? `
+      <div class="word-board__bottom-bar">
+        <div class="word-board__bottom-title">Tap the plus icons to add words to the board.</div>
+        <div class="word-board__bottom-actions">
+          ${wordBoardData.map(section => `<button class="word-board__bottom-chip" onclick="App.showAddWordInput('${section.cat}')">${section.label}</button>`).join('')}
+        </div>
+      </div>
+    ` : '';
+
     board.className = 'word-board' + (isEditing ? ' word-board--editing' : '');
-    board.innerHTML = editBtnHTML + sectionsHTML;
+    board.innerHTML = editBtnHTML + sectionsHTML + bottomBar;
+  }
+
+  function openBoardCustomization() {
+    hideSubView();
+    switchTab('capture');
+    if (!state.boardEditing) {
+      state.boardEditing = true;
+    }
+    state.addingWordCat = null;
+    hideAddWordSheet();
+    renderWordBoard();
+    showToast('Board edit mode active');
+  }
+
+  function downloadExportData() {
+    const rows = [
+      ['Timestamp', 'Mode', 'Text', 'Category', 'Priority']
+    ];
+    state.recentCaptures.forEach(cap => {
+      rows.push([cap.time, cap.mode, cap.text, cap.category, cap.priority]);
+    });
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const filename = 'admini-data-export.csv';
+
+    if (window.showSaveFilePicker) {
+      window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'CSV', accept: { 'text/csv': ['.csv'] } }]
+      }).then(handle => handle.createWritable()).then(writable => writable.write(blob).then(() => writable.close())).then(() => {
+        showToast('Export saved');
+      }).catch(() => {
+        showToast('Export canceled');
+      });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Export downloaded');
+    }
   }
 
   function toggleBoardEdit() {
@@ -574,12 +626,28 @@ const App = (function () {
     const sheet = document.getElementById('add-word-sheet');
     const title = document.getElementById('add-word-title');
     const input = document.getElementById('add-word-input');
+    const iconGrid = document.getElementById('add-word-icon-grid');
 
     title.textContent = `Add word to ${label}`;
     input.value = '';
+    state.addWordIcon = wordIconChoices[0].icon;
+    if (iconGrid) {
+      iconGrid.innerHTML = wordIconChoices.map((choice, index) => `
+        <button class="icon-choice${index === 0 ? ' selected' : ''}" type="button" onclick="App.setAddWordIcon('${choice.icon}', this)" aria-label="${choice.label}">
+          <span>${choice.icon}</span>
+          ${choice.label}
+        </button>
+      `).join('');
+    }
     overlay.classList.add('visible');
     sheet.classList.add('visible');
     setTimeout(() => input.focus(), 350);
+  }
+
+  function setAddWordIcon(icon, button) {
+    state.addWordIcon = icon;
+    document.querySelectorAll('.icon-choice').forEach((choice) => choice.classList.remove('selected'));
+    button?.classList.add('selected');
   }
 
   function hideAddWordSheet() {
@@ -604,6 +672,7 @@ const App = (function () {
     }
 
     section.words.push(word);
+    wordIcons[word] = state.addWordIcon;
     hideAddWordSheet();
     renderWordBoard();
     showToast(`Added: ${word}`);
@@ -648,7 +717,17 @@ const App = (function () {
       `;
     }
 
-    let listHTML = quickCaptures.map((qc, i) => {
+    let listHTML = '';
+    if (quickCaptures.length === 0) {
+      listHTML = `
+        <div class="quick-captures__empty">
+          <div class="quick-captures__empty-title">No Quick Captures yet</div>
+          <div class="quick-captures__empty-desc">Create a capture and tap "Save as Quick Capture" to save shortcuts here.</div>
+          <div style="margin-top:10px;"><button class="btn btn--primary" onclick="App.switchTab('capture')">Go to Capture</button></div>
+        </div>
+      `;
+    } else {
+      listHTML = quickCaptures.map((qc, i) => {
       const icon = qcIcons[i % qcIcons.length];
       const deleteBtn = isEditing ? `<button class="qc-delete-btn" onclick="event.stopPropagation(); App.removeQuickCapture('${qc.id}')" aria-label="Remove shortcut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>` : '';
       return `
@@ -659,7 +738,7 @@ const App = (function () {
         </button>
       `;
     }).join('');
-
+    }
     // Add "Save as Quick Capture" button in edit mode
     const addBtnHTML = isEditing ? `
       <button class="quick-capture-btn quick-capture-btn--add" onclick="App.saveAsQuickCapture()">
@@ -926,6 +1005,10 @@ const App = (function () {
     switch (kpiId) {
       case 'tasks':
         titleText = 'Today\'s Tasks';
+        if (!tasksToday.length) {
+          contentHTML = emptyState('No tasks yet', 'Tasks will appear after you capture or add them.');
+          break;
+        }
         contentHTML = tasksToday.map(t => `
           <div class="kpi-detail-item">
             <div class="kpi-detail-item__row">
@@ -949,6 +1032,10 @@ const App = (function () {
 
       case 'unresolved':
         titleText = 'Unresolved Items';
+        if (!unresolvedItems.length) {
+          contentHTML = emptyState('No unresolved items', 'Open items will appear here after you create tasks.');
+          break;
+        }
         contentHTML = unresolvedItems.map(item => `
           <div class="kpi-detail-item">
             <div class="kpi-detail-item__row">
@@ -968,6 +1055,10 @@ const App = (function () {
 
       case 'meetings':
         titleText = 'Today\'s Meetings';
+        if (!meetingsToday.length) {
+          contentHTML = emptyState('No meetings yet', 'Connected calendars or manual entries will appear here.');
+          break;
+        }
         contentHTML = meetingsToday.map(m => `
           <div class="kpi-detail-item kpi-detail-item--meeting">
             <div class="kpi-detail-item__time-block">${m.time}</div>
@@ -1009,7 +1100,7 @@ const App = (function () {
           </div>
           <div class="kpi-detail-section-title">By Grade</div>
           <div class="kpi-detail-grades">
-            ${ad.byGrade.map(g => `
+            ${ad.byGrade.length ? ad.byGrade.map(g => `
               <div class="kpi-detail-grade">
                 <div class="kpi-detail-grade__label">${g.grade}</div>
                 <div class="kpi-detail-grade__bar-wrap">
@@ -1017,7 +1108,7 @@ const App = (function () {
                 </div>
                 <div class="kpi-detail-grade__pct">${g.pct}%</div>
               </div>
-            `).join('')}
+            `).join('') : '<div class="capture-empty__desc">No attendance data connected yet.</div>'}
           </div>
         `;
         break;
@@ -1026,6 +1117,10 @@ const App = (function () {
         titleText = 'Staff Coverage';
         const absentStaff = staffCoverage.filter(s => s.status === 'absent');
         const presentStaff = staffCoverage.filter(s => s.status === 'present');
+        if (!staffCoverage.length) {
+          contentHTML = emptyState('No staff coverage data', 'Connected roster or attendance systems will populate this view.');
+          break;
+        }
         contentHTML = `
           <div class="kpi-detail-summary">
             <div class="kpi-detail-summary__row">
@@ -1637,13 +1732,7 @@ const App = (function () {
   // =========================================
   // OBSERVATIONS
   // =========================================
-  const mobObsTeacherRoster = {
-    'K': { 'General': ['Ms. Lawson', 'Mr. Diaz', 'Ms. Chen'] },
-    '1st': { 'General': ['Ms. Cho', 'Ms. Perry', 'Ms. Tate'] },
-    '2nd': { 'General': ['Ms. Nash', 'Mr. Lyons', 'Ms. Ford'] },
-    '3rd': { 'Math': ['Ms. Drake', 'Mr. Watts'], 'ELA': ['Ms. Vega', 'Ms. Hale'], 'Science': ['Ms. Drake', 'Mr. Watts'], 'Social Studies': ['Ms. Vega', 'Ms. Hale'] },
-    '4th': { 'Math': ['Mr. Quinn', 'Ms. Pratt'], 'ELA': ['Ms. Avery', 'Mr. Kemp'], 'Science': ['Mr. Quinn', 'Ms. Pratt'], 'Social Studies': ['Ms. Avery', 'Mr. Kemp'] }
-  };
+  const mobObsTeacherRoster = {};
 
   let mobObs = {
     phase: 'setup',
@@ -1652,11 +1741,7 @@ const App = (function () {
     notes: [], activeTags: [], noteType: 'observation'
   };
 
-  const mobObsPast = [
-    { teacher: 'Ms. Cho', grade: '2nd', subject: 'Math', period: 'P2', date: 'Mar 6', duration: '18m', initials: 'RC' },
-    { teacher: 'Mr. Watts', grade: '3rd', subject: 'ELA', period: 'P1', date: 'Mar 5', duration: '22m', initials: 'MW' },
-    { teacher: 'Ms. Lawson', grade: 'K', subject: 'General', period: 'AM', date: 'Mar 4', duration: '15m', initials: 'ML' },
-  ];
+  const mobObsPast = [];
 
   function initMobObs() {
     // Period pills
@@ -1674,15 +1759,23 @@ const App = (function () {
     // Grade pills
     const gp = document.getElementById('mobObsGradePills');
     if (gp) {
-      gp.innerHTML = Object.keys(mobObsTeacherRoster).map(g =>
+      const grades = Object.keys(mobObsTeacherRoster);
+      if (!grades.length) {
+        gp.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);">No roster connected yet. Connect a roster system or enter observation details after setup.</div>';
+      } else {
+      gp.innerHTML = grades.map(g =>
         `<button class="mob-obs-pill" data-grade="${g}">${g}</button>`
       ).join('');
       gp.querySelectorAll('.mob-obs-pill').forEach(b => b.addEventListener('click', () => mobObsSelectGrade(b.dataset.grade)));
+      }
     }
 
     // Past list
     const pl = document.getElementById('mobObsPastList');
     if (pl) {
+      if (!mobObsPast.length) {
+        pl.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);padding:var(--space-4);">No observations yet.</div>';
+      } else {
       pl.innerHTML = mobObsPast.map(o => `
         <div class="mob-obs-past-item">
           <div class="mob-obs-past-avatar">${o.initials}</div>
@@ -1693,6 +1786,7 @@ const App = (function () {
           <div class="mob-obs-past-dur">${o.duration}</div>
         </div>
       `).join('');
+      }
     }
 
     // Tag toggles
@@ -1895,6 +1989,7 @@ const App = (function () {
     toggleBoardEdit,
     removeWordFromBoard,
     showAddWordInput,
+    setAddWordIcon,
     hideAddWordSheet,
     confirmAddWord,
     resetWordBoard,
@@ -1923,6 +2018,8 @@ const App = (function () {
     showNotification,
     initMobObs,
     mobObsSelectGrade,
+    openBoardCustomization,
+    downloadExportData,
     mobObsSelectSubject,
     mobObsStart,
     mobObsAddNote,
@@ -1934,3 +2031,4 @@ const App = (function () {
   };
 
 })();
+

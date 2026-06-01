@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -28,15 +28,15 @@
         <div class="status-bar__logo">Admin<span>I</span></div>
       </div>
       <div class="status-bar__meta">
-        <span class="status-bar__date" id="current-date">Sat, Feb 28</span>
-        <span class="status-bar__time" id="current-time">9:53 AM</span>
+        <span class="status-bar__date" id="current-date"></span>
+        <span class="status-bar__time" id="current-time"></span>
       </div>
     </header>
 
     <!-- ===== PULSE NOTIFICATION BANNER ===== -->
     <div class="pulse-banner" id="pulse-banner">
       <span class="pulse-banner__dot"></span>
-      <span>Observation notes — 2nd grade Math?</span>
+      <span>No Pulse scheduled yet</span>
       <div class="pulse-banner__actions">
         <button class="pulse-banner__btn pulse-banner__btn--primary" onclick="App.goToCapture('voice')">Voice</button>
         <button class="pulse-banner__btn pulse-banner__btn--secondary" onclick="App.goToCapture('tap')">Tap</button>
@@ -164,8 +164,8 @@
         <div class="dashboard-view">
 
           <div class="dashboard__greeting">
-            <h1>Good morning, Mr. Mitchell</h1>
-            <p>Westfield Academy — Tuesday, March 10</p>
+            <h1 id="greeting">Good morning, <span id="user-id"></span></h1>
+            <p>Complete setup to personalize your workspace.</p>
           </div>
 
           <!-- KPI Cards (dynamically rendered) -->
@@ -180,9 +180,9 @@
             </div>
             <div class="pulse-countdown__text">
               <div class="pulse-countdown__label">Next Pulse</div>
-              <div class="pulse-countdown__title">Leadership team huddle</div>
+              <div class="pulse-countdown__title">No Pulse scheduled</div>
             </div>
-            <div class="pulse-countdown__time" id="pulse-timer">23m</div>
+            <div class="pulse-countdown__time" id="pulse-timer">0m</div>
           </div>
 
           <!-- Priority Queue -->
@@ -192,59 +192,7 @@
               <button class="section-title__action">View all</button>
             </div>
 
-            <div class="priority-card" id="priority-1">
-              <div class="priority-card__content">
-                <div class="priority-dot priority-dot--urgent"></div>
-                <div>
-                  <div class="priority-card__title">Review AIG identification data — Dana Lewis follow-up</div>
-                  <div class="priority-card__meta">
-                    <span class="pill pill--student">Academic</span>
-                    <span class="pill pill--high">High</span>
-                    <span class="priority-card__due">10:00 AM</span>
-                    <span class="priority-card__source">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
-                      Canvas LMS
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="priority-card" id="priority-2">
-              <div class="priority-card__content">
-                <div class="priority-dot priority-dot--high"></div>
-                <div>
-                  <div class="priority-card__title">Regional accreditation evidence binder — compile artifacts</div>
-                  <div class="priority-card__meta">
-                    <span class="pill pill--compliance">Compliance</span>
-                    <span class="pill pill--high">High</span>
-                    <span class="priority-card__due">11:00 AM</span>
-                    <span class="priority-card__source">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
-                      Email
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="priority-card" id="priority-3">
-              <div class="priority-card__content">
-                <div class="priority-dot priority-dot--high"></div>
-                <div>
-                  <div class="priority-card__title">2nd grade field trip permission forms — collect by Friday</div>
-                  <div class="priority-card__meta">
-                    <span class="pill pill--student">Student</span>
-                    <span class="pill pill--normal">Normal</span>
-                    <span class="priority-card__due">2:00 PM</span>
-                    <span class="priority-card__source">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                      Tap
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="capture-empty"><div class="capture-empty__title">No tasks yet</div><div class="capture-empty__desc">New tasks will appear after you capture or add them.</div></div>
           </div>
 
           <!-- Recent Activity -->
@@ -253,55 +201,7 @@
               <h2>Recent Activity</h2>
             </div>
 
-            <div class="activity-item">
-              <div class="activity-item__icon activity-item__icon--capture">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-              </div>
-              <div class="activity-item__content">
-                <div class="activity-item__text">Voice capture: Bus 47 late again — email transportation</div>
-                <div class="activity-item__time">9:12 AM</div>
-              </div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-item__icon activity-item__icon--task">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div class="activity-item__content">
-                <div class="activity-item__text">Completed: Morning arrival walkthrough</div>
-                <div class="activity-item__time">7:30 AM</div>
-              </div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-item__icon activity-item__icon--capture">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              </div>
-              <div class="activity-item__content">
-                <div class="activity-item__text">Tap capture: Teacher + Request + Schedule</div>
-                <div class="activity-item__time">8:45 AM</div>
-              </div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-item__icon activity-item__icon--pulse">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              </div>
-              <div class="activity-item__content">
-                <div class="activity-item__text">Pulse responded: 3rd grade Math PLC takeaways</div>
-                <div class="activity-item__time">8:30 AM</div>
-              </div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-item__icon activity-item__icon--capture">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-              </div>
-              <div class="activity-item__content">
-                <div class="activity-item__text">Voice capture: Follow up with Dana on 4th grade reading data</div>
-                <div class="activity-item__time">7:50 AM</div>
-              </div>
-            </div>
+            <div class="capture-empty"><div class="capture-empty__title">No activity yet</div><div class="capture-empty__desc">Activity will appear after you create captures, tasks, or observations.</div></div>
           </div>
 
         </div>
@@ -321,127 +221,7 @@
           </div>
 
           <div class="task-list" id="task-list">
-            <!-- Task 1 -->
-            <div class="task-item" data-filter-tags="all today">
-              <div class="task-item__row">
-                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <div class="task-item__body">
-                  <div class="task-item__title">Review AIG identification data — Dana Lewis</div>
-                  <div class="task-item__footer">
-                    <span class="pill pill--student">Academic</span>
-                    <span class="priority-dot priority-dot--urgent"></span>
-                    <span class="task-item__due">Due: 10:00 AM</span>
-                    <svg class="task-item__source-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Task 2 -->
-            <div class="task-item" data-filter-tags="all today">
-              <div class="task-item__row">
-                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <div class="task-item__body">
-                  <div class="task-item__title">Accreditation evidence binder — compile by Friday</div>
-                  <div class="task-item__footer">
-                    <span class="pill pill--compliance">Compliance</span>
-                    <span class="priority-dot priority-dot--high"></span>
-                    <span class="task-item__due">Due: 11:00 AM</span>
-                    <svg class="task-item__source-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 5-10 7L2 5"/></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Task 3 -->
-            <div class="task-item" data-filter-tags="all today">
-              <div class="task-item__row">
-                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <div class="task-item__body">
-                  <div class="task-item__title">2nd grade field trip permission forms</div>
-                  <div class="task-item__footer">
-                    <span class="pill pill--student">Student</span>
-                    <span class="priority-dot priority-dot--high"></span>
-                    <span class="task-item__due">Due: 2:00 PM</span>
-                    <svg class="task-item__source-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Task 4 -->
-            <div class="task-item" data-filter-tags="all today delegated">
-              <div class="task-item__row">
-                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <div class="task-item__body">
-                  <div class="task-item__title">Budget request: K-2 math manipulatives</div>
-                  <div class="task-item__footer">
-                    <span class="pill pill--budget">Budget</span>
-                    <span class="priority-dot priority-dot--normal"></span>
-                    <span class="task-item__due">Due: 3:00 PM</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Task 5 -->
-            <div class="task-item" data-filter-tags="all week">
-              <div class="task-item__row">
-                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <div class="task-item__body">
-                  <div class="task-item__title">Parent conference — Tanya Webb's son progress</div>
-                  <div class="task-item__footer">
-                    <span class="pill pill--student">Student</span>
-                    <span class="priority-dot priority-dot--normal"></span>
-                    <span class="task-item__due">Due: Wed, Mar 11</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Task 6 -->
-            <div class="task-item" data-filter-tags="all week">
-              <div class="task-item__row">
-                <button class="task-item__checkbox" onclick="App.toggleTask(this)" aria-label="Mark complete">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <div class="task-item__body">
-                  <div class="task-item__title">Staff PD planning — data-driven instruction workshop</div>
-                  <div class="task-item__footer">
-                    <span class="pill pill--staff">Staff</span>
-                    <span class="priority-dot priority-dot--normal"></span>
-                    <span class="task-item__due">Due: Fri, Mar 13</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Task 7 (completed) -->
-            <div class="task-item completed" data-filter-tags="all today">
-              <div class="task-item__row">
-                <button class="task-item__checkbox checked" onclick="App.toggleTask(this)" aria-label="Mark incomplete">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                </button>
-                <div class="task-item__body">
-                  <div class="task-item__title">Morning arrival walkthrough — bus loop</div>
-                  <div class="task-item__footer">
-                    <span class="pill pill--student">Student</span>
-                    <span class="priority-dot priority-dot--low"></span>
-                    <span class="task-item__due">Completed 7:30 AM</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="capture-empty"><div class="capture-empty__title">No tasks yet</div><div class="capture-empty__desc">Use capture or the add task button to create your first task.</div></div>
           </div>
         </div>
 
@@ -460,123 +240,28 @@
           <!-- Pulse Stats -->
           <div class="pulse-stats">
             <div class="pulse-stat">
-              <div class="pulse-stat__value">5/7</div>
+              <div class="pulse-stat__value">0</div>
               <div class="pulse-stat__label">Responded</div>
             </div>
             <div class="pulse-stat">
-              <div class="pulse-stat__value">1</div>
+              <div class="pulse-stat__value">0</div>
               <div class="pulse-stat__label">Skipped</div>
             </div>
             <div class="pulse-stat">
-              <div class="pulse-stat__value">1</div>
+              <div class="pulse-stat__value">0</div>
               <div class="pulse-stat__label">Upcoming</div>
             </div>
           </div>
 
           <!-- Pulse Timeline -->
           <div class="pulse-timeline">
-            <div class="pulse-item">
-              <div class="pulse-item__dot pulse-item__dot--responded">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div class="pulse-item__content">
-                <div class="pulse-item__time">7:30 AM</div>
-                <div class="pulse-item__prompt">Morning arrival smooth? Bus loop concerns?</div>
-                <div class="pulse-item__status">Responded with voice capture</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-item__dot pulse-item__dot--responded">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div class="pulse-item__content">
-                <div class="pulse-item__time">8:00 AM</div>
-                <div class="pulse-item__prompt">3rd grade Math PLC takeaways?</div>
-                <div class="pulse-item__status">Responded with 2 captures</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-item__dot pulse-item__dot--responded">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div class="pulse-item__content">
-                <div class="pulse-item__time">8:30 AM</div>
-                <div class="pulse-item__prompt">Walkthrough follow-up notes? 1st grade ELA block?</div>
-                <div class="pulse-item__status">Responded with tap capture</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-item__dot pulse-item__dot--responded">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div class="pulse-item__content">
-                <div class="pulse-item__time">9:00 AM</div>
-                <div class="pulse-item__prompt">AIG screening update from Dana?</div>
-                <div class="pulse-item__status">Responded with voice capture</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-item__dot pulse-item__dot--skipped">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
-              </div>
-              <div class="pulse-item__content">
-                <div class="pulse-item__time">9:30 AM</div>
-                <div class="pulse-item__prompt">Specials rotation running on time?</div>
-                <div class="pulse-item__status">Skipped</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-item__dot pulse-item__dot--responded">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div class="pulse-item__content">
-                <div class="pulse-item__time">9:45 AM</div>
-                <div class="pulse-item__prompt">Observation notes — 2nd grade Math (Ms. Cho)?</div>
-                <div class="pulse-item__status">Responded with voice capture</div>
-              </div>
-            </div>
-
-            <!-- Active Pulse -->
-            <div class="pulse-item pulse-item--active">
-              <div class="pulse-item__dot pulse-item__dot--active">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              </div>
-              <div class="pulse-item__content">
-                <div class="pulse-item__time">10:15 AM</div>
-                <div class="pulse-item__prompt">Leadership team huddle — key decisions?</div>
-                <div class="pulse-item__status" style="color: var(--color-primary); font-weight: 600;">Active now</div>
-                <div class="pulse-item__actions">
-                  <button class="btn btn--primary" onclick="App.goToCapture('voice')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-                    Voice
-                  </button>
-                  <button class="btn btn--secondary" onclick="App.goToCapture('tap')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                    Tap
-                  </button>
-                  <button class="btn btn--ghost">Skip</button>
-                </div>
-              </div>
-            </div>
+            <div class="capture-empty"><div class="capture-empty__title">No Pulse checkpoints yet</div><div class="capture-empty__desc">Add schedule or capture context to create Pulse prompts.</div></div>
           </div>
 
           <!-- Day Structure -->
           <div class="day-structure">
             <div class="day-structure__title">Your Day Structure</div>
-            <div class="day-map">
-              <div class="day-map__block day-map__block--done" title="7:30 AM">7:30</div>
-              <div class="day-map__block day-map__block--done" title="8:00 AM">8:00</div>
-              <div class="day-map__block day-map__block--done" title="8:30 AM">8:30</div>
-              <div class="day-map__block day-map__block--done" title="9:00 AM">9:00</div>
-              <div class="day-map__block day-map__block--done" title="9:30 AM" style="opacity:0.5">9:30</div>
-              <div class="day-map__block day-map__block--done" title="9:45 AM">9:45</div>
-              <div class="day-map__block day-map__block--active" title="10:15 AM">10:15</div>
-            </div>
+            <div class="day-map"></div>
           </div>
 
           <!-- Pulse Notifications Toggle -->
@@ -652,6 +337,15 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             </button>
+            <button class="menu-item" onclick="parent.postMessage({type:'request-signout'}, '*')">
+              <div class="menu-item__icon menu-item__icon--signout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/><path d="M6 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1"/></svg>
+              </div>
+              <div class="menu-item__text">Sign out</div>
+              <div class="menu-item__chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -668,15 +362,15 @@
             <div class="settings-section__title">Profile</div>
             <div class="settings-item">
               <span class="settings-item__label">Name</span>
-              <span class="settings-item__value">James Mitchell</span>
+              <span class="settings-item__value">Not provided</span>
             </div>
             <div class="settings-item">
               <span class="settings-item__label">School</span>
-              <span class="settings-item__value">Westfield Academy</span>
+              <span class="settings-item__value">Not provided</span>
             </div>
             <div class="settings-item">
               <span class="settings-item__label">Role</span>
-              <span class="settings-item__value">ES Principal</span>
+              <span class="settings-item__value">Not provided</span>
             </div>
           </div>
 
@@ -714,7 +408,7 @@
 
           <div class="settings-section">
             <div class="settings-section__title">Capture</div>
-            <div class="settings-item">
+            <div class="settings-item" onclick="App.openBoardCustomization()" role="button" tabindex="0">
               <span class="settings-item__label">Board Customization</span>
               <div class="menu-item__chevron">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
@@ -728,15 +422,43 @@
 
           <div class="settings-section">
             <div class="settings-section__title">Privacy</div>
-            <div class="settings-item">
-              <span class="settings-item__label">Data Retention</span>
-              <span class="settings-item__value">90 days</span>
-            </div>
-            <div class="settings-item">
+            <div class="settings-item" onclick="App.showSubView('export-data')" role="button" tabindex="0">
               <span class="settings-item__label">Export My Data</span>
               <div class="menu-item__chevron">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">Data Retention</span>
+              <span class="settings-item__value">90 days</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section__title">Account</div>
+            <div class="settings-item">
+              <span class="settings-item__label">Sign out</span>
+              <button class="btn btn--ghost" onclick="parent.postMessage({type: 'request-signout'}, '*')">Sign out</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Data Sub-View -->
+        <div class="sub-view" id="subview-export-data">
+          <div class="sub-view__header">
+            <button class="sub-view__back" aria-label="Go back" onclick="App.hideSubView()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 class="sub-view__title">Export My Data</h2>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section__title">Download a copy</div>
+            <div class="settings-item" style="flex-direction: column; align-items: flex-start; gap: var(--space-1);">
+              <span class="settings-item__label">Export activity and captures</span>
+              <span class="settings-item__value">Download your data as a CSV file for spreadsheets or records.</span>
+            </div>
+            <div class="settings-item">
+              <button class="btn btn--primary" onclick="App.downloadExportData()">Export as CSV</button>
             </div>
           </div>
         </div>
@@ -794,7 +516,7 @@
             <div class="menu-list">
               <button class="menu-item"><div class="menu-item__text">Getting Started Guide</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
               <button class="menu-item"><div class="menu-item__text">Using Voice Capture</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
-              <button class="menu-item"><div class="menu-item__text">Customizing Your Board</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
+              <button class="menu-item" onclick="App.openBoardCustomization()"><div class="menu-item__text">Customizing Your Board</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
               <button class="menu-item"><div class="menu-item__text">Understanding Pulses</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
               <button class="menu-item"><div class="menu-item__text">Contact Support</div><div class="menu-item__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></button>
             </div>
@@ -1150,6 +872,7 @@
         <div style="margin-bottom: var(--space-3);">
           <input type="text" class="quick-detail__input" placeholder="Type a new word..." style="width:100%" id="add-word-input" autocomplete="off">
         </div>
+        <div class="icon-choice-grid" id="add-word-icon-grid" aria-label="Choose icon"></div>
         <button class="btn btn--primary btn--large" onclick="App.confirmAddWord()">Add Word</button>
       </div>
     </div>
@@ -1166,9 +889,125 @@
       </div>
     </div>
 
+    <div class="integration-reminder hidden" id="integration-reminder" role="button" tabindex="0" aria-live="polite" aria-hidden="true">
+      <span class="integration-reminder__text" id="integration-reminder-text"></span>
+      <button type="button" class="integration-reminder__close" id="integration-reminder-close" aria-label="Close reminder">×</button>
+    </div>
   </div>
 
   <script src="../shared/admini-privacy-layer.js"></script>
   <script src="./Mobile_app.js"></script>
+  <script>
+    (function(){
+      function getTimeGreeting(){
+        const h = new Date().getHours();
+        if (h < 12) return 'Good morning';
+        if (h < 18) return 'Good afternoon';
+        return 'Good evening';
+      }
+      function setGreetingName(name){
+        const gid = document.getElementById('user-id');
+        const gh = document.getElementById('greeting');
+        if (gid) gid.textContent = name || '';
+        if (gh) gh.firstChild && (gh.firstChild.nodeValue = getTimeGreeting() + ', ');
+      }
+      setGreetingName('');
+      // listen for parent message
+      const reminderEl = document.getElementById('integration-reminder');
+      const reminderTextEl = document.getElementById('integration-reminder-text');
+      const reminderCloseBtn = document.getElementById('integration-reminder-close');
+      let reminderShown = sessionStorage.getItem('integrationReminderShown') === 'true';
+
+      function normalizeSystemName(provider) {
+        const names = {
+          'infinite_campus': 'Infinite Campus',
+          'schoology': 'Schoology',
+          'google_workspace': 'Google Workspace',
+          'microsoft_365': 'Microsoft 365',
+          'apple_school_manager': 'Apple School Manager'
+        };
+        return names[provider] || provider;
+      }
+      function formatSystemsLabel(systems) {
+        if (!systems || !systems.length) return '';
+        const normalized = systems.map(normalizeSystemName);
+        if (normalized.length === 1) return normalized[0];
+        if (normalized.length === 2) return `${normalized[0]} and ${normalized[1]}`;
+        return `${normalized.slice(0, -1).join(', ')} and ${normalized[normalized.length - 1]}`;
+      }
+
+      function showIntegrationReminder(systems) {
+        if (!systems || !systems.length || !reminderEl || !reminderTextEl) {
+          reminderEl?.classList.add('hidden');
+          reminderEl?.setAttribute('aria-hidden', 'true');
+          return;
+        }
+        if (reminderShown) return;
+        reminderTextEl.textContent = `Open Settings > Integrations for ${formatSystemsLabel(systems)}`;
+        positionIntegrationReminder();
+        reminderEl.classList.remove('hidden');
+        reminderEl.setAttribute('aria-hidden', 'false');
+        reminderShown = true;
+        sessionStorage.setItem('integrationReminderShown', 'true');
+      }
+
+      function positionIntegrationReminder() {
+        if (!reminderEl) return;
+        const anchor = document.querySelector('.tab-bar__item[data-tab="more"]');
+        const shell = document.querySelector('.app-shell');
+        if (!anchor || !shell) return;
+        const anchorRect = anchor.getBoundingClientRect();
+        const shellRect = shell.getBoundingClientRect();
+        reminderEl.style.setProperty('--integration-reminder-left', `${anchorRect.left - shellRect.left + anchorRect.width / 2}px`);
+        reminderEl.style.setProperty('--integration-reminder-bottom', `${shellRect.bottom - anchorRect.top + 12}px`);
+      }
+
+      if (reminderCloseBtn) {
+        reminderCloseBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          reminderEl?.classList.add('hidden');
+          reminderEl?.setAttribute('aria-hidden', 'true');
+        });
+      }
+
+      window.addEventListener('resize', positionIntegrationReminder);
+
+      if (reminderEl) {
+        const openReminderTarget = () => {
+          reminderEl.classList.add('hidden');
+          reminderEl.setAttribute('aria-hidden', 'true');
+          window.App?.switchTab?.('more');
+          window.App?.showSubView?.('integrations');
+        };
+        reminderEl.addEventListener('click', openReminderTarget);
+        reminderEl.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openReminderTarget();
+          }
+        });
+      }
+
+      window.addEventListener('message', (ev) => {
+        try {
+          const data = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+          if (data && data.type === 'user') {
+            setGreetingName(data.name);
+            window.AdminiPrototype?.applyUserProfile?.(data);
+            showIntegrationReminder(data.systems);
+          }
+        } catch (e) {
+          if (ev.data && ev.data.type === 'user') {
+            setGreetingName(ev.data.name);
+            window.AdminiPrototype?.applyUserProfile?.(ev.data);
+            showIntegrationReminder(ev.data.systems);
+          }
+        }
+      }, false);
+    })();
+  </script>
 </body>
 </html>
+
+
+

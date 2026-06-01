@@ -1,6 +1,6 @@
 import { integrationCatalog } from '@admini/integrations';
-import { createIndexedDbStorage, nowIso, type IntegrationCatalogItem, type IntegrationProvider } from '@admini/shared';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { clearAdminiBrowserState, createIndexedDbStorage, nowIso, type IntegrationCatalogItem, type IntegrationProvider } from '@admini/shared';
+import { useEffect, useMemo, useState, useRef, type FormEvent } from 'react';
 import {
   getCurrentUser,
   isSupabaseConfigured,
@@ -22,6 +22,14 @@ type IntegrationRecord = {
 };
 
 const integrationStorage = createIndexedDbStorage('integrations');
+const authStorage = createIndexedDbStorage('auth');
+
+type OnboardingAnswers = {
+  role: string;
+  focus: string;
+  systems: string[];
+};
+
 let hoverAudioContext: AudioContext | null = null;
 const defaultReturningUserTagline = "we'll take it from here";
 const returningUserTaglines = [
@@ -35,10 +43,24 @@ export function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [showIntegrations, setShowIntegrations] = useState(false);
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
+  const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingAnswers | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    getCurrentUser()
+    const params = new URLSearchParams(window.location.search);
+    const shouldReset = params.get('reset') === '1' || params.get('resetUserData') === '1';
+    const resetState = shouldReset
+      ? clearAdminiBrowserState().then(() => {
+          params.delete('reset');
+          params.delete('resetUserData');
+          const nextSearch = params.toString();
+          window.history.replaceState({}, '', `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`);
+        })
+      : Promise.resolve();
+
+    resetState
+      .then(() => getCurrentUser())
       .then((currentUser) => {
         if (mounted) setUser(currentUser);
       })
@@ -51,14 +73,73 @@ export function App() {
     };
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    if (!user) {
+      setOnboardingComplete(null);
+      setOnboardingAnswers(null);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    const completeKey = `onboarding_complete_${user.id}`;
+    const answersKey = `onboarding_answers_${user.id}`;
+
+    authStorage.getItem(completeKey)
+      .then((value) => {
+        if (mounted) setOnboardingComplete(value === 'true');
+      })
+      .catch(() => {
+        if (mounted) setOnboardingComplete(false);
+      });
+
+    authStorage.getItem(answersKey)
+      .then((value) => {
+        if (!mounted) return;
+        if (value) {
+          try {
+            setOnboardingAnswers(JSON.parse(value) as OnboardingAnswers);
+          } catch {
+            setOnboardingAnswers(null);
+          }
+        } else {
+          setOnboardingAnswers(null);
+        }
+      })
+      .catch(() => {
+        if (mounted) setOnboardingAnswers(null);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  async function completeOnboarding(answers: OnboardingAnswers) {
+    if (!user) return;
+    const completeKey = `onboarding_complete_${user.id}`;
+    const answersKey = `onboarding_answers_${user.id}`;
+    await authStorage.setItem(completeKey, 'true');
+    await authStorage.setItem(answersKey, JSON.stringify(answers));
+    setOnboardingAnswers(answers);
+    setOnboardingComplete(true);
+  }
+
   if (loadingUser) return <div className="auth-page auth-page-home"><LogoLockup /><p>Checking session...</p></div>;
   if (!user) return <AuthScreen onAuthenticated={setUser} />;
+  if (onboardingComplete === null) return <div className="auth-page auth-page-home"><LogoLockup /><p>Preparing your workspace...</p></div>;
 
   return (
     <ProtectedWorkspace
       appName="Admini"
       prototypePath={`${import.meta.env.BASE_URL}prototype/Mobile_index.html`}
       user={user}
+      userName={user.displayName ?? user.email?.split('@')[0] ?? 'Admin'}
+      schoolName={user.schoolName ?? ''}
+      onboardingComplete={onboardingComplete}
+      onboardingAnswers={onboardingAnswers}
+      onCompleteOnboarding={completeOnboarding}
       showIntegrations={showIntegrations}
       onToggleIntegrations={() => setShowIntegrations((current) => !current)}
       onSignOut={() => {
@@ -195,7 +276,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
         <span className="mode-moon" aria-hidden="true" />
       </button>
       <ProductCredit />
-      {breathing ? <BreathingOverlay /> : null}
+      {breathing ? <BreathingOverlay onClose={() => setBreathing(false)} /> : null}
 
       {view === 'home' ? (
         <section className="home-panel" aria-label="Admini welcome">
@@ -353,9 +434,155 @@ function AuthMessages({ error, status }: { error: string; status: string }) {
   );
 }
 
-function BreathingOverlay() {
+function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string; onComplete: (answers: OnboardingAnswers) => Promise<void>; }) {
+  const [step, setStep] = useState(0);
+  const [role, setRole] = useState('School leader');
+  const [focus, setFocus] = useState('Walkthrough notes and follow-up');
+  const [systems, setSystems] = useState<string[]>([]);
+  const [applying, setApplying] = useState(false);
+
+  const roleOptions = [
+    'School leader',
+    'Operations leader',
+    'Instructional coach',
+    'Campus support',
+    'District staff'
+  ];
+
+  const focusOptions = [
+    'Walkthrough notes and follow-up',
+    'Task and issue management',
+    'Compliance checks and walkthrough records',
+    'Staff and attendance coordination'
+  ];
+
+  const systemOptions = integrationCatalog.map((item) => ({
+    provider: item.provider,
+    label: item.name,
+    description: item.description
+  }));
+
+  function toggleSystem(provider: string) {
+    setSystems((current) => current.includes(provider)
+      ? current.filter((item) => item !== provider)
+      : [...current, provider]);
+  }
+
+  function chooseRole(option: string) {
+    setRole(option);
+    setStep(1);
+  }
+
+  function chooseFocus(option: string) {
+    setFocus(option);
+    setStep(2);
+  }
+
+  async function handleApply() {
+    setApplying(true);
+    try {
+      await onComplete({ role, focus, systems });
+    } finally {
+      setApplying(false);
+    }
+  }
+
+  return (
+    <section className="onboarding-page">
+      <header className="onboarding-header">
+        <h1>{getTimeGreeting()}, <span id="user-id">{userName}</span></h1>
+        <p>This guided tour keeps your workspace clean and recommends only the settings and integrations that make sense for your role. You can change everything later.</p>
+      </header>
+
+      <div className="onboarding-step">
+        <p className="step-counter">Step {step + 1} of 3</p>
+        {step === 0 && (
+          <div>
+            <h2>Who are you?</h2>
+            <p>Pick the role that best matches how you want to use Admini.</p>
+            <div className="option-grid">
+              {roleOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={option === role ? 'option selected' : 'option'}
+                  onClick={() => chooseRole(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div>
+            <h2>What do you want to do first?</h2>
+            <p>This helps Admini suggest the right defaults and keep the first view clutter-free.</p>
+            <div className="option-grid">
+              {focusOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={option === focus ? 'option selected' : 'option'}
+                  onClick={() => chooseFocus(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div>
+            <h2>Which systems do you plan to connect?</h2>
+            <p>Choose only the systems you want to sync now. Admini will leave everything else disconnected.</p>
+            <div className="system-grid">
+              {systemOptions.map((option) => (
+                <button
+                  key={option.provider}
+                  type="button"
+                  className={systems.includes(option.provider) ? 'system-card selected' : 'system-card'}
+                  onClick={() => toggleSystem(option.provider)}
+                >
+                  <strong>{option.label}</strong>
+                  <p>{option.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="wizard-actions">
+        <button
+          type="button"
+          className="wizard-back-arrow"
+          aria-label="Go back"
+          disabled={step === 0}
+          onClick={() => setStep((current) => Math.max(0, current - 1))}
+        >
+          &larr;
+        </button>
+        <button type="button" className="bubble-submit" disabled={applying} onClick={handleApply}>
+          {applying ? 'Applying...' : 'Take me to AdminI'}
+        </button>
+      </div>
+    </section>
+  );
+}
+function getTimeGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function BreathingOverlay({ onClose }: { onClose: () => void }) {
   return (
     <section className="breathing-overlay" aria-live="polite">
+      <button className="breathing-overlay__close" type="button" onClick={onClose} aria-label="Close breathing exercise">×</button>
       <div className="breath-orb" />
       <p>inhale</p>
       <span>exhale</span>
@@ -441,6 +668,11 @@ function ProtectedWorkspace({
   appName,
   prototypePath,
   user,
+  userName,
+  schoolName,
+  onboardingComplete,
+  onboardingAnswers,
+  onCompleteOnboarding,
   showIntegrations,
   onToggleIntegrations,
   onSignOut
@@ -448,21 +680,70 @@ function ProtectedWorkspace({
   appName: string;
   prototypePath: string;
   user: AuthUser;
+  userName: string;
+  schoolName: string;
+  onboardingComplete: boolean;
+  onboardingAnswers: OnboardingAnswers | null;
+  onCompleteOnboarding: (answers: OnboardingAnswers) => Promise<void>;
   showIntegrations: boolean;
   onToggleIntegrations: () => void;
   onSignOut: () => void;
 }) {
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const userPayload = useMemo(() => ({
+    type: 'user',
+    name: userName,
+    email: user.email ?? '',
+    schoolName,
+    role: onboardingAnswers?.role ?? '',
+    focus: onboardingAnswers?.focus ?? '',
+    systems: onboardingAnswers?.systems ?? []
+  }), [user.email, userName, schoolName, onboardingAnswers]);
+
+  useEffect(() => {
+    function onMessage(ev: MessageEvent) {
+      const data = ev.data && (typeof ev.data === 'string' ? (() => { try { return JSON.parse(ev.data); } catch { return ev.data; } })() : ev.data);
+      if (!data) return;
+      if (data.type === 'request-signout') {
+        onSignOut();
+      }
+      if (data.type === 'open-integrations') {
+        onToggleIntegrations();
+      }
+    }
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [onSignOut, onToggleIntegrations]);
+
+  useEffect(() => {
+    frameRef.current?.contentWindow?.postMessage(userPayload, '*');
+  }, [userPayload]);
+
+  if (!onboardingComplete) {
+    return (
+      <main className="protected-app onboarding-app">
+        <div className="workspace-shell">
+          <iframe ref={frameRef} onLoad={() => frameRef.current?.contentWindow?.postMessage(userPayload, '*')} className="prototype-frame workspace-background" src={prototypePath} title={`${appName} workspace`} />
+          <div className="workspace-backdrop" />
+        </div>
+        <div className="onboarding-modal">
+          <FirstTimeOnboardingWizard userName={userName} onComplete={onCompleteOnboarding} />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="protected-app">
-      <header className="session-bar">
-        <strong>{appName}</strong>
-        <div>
-          <span>{user.email}</span>
-          <button type="button" onClick={onToggleIntegrations}>{showIntegrations ? 'Workspace' : 'Integrations'}</button>
-          <button type="button" onClick={onSignOut}>Sign out</button>
-        </div>
-      </header>
-      {showIntegrations ? <IntegrationsPanel /> : <iframe className="prototype-frame" src={prototypePath} title={`${appName} workspace`} />}
+      {showIntegrations ? <IntegrationsPanel /> : (
+        <iframe
+          ref={frameRef}
+          onLoad={() => frameRef.current?.contentWindow?.postMessage(userPayload, '*')}
+          className="prototype-frame"
+          src={prototypePath}
+          title={`${appName} workspace`}
+        />
+      )}
     </main>
   );
 }

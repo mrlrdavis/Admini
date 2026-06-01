@@ -62,10 +62,10 @@
       </nav>
 
       <div class="sidebar-footer">
-        <div class="user-avatar">JM</div>
+        <div class="user-avatar">AD</div>
         <div class="user-info">
-          <div class="user-name">James Mitchell</div>
-          <div class="user-school">Westfield Academy</div>
+          <div class="user-name"></div>
+          <div class="user-school">Not provided</div>
         </div>
       </div>
     </aside>
@@ -78,7 +78,7 @@
         </button>
         <div>
           <div class="header-title" id="headerTitle">School at a Glance</div>
-          <div class="header-subtitle" id="headerSubtitle">Tuesday, Mar 10, 2026 &middot; 9:42 AM</div>
+          <div class="header-subtitle" id="headerSubtitle"></div>
         </div>
       </div>
       <div class="header-right">
@@ -198,10 +198,6 @@
             <div class="card-header">
               <div class="card-title">Tap Capture</div>
               <div style="display:flex;gap:var(--space-2);">
-                <button class="btn btn-ghost btn-sm" id="resetBoardBtn" title="Reset to defaults">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                  Reset
-                </button>
                 <button class="btn btn-ghost btn-sm" id="editBoardBtn">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Edit Board
@@ -368,8 +364,8 @@
               <!-- Header with teacher info and timer -->
               <div class="obs-live-header">
                 <div class="obs-live-info">
-                  <div class="obs-live-teacher" id="obsLiveTeacher">Ms. Drake</div>
-                  <div class="obs-live-meta" id="obsLiveMeta">Grade 3 &middot; Math &middot; Room 204</div>
+                  <div class="obs-live-teacher" id="obsLiveTeacher"></div>
+                  <div class="obs-live-meta" id="obsLiveMeta"></div>
                 </div>
                 <div class="obs-live-timer">
                   <div class="obs-timer-dot"></div>
@@ -537,28 +533,28 @@
           <div class="setting-row">
             <div>
               <div class="setting-label">Display Name</div>
-              <div class="setting-desc">James Mitchell</div>
+              <div class="setting-desc">Not provided</div>
             </div>
             <button class="btn btn-ghost btn-sm">Edit</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">School</div>
-              <div class="setting-desc">Westfield Academy</div>
+              <div class="setting-desc">Not provided</div>
             </div>
             <button class="btn btn-ghost btn-sm">Edit</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">Email</div>
-              <div class="setting-desc">j.mitchell@westfieldacademy.org</div>
+              <div class="setting-desc">Not provided</div>
             </div>
             <button class="btn btn-ghost btn-sm">Edit</button>
           </div>
           <div class="setting-row">
             <div>
               <div class="setting-label">Role</div>
-              <div class="setting-desc">Principal</div>
+              <div class="setting-desc">Not provided</div>
             </div>
             <button class="btn btn-ghost btn-sm">Edit</button>
           </div>
@@ -586,6 +582,17 @@
               <div class="setting-desc">Adjust based on calendar gaps</div>
             </div>
             <div class="toggle-switch on" data-toggle="smart-timing"></div>
+          </div>
+        </div>
+
+        <div class="settings-section" id="settings-integrations">
+          <div class="settings-section-title">Connected Systems</div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Integrations</div>
+              <div class="setting-desc">Connect the systems you selected during setup</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="window.AdminiPrototype?.openIntegrationsPanel?.()">Setup</button>
           </div>
         </div>
 
@@ -663,6 +670,17 @@
         </div>
 
         <div class="settings-section">
+          <div class="settings-section-title">Account</div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Sign out</div>
+              <div class="setting-desc">Sign out of Admini on this device</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="parent.postMessage({type: 'request-signout'}, '*')">Sign out</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
           <div class="settings-section-title">Appearance</div>
           <div class="setting-row">
             <div>
@@ -678,9 +696,116 @@
       </section>
 
     </main>
+    <div class="integration-reminder hidden" id="integration-reminder" role="button" tabindex="0" aria-live="polite" aria-hidden="true">
+      <span class="integration-reminder__text" id="integration-reminder-text"></span>
+      <button type="button" class="integration-reminder__close" id="integration-reminder-close" aria-label="Close reminder">×</button>
+    </div>
   </div>
 
   <script src="../shared/admini-privacy-layer.js"></script>
   <script src="./Desktop_app.js"></script>
+  <script>
+    (function(){
+      function updateHeaderTime() {
+        const el = document.getElementById('headerSubtitle');
+        if (!el) return;
+        const now = new Date();
+        el.textContent = `${now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })} · ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+      }
+      function sendName(name) {
+        window.AdminiPrototype?.applyUserProfile?.({ name });
+      }
+      function normalizeSystemName(provider) {
+        const names = {
+          'infinite_campus': 'Infinite Campus',
+          'schoology': 'Schoology',
+          'google_workspace': 'Google Workspace',
+          'microsoft_365': 'Microsoft 365',
+          'apple_school_manager': 'Apple School Manager'
+        };
+        return names[provider] || provider;
+      }
+      function formatSystemsLabel(systems) {
+        if (!systems || !systems.length) return '';
+        const normalized = systems.map(normalizeSystemName);
+        if (normalized.length === 1) return normalized[0];
+        if (normalized.length === 2) return `${normalized[0]} and ${normalized[1]}`;
+        return `${normalized.slice(0, -1).join(', ')} and ${normalized[normalized.length - 1]}`;
+      }
+
+      const reminderEl = document.getElementById('integration-reminder');
+      const reminderTextEl = document.getElementById('integration-reminder-text');
+      const reminderCloseBtn = document.getElementById('integration-reminder-close');
+      let reminderShown = sessionStorage.getItem('integrationReminderShown') === 'true';
+
+      function positionIntegrationReminder() {
+        if (!reminderEl) return;
+        const anchor = document.querySelector('.nav-item[data-view="settings"]');
+        const app = document.getElementById('app');
+        if (!anchor || !app) return;
+        const anchorRect = anchor.getBoundingClientRect();
+        const appRect = app.getBoundingClientRect();
+        reminderEl.style.setProperty('--integration-reminder-left', `${anchorRect.right - appRect.left + 12}px`);
+        reminderEl.style.setProperty('--integration-reminder-top', `${anchorRect.top - appRect.top + anchorRect.height / 2}px`);
+      }
+
+      function showIntegrationReminder(systems) {
+        if (!systems || !systems.length || !reminderEl || !reminderTextEl) {
+          reminderEl?.classList.add('hidden');
+          reminderEl?.setAttribute('aria-hidden', 'true');
+          return;
+        }
+        if (reminderShown) return;
+        reminderTextEl.textContent = `Open Settings setup for ${formatSystemsLabel(systems)}`;
+        positionIntegrationReminder();
+        reminderEl.classList.remove('hidden');
+        reminderEl.setAttribute('aria-hidden', 'false');
+        reminderShown = true;
+        sessionStorage.setItem('integrationReminderShown', 'true');
+      }
+
+      if (reminderCloseBtn) {
+        reminderCloseBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          reminderEl?.classList.add('hidden');
+          reminderEl?.setAttribute('aria-hidden', 'true');
+        });
+      }
+
+      window.addEventListener('resize', positionIntegrationReminder);
+
+      if (reminderEl) {
+        const openReminderTarget = () => {
+          reminderEl.classList.add('hidden');
+          reminderEl.setAttribute('aria-hidden', 'true');
+          window.AdminiPrototype?.openIntegrationsSetup?.();
+        };
+        reminderEl.addEventListener('click', openReminderTarget);
+        reminderEl.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openReminderTarget();
+          }
+        });
+      }
+
+      window.addEventListener('message', (ev) => {
+        try {
+          const data = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+          if (data && data.type === 'user') {
+            window.AdminiPrototype?.applyUserProfile?.(data);
+            showIntegrationReminder(data.systems);
+          }
+        } catch (e) {
+          if (ev.data && ev.data.type === 'user') {
+            window.AdminiPrototype?.applyUserProfile?.(ev.data);
+            showIntegrationReminder(ev.data.systems);
+          }
+        }
+      }, false);
+      updateHeaderTime();
+      setInterval(updateHeaderTime, 30000);
+    })();
+  </script>
 </body>
 </html>

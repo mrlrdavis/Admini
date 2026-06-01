@@ -23,13 +23,22 @@ const supabase = supabaseUrl && supabaseKey
     })
   : null;
 
-export type AuthUser = Pick<User, 'id' | 'email'>;
+export type AuthUser = Pick<User, 'id' | 'email'> & {
+  displayName?: string | null;
+  schoolName?: string | null;
+};
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getUser();
   if (error) return null;
-  return data.user ? { id: data.user.id, email: data.user.email } : null;
+  if (!data.user) return null;
+  return {
+    id: data.user.id,
+    email: data.user.email,
+    displayName: data.user.user_metadata?.display_name ?? null,
+    schoolName: data.user.user_metadata?.school_name ?? null
+  };
 }
 
 export async function getSupabaseAccessToken(): Promise<string | null> {
@@ -45,7 +54,12 @@ export async function signInWithPassword(input: { email: string; password: strin
   });
   if (error) throw error;
   if (!data.user) throw new Error('Sign in did not return a user.');
-  return { id: data.user.id, email: data.user.email };
+  return {
+    id: data.user.id,
+    email: data.user.email,
+    displayName: data.user.user_metadata?.display_name ?? null,
+    schoolName: data.user.user_metadata?.school_name ?? null
+  };
 }
 
 export async function sendPasswordReset(email: string): Promise<void> {
@@ -76,7 +90,12 @@ export async function signUpWithPassword(input: {
   if (error) throw error;
 
   return {
-    user: data.user ? { id: data.user.id, email: data.user.email } : null,
+    user: data.user ? {
+      id: data.user.id,
+      email: data.user.email,
+      displayName: data.user.user_metadata?.display_name ?? input.displayName,
+      schoolName: data.user.user_metadata?.school_name ?? input.schoolName
+    } : null,
     needsEmailConfirmation: Boolean(data.user && !data.session)
   };
 }

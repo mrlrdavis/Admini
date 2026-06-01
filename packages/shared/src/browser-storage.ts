@@ -1,8 +1,10 @@
 type StoreName = 'auth' | 'integrations';
+const browserStateDbName = 'admini_browser_state';
+const syncQueueDbName = 'admini_sync_queue';
 
 function openAdminiDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('admini_browser_state', 1);
+    const request = indexedDB.open(browserStateDbName, 1);
 
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -52,4 +54,26 @@ export function createIndexedDbStorage(storeName: StoreName) {
       db.close();
     }
   };
+}
+
+function deleteIndexedDb(name: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => resolve();
+  });
+}
+
+export async function clearAdminiBrowserState(): Promise<void> {
+  await Promise.all([
+    deleteIndexedDb(browserStateDbName),
+    deleteIndexedDb(syncQueueDbName)
+  ]);
+
+  sessionStorage.removeItem('integrationReminderShown');
+
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith('sb-') || key.startsWith('admini-'))
+    .forEach((key) => localStorage.removeItem(key));
 }

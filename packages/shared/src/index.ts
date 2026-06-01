@@ -151,4 +151,4 @@ export async function listSyncQueueItems(): Promise<SyncQueueItem[]> {
   return items;
 }
 
-export { createIndexedDbStorage } from './browser-storage';
+export { clearAdminiBrowserState, createIndexedDbStorage } from './browser-storage';
