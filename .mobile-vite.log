@@ -87,3 +87,34 @@ Re-optimizing dependencies because vite config has changed
 [2m5:28:50 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
 [2m5:28:53 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
 [2m5:29:10 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m5:43:03 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m5:43:03 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m5:54:25 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m5:55:01 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Mobile_index.html[22m
+[2m5:57:36 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Mobile_index.html[22m
+[2m5:58:38 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Mobile_index.html[22m
+[2m7:05:03 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m7:06:26 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m7:11:39 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m8:20:10 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m8:20:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m8:29:14 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m8:29:28 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m8:30:57 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m8:31:09 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m8:31:29 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Mobile_index.html[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Mobile_index.html[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.tsx[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/supabase.ts[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mC:/Users/thatg/Documents/GitHub/Admini/packages/privacy/src/index.ts[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mC:/Users/thatg/Documents/GitHub/Admini/packages/integrations/src/index.ts[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mC:/Users/thatg/Documents/GitHub/Admini/packages/shared/src/browser-storage.ts[22m
+[2m1:17:21 PM[22m [36m[1m[vite][22m[39m server restarted.
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5174[22m/[39m
+[2m1:17:35 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m1:17:35 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mpublic/prototype/Mobile_index.html[22m
