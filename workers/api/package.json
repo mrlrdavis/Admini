@@ -1,0 +1,21 @@
+{
+  "name": "@admini/api-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@admini/integrations": "0.1.0",
+    "@admini/privacy": "0.1.0",
+    "@admini/shared": "0.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240806.0",
+    "typescript": "^5.5.4",
+    "wrangler": "^3.70.0"
+  }
+}
