@@ -7,8 +7,6 @@ import {
   isSupabaseConfigured,
   listTasks,
   signInWithOAuthProvider,
-  signInWithPhone,
-  verifyPhoneOtp,
   signInWithPassword,
   sendPasswordReset,
   signOut,
@@ -174,11 +172,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
   const [view, setView] = useState<AuthView>('home');
   const [now, setNow] = useState(() => new Date());
   const [breathing, setBreathing] = useState(false);
-  const [emailSignIn, setEmailSignIn] = useState(false);
-  const [phoneSignIn, setPhoneSignIn] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -207,7 +201,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
     if (view === 'sign-in') setReturningTagline(getRandomTagline());
   }, [view]);
 
-  async function handleOAuth(provider: 'google' | 'linkedin') {
+  async function handleOAuth(provider: 'google') {
     setError('');
     if (!isSupabaseConfigured) {
       setError('Single sign-on is almost ready. Restart Admini so the new connection settings can load.');
@@ -276,7 +270,6 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
       if (result.needsEmailConfirmation) {
         setStatus('You are in. Check your email to confirm the account.');
         setView('sign-in');
-        setEmailSignIn(true);
       } else if (result.user) {
         onAuthenticated(result.user);
       }
@@ -319,31 +312,13 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
         <section className="split-auth" aria-label="Sign in">
           <AuthStoryPanel greeting={timeContext.greeting} tagline={returningTagline} onBack={() => setView('home')} />
           <div className="auth-conversation">
-            <div className="provider-boxes" aria-label="Sign in options">
-              <button type="button" aria-label="Sign in with Google" title="Google" onClick={() => handleOAuth('google')} onPointerEnter={playBubbleSound}><ProviderIcon provider="google" /></button>
-              <button type="button" aria-label="Sign in with phone" title="Phone" onClick={() => setPhoneSignIn(true)} onPointerEnter={playBubbleSound}><ProviderIcon provider="phone" /></button>
-              <button type="button" aria-label="Sign in with LinkedIn" title="LinkedIn" onClick={() => handleOAuth('linkedin')} onPointerEnter={playBubbleSound}><ProviderIcon provider="linkedin" /></button>
-              <button type="button" aria-label="Sign in with email" title="Email" onClick={() => setEmailSignIn(true)} onPointerEnter={playBubbleSound}><ProviderIcon provider="email" /></button>
-            </div>
-            {emailSignIn ? (
-              <form className="minimal-form" onSubmit={handleSignIn}>
-                <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" /></label>
-                <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" /></label>
+            <form className="minimal-form" onSubmit={handleSignIn}>
+                <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></label>
+                <label>Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" /></label>
                 <button className="forgot-link" type="button" onClick={handlePasswordReset}>Forgot your password?</button>
                 <button className="bubble-submit" disabled={submitting} type="submit" onPointerEnter={playBubbleSound}>{submitting ? 'Opening...' : 'Open Admini'}</button>
               </form>
-            ) : null}
-            
-            {phoneSignIn && !emailSignIn ? (
-              <form className="minimal-form" onSubmit={async (e) => { e.preventDefault(); setError(''); if (!otpSent) { try { await signInWithPhone(phoneNumber); setOtpSent(true); setStatus('Code sent! Check your phone.'); } catch (err) { setError(err instanceof Error ? err.message : 'Failed to send code'); } } else { setSubmitting(true); try { onAuthenticated(await verifyPhoneOtp(phoneNumber, otpCode)); } catch (err) { setError(err instanceof Error ? err.message : 'Verification failed'); } finally { setSubmitting(false); } }}}>
-                {!otpSent ? (
-                  <label>Phone number<input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required placeholder="+1 (555) 000-0000" autoComplete="tel" /></label>
-                ) : (
-                  <label>Verification code<input type="text" inputMode="numeric" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} required placeholder="123456" autoComplete="one-time-code" maxLength={6} /></label>
-                )}
-                <button className="bubble-submit" disabled={submitting} type="submit" onPointerEnter={playBubbleSound}>{submitting ? 'Verifying...' : otpSent ? 'Verify Code' : 'Send Code'}</button>
-              </form>
-            ) : null}
+              <button type="button" className="google-link" onClick={() => handleOAuth('google')} onPointerEnter={playBubbleSound}>or sign in with Google</button>
             <AuthMessages error={error} status={status} />
           </div>
         </section>

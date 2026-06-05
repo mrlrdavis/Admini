@@ -228,7 +228,7 @@ export async function signUpWithPassword(input: {
   };
 }
 
-export async function signInWithOAuthProvider(provider: Extract<Provider, 'google' | 'linkedin'>): Promise<void> {
+export async function signInWithOAuthProvider(provider: Extract<Provider, 'google'>): Promise<void> {
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -243,24 +243,7 @@ export async function signInWithOAuthProvider(provider: Extract<Provider, 'googl
 
 
 
-export async function signInWithPhone(phone: string): Promise<void> {
-  if (!supabase) throw new Error('Supabase is not configured for this environment.');
-  const { error } = await supabase.auth.signInWithOtp({ phone });
-  if (error) throw error;
-}
 
-export async function verifyPhoneOtp(phone: string, token: string): Promise<AuthUser> {
-  if (!supabase) throw new Error('Supabase is not configured for this environment.');
-  const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
-  if (error) throw error;
-  if (!data.user) throw new Error('Verification did not return a user.');
-  return {
-    id: data.user.id,
-    email: data.user.email,
-    displayName: data.user.user_metadata?.display_name ?? null,
-    schoolName: data.user.user_metadata?.school_name ?? null
-  };
-}
 export async function signOut(): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.auth.signOut();

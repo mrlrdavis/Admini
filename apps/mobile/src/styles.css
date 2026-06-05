@@ -932,3 +932,21 @@ body,
   min-height: 36px;
   padding: 0 16px;
 }
+
+.google-link {
+  background: transparent;
+  border: 0;
+  color: var(--sage-deep);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 160ms ease;
+}
+
+.google-link:hover {
+  color: #111111;
+}
