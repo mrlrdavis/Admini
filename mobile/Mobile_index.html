@@ -17,6 +17,71 @@
   <link rel="stylesheet" href="./Mobilestyle.css">
 </head>
 <body>
+  <!-- Standalone Onboarding Overlay -->
+  <div id="standalone-onboarding" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#f8f8f5 0%,#f1f1eb 54%,#e6e5dc 100%);overflow-y:auto;">
+    <div style="max-width:400px;margin:0 auto;padding:48px 20px;">
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="font-family:'Arial Rounded MT Bold',Nunito,sans-serif;font-size:48px;font-weight:900;letter-spacing:-0.065em;line-height:0.84;color:#111;">AdminI.</div>
+        <p style="color:#54745c;font-weight:700;margin-top:10px;font-size:14px;">cognitive load support for school administrators</p>
+      </div>
+      <div id="onboard-step-0" class="onboard-step">
+        <h2 style="margin:0 0 8px;font-size:20px;">Welcome! Let's set up.</h2>
+        <label style="display:grid;gap:6px;font-size:13px;font-weight:600;color:#6b6580;margin-top:16px;">Your name
+          <input type="text" id="onboard-name" placeholder="Name" style="padding:10px;border:2px solid #d4d1de;border-radius:8px;font-size:16px;outline:none;">
+        </label>
+        <label style="display:grid;gap:6px;font-size:13px;font-weight:600;color:#6b6580;margin-top:12px;">School
+          <input type="text" id="onboard-school" placeholder="School name" style="padding:10px;border:2px solid #d4d1de;border-radius:8px;font-size:16px;outline:none;">
+        </label>
+        <button onclick="advanceOnboarding(1)" style="margin-top:20px;width:100%;padding:12px;background:#54745c;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:15px;cursor:pointer;">Next</button>
+      </div>
+      <div id="onboard-step-1" class="onboard-step" style="display:none;">
+        <h2 style="margin:0 0 8px;font-size:20px;">Your role</h2>
+        <div id="onboard-roles" style="display:grid;gap:8px;margin-top:12px;"></div>
+        <button onclick="completeOnboarding()" style="margin-top:20px;width:100%;padding:12px;background:#54745c;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:15px;cursor:pointer;">Open AdminI</button>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    const ONBOARD_KEY = 'admini_standalone_onboarded';
+    const overlay = document.getElementById('standalone-onboarding');
+    if (!overlay) return;
+    if (localStorage.getItem(ONBOARD_KEY) === 'true') { overlay.remove(); return; }
+    overlay.style.display = 'block';
+
+    const roles = ['School leader','Operations leader','Instructional coach','Campus support','District staff'];
+    let selectedRole = '';
+
+    const rolesDiv = document.getElementById('onboard-roles');
+    rolesDiv.innerHTML = roles.map(r => '<button type="button" onclick="selectRole(this,\'' + r + '\')" style="width:100%;padding:12px 16px;border:2px solid #d4d1de;border-radius:12px;background:#fff;text-align:left;font-size:14px;font-weight:500;cursor:pointer;">' + r + '</button>').join('');
+
+    window.selectRole = function(btn, role) {
+      selectedRole = role;
+      rolesDiv.querySelectorAll('button').forEach(b => { b.style.borderColor = '#d4d1de'; b.style.background = '#fff'; });
+      btn.style.borderColor = '#54745c'; btn.style.background = 'rgba(84,116,92,0.08)';
+    };
+    window.advanceOnboarding = function(step) {
+      document.querySelectorAll('.onboard-step').forEach(s => s.style.display = 'none');
+      document.getElementById('onboard-step-' + step).style.display = 'block';
+    };
+    window.completeOnboarding = function() {
+      const name = document.getElementById('onboard-name').value || 'Admin';
+      const school = document.getElementById('onboard-school').value || 'My School';
+      localStorage.setItem(ONBOARD_KEY, 'true');
+      localStorage.setItem('admini_demo_name', name);
+      localStorage.setItem('admini_demo_school', school);
+      localStorage.setItem('admini_demo_role', selectedRole || 'School leader');
+      overlay.style.display = 'none';
+      overlay.remove();
+      // Apply name to the UI
+      const greeting = document.getElementById('user-id');
+      if (greeting) greeting.textContent = name;
+      const subtext = document.querySelector('.dashboard__greeting p');
+      if (subtext) subtext.textContent = school + ' - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    };
+  })();
+  </script>
+
   <!-- Skip to content -->
   <a href="#main-content" class="sr-only">Skip to content</a>
 
@@ -895,7 +960,7 @@
     </div>
   </div>
 
-  <script src="../shared/admini-privacy-layer.js"></script>
+  <script src="./admini-privacy-layer.js"></script>
   <script src="./Mobile_app.js"></script>
   <script>
     (function(){
@@ -1002,7 +1067,19 @@
           }
         }
       }, false);
-    })();
+    
+      // Standalone fallback: if not in iframe, auto-apply demo profile
+      if (window === window.parent) {
+        setTimeout(() => {
+          const greeting = document.getElementById('user-id');
+          if (greeting) greeting.textContent = (localStorage.getItem('admini_demo_name') || 'Admin');
+          const greetingEl = document.getElementById('greeting');
+          if (greetingEl) greetingEl.innerHTML = getTimeGreeting() + ', <span id="user-id">Demo Admin</span>';
+          const subtext = document.querySelector('.dashboard__greeting p');
+          if (subtext) subtext.textContent = 'Demo School - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        }, 300);
+      }
+})();
   </script>
 </body>
 </html>
