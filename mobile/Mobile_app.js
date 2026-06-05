@@ -626,7 +626,7 @@ const App = (function () {
 
     const bottomBar = isEditing ? `
       <div class="word-board__bottom-bar">
-        <div class="word-board__bottom-title">Tap the plus icons to add words to the board.</div>
+        <div class="word-board__bottom-title">Quick edits: add or remove words. Use the desktop app for full board customization.</div>
         <div class="word-board__bottom-actions">
           ${wordBoardData.map(section => `<button class="word-board__bottom-chip" onclick="App.showAddWordInput('${section.cat}')">${section.label}</button>`).join('')}
         </div>
@@ -646,7 +646,7 @@ const App = (function () {
     state.addingWordCat = null;
     hideAddWordSheet();
     renderWordBoard();
-    showToast('Board edit mode active');
+    showToast('Editing board \u2014 use desktop for full customization');
   }
 
   function downloadExportData() {
