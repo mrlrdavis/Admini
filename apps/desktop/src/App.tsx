@@ -201,7 +201,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
     if (view === 'sign-in') setReturningTagline(getRandomTagline());
   }, [view]);
 
-  async function handleOAuth(provider: 'google' | 'apple' | 'azure') {
+  async function handleOAuth(provider: 'google' | 'linkedin' | 'azure') {
     setError('');
     if (!isSupabaseConfigured) {
       setError('Single sign-on is almost ready. Restart Admini so the new connection settings can load.');
@@ -316,7 +316,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
             <div className="provider-boxes" aria-label="Sign in options">
               <button type="button" aria-label="Sign in with Google" title="Google" onClick={() => handleOAuth('google')} onPointerEnter={playBubbleSound}><ProviderIcon provider="google" /></button>
               <button type="button" aria-label="Sign in with Microsoft" title="Microsoft" onClick={() => handleOAuth('azure')} onPointerEnter={playBubbleSound}><ProviderIcon provider="outlook" /></button>
-              <button type="button" aria-label="Sign in with Apple" title="Apple" onClick={() => handleOAuth('apple')} onPointerEnter={playBubbleSound}><ProviderIcon provider="apple" /></button>
+              <button type="button" aria-label="Sign in with LinkedIn" title="LinkedIn" onClick={() => handleOAuth('linkedin')} onPointerEnter={playBubbleSound}><ProviderIcon provider="linkedin" /></button>
               <button type="button" aria-label="Sign in with email" title="Email" onClick={() => setEmailSignIn(true)} onPointerEnter={playBubbleSound}><ProviderIcon provider="email" /></button>
             </div>
             {emailSignIn ? (
@@ -605,7 +605,7 @@ function BreathingOverlay({ onClose }: { onClose: () => void }) {
   );
 }
 
-function ProviderIcon({ provider }: { provider: 'google' | 'apple' | 'outlook' | 'email' }) {
+function ProviderIcon({ provider }: { provider: 'google' | 'linkedin' | 'outlook' | 'email' }) {
   if (provider === 'google') {
     return (
       <svg aria-hidden="true" className="provider-icon" viewBox="0 0 24 24">
@@ -616,10 +616,10 @@ function ProviderIcon({ provider }: { provider: 'google' | 'apple' | 'outlook' |
       </svg>
     );
   }
-  if (provider === 'apple') {
+  if (provider === 'linkedin') {
     return (
       <svg aria-hidden="true" className="provider-icon" viewBox="0 0 24 24">
-        <path fill="currentColor" d="M16.36 12.65c-.03-2.74 2.24-4.05 2.34-4.12-1.28-1.87-3.26-2.13-3.96-2.16-1.69-.17-3.29.99-4.14.99-.86 0-2.18-.96-3.59-.93-1.85.03-3.55 1.08-4.5 2.73-1.92 3.33-.49 8.27 1.38 10.97.91 1.32 2 2.8 3.43 2.75 1.37-.05 1.89-.89 3.55-.89 1.65 0 2.12.89 3.58.86 1.48-.03 2.42-1.35 3.32-2.68 1.05-1.53 1.48-3.02 1.5-3.1-.03-.01-2.88-1.1-2.91-4.42ZM13.64 4.59c.75-.91 1.26-2.17 1.12-3.43-1.08.04-2.39.72-3.16 1.63-.69.8-1.3 2.09-1.13 3.32 1.2.09 2.43-.61 3.17-1.52Z" />
+        <path fill="#0A66C2" d="M4.98 3.5a2.48 2.48 0 1 1 0 4.96 2.48 2.48 0 0 1 0-4.96ZM3 9.68h3.95V21H3V9.68Zm6.13 0h3.79v1.55h.05c.53-.99 1.82-2.03 3.74-2.03 4 0 4.74 2.63 4.74 6.06V21h-3.95v-5.09c0-1.21-.02-2.77-1.69-2.77-1.69 0-1.95 1.32-1.95 2.69V21H9.13V9.68Z" />
       </svg>
     );
   }

@@ -71,13 +71,14 @@ export default {
           data: {
             connections: [
               mockConnection('schoology'),
-              mockConnection('infinite_campus')
+              mockConnection('infinite_campus'),
+              mockConnection('google_classroom')
             ]
           }
         });
       }
 
-      const authorizeMatch = url.pathname.match(/^\/api\/integrations\/(schoology|infinite_campus|google_workspace|apple_school_manager|microsoft_365)\/authorize$/);
+      const authorizeMatch = url.pathname.match(/^\/api\/integrations\/(schoology|infinite_campus|google_classroom)\/authorize$/);
       if (request.method === 'GET' && authorizeMatch) {
         const provider = authorizeMatch[1] as IntegrationProvider;
         const mode = url.searchParams.get('mode') || 'oauth';
@@ -85,7 +86,7 @@ export default {
         return Response.redirect(`${returnTo}${returnTo.includes('?') ? '&' : '?'}integration=${provider}&mode=${mode}&status=connected`, 302);
       }
 
-      const integrationMatch = url.pathname.match(/^\/api\/integrations\/(schoology|infinite_campus|google_workspace|apple_school_manager|microsoft_365)\/([a-z_]+)$/);
+      const integrationMatch = url.pathname.match(/^\/api\/integrations\/(schoology|infinite_campus|google_classroom)\/([a-z_]+)$/);
       if (request.method === 'POST' && integrationMatch) {
         const provider = integrationMatch[1] as IntegrationProvider;
         const tool = integrationMatch[2];

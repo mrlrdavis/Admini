@@ -20,30 +20,12 @@ export const integrationCatalog: IntegrationCatalogItem[] = [
     persistenceTargets: ['indexeddb', 'supabase', 'worker_secret']
   },
   {
-    provider: 'google_workspace',
-    name: 'Google Workspace',
-    category: 'productivity',
-    description: 'Calendar, Drive, and email context for admin workflows.',
+    provider: 'google_classroom',
+    name: 'Google Classroom',
+    category: 'lms',
+    description: 'Classes, coursework, announcements, and classroom learning context.',
     authModes: ['oauth', 'sso'],
-    scopes: ['calendar:read', 'drive.metadata:read'],
-    persistenceTargets: ['indexeddb', 'supabase', 'worker_secret']
-  },
-  {
-    provider: 'microsoft_365',
-    name: 'Microsoft 365 / Outlook',
-    category: 'productivity',
-    description: 'Outlook calendar, mail metadata, Teams, and Microsoft identity.',
-    authModes: ['oauth', 'sso'],
-    scopes: ['openid', 'email', 'profile', 'offline_access'],
-    persistenceTargets: ['indexeddb', 'supabase', 'worker_secret']
-  },
-  {
-    provider: 'apple_school_manager',
-    name: 'Apple School Manager',
-    category: 'identity',
-    description: 'Apple identity and school roster handoff readiness.',
-    authModes: ['sso', 'manual_import'],
-    scopes: ['identity:read', 'roster:read'],
+    scopes: ['classroom.courses.readonly', 'classroom.rosters.readonly', 'classroom.coursework.students.readonly'],
     persistenceTargets: ['indexeddb', 'supabase', 'worker_secret']
   }
 ];

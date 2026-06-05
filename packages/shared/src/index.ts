@@ -1,4 +1,4 @@
-export type AdminiRole = 'admin' | 'staff' | 'viewer';
+export type AdminiRole = 'admin' | 'principal' | 'teacher' | 'staff';
 export type AppSurface = 'desktop' | 'mobile';
 export type RetentionKind = 'captures' | 'tasks' | 'observations';
 
@@ -59,9 +59,7 @@ export type CaptureTaskLink = {
 export type IntegrationProvider =
   | 'schoology'
   | 'infinite_campus'
-  | 'google_workspace'
-  | 'apple_school_manager'
-  | 'microsoft_365';
+  | 'google_classroom';
 export type IntegrationStatus = 'not_configured' | 'mock' | 'connected' | 'error';
 
 export type IntegrationConnection = {

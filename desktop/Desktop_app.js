@@ -191,9 +191,7 @@
   const integrationNameMap = {
     schoology: 'Schoology',
     infinite_campus: 'Infinite Campus',
-    google_workspace: 'Google Workspace',
-    microsoft_365: 'Microsoft 365 / Outlook',
-    apple_school_manager: 'Apple School Manager'
+    google_classroom: 'Google Classroom'
   };
 
   function setText(selector, value) {

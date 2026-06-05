@@ -41,7 +41,7 @@ type DbProfile = {
   organization_id: string;
   email: string;
   display_name: string;
-  role: 'admin' | 'staff' | 'viewer';
+  role: 'admin' | 'principal' | 'teacher' | 'staff';
 };
 
 export type PersistedTask = {
@@ -228,7 +228,7 @@ export async function signUpWithPassword(input: {
   };
 }
 
-export async function signInWithOAuthProvider(provider: Extract<Provider, 'google' | 'apple' | 'azure'>): Promise<void> {
+export async function signInWithOAuthProvider(provider: Extract<Provider, 'google' | 'linkedin' | 'azure'>): Promise<void> {
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
