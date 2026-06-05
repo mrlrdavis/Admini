@@ -11,84 +11,7 @@
   <link rel="stylesheet" href="./Desktop_style.css">
 </head>
 <body>
-  <!-- Standalone Onboarding Overlay -->
-  <div id="standalone-onboarding" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#f8f8f5 0%,#f1f1eb 54%,#e6e5dc 100%);overflow-y:auto;">
-    <div style="max-width:640px;margin:0 auto;padding:48px 24px;">
-      <div style="text-align:center;margin-bottom:32px;">
-        <div style="font-family:'Arial Rounded MT Bold',Nunito,sans-serif;font-size:72px;font-weight:900;letter-spacing:-0.065em;line-height:0.84;color:#111;">AdminI.</div>
-        <p style="color:#54745c;font-weight:700;margin-top:12px;">cognitive load support for school administrators</p>
-      </div>
-      <div id="onboard-step-0" class="onboard-step">
-        <h2 style="margin:0 0 8px;">Welcome! Let's set up your workspace.</h2>
-        <p style="color:#6b6580;margin:0 0 24px;">Quick setup to personalize AdminI for you.</p>
-        <label style="display:grid;gap:8px;font-size:14px;font-weight:600;color:#6b6580;">What should we call you?
-          <input type="text" id="onboard-name" placeholder="Your name" style="padding:12px;border:2px solid #d4d1de;border-radius:8px;font-size:18px;outline:none;">
-        </label>
-        <label style="display:grid;gap:8px;font-size:14px;font-weight:600;color:#6b6580;margin-top:16px;">School name
-          <input type="text" id="onboard-school" placeholder="Your school" style="padding:12px;border:2px solid #d4d1de;border-radius:8px;font-size:18px;outline:none;">
-        </label>
-        <button onclick="advanceOnboarding(1)" style="margin-top:24px;padding:12px 32px;background:#54745c;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:16px;cursor:pointer;">Next</button>
-      </div>
-      <div id="onboard-step-1" class="onboard-step" style="display:none;">
-        <h2 style="margin:0 0 8px;">What's your role?</h2>
-        <div id="onboard-roles" style="display:grid;gap:10px;margin-top:16px;"></div>
-        <button onclick="advanceOnboarding(2)" style="margin-top:24px;padding:12px 32px;background:#54745c;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:16px;cursor:pointer;">Next</button>
-      </div>
-      <div id="onboard-step-2" class="onboard-step" style="display:none;">
-        <h2 style="margin:0 0 8px;">Which systems do you use?</h2>
-        <div id="onboard-systems" style="display:grid;gap:10px;margin-top:16px;"></div>
-        <button onclick="completeOnboarding()" style="margin-top:24px;padding:12px 32px;background:#54745c;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:16px;cursor:pointer;">Take me to AdminI</button>
-      </div>
-    </div>
-  </div>
-  <script>
-  (function(){
-    const ONBOARD_KEY = 'admini_standalone_onboarded';
-    const overlay = document.getElementById('standalone-onboarding');
-    if (!overlay) return;
-    if (localStorage.getItem(ONBOARD_KEY) === 'true') { overlay.remove(); return; }
-    // Show onboarding if not completed
-    overlay.style.display = 'block';
 
-    const roles = ['School leader','Operations leader','Instructional coach','Campus support','District staff'];
-    const systems = [{id:'schoology',name:'Schoology'},{id:'infinite_campus',name:'Infinite Campus'},{id:'google_classroom',name:'Google Classroom'}];
-    let selectedRole = '';
-    let selectedSystems = [];
-
-    const rolesDiv = document.getElementById('onboard-roles');
-    rolesDiv.innerHTML = roles.map(r => '<button type="button" onclick="selectRole(this,\'' + r + '\')" style="padding:14px 18px;border:2px solid #d4d1de;border-radius:12px;background:#fff;text-align:left;font-size:15px;font-weight:500;cursor:pointer;">' + r + '</button>').join('');
-
-    const sysDiv = document.getElementById('onboard-systems');
-    sysDiv.innerHTML = systems.map(s => '<button type="button" onclick="toggleSystem(this,\'' + s.id + '\')" style="padding:14px 18px;border:2px solid #d4d1de;border-radius:12px;background:#fff;text-align:left;font-size:15px;font-weight:500;cursor:pointer;">' + s.name + '</button>').join('');
-
-    window.selectRole = function(btn, role) {
-      selectedRole = role;
-      rolesDiv.querySelectorAll('button').forEach(b => { b.style.borderColor = '#d4d1de'; b.style.background = '#fff'; });
-      btn.style.borderColor = '#54745c'; btn.style.background = 'rgba(84,116,92,0.08)';
-    };
-    window.toggleSystem = function(btn, id) {
-      if (selectedSystems.includes(id)) { selectedSystems = selectedSystems.filter(s => s !== id); btn.style.borderColor = '#d4d1de'; btn.style.background = '#fff'; }
-      else { selectedSystems.push(id); btn.style.borderColor = '#54745c'; btn.style.background = 'rgba(84,116,92,0.08)'; }
-    };
-    window.advanceOnboarding = function(step) {
-      document.querySelectorAll('.onboard-step').forEach(s => s.style.display = 'none');
-      document.getElementById('onboard-step-' + step).style.display = 'block';
-    };
-    window.completeOnboarding = function() {
-      const name = document.getElementById('onboard-name').value || 'Admin';
-      const school = document.getElementById('onboard-school').value || 'My School';
-      localStorage.setItem(ONBOARD_KEY, 'true');
-      localStorage.setItem('admini_demo_name', name);
-      localStorage.setItem('admini_demo_school', school);
-      localStorage.setItem('admini_demo_role', selectedRole || 'School leader');
-      localStorage.setItem('admini_demo_systems', JSON.stringify(selectedSystems));
-      overlay.style.display = 'none';
-      overlay.remove();
-      // Apply profile to the app
-      window.AdminiPrototype?.applyUserProfile?.({ name, email: name.toLowerCase().replace(/\s/g,'.') + '@' + school.toLowerCase().replace(/\s/g,'') + '.edu', schoolName: school, role: selectedRole || 'School leader', systems: selectedSystems });
-    };
-  })();
-  </script>
 
   <a href="#main-content" class="sr-only">Skip to content</a>
 
@@ -884,12 +807,12 @@
       if (window === window.parent) {
         setTimeout(() => {
           window.AdminiPrototype?.applyUserProfile?.({
-            name: localStorage.getItem('admini_demo_name') || 'Demo Admin',
-            email: (localStorage.getItem('admini_demo_name') || 'admin').toLowerCase().replace(/\\s/g,'.') + '@school.edu',
-            schoolName: localStorage.getItem('admini_demo_school') || 'Demo School',
-            role: localStorage.getItem('admini_demo_role') || 'School leader',
+            name: 'Demo Admin',
+            email: 'admin@demo-school.edu',
+            schoolName: 'Demo School',
+            role: 'School leader',
             focus: 'Walkthrough notes and follow-up',
-            systems: JSON.parse(localStorage.getItem('admini_demo_systems') || '["schoology","infinite_campus"]')
+            systems: ['schoology', 'infinite_campus']
           });
         }, 300);
       }
