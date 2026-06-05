@@ -1,6 +1,6 @@
 # Supabase Auth Setup
 
-Admini uses Supabase Auth for email/password sign up plus Google, Apple, and Outlook sign in. The apps are already wired for Supabase, but each deployment environment needs URL allow-listing and each social provider needs credentials in the Supabase Dashboard.
+Admini uses Supabase Auth for email/password sign up, Google and LinkedIn OAuth, and phone (SMS/OTP via Twilio) sign in. The apps are already wired for Supabase, but each deployment environment needs URL allow-listing and each social provider needs credentials in the Supabase Dashboard.
 
 ## App Environment
 
@@ -66,22 +66,16 @@ https://YOUR_SITE.netlify.app
 3. Add the Supabase callback URL as an authorized redirect URI.
 4. In Supabase Dashboard > Authentication > Providers > Google, enable Google and paste the Client ID and Client Secret.
 
-## Apple
+## Phone (SMS via Twilio)
 
-1. In Apple Developer, create/configure Sign in with Apple for the web.
-2. Add the Supabase callback URL to the web redirect URLs.
-3. In Supabase Dashboard > Authentication > Providers > Apple, enable Apple and add the required Apple credentials.
+1. In Supabase Dashboard > Authentication > Providers > Phone, enable Phone.
+2. Select Twilio as the SMS provider.
+3. Enter your Twilio Account SID, Auth Token, and Messaging Service SID (or phone number).
+4. Supabase will send OTP codes via Twilio when users sign in with phone.
 
-## Outlook / Microsoft
-
-1. In Microsoft Entra ID, register a Web app.
-2. Add the Supabase callback URL as the Web redirect URI.
-3. Create a client secret.
-4. In Supabase Dashboard > Authentication > Providers > Azure, enable Azure and paste the Application Client ID and Client Secret.
-5. If this should be district-only, set the Azure Tenant URL to `https://login.microsoftonline.com/YOUR_TENANT_ID`. Otherwise Supabase uses the common Microsoft tenant behavior.
-
-Admini requests `email openid profile` for Azure because Supabase needs a valid email from Microsoft sign in.
-
+The app handles the two-step flow:
+1. User enters phone number → app calls signInWithOtp({ phone })
+2. User receives SMS code → enters it → app calls erifyOtp({ phone, token, type: 'sms' })
 ## Verify
 
 Run the local apps after env changes:
