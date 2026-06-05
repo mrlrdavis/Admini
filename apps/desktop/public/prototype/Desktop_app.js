@@ -2023,7 +2023,7 @@
   }
 
   function requestResetUserData() {
-    const confirmed = window.confirm('Delete local AdminI user data and return to onboarding?');
+    const confirmed = window.confirm('Delete all local AdminI data and sign out? You will need to sign in again.');
     if (!confirmed) return;
     parent.postMessage({ type: 'reset-user-data' }, '*');
   }
