@@ -727,6 +727,8 @@ body,
 
 .option:hover,
 .system-card:hover {
+  background: rgba(72, 118, 86, 0.06);
+  border-color: var(--sage);
   transform: translateY(-1px);
 }
 

@@ -451,8 +451,8 @@ function AuthMessages({ error, status }: { error: string; status: string }) {
 
 function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string; onComplete: (answers: OnboardingAnswers) => Promise<void>; }) {
   const [step, setStep] = useState(0);
-  const [role, setRole] = useState('School leader');
-  const [focus, setFocus] = useState('Walkthrough notes and follow-up');
+  const [role, setRole] = useState('');
+  const [focus, setFocus] = useState('');
   const [systems, setSystems] = useState<string[]>([]);
   const [applying, setApplying] = useState(false);
 
