@@ -1463,7 +1463,7 @@
   const pastObservations = [];
 
   function showRosterUploadModal() {
-    openDrawer('Upload Roster', 'Import teacher roster data', 
+    openDrawer('Upload Roster', 'Import teacher roster data', `
       <div style="display:grid;gap:var(--space-4);padding:var(--space-2);">
         <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:0;">Upload a CSV file with columns: <strong>Grade, Subject, Teacher Name</strong></p>
         <div style="border:2px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-6);text-align:center;cursor:pointer;" id="rosterDropZone">
@@ -1483,7 +1483,7 @@
           </div>
         </div>
       </div>
-    );
+    `);
 
     // Wire up drop zone
     setTimeout(() => {

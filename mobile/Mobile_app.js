@@ -1807,8 +1807,9 @@ const App = (function () {
     };
     const content = helpContent[topic] || '<div style="padding:var(--space-3);"><p>Help content for this topic is coming soon.</p></div>';
     showSubViewWithContent('help-detail', topic, content);
-  } will open from AdminI help content when it is added.`);
   }
+
+
 
   // =========================================
   // THEME
