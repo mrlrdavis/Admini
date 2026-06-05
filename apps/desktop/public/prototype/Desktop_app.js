@@ -228,7 +228,7 @@
     (profile?.systems || []).forEach((provider) => {
       integrations.push({
         name: integrationNameMap[provider] || provider,
-        desc: 'Selected during setup',
+        desc: 'Available for connection',
         status: 'available',
         lastSync: 'Not connected',
         on: false,
@@ -1390,7 +1390,29 @@
     const grid = document.getElementById('integrationGrid');
     if (!grid) return;
     if (!integrations.length) {
-      grid.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No systems selected yet. Use first time setup or Integrations to choose what to connect.</div>';
+      // Show all available integrations when none selected during onboarding
+      const allSystems = Object.entries(integrationNameMap).map(([provider, name]) => ({
+        name,
+        desc: provider === 'schoology' ? 'Courses, sections, assignments, and learning context.' : provider === 'infinite_campus' ? 'Roster, attendance, schedules, and student information.' : 'Classes, coursework, announcements, and classroom context.',
+        status: 'available',
+        lastSync: 'Not connected',
+        on: false,
+        icon: provider.includes('google') ? 'mail' : 'database'
+      }));
+      grid.innerHTML = allSystems.map(intg => `
+        <div class="integration-card">
+          <div class="integration-top">
+            <div class="integration-icon">${integrationIcons[intg.icon] || ''}</div>
+            <div class="toggle-switch ${intg.on ? 'on' : ''}" data-toggle="intg-${intg.name.replace(/\s/g, '')}"></div>
+          </div>
+          <div class="integration-name">${intg.name}</div>
+          <div class="integration-desc">${intg.desc}</div>
+          <div class="integration-status available">Available</div>
+        </div>
+      `).join('');
+      grid.querySelectorAll('.toggle-switch').forEach(el => {
+        el.addEventListener('click', () => { el.classList.toggle('on'); });
+      });
       return;
     }
     grid.innerHTML = integrations.map(intg => `
@@ -1440,6 +1462,93 @@
   // Past observations from user inputs
   const pastObservations = [];
 
+  function showRosterUploadModal() {
+    openDrawer('Upload Roster', 'Import teacher roster data', 
+      <div style="display:grid;gap:var(--space-4);padding:var(--space-2);">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:0;">Upload a CSV file with columns: <strong>Grade, Subject, Teacher Name</strong></p>
+        <div style="border:2px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-6);text-align:center;cursor:pointer;" id="rosterDropZone">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--color-text-faint);margin-bottom:var(--space-2);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+          <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Drop CSV here or click to browse</div>
+          <input type="file" accept=".csv" id="rosterFileInput" style="display:none;" />
+        </div>
+        <button class="btn btn-primary" id="rosterProcessBtn" disabled>Process Roster</button>
+        <div id="rosterPreview" style="font-size:var(--text-xs);color:var(--color-text-muted);"></div>
+        <div style="border-top:1px solid var(--color-border);padding-top:var(--space-3);margin-top:var(--space-2);">
+          <p style="font-size:var(--text-xs);color:var(--color-text-faint);margin:0;">Or enter manually:</p>
+          <div style="display:grid;gap:var(--space-2);margin-top:var(--space-2);">
+            <input type="text" id="rosterManualGrade" placeholder="Grade (e.g. Grade 3)" style="padding:var(--space-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:var(--text-sm);">
+            <input type="text" id="rosterManualSubject" placeholder="Subject (e.g. Math)" style="padding:var(--space-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:var(--text-sm);">
+            <input type="text" id="rosterManualTeacher" placeholder="Teacher name" style="padding:var(--space-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:var(--text-sm);">
+            <button class="btn btn-secondary btn-sm" id="rosterManualAddBtn">Add to Roster</button>
+          </div>
+        </div>
+      </div>
+    );
+
+    // Wire up drop zone
+    setTimeout(() => {
+      const dropZone = document.getElementById('rosterDropZone');
+      const fileInput = document.getElementById('rosterFileInput');
+      const processBtn = document.getElementById('rosterProcessBtn');
+      const preview = document.getElementById('rosterPreview');
+      const manualAddBtn = document.getElementById('rosterManualAddBtn');
+
+      if (dropZone && fileInput) {
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const text = ev.target.result;
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            if (preview) preview.textContent = 'Found ' + (lines.length - 1) + ' entries';
+            if (processBtn) processBtn.disabled = false;
+            processBtn._csvData = lines;
+          };
+          reader.readAsText(file);
+        });
+      }
+
+      if (processBtn) {
+        processBtn.addEventListener('click', () => {
+          const lines = processBtn._csvData || [];
+          lines.slice(1).forEach(line => {
+            const [grade, subject, teacher] = line.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+            if (grade && subject && teacher) {
+              if (!teacherRoster[grade]) teacherRoster[grade] = {};
+              if (!teacherRoster[grade][subject]) teacherRoster[grade][subject] = [];
+              if (!teacherRoster[grade][subject].includes(teacher)) {
+                teacherRoster[grade][subject].push(teacher);
+              }
+            }
+          });
+          renderObservationsView();
+          closeDrawer();
+        });
+      }
+
+      if (manualAddBtn) {
+        manualAddBtn.addEventListener('click', () => {
+          const grade = document.getElementById('rosterManualGrade')?.value.trim();
+          const subject = document.getElementById('rosterManualSubject')?.value.trim();
+          const teacher = document.getElementById('rosterManualTeacher')?.value.trim();
+          if (grade && subject && teacher) {
+            if (!teacherRoster[grade]) teacherRoster[grade] = {};
+            if (!teacherRoster[grade][subject]) teacherRoster[grade][subject] = [];
+            if (!teacherRoster[grade][subject].includes(teacher)) {
+              teacherRoster[grade][subject].push(teacher);
+            }
+            document.getElementById('rosterManualGrade').value = '';
+            document.getElementById('rosterManualSubject').value = '';
+            document.getElementById('rosterManualTeacher').value = '';
+            if (preview) preview.textContent = 'Added: ' + teacher + ' (' + grade + ' / ' + subject + ')';
+            renderObservationsView();
+          }
+        });
+      }
+    }, 100);
+  }
   function renderObservationsView() {
     // Render period pills
     const periodPills = document.getElementById('obsPeriodPills');
@@ -1461,7 +1570,11 @@
     if (gradePills) {
       const grades = Object.keys(teacherRoster);
       if (!grades.length) {
-        gradePills.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);">No roster connected yet. Connect a roster system or enter observation details after setup.</div>';
+        gradePills.innerHTML = '<div style="display:grid;gap:var(--space-3);"><div style="color:var(--color-text-muted);font-size:var(--text-sm);">No roster data available yet. Choose an option below:</div><div style="display:flex;gap:var(--space-2);flex-wrap:wrap;"><button class="btn btn-secondary btn-sm" id="obsUploadRosterBtn">Upload Roster (CSV)</button><button class="btn btn-ghost btn-sm" onclick="window.AdminiPrototype.openIntegrationsPanel()">Connect a System</button></div></div>';
+        const uploadBtn = document.getElementById('obsUploadRosterBtn');
+        if (uploadBtn) {
+          uploadBtn.addEventListener('click', () => showRosterUploadModal());
+        }
       } else {
       gradePills.innerHTML = grades.map(g =>
         `<button class="obs-pill" data-grade="${g}">${g}</button>`
@@ -1915,6 +2028,63 @@
     parent.postMessage({ type: 'reset-user-data' }, '*');
   }
 
+  const helpContent = {
+    'Getting Started': '<h3>Getting Started with AdminI</h3><p>AdminI helps school administrators capture, organize, and act on information faster.</p><ol><li><strong>Capture</strong> \u2014 Use voice or tap capture to quickly record observations, follow-ups, and notes throughout your day.</li><li><strong>Tasks</strong> \u2014 Captures automatically generate actionable tasks. Prioritize, delegate, and track completion.</li><li><strong>Observations</strong> \u2014 Conduct structured classroom walkthroughs with timestamped notes and AI-generated insights.</li><li><strong>Integrations</strong> \u2014 Connect Schoology, Infinite Campus, or Google Classroom to pull roster and course data automatically.</li><li><strong>Pulse</strong> \u2014 Contextual check-in prompts throughout your day keep you on track without overwhelming your schedule.</li></ol>',
+    'Voice Capture': '<h3>Using Voice Capture</h3><p>Voice capture lets you speak naturally and AdminI transcribes and processes your words.</p><ul><li>Tap the microphone button to start recording</li><li>Speak clearly \u2014 AdminI will transcribe in real-time</li><li>When finished, review the AI-suggested task</li><li>Tap <strong>Confirm</strong> to save or <strong>Edit</strong> to modify</li></ul><p><strong>Privacy:</strong> All text is run through the PII redaction layer before storage. Student IDs, SSNs, emails, phone numbers, and dates of birth are automatically replaced with tokens.</p>',
+    'Customizing Your Board': '<h3>Customizing Your Tap Capture Board</h3><p>The tap capture board gives you quick-select words organized by category (Who, What, Where, Action, Urgency).</p><h4>How to customize:</h4><ol><li>Navigate to the <strong>Capture</strong> view</li><li>Click the <strong>Edit Board</strong> button above the word grid</li><li>In edit mode you can:<ul><li>Remove words by clicking the X on any word button</li><li>Add new words by clicking the + button in any category</li><li>Choose an icon for each new word</li></ul></li><li>Click <strong>Done</strong> when finished</li></ol><p>You can also access board editing from <strong>Settings \u2192 Tap Capture Customization \u2192 Manage Words</strong>.</p><p><strong>Tip:</strong> Add school-specific names, locations, and action verbs that match your daily vocabulary for faster captures.</p>',
+    'Understanding Pulses': '<h3>Understanding Pulses</h3><p>Pulses are contextual check-in prompts that appear throughout your day based on your schedule and activity patterns.</p><ul><li><strong>Frequency</strong> \u2014 Default is every 2 hours during active hours (7:30 AM \u2013 4:30 PM)</li><li><strong>Smart Timing</strong> \u2014 When enabled, Pulses adjust based on calendar gaps</li><li><strong>Response</strong> \u2014 You can respond with a voice or tap capture, skip, or snooze</li></ul><p>Configure Pulse settings in <strong>Settings \u2192 Pulse Configuration</strong>.</p>',
+    'Observations': '<h3>Classroom Observations</h3><p>AdminI provides structured walkthrough tools for classroom observations.</p><ol><li>Select the period, grade, subject, and teacher</li><li>Click <strong>Begin Observation</strong> to start the timer</li><li>Use quick tags for instruction, engagement, environment, and management</li><li>Type notes and click <strong>Stamp</strong> to log timestamped entries</li><li>Click <strong>End Observation</strong> to generate an AI summary</li></ol><p><strong>Roster data:</strong> You can populate teacher rosters by connecting a SIS integration or by uploading a CSV file from the Observations view.</p>',
+    'Contact Support': '<h3>Contact Support</h3><p>Need help? Reach out to the AdminI team:</p><ul><li><strong>Email:</strong> support@admini.app</li><li><strong>Response time:</strong> Within 24 hours on business days</li></ul><p>For urgent issues during school hours, include your school name and a brief description of the problem.</p>'
+  };
+
+  function showHelpTopic(topic) {
+    const content = helpContent[topic] || helpContent['Getting Started'] || '<p>Help content coming soon.</p>';
+    openDrawer(topic, 'Help & Support', '<div style="padding:var(--space-2);font-size:var(--text-sm);line-height:1.7;color:var(--color-text);">' + content + '</div>');
+  }
+  function showIntegrationConnectModal(systemName, toggleEl) {
+    openDrawer(`Connect ${systemName}`, 'Integration setup', `
+      <div style="display:grid;gap:var(--space-4);padding:var(--space-2);">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:0;">Choose how to connect <strong>${systemName}</strong> to AdminI:</p>
+        <div style="display:grid;gap:var(--space-2);">
+          <button class="btn btn-primary" onclick="handleIntegrationConnect('${systemName}', 'oauth', this)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+            Sign in with ${systemName}
+          </button>
+          <button class="btn btn-secondary" onclick="handleIntegrationConnect('${systemName}', 'api_key', this)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Use API Key
+          </button>
+          <button class="btn btn-ghost" onclick="handleIntegrationConnect('${systemName}', 'manual', this)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            Manual Import (CSV)
+          </button>
+        </div>
+        <div style="border-top:1px solid var(--color-border);padding-top:var(--space-3);margin-top:var(--space-2);">
+          <button class="btn btn-ghost btn-sm" onclick="closeDrawer()" style="width:100%;">Cancel</button>
+        </div>
+      </div>
+    `);
+    // Store reference for the handler
+    window._pendingIntegrationToggle = toggleEl;
+  }
+
+  function handleIntegrationConnect(systemName, method, btnEl) {
+    const toggleEl = window._pendingIntegrationToggle;
+    if (toggleEl) {
+      toggleEl.classList.add('on');
+      const card = toggleEl.closest('.integration-card');
+      const statusEl = card?.querySelector('.integration-status');
+      if (statusEl) {
+        statusEl.textContent = 'Connected via ' + method.replace('_', ' ');
+        statusEl.className = 'integration-status connected';
+      }
+    }
+    closeDrawer();
+  }
+
+  function triggerOnboarding() {
+    parent.postMessage({ type: 'reset-user-data' }, '*');
+  }
   function bindStaticActions() {
     const bindClick = (id, handler) => {
       const el = document.getElementById(id);

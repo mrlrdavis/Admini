@@ -626,7 +626,7 @@ const App = (function () {
 
     const bottomBar = isEditing ? `
       <div class="word-board__bottom-bar">
-        <div class="word-board__bottom-title">Tap the plus icons to add words to the board.</div>
+        <div class="word-board__bottom-title">Quick edits: add or remove words. Use the desktop app for full board customization.</div>
         <div class="word-board__bottom-actions">
           ${wordBoardData.map(section => `<button class="word-board__bottom-chip" onclick="App.showAddWordInput('${section.cat}')">${section.label}</button>`).join('')}
         </div>
@@ -1771,7 +1771,15 @@ const App = (function () {
   }
 
   function showHelpTopic(topic) {
-    showToast(`${topic} will open from AdminI help content when it is added.`);
+    const helpContent = {
+      'Getting Started Guide': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Getting Started</h3><p>AdminI helps school administrators capture and organize information faster.</p><ul><li><strong>Voice Capture</strong> \u2014 Tap the mic to record observations hands-free</li><li><strong>Tap Capture</strong> \u2014 Quick-select words to build structured captures</li><li><strong>Tasks</strong> \u2014 Captures generate actionable tasks automatically</li><li><strong>Pulse</strong> \u2014 Contextual check-ins keep you on track</li></ul></div>',
+      'Using Voice Capture': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Voice Capture</h3><p>Speak naturally and AdminI transcribes your words.</p><ol><li>Tap the microphone button</li><li>Speak clearly</li><li>Review the AI-suggested task</li><li>Tap Confirm to save or Edit to modify</li></ol><p><strong>Privacy:</strong> PII is automatically redacted before storage.</p></div>',
+      'Understanding Pulses': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Pulses</h3><p>Contextual check-in prompts throughout your day.</p><ul><li>Default: every 2 hours during active hours</li><li>Smart Timing adjusts based on calendar gaps</li><li>Respond with voice/tap capture, skip, or snooze</li></ul></div>',
+      'Contact Support': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Contact Support</h3><p>Need help?</p><ul><li><strong>Email:</strong> support@admini.app</li><li><strong>Response time:</strong> Within 24 hours on business days</li></ul></div>'
+    };
+    const content = helpContent[topic] || '<div style="padding:var(--space-3);"><p>Help content for this topic is coming soon.</p></div>';
+    showSubViewWithContent('help-detail', topic, content);
+  } will open from AdminI help content when it is added.`);
   }
 
   // =========================================

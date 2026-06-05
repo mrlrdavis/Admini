@@ -2013,6 +2013,14 @@
   transition: background var(--transition-interactive);
   border-bottom: 1px solid var(--color-divider);
   min-height: 52px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .menu-item:last-child {

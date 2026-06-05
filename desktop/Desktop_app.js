@@ -1390,7 +1390,29 @@
     const grid = document.getElementById('integrationGrid');
     if (!grid) return;
     if (!integrations.length) {
-      grid.innerHTML = '<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);">No systems selected yet. Use first time setup or Integrations to choose what to connect.</div>';
+      // Show all available integrations when none selected during onboarding
+      const allSystems = Object.entries(integrationNameMap).map(([provider, name]) => ({
+        name,
+        desc: provider === 'schoology' ? 'Courses, sections, assignments, and learning context.' : provider === 'infinite_campus' ? 'Roster, attendance, schedules, and student information.' : 'Classes, coursework, announcements, and classroom context.',
+        status: 'available',
+        lastSync: 'Not connected',
+        on: false,
+        icon: provider.includes('google') ? 'mail' : 'database'
+      }));
+      grid.innerHTML = allSystems.map(intg => `
+        <div class="integration-card">
+          <div class="integration-top">
+            <div class="integration-icon">${integrationIcons[intg.icon] || ''}</div>
+            <div class="toggle-switch ${intg.on ? 'on' : ''}" data-toggle="intg-${intg.name.replace(/\s/g, '')}"></div>
+          </div>
+          <div class="integration-name">${intg.name}</div>
+          <div class="integration-desc">${intg.desc}</div>
+          <div class="integration-status available">Available</div>
+        </div>
+      `).join('');
+      grid.querySelectorAll('.toggle-switch').forEach(el => {
+        el.addEventListener('click', () => { el.classList.toggle('on'); });
+      });
       return;
     }
     grid.innerHTML = integrations.map(intg => `
