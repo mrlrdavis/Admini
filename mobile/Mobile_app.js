@@ -1913,7 +1913,7 @@ const App = (function () {
     if (gp) {
       const grades = Object.keys(mobObsTeacherRoster);
       if (!grades.length) {
-        gp.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);">No roster connected yet. Connect a roster system or enter observation details after setup.</div>';
+        gp.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);">No roster data yet. Upload a CSV or connect a system from Integrations.</div>';
       } else {
       gp.innerHTML = grades.map(g =>
         `<button class="mob-obs-pill" data-grade="${g}">${g}</button>`

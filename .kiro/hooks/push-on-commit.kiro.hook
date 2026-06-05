@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Push to GitHub on commit",
+  "description": "After the agent stops working, push the current branch to origin so changes appear in GitHub Desktop for merge.",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "git push origin HEAD 2>&1 || echo \"Nothing to push\""
+  }
+}

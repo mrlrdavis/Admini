@@ -650,7 +650,14 @@
             </div>
             <button class="btn btn-secondary btn-sm" id="exportDataBtn">Export</button>
           </div>
-          <div class="setting-row">
+                    <div class="setting-row">
+            <div>
+              <div class="setting-label">Re-run Onboarding</div>
+              <div class="setting-desc">Redo the initial setup wizard</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="parent.postMessage({type:'reset-user-data'},'*')">Re-run</button>
+          </div>
+<div class="setting-row">
             <div>
               <div class="setting-label">Delete Account</div>
               <div class="setting-desc">Permanently remove all data</div>

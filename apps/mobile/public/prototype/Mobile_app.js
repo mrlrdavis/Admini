@@ -1766,6 +1766,33 @@ const App = (function () {
     if (menu) menu.style.display = '';
   }
 
+  function showSubViewWithContent(id, title, htmlContent) {
+    // Create or reuse a dynamic help detail subview
+    let view = document.getElementById('subview-help-detail');
+    if (!view) {
+      view = document.createElement('div');
+      view.className = 'sub-view';
+      view.id = 'subview-help-detail';
+      document.getElementById('view-more').appendChild(view);
+    }
+    view.innerHTML = `
+      <div class="sub-view__header">
+        <button class="sub-view__back" aria-label="Go back" onclick="App.hideSubView()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2 class="sub-view__title">${title}</h2>
+      </div>
+      <div style="padding: 0 var(--space-4); font-size: var(--text-sm); line-height: 1.6;">
+        ${htmlContent}
+      </div>
+    `;
+    const menu = document.getElementById('more-menu');
+    if (menu) menu.style.display = 'none';
+    document.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
+    view.classList.add('active');
+  }
+
+
   function simulateUpload() {
     showToast('Camera/upload would open here');
   }
@@ -1775,6 +1802,7 @@ const App = (function () {
       'Getting Started Guide': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Getting Started</h3><p>AdminI helps school administrators capture and organize information faster.</p><ul><li><strong>Voice Capture</strong> \u2014 Tap the mic to record observations hands-free</li><li><strong>Tap Capture</strong> \u2014 Quick-select words to build structured captures</li><li><strong>Tasks</strong> \u2014 Captures generate actionable tasks automatically</li><li><strong>Pulse</strong> \u2014 Contextual check-ins keep you on track</li></ul></div>',
       'Using Voice Capture': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Voice Capture</h3><p>Speak naturally and AdminI transcribes your words.</p><ol><li>Tap the microphone button</li><li>Speak clearly</li><li>Review the AI-suggested task</li><li>Tap Confirm to save or Edit to modify</li></ol><p><strong>Privacy:</strong> PII is automatically redacted before storage.</p></div>',
       'Understanding Pulses': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Pulses</h3><p>Contextual check-in prompts throughout your day.</p><ul><li>Default: every 2 hours during active hours</li><li>Smart Timing adjusts based on calendar gaps</li><li>Respond with voice/tap capture, skip, or snooze</li></ul></div>',
+      'Customizing Your Board': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Customizing Your Tap Board</h3><p>The tap capture board gives you quick-select words organized by category (Who, What, Where, Action, Urgency).</p><h4>Quick editing on mobile:</h4><ol><li>Go to the <strong>Capture</strong> tab and switch to <strong>Tap</strong> mode</li><li>Tap the pencil icon to enter edit mode</li><li>Remove words with the X button</li><li>Add words with the + button in any category</li><li>Tap <strong>Done</strong> when finished</li></ol><p><strong>For full customization</strong> (reordering categories, bulk editing, icon choices), use the desktop app under Settings \u2192 Tap Capture Customization.</p></div>',
       'Contact Support': '<div style="padding:var(--space-3);"><h3 style="margin:0 0 var(--space-3);">Contact Support</h3><p>Need help?</p><ul><li><strong>Email:</strong> support@admini.app</li><li><strong>Response time:</strong> Within 24 hours on business days</li></ul></div>'
     };
     const content = helpContent[topic] || '<div style="padding:var(--space-3);"><p>Help content for this topic is coming soon.</p></div>';
@@ -1921,7 +1949,7 @@ const App = (function () {
     if (gp) {
       const grades = Object.keys(mobObsTeacherRoster);
       if (!grades.length) {
-        gp.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);">No roster connected yet. Connect a roster system or enter observation details after setup.</div>';
+        gp.innerHTML = '<div style="color:var(--color-text-faint);font-size:var(--text-sm);">No roster data yet. Upload a CSV or connect a system from Integrations.</div>';
       } else {
       gp.innerHTML = grades.map(g =>
         `<button class="mob-obs-pill" data-grade="${g}">${g}</button>`
