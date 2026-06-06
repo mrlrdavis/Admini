@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // DashboardTab - Native React implementation of the Dashboard view
 // ---------------------------------------------------------------------------
-// Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
+// Requirements: 2.1, 2.4, 7.1
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { KPICard } from '@admini/ui';
@@ -9,8 +9,12 @@ import {
   getTasks,
   getActivityEvents,
   getDashboardKPIs,
+  sortByUrgency,
 } from '../services/dashboardService';
-import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../services/dashboardService';
+import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
+
+// Re-export sortByUrgency for testing and backward compatibility
+export { sortByUrgency } from '../services/dashboardService';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -35,31 +39,6 @@ export function getTimeGreeting(): string {
   if (hour >= 5 && hour <= 11) return 'Good morning';
   if (hour >= 12 && hour <= 17) return 'Good afternoon';
   return 'Good evening';
-}
-
-/** Priority urgency weight - higher number = more urgent. */
-const PRIORITY_WEIGHT: Record<DashboardTask['priority'], number> = {
-  urgent: 4,
-  high: 3,
-  normal: 2,
-  low: 1,
-};
-
-/**
- * Sorts open tasks by urgency descending (urgent > high > normal > low),
- * with ties broken by dueAt ascending (earliest due first, no-due-date last).
- */
-export function sortByUrgency(a: DashboardTask, b: DashboardTask): number {
-  const weightDiff = PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority];
-  if (weightDiff !== 0) return weightDiff;
-
-  // Ties broken by dueAt ascending - tasks without a due date sort last.
-  const aDue = a.dueAt ?? '';
-  const bDue = b.dueAt ?? '';
-  if (!aDue && !bDue) return 0;
-  if (!aDue) return 1;
-  if (!bDue) return -1;
-  return aDue < bDue ? -1 : aDue > bDue ? 1 : 0;
 }
 
 /**

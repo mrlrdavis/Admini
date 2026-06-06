@@ -1,4 +1,4 @@
-import { createIndexedDbStorage } from '@admini/shared';
+﻿import { createIndexedDbStorage } from '@admini/shared';
 import { createClient, type Provider, type User } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
@@ -10,7 +10,7 @@ function getAuthRedirectTo(): string {
   return new URL(import.meta.env.BASE_URL, window.location.origin).toString();
 }
 
-const supabase = supabaseUrl && supabaseKey
+export const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: true,

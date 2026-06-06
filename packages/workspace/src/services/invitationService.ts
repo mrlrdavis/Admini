@@ -1,41 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import { getClient } from './getClient';
+import type { AdminiRole, OrgInvitation } from '../types';
 
 // ---------------------------------------------------------------------------
-// Supabase client (reuses the same singleton pattern as ../supabase.ts)
+// Internal Types
 // ---------------------------------------------------------------------------
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
-
-const supabase =
-  supabaseUrl && supabaseKey
-    ? createClient(supabaseUrl, supabaseKey, {
-        auth: { persistSession: true, autoRefreshToken: true, storageKey: 'admini-mobile-auth' },
-      })
-    : null;
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type InvitationRole = 'admin' | 'principal' | 'teacher' | 'staff';
-
-export type InvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired';
-
-export interface OrgInvitation {
-  id: string;
-  email: string;
-  role: InvitationRole;
-  status: InvitationStatus;
-  createdAt: string;
-  expiresAt: string;
-}
+type InvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired';
 
 type DbInvitation = {
   id: string;
   organization_id: string;
   email: string;
-  role: InvitationRole;
+  role: AdminiRole;
   status: InvitationStatus;
   created_at: string;
   expires_at: string;
@@ -69,9 +45,9 @@ function wrapError(message: string, cause: unknown): Error {
  * List all invitations for an organization.
  */
 export async function listInvitations(orgId: string): Promise<OrgInvitation[]> {
-  if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  const client = getClient();
   try {
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('invitations')
       .select('id, organization_id, email, role, status, created_at, expires_at')
       .eq('organization_id', orgId)
@@ -90,11 +66,11 @@ export async function listInvitations(orgId: string): Promise<OrgInvitation[]> {
 export async function createInvitation(
   orgId: string,
   email: string,
-  role: InvitationRole,
+  role: AdminiRole,
 ): Promise<OrgInvitation> {
-  if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  const client = getClient();
   try {
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('invitations')
       .insert({
         organization_id: orgId,
@@ -115,9 +91,9 @@ export async function createInvitation(
  * Revoke a pending invitation by setting its status to 'revoked'.
  */
 export async function revokeInvitation(invitationId: string): Promise<OrgInvitation> {
-  if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  const client = getClient();
   try {
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('invitations')
       .update({ status: 'revoked' as InvitationStatus })
       .eq('id', invitationId)

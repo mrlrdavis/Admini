@@ -1,20 +1,17 @@
-import { integrationCatalog } from '@admini/integrations';
+﻿import { integrationCatalog } from '@admini/integrations';
 import { clearAdminiBrowserState, createIndexedDbStorage, nowIso, type IntegrationCatalogItem, type IntegrationProvider } from '@admini/shared';
-import { useEffect, useMemo, useState, useRef, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
-  createTask,
   getCurrentUser,
   isSupabaseConfigured,
-  listTasks,
   signInWithOAuthProvider,
   signInWithPassword,
   sendPasswordReset,
   signOut,
   signUpWithPassword,
-  updateTaskStatus,
-  type CreateTaskInput,
   type AuthUser
 } from './supabase';
+import { DesktopWorkspace } from './Workspace';
 
 type AuthView = 'home' | 'sign-in' | 'sign-up';
 type VisualMode = 'day' | 'night';
@@ -34,7 +31,6 @@ type OnboardingAnswers = {
   systems: string[];
 };
 
-type TaskStatusInput = 'open' | 'in_progress' | 'completed' | 'archived';
 
 let hoverAudioContext: AudioContext | null = null;
 const defaultReturningUserTagline = "we'll take it from here";
@@ -145,26 +141,36 @@ export function App() {
   if (!user) return <AuthScreen onAuthenticated={setUser} />;
   if (onboardingComplete === null) return <div className="auth-page auth-page-home"><LogoLockup /><p>Preparing your workspace...</p></div>;
 
+  const userName = user.displayName ?? user.email?.split('@')[0] ?? 'Admin';
+  const schoolName = user.schoolName ?? '';
+  const prototypePath = `${import.meta.env.BASE_URL}prototype/Desktop_index.html`;
+
+  if (!onboardingComplete) {
+    return (
+      <main className="protected-app onboarding-app">
+        <div className="onboarding-modal">
+          <FirstTimeOnboardingWizard userName={userName} onComplete={completeOnboarding} />
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <ProtectedWorkspace
-      appName="Admini"
-      prototypePath={`${import.meta.env.BASE_URL}prototype/Desktop_index.html`}
-      user={user}
-      userName={user.displayName ?? user.email?.split('@')[0] ?? 'Admin'}
-      schoolName={user.schoolName ?? ''}
-      onboardingComplete={onboardingComplete}
-      onboardingAnswers={onboardingAnswers}
-      onCompleteOnboarding={completeOnboarding}
-      showIntegrations={showIntegrations}
-      onToggleIntegrations={() => setShowIntegrations((current) => !current)}
-      onSignOut={() => {
-        signOut().finally(() => setUser(null));
-      }}
-      onResetUserData={resetUserData}
-      onListTasks={listTasks}
-      onCreateTask={createTask}
-      onUpdateTaskStatus={updateTaskStatus}
-    />
+    <main className="protected-app">
+      {showIntegrations ? <IntegrationsPanel /> : (
+        <DesktopWorkspace
+          user={user}
+          userRole={onboardingAnswers?.role ?? 'admin'}
+          userName={userName}
+          schoolName={schoolName}
+          prototypePath={prototypePath}
+          onSignOut={() => {
+            signOut().finally(() => setUser(null));
+          }}
+          onResetUserData={resetUserData}
+        />
+      )}
+    </main>
   );
 }
 
@@ -589,7 +595,7 @@ function getTimeGreeting() {
 function BreathingOverlay({ onClose }: { onClose: () => void }) {
   return (
     <section className="breathing-overlay" aria-live="polite">
-      <button className="breathing-overlay__close" type="button" onClick={onClose} aria-label="Close breathing exercise">×</button>
+      <button className="breathing-overlay__close" type="button" onClick={onClose} aria-label="Close breathing exercise">Ã—</button>
       <div className="breath-orb" />
       <p>inhale</p>
       <span>exhale</span>
@@ -671,131 +677,6 @@ function playBubbleSound() {
   oscillator.stop(hoverAudioContext.currentTime + 0.13);
 }
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-function ProtectedWorkspace({
-  appName,
-  prototypePath,
-  user,
-  userName,
-  schoolName,
-  onboardingComplete,
-  onboardingAnswers,
-  onCompleteOnboarding,
-  showIntegrations,
-  onToggleIntegrations,
-  onSignOut,
-  onResetUserData,
-  onListTasks,
-  onCreateTask,
-  onUpdateTaskStatus
-}: {
-  appName: string;
-  prototypePath: string;
-  user: AuthUser;
-  userName: string;
-  schoolName: string;
-  onboardingComplete: boolean;
-  onboardingAnswers: OnboardingAnswers | null;
-  onCompleteOnboarding: (answers: OnboardingAnswers) => Promise<void>;
-  showIntegrations: boolean;
-  onToggleIntegrations: () => void;
-  onSignOut: () => void;
-  onResetUserData: () => void;
-  onListTasks: () => Promise<unknown>;
-  onCreateTask: (task: CreateTaskInput) => Promise<unknown>;
-  onUpdateTaskStatus: (id: string, status: TaskStatusInput) => Promise<unknown>;
-}) {
-  const frameRef = useRef<HTMLIFrameElement | null>(null);
-  const userPayload = useMemo(() => ({
-    type: 'user',
-    name: userName,
-    email: user.email ?? '',
-    schoolName,
-    role: onboardingAnswers?.role ?? '',
-    focus: onboardingAnswers?.focus ?? '',
-    systems: onboardingAnswers?.systems ?? []
-  }), [user.email, userName, schoolName, onboardingAnswers]);
-
-  useEffect(() => {
-    function onMessage(ev: MessageEvent) {
-      const data = ev.data && (typeof ev.data === 'string' ? (() => { try { return JSON.parse(ev.data); } catch { return ev.data; } })() : ev.data);
-      if (!data) return;
-      if (data.type === 'request-signout') {
-        onSignOut();
-      }
-      if (data.type === 'reset-user-data') {
-        onResetUserData();
-      }
-      if (data.type === 'open-integrations') {
-        onToggleIntegrations();
-      }
-      if (data.type === 'tasks:list') {
-        void onListTasks()
-          .then((tasks) => {
-            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:list:result', requestId: data.requestId, ok: true, tasks }, '*');
-          })
-          .catch((error: unknown) => {
-            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:list:result', requestId: data.requestId, ok: false, error: getErrorMessage(error) }, '*');
-          });
-      }
-      if (data.type === 'tasks:create') {
-        void onCreateTask(data.task as CreateTaskInput)
-          .then((task) => {
-            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:create:result', requestId: data.requestId, ok: true, task }, '*');
-          })
-          .catch((error: unknown) => {
-            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:create:result', requestId: data.requestId, ok: false, error: getErrorMessage(error) }, '*');
-          });
-      }
-      if (data.type === 'tasks:update-status') {
-        void onUpdateTaskStatus(String(data.id), data.status as TaskStatusInput)
-          .then((task) => {
-            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:update-status:result', requestId: data.requestId, ok: true, task }, '*');
-          })
-          .catch((error: unknown) => {
-            frameRef.current?.contentWindow?.postMessage({ type: 'tasks:update-status:result', requestId: data.requestId, ok: false, error: getErrorMessage(error) }, '*');
-          });
-      }
-    }
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, [onCreateTask, onListTasks, onResetUserData, onSignOut, onToggleIntegrations, onUpdateTaskStatus]);
-
-  useEffect(() => {
-    frameRef.current?.contentWindow?.postMessage(userPayload, '*');
-  }, [userPayload]);
-
-  if (!onboardingComplete) {
-    return (
-      <main className="protected-app onboarding-app">
-        <div className="workspace-shell">
-          <iframe ref={frameRef} onLoad={() => frameRef.current?.contentWindow?.postMessage(userPayload, '*')} className="prototype-frame workspace-background" src={prototypePath} title={`${appName} workspace`} />
-          <div className="workspace-backdrop" />
-        </div>
-        <div className="onboarding-modal">
-          <FirstTimeOnboardingWizard userName={userName} onComplete={onCompleteOnboarding} />
-        </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="protected-app">
-      {showIntegrations ? <IntegrationsPanel /> : (
-        <iframe
-          ref={frameRef}
-          onLoad={() => frameRef.current?.contentWindow?.postMessage(userPayload, '*')}
-          className="prototype-frame"
-          src={prototypePath}
-          title={`${appName} workspace`}
-        />
-      )}
-    </main>
-  );
-}
 
 function IntegrationsPanel() {
   const [records, setRecords] = useState<Record<string, IntegrationRecord>>({});

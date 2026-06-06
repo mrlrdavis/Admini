@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useOrgData } from './useOrgData';
-import type { AdminiRole, OrgDetailsForm } from './types';
+import { useOrgData } from '../hooks/useOrgData';
+import type { AdminiRole, OrgDetailsForm } from '../types';
 
 // ---------------------------------------------------------------------------
 // AdminTab

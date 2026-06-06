@@ -8,15 +8,21 @@ import {
   listFeatureFlags,
   toggleFeatureFlag as toggleFeatureFlagSvc,
 } from '../services/organizationService';
-import type { OrgDetails, OrgDetailsForm, OrgMember, OrgFeatureFlag } from '../services/organizationService';
-import type { AdminiRole } from './types';
 
 import {
   listInvitations,
   createInvitation as createInvitationSvc,
   revokeInvitation as revokeInvitationSvc,
 } from '../services/invitationService';
-import type { OrgInvitation } from '../services/invitationService';
+
+import type {
+  OrgDetails,
+  OrgDetailsForm,
+  OrgMember,
+  OrgFeatureFlag,
+  AdminiRole,
+  OrgInvitation,
+} from '../types';
 
 // ---------------------------------------------------------------------------
 // Hook Return Type

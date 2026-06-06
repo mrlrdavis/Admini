@@ -1443,3 +1443,106 @@ body,
 .layout-shell .tab-item__label {
   font-size: 12px !important;
 }
+
+/* --- Workspace Status Bar (top bar with AdminI logo) --- */
+.workspace-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.workspace-status-bar__brand {
+  font-family: 'Unbounded', 'Arial Rounded MT Bold', 'Avenir Next Rounded', Nunito, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--sage-deep, #54745c);
+  letter-spacing: -0.02em;
+}
+
+.workspace-status-bar__signout {
+  background: transparent;
+  border: 1.5px solid rgba(84, 116, 92, 0.3);
+  border-radius: 999px;
+  color: var(--sage-deep, #54745c);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 34px;
+  padding: 0 14px;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.workspace-status-bar__signout:hover {
+  background: rgba(84, 116, 92, 0.08);
+  transform: translateY(-1px);
+}
+
+.workspace-status-bar__signout:active {
+  transform: scale(0.95);
+}
+
+/* Override signout to be an icon button aligned with Breathe style */
+.workspace-status-bar__signout {
+  align-items: center !important;
+  border: none !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  height: 36px !important;
+  justify-content: center !important;
+  min-height: unset !important;
+  padding: 0 !important;
+  width: 36px !important;
+}
+
+.workspace-status-bar__signout svg {
+  color: var(--sage-deep, #54745c);
+}
+
+/* Fix auth back-link position - move to top of story panel */
+.auth-story .back-link {
+  position: absolute !important;
+  top: 20px;
+  left: 20px;
+  min-height: 36px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  z-index: 10;
+}
+
+@media (max-width: 820px) {
+  .auth-story .back-link {
+    top: 14px;
+    left: 14px;
+  }
+}
+
+.auth-story {
+  position: relative;
+}
+
+/* Back link as arrow icon button matching Breathe size */
+.auth-story .back-link {
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+  border: 1.5px solid rgba(17, 17, 17, 0.72) !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  height: 40px !important;
+  justify-content: center !important;
+  min-height: unset !important;
+  padding: 0 !important;
+  width: 40px !important;
+}
+
+.auth-story .back-link:hover {
+  background: var(--sage-deep, #54745c) !important;
+  color: #ffffff !important;
+}
+
+.auth-story .back-link:hover svg {
+  stroke: #ffffff;
+}

@@ -13,10 +13,12 @@ import {
   signOut,
   signUpWithPassword,
   updateTaskStatus,
+  supabase,
   type CreateTaskInput,
   type AuthUser
 } from './supabase';
-import { WorkspaceShell } from './workspace/WorkspaceShell';
+import { SupabaseClientProvider, WorkspaceShell } from '@admini/workspace';
+import { TabBar } from '@admini/ui';
 
 type AuthView = 'home' | 'sign-in' | 'sign-up';
 type VisualMode = 'day' | 'night';
@@ -207,17 +209,22 @@ export function App() {
 
   // Authenticated and onboarded: render native WorkspaceShell
   return (
-    <WorkspaceShell
-      user={user}
-      userRole={userRole}
-      userName={userName}
-      schoolName={schoolName}
-      prototypePath={prototypePath}
-      onSignOut={() => {
-        signOut().finally(() => setUser(null));
-      }}
-      onResetUserData={resetUserData}
-    />
+    <SupabaseClientProvider client={supabase!}>
+      <WorkspaceShell
+        user={user}
+        userRole={onboardingAnswers?.role ?? 'staff'}
+        userName={userName}
+        schoolName={schoolName}
+        prototypePath={prototypePath}
+        onSignOut={() => {
+          signOut().finally(() => setUser(null));
+        }}
+        onResetUserData={resetUserData}
+        renderNavigation={({ activeTab, tabs, onTabChange }) => (
+          <TabBar tabs={tabs} activeTab={activeTab} onTabChange={onTabChange as (tabId: string) => void} />
+        )}
+      />
+    </SupabaseClientProvider>
   );
 }
 
@@ -434,7 +441,7 @@ function AuthStoryPanel({
 }) {
   return (
     <div className="auth-story">
-      <button className="back-link" type="button" onClick={onBack} onPointerEnter={playBubbleSound}>Back</button>
+      <button className="back-link" type="button" onClick={onBack} onPointerEnter={playBubbleSound} aria-label="Go back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg></button>
       <p className="time-greeting">{greeting}</p>
       <LogoLockup />
       <p className={compactTagline ? 'story-tagline story-tagline-small' : 'story-tagline'}>{tagline}</p>

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { listTasks, createTask, updateTaskStatus, type CreateTaskInput } from '../supabase';
+import { getClient } from '../services/getClient';
 
 // ---------------------------------------------------------------------------
 // IframeFallback Component
@@ -7,9 +7,17 @@ import { listTasks, createTask, updateTaskStatus, type CreateTaskInput } from '.
 // Renders a persistent iframe for unconverted workspace tabs.
 // The iframe is NEVER unmounted - visibility is toggled via display style.
 // Manages the postMessage bridge between the native shell and the iframe content.
-// Requirements: 4.1, 4.2, 4.3, 4.4, 4.5
+// Requirements: 6.1, 6.2, 6.3, 6.4
 
 type TaskStatusInput = 'open' | 'in_progress' | 'completed' | 'archived';
+
+interface CreateTaskInput {
+  title: string;
+  description?: string;
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+  status?: TaskStatusInput;
+  due_at?: string;
+}
 
 export interface IframeFallbackProps {
   src: string;
@@ -22,6 +30,48 @@ export interface IframeFallbackProps {
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+// ---------------------------------------------------------------------------
+// Task CRUD operations via shared Supabase client
+// ---------------------------------------------------------------------------
+
+async function listTasks() {
+  const client = getClient();
+  const { data, error } = await client
+    .from('tasks')
+    .select('*')
+    .neq('status', 'archived')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+async function createTask(input: CreateTaskInput) {
+  const client = getClient();
+  const { data, error } = await client
+    .from('tasks')
+    .insert(input)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+async function updateTaskStatus(id: string, status: TaskStatusInput) {
+  const client = getClient();
+  const { data, error } = await client
+    .from('tasks')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function IframeFallback({
   src,

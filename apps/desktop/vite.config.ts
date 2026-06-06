@@ -1,4 +1,4 @@
-import { fileURLToPath, URL } from 'node:url';
+﻿import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
@@ -29,7 +29,8 @@ export default defineConfig({
       '@admini/privacy': fileURLToPath(new URL('../../packages/privacy/src/index.ts', import.meta.url)),
       '@admini/api-client': fileURLToPath(new URL('../../packages/api-client/src/index.ts', import.meta.url)),
       '@admini/ui': fileURLToPath(new URL('../../packages/ui/src/index.ts', import.meta.url)),
-      '@admini/integrations': fileURLToPath(new URL('../../packages/integrations/src/index.ts', import.meta.url))
+      '@admini/integrations': fileURLToPath(new URL('../../packages/integrations/src/index.ts', import.meta.url)),
+      '@admini/workspace': fileURLToPath(new URL('../../packages/workspace/src/index.ts', import.meta.url))
     }
   }
 });

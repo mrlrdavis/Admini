@@ -1,0 +1,195 @@
+﻿/* ==========================================================================
+   DashboardTab styles
+   ========================================================================== */
+
+.dashboard-tab {
+  padding: var(--ws-space-lg);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+}
+
+.dashboard-tab--loading,
+.dashboard-tab--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+}
+
+.dashboard-tab__error-banner {
+  background: var(--ws-color-limestone);
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-lg);
+  text-align: center;
+}
+
+.dashboard-tab__retry-btn {
+  margin-top: var(--ws-space-md);
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  border: none;
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+}
+
+.dashboard-tab__retry-btn:hover {
+  background: var(--ws-color-sage-dark);
+}
+
+/* Greeting */
+.dashboard-tab__greeting h1 {
+  font-family: var(--ws-font-display);
+  font-size: var(--ws-font-size-xl);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-lg);
+  color: var(--ws-color-text);
+}
+
+/* KPI Cards - horizontal scroll container */
+.dashboard-tab__kpis {
+  display: flex;
+  gap: var(--ws-space-md);
+  overflow-x: auto;
+  padding-bottom: var(--ws-space-sm);
+  margin-bottom: var(--ws-space-xl);
+  scroll-snap-type: x mandatory;
+}
+
+.dashboard-tab__kpis > * {
+  flex: 0 0 auto;
+  min-width: 8rem;
+  scroll-snap-align: start;
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  box-shadow: var(--ws-shadow-card);
+  padding: var(--ws-space-md) var(--ws-space-lg);
+}
+
+/* Priority Queue */
+.dashboard-tab__priority-queue {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.dashboard-tab__priority-queue h2 {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-md);
+}
+
+.dashboard-tab__task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.dashboard-tab__task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-md);
+  box-shadow: var(--ws-shadow-card);
+  border-left: 3px solid var(--ws-color-sage);
+}
+
+.dashboard-tab__task-item[data-priority="urgent"] {
+  border-left-color: var(--ws-color-priority-urgent);
+}
+
+.dashboard-tab__task-item[data-priority="high"] {
+  border-left-color: var(--ws-color-priority-high);
+}
+
+.dashboard-tab__task-item[data-priority="low"] {
+  border-left-color: var(--ws-color-priority-low);
+}
+
+.dashboard-tab__task-title {
+  flex: 1;
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+}
+
+.dashboard-tab__task-priority {
+  font-size: var(--ws-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ws-color-text-muted);
+}
+
+.dashboard-tab__task-due {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+}
+
+/* Activity Feed */
+.dashboard-tab__activity-feed {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.dashboard-tab__activity-feed h2 {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-md);
+}
+
+.dashboard-tab__event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.dashboard-tab__event-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-md);
+}
+
+.dashboard-tab__event-action {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
+}
+
+.dashboard-tab__event-time {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+}
+
+/* Pulse Countdown */
+.dashboard-tab__pulse-countdown {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.dashboard-tab__pulse-countdown h2 {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-sm);
+}
+
+.dashboard-tab__countdown-value {
+  font-family: var(--ws-font-display);
+  font-size: var(--ws-font-size-2xl);
+  font-weight: 700;
+  color: var(--ws-color-sage);
+}
+
+/* Empty states */
+.dashboard-tab__empty {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  font-style: italic;
+}

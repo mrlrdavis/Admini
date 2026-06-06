@@ -1,0 +1,113 @@
+﻿/* ==========================================================================
+   MoreTab styles
+   ========================================================================== */
+
+.more-tab {
+  padding: var(--ws-space-lg);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+}
+
+/* Header */
+.more-tab__header {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.more-tab__title {
+  font-family: var(--ws-font-display);
+  font-size: var(--ws-font-size-xl);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Sections */
+.more-tab__section {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.more-tab__section-title {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ws-color-text-muted);
+  margin: 0 0 var(--ws-space-md);
+}
+
+/* List items */
+.more-tab__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  box-shadow: var(--ws-shadow-card);
+  overflow: hidden;
+}
+
+.more-tab__list-item {
+  border-bottom: 1px solid var(--ws-color-border);
+}
+
+.more-tab__list-item:last-child {
+  border-bottom: none;
+}
+
+.more-tab__link-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  width: 100%;
+  padding: var(--ws-space-md) var(--ws-space-lg);
+  border: none;
+  background: transparent;
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+  text-align: left;
+}
+
+.more-tab__link-btn:hover {
+  background: var(--ws-color-limestone);
+}
+
+.more-tab__link-icon {
+  font-size: var(--ws-font-size-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+}
+
+.more-tab__link-label {
+  font-weight: 400;
+}
+
+/* Account actions */
+.more-tab__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+}
+
+.more-tab__sign-out-btn {
+  width: 100%;
+  padding: var(--ws-space-md);
+  background: transparent;
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-card);
+  color: var(--ws-color-error);
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  transition: all var(--ws-transition-fast);
+}
+
+.more-tab__sign-out-btn:hover {
+  background: var(--ws-color-error);
+  color: var(--ws-color-white);
+}
