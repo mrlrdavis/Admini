@@ -23,3 +23,12 @@ export function useThemeMode() {
 
 export const navViews = ['dashboard', 'capture', 'tasks', 'observations', 'integrations', 'settings'] as const;
 export type NavView = (typeof navViews)[number];
+
+export { LayoutShell } from './LayoutShell';
+export type { LayoutShellProps } from './LayoutShell';
+
+export { TabBar } from './TabBar';
+export type { TabBarProps, TabItem } from './TabBar';
+
+export { KPICard } from './KPICard';
+export type { KPICardProps } from './KPICard';

@@ -1,5 +1,19 @@
 import { createIndexedDbStorage } from '@admini/shared';
 import { createClient, type Provider, type User } from '@supabase/supabase-js';
+import {
+  getOrgDetails as _getOrgDetails,
+  updateOrgDetails as _updateOrgDetails,
+  listOrgMembers as _listOrgMembers,
+  updateMemberRole as _updateMemberRole,
+  listFeatureFlags as _listFeatureFlags,
+  toggleFeatureFlag as _toggleFeatureFlag,
+} from './services/organizationService';
+import type { OrgDetails, OrgDetailsForm, OrgMember, AdminiRole, OrgFeatureFlag } from './services/organizationService';
+import {
+  listInvitations as _listInvitations,
+  createInvitation as _createInvitation,
+} from './services/invitationService';
+import type { OrgInvitation, InvitationRole } from './services/invitationService';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
@@ -241,11 +255,42 @@ export async function signInWithOAuthProvider(provider: Extract<Provider, 'googl
   if (data.url) window.location.assign(data.url);
 }
 
-
-
-
 export async function signOut(): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }
+
+// ---------------------------------------------------------------------------
+// Organization Management - thin wrappers delegating to service layer
+// (Backward-compatible exports so existing imports from supabase.ts still work)
+// Requirements: 8.1, 8.2, 8.3, 8.4
+// ---------------------------------------------------------------------------
+
+// Re-export types for consumers
+export type { OrgDetails, OrgDetailsForm, OrgMember, AdminiRole, OrgFeatureFlag };
+export type { OrgInvitation, InvitationRole };
+
+/** Fetch organization details by ID. Delegates to organizationService. */
+export const getOrgDetails = _getOrgDetails;
+
+/** Update organization details (partial). Delegates to organizationService. */
+export const updateOrgDetails = _updateOrgDetails;
+
+/** List all members of an organization. Delegates to organizationService. */
+export const listOrgMembers = _listOrgMembers;
+
+/** Update a member's role. Delegates to organizationService. */
+export const updateMemberRole = _updateMemberRole;
+
+/** List all invitations for an organization. Delegates to invitationService. */
+export const listInvitations = _listInvitations;
+
+/** Create a new invitation. Delegates to invitationService. */
+export const createInvitation = _createInvitation;
+
+/** List all feature flags for an organization. Delegates to organizationService. */
+export const listFeatureFlags = _listFeatureFlags;
+
+/** Toggle a feature flag's enabled state. Delegates to organizationService. */
+export const toggleFeatureFlag = _toggleFeatureFlag;

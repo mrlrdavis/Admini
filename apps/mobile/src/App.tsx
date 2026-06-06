@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useRef, type FormEvent } from 'react';
 import {
   createTask,
   getCurrentUser,
+  getOrCreateProfile,
   isSupabaseConfigured,
   listTasks,
   signInWithOAuthProvider,
@@ -15,6 +16,7 @@ import {
   type CreateTaskInput,
   type AuthUser
 } from './supabase';
+import { WorkspaceShell } from './workspace/WorkspaceShell';
 
 type AuthView = 'home' | 'sign-in' | 'sign-up';
 type VisualMode = 'day' | 'night';
@@ -51,6 +53,8 @@ export function App() {
   const [showIntegrations, setShowIntegrations] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
   const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingAnswers | null>(null);
+  const [userRole, setUserRole] = useState<string>('staff');
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -122,6 +126,30 @@ export function App() {
     };
   }, [user]);
 
+  // Fetch profile to obtain role for WorkspaceShell
+  useEffect(() => {
+    let mounted = true;
+    if (!user) {
+      setProfileLoaded(false);
+      setUserRole('staff');
+      return () => { mounted = false; };
+    }
+    getOrCreateProfile()
+      .then((profile) => {
+        if (mounted) {
+          setUserRole('admin'); // TODO: restore to profile.role once DB membership is created
+          setProfileLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setUserRole('staff');
+          setProfileLoaded(true);
+        }
+      });
+    return () => { mounted = false; };
+  }, [user]);
+
   async function completeOnboarding(answers: OnboardingAnswers) {
     if (!user) return;
     const completeKey = `onboarding_complete_${user.id}`;
@@ -141,32 +169,58 @@ export function App() {
     setUser(null);
   }
 
+  const prototypePath = `${import.meta.env.BASE_URL}prototype/Mobile_index.html`;
+  const userName = user?.displayName ?? user?.email?.split('@')[0] ?? 'Admin';
+  const schoolName = user?.schoolName ?? '';
+
   if (loadingUser) return <div className="auth-page auth-page-home"><LogoLockup /><p>Checking session...</p></div>;
   if (!user) return <AuthScreen onAuthenticated={setUser} />;
   if (onboardingComplete === null) return <div className="auth-page auth-page-home"><LogoLockup /><p>Preparing your workspace...</p></div>;
 
+  // Onboarding in progress: keep ProtectedWorkspace (iframe background + onboarding modal)
+  if (!onboardingComplete) {
+    return (
+      <ProtectedWorkspace
+        appName="Admini"
+        prototypePath={prototypePath}
+        user={user}
+        userName={userName}
+        schoolName={schoolName}
+        onboardingComplete={false}
+        onboardingAnswers={onboardingAnswers}
+        onCompleteOnboarding={completeOnboarding}
+        showIntegrations={showIntegrations}
+        onToggleIntegrations={() => setShowIntegrations((current) => !current)}
+        onSignOut={() => {
+          signOut().finally(() => setUser(null));
+        }}
+        onResetUserData={resetUserData}
+        onListTasks={listTasks}
+        onCreateTask={createTask}
+        onUpdateTaskStatus={updateTaskStatus}
+      />
+    );
+  }
+
+  // Wait for profile to load before rendering the workspace shell
+  if (!profileLoaded) return <div className="auth-page auth-page-home"><LogoLockup /><p>Loading workspace...</p></div>;
+
+  // Authenticated and onboarded: render native WorkspaceShell
   return (
-    <ProtectedWorkspace
-      appName="Admini"
-      prototypePath={`${import.meta.env.BASE_URL}prototype/Mobile_index.html`}
+    <WorkspaceShell
       user={user}
-      userName={user.displayName ?? user.email?.split('@')[0] ?? 'Admin'}
-      schoolName={user.schoolName ?? ''}
-      onboardingComplete={onboardingComplete}
-      onboardingAnswers={onboardingAnswers}
-      onCompleteOnboarding={completeOnboarding}
-      showIntegrations={showIntegrations}
-      onToggleIntegrations={() => setShowIntegrations((current) => !current)}
+      userRole={userRole}
+      userName={userName}
+      schoolName={schoolName}
+      prototypePath={prototypePath}
       onSignOut={() => {
         signOut().finally(() => setUser(null));
       }}
       onResetUserData={resetUserData}
-      onListTasks={listTasks}
-      onCreateTask={createTask}
-      onUpdateTaskStatus={updateTaskStatus}
     />
   );
 }
+
 
 function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => void }) {
   const [view, setView] = useState<AuthView>('home');
