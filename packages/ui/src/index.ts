@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -25,10 +25,13 @@ export const navViews = ['dashboard', 'capture', 'tasks', 'observations', 'integ
 export type NavView = (typeof navViews)[number];
 
 export { LayoutShell } from './LayoutShell';
-export type { LayoutShellProps } from './LayoutShell';
+export type { LayoutShellProps, LayoutMode } from './LayoutShell';
 
 export { TabBar } from './TabBar';
 export type { TabBarProps, TabItem } from './TabBar';
 
 export { KPICard } from './KPICard';
 export type { KPICardProps } from './KPICard';
+export { Skeleton, SkeletonCard } from './Skeleton';
+export type { SkeletonProps, SkeletonCardProps } from './Skeleton';
+
