@@ -1,0 +1,12 @@
+﻿{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src/types.ts",
+    "src/services/getClient.ts",
+    "src/services/dashboardService.ts",
+    "src/services/organizationService.ts",
+    "src/services/invitationService.ts",
+    "src/providers/SupabaseClientProvider.tsx",
+    "src/hooks/useOrgData.ts"
+  ]
+}

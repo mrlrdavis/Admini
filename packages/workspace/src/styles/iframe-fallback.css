@@ -1,0 +1,23 @@
+﻿/* ==========================================================================
+   IframeFallback styles
+   ========================================================================== */
+
+/*
+ * IframeFallback visibility is managed inline via the component's style prop.
+ * These styles provide a base layer for consistent rendering when visible.
+ * No fixed heights or viewport-unit widths - the iframe fills its container.
+ */
+
+.iframe-fallback {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+.iframe-fallback--hidden {
+  display: none;
+}
+
+.iframe-fallback--visible {
+  display: block;
+}

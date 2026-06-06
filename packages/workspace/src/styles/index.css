@@ -1,0 +1,70 @@
+/* ==========================================================================
+   @admini/workspace — Shared styles entry point
+   Design Tokens: sage/limestone palette, rounded cards, horizontal-scroll KPIs
+   ========================================================================== */
+
+@import './dashboard.css';
+@import './admin.css';
+@import './capture.css';
+@import './tasks.css';
+@import './pulse.css';
+@import './more.css';
+@import './iframe-fallback.css';
+
+/* --------------------------------------------------------------------------
+   Design Tokens (CSS Custom Properties)
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Colors */
+  --ws-color-sage: #6B8E6B;
+  --ws-color-sage-light: #8FB38F;
+  --ws-color-sage-dark: #4A6B4A;
+  --ws-color-limestone: #F5F3EE;
+  --ws-color-limestone-dark: #E8E5DE;
+  --ws-color-white: #FFFFFF;
+  --ws-color-text: #2D3436;
+  --ws-color-text-muted: #636E72;
+  --ws-color-border: #DFE6E9;
+  --ws-color-error: #D63031;
+  --ws-color-success: #00B894;
+  --ws-color-warning: #FDCB6E;
+
+  /* Priority colors */
+  --ws-color-priority-urgent: #D63031;
+  --ws-color-priority-high: #E17055;
+  --ws-color-priority-normal: #6B8E6B;
+  --ws-color-priority-low: #636E72;
+
+  /* Typography */
+  --ws-font-body: system-ui, -apple-system, sans-serif;
+  --ws-font-display: 'Tomorrow', system-ui, -apple-system, sans-serif;
+  --ws-font-size-xs: 0.75rem;
+  --ws-font-size-sm: 0.875rem;
+  --ws-font-size-base: 1rem;
+  --ws-font-size-lg: 1.125rem;
+  --ws-font-size-xl: 1.5rem;
+  --ws-font-size-2xl: 2rem;
+
+  /* Spacing */
+  --ws-space-xs: 0.25rem;
+  --ws-space-sm: 0.5rem;
+  --ws-space-md: 1rem;
+  --ws-space-lg: 1.5rem;
+  --ws-space-xl: 2rem;
+  --ws-space-2xl: 3rem;
+
+  /* Radii */
+  --ws-radius-sm: 6px;
+  --ws-radius-md: 8px;
+  --ws-radius-card: 12px;
+  --ws-radius-pill: 9999px;
+
+  /* Shadows */
+  --ws-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --ws-shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --ws-transition-fast: 150ms ease;
+  --ws-transition-normal: 250ms ease;
+}

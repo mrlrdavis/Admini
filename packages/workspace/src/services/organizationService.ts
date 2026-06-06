@@ -1,40 +1,5 @@
-﻿import { supabase } from './supabaseClient';
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type AdminiRole = 'admin' | 'principal' | 'teacher' | 'staff';
-
-export interface OrgDetails {
-  id: string;
-  name: string;
-  slug: string | null;
-  address: string | null;
-  contactEmail: string | null;
-  contactPhone: string | null;
-}
-
-export interface OrgDetailsForm {
-  name?: string;
-  address?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-}
-
-export interface OrgMember {
-  profileId: string;
-  email: string;
-  displayName: string;
-  role: AdminiRole;
-  joinedAt: string;
-}
-
-export interface OrgFeatureFlag {
-  id: string;
-  flagKey: string;
-  enabled: boolean;
-}
+import { getClient } from './getClient';
+import type { AdminiRole, OrgDetails, OrgDetailsForm, OrgMember, OrgFeatureFlag } from '../types';
 
 // ---------------------------------------------------------------------------
 // Internal DB row types
@@ -68,13 +33,6 @@ type DbFeatureFlag = {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function getClient() {
-  if (!supabase) {
-    throw new Error('Supabase is not configured for this environment.');
-  }
-  return supabase;
-}
 
 class ServiceError extends Error {
   constructor(message: string, public readonly code?: string) {

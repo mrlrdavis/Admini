@@ -1,0 +1,248 @@
+﻿/* ==========================================================================
+   AdminTab styles
+   ========================================================================== */
+
+.admin-tab {
+  padding: var(--ws-space-lg);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+}
+
+.admin-tab--loading,
+.admin-tab--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+}
+
+.admin-tab__title {
+  font-family: var(--ws-font-display);
+  font-size: var(--ws-font-size-xl);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-xl);
+}
+
+.admin-tab__section {
+  margin-bottom: var(--ws-space-xl);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-lg);
+  box-shadow: var(--ws-shadow-card);
+}
+
+.admin-tab__section-title {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-md);
+  color: var(--ws-color-text);
+}
+
+.admin-tab__subsection-title {
+  font-size: var(--ws-font-size-base);
+  font-weight: 600;
+  margin: var(--ws-space-lg) 0 var(--ws-space-sm);
+}
+
+/* Form */
+.admin-tab__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+}
+
+.admin-tab__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+}
+
+.admin-tab__field-label {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-text-muted);
+}
+
+.admin-tab__input {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-md);
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  background: var(--ws-color-limestone);
+  transition: border-color var(--ws-transition-fast);
+}
+
+.admin-tab__input:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+}
+
+.admin-tab__submit {
+  align-self: flex-start;
+  padding: var(--ws-space-sm) var(--ws-space-xl);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  border: none;
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+}
+
+.admin-tab__submit:hover {
+  background: var(--ws-color-sage-dark);
+}
+
+.admin-tab__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Messages */
+.admin-tab__error-message {
+  color: var(--ws-color-error);
+  font-size: var(--ws-font-size-sm);
+  margin: var(--ws-space-sm) 0;
+}
+
+.admin-tab__success-message {
+  color: var(--ws-color-success);
+  font-size: var(--ws-font-size-sm);
+  margin: var(--ws-space-sm) 0;
+}
+
+/* Member list */
+.admin-tab__member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.admin-tab__member-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-sm) 0;
+  border-bottom: 1px solid var(--ws-color-border);
+}
+
+.admin-tab__member-item:last-child {
+  border-bottom: none;
+}
+
+.admin-tab__member-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+}
+
+.admin-tab__member-name {
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+}
+
+.admin-tab__member-email {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+}
+
+.admin-tab__role-select {
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+  background: var(--ws-color-white);
+  color: var(--ws-color-text);
+}
+
+.admin-tab__loading-indicator {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+}
+
+/* Invitations */
+.admin-tab__invite-form {
+  margin-bottom: var(--ws-space-lg);
+}
+
+.admin-tab__invitation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.admin-tab__invitation-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-sm);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-md);
+}
+
+.admin-tab__invitation-email {
+  flex: 1;
+  font-size: var(--ws-font-size-sm);
+}
+
+.admin-tab__invitation-role {
+  font-size: var(--ws-font-size-xs);
+  text-transform: capitalize;
+  color: var(--ws-color-text-muted);
+}
+
+.admin-tab__invitation-status {
+  font-size: var(--ws-font-size-xs);
+  text-transform: capitalize;
+  color: var(--ws-color-sage);
+}
+
+/* Feature flags */
+.admin-tab__flag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.admin-tab__flag-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-sm) 0;
+}
+
+.admin-tab__flag-label {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-sm);
+  cursor: pointer;
+}
+
+.admin-tab__flag-toggle {
+  accent-color: var(--ws-color-sage);
+}
+
+.admin-tab__flag-key {
+  font-size: var(--ws-font-size-sm);
+  font-family: monospace;
+}
+
+/* Empty state */
+.admin-tab__empty {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  font-style: italic;
+}

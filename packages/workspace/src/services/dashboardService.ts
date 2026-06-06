@@ -1,7 +1,8 @@
-﻿import { supabase } from './supabaseClient';
+import { getClient } from './getClient';
+import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
 
 // ---------------------------------------------------------------------------
-// Types
+// Internal DB row types
 // ---------------------------------------------------------------------------
 
 /** Raw row shape returned by the tasks table. */
@@ -29,39 +30,9 @@ type DbSyncEvent = {
   created_at: string;
 };
 
-/** Application-layer task representation (camelCase). */
-export type DashboardTask = {
-  id: string;
-  organizationId: string;
-  createdBy: string;
-  title: string;
-  description?: string;
-  priority: DbTask['priority'];
-  status: DbTask['status'];
-  dueAt?: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-/** Activity event surfaced in the dashboard feed. */
-export type ActivityEvent = {
-  id: string;
-  organizationId: string;
-  actorId: string;
-  entityType: string;
-  entityId: string;
-  action: string;
-  createdAt: string;
-};
-
-/** KPI metrics computed from task data. */
-export type DashboardKPIs = {
-  openTasks: number;
-  completedThisWeek: number;
-  overdueTasks: number;
-  /** ISO string of the next scheduled pulse check-in, or null if unavailable. */
-  nextPulseAt: string | null;
-};
+// ---------------------------------------------------------------------------
+// Errors
+// ---------------------------------------------------------------------------
 
 /** Typed error thrown by dashboard service functions. */
 export class DashboardServiceError extends Error {
@@ -78,17 +49,15 @@ export class DashboardServiceError extends Error {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function requireClient() {
-  if (!supabase) {
-    throw new DashboardServiceError(
-      'Supabase is not configured for this environment.',
-      'NOT_CONFIGURED',
-    );
-  }
-  return supabase;
-}
+/** Priority weight for sort ordering (higher = more urgent). */
+const PRIORITY_WEIGHT: Record<DashboardTask['priority'], number> = {
+  urgent: 4,
+  high: 3,
+  normal: 2,
+  low: 1,
+};
 
-function mapTask(row: DbTask): DashboardTask {
+export function mapTask(row: DbTask): DashboardTask {
   return {
     id: row.id,
     organizationId: row.organization_id,
@@ -103,7 +72,7 @@ function mapTask(row: DbTask): DashboardTask {
   };
 }
 
-function mapSyncEvent(row: DbSyncEvent): ActivityEvent {
+export function mapSyncEvent(row: DbSyncEvent): ActivityEvent {
   return {
     id: row.id,
     organizationId: row.organization_id,
@@ -127,6 +96,32 @@ function startOfCurrentWeek(): string {
 }
 
 // ---------------------------------------------------------------------------
+// Sort Comparator
+// ---------------------------------------------------------------------------
+
+/**
+ * Sort comparator for DashboardTask[].
+ * Orders by priority descending (urgent > high > normal > low),
+ * then by dueAt ascending (earliest due first; tasks without dueAt sort last).
+ *
+ * Requirements: 3.5, 10.5
+ */
+export function sortByUrgency(a: DashboardTask, b: DashboardTask): number {
+  // Higher priority first
+  const priorityDiff = PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority];
+  if (priorityDiff !== 0) return priorityDiff;
+
+  // Earlier due date first; undefined dueAt sorts to the end
+  if (a.dueAt && b.dueAt) {
+    return a.dueAt < b.dueAt ? -1 : a.dueAt > b.dueAt ? 1 : 0;
+  }
+  if (a.dueAt && !b.dueAt) return -1;
+  if (!a.dueAt && b.dueAt) return 1;
+
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -137,7 +132,7 @@ function startOfCurrentWeek(): string {
  * Requirements: 3.2, 3.3, 3.5
  */
 export async function getTasks(): Promise<DashboardTask[]> {
-  const client = requireClient();
+  const client = getClient();
 
   try {
     const { data, error } = await client
@@ -170,7 +165,7 @@ export async function getTasks(): Promise<DashboardTask[]> {
  * Requirements: 3.4
  */
 export async function getActivityEvents(): Promise<ActivityEvent[]> {
-  const client = requireClient();
+  const client = getClient();
 
   try {
     const { data, error } = await client
@@ -204,7 +199,7 @@ export async function getActivityEvents(): Promise<ActivityEvent[]> {
  * Requirements: 3.2, 3.5, 3.6
  */
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
-  const client = requireClient();
+  const client = getClient();
 
   try {
     const now = new Date().toISOString();

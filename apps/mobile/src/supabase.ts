@@ -1,19 +1,29 @@
-import { createIndexedDbStorage } from '@admini/shared';
+﻿import { createIndexedDbStorage } from '@admini/shared';
 import { createClient, type Provider, type User } from '@supabase/supabase-js';
 import {
-  getOrgDetails as _getOrgDetails,
-  updateOrgDetails as _updateOrgDetails,
-  listOrgMembers as _listOrgMembers,
-  updateMemberRole as _updateMemberRole,
-  listFeatureFlags as _listFeatureFlags,
-  toggleFeatureFlag as _toggleFeatureFlag,
-} from './services/organizationService';
-import type { OrgDetails, OrgDetailsForm, OrgMember, AdminiRole, OrgFeatureFlag } from './services/organizationService';
-import {
-  listInvitations as _listInvitations,
-  createInvitation as _createInvitation,
-} from './services/invitationService';
-import type { OrgInvitation, InvitationRole } from './services/invitationService';
+  organizationService,
+  invitationService,
+} from '@admini/workspace';
+import type {
+  OrgDetails,
+  OrgDetailsForm,
+  OrgMember,
+  AdminiRole,
+  OrgFeatureFlag,
+  OrgInvitation,
+} from '@admini/workspace';
+
+// InvitationRole is identical to AdminiRole — alias for backward compatibility
+type InvitationRole = AdminiRole;
+
+const _getOrgDetails = organizationService.getOrgDetails;
+const _updateOrgDetails = organizationService.updateOrgDetails;
+const _listOrgMembers = organizationService.listOrgMembers;
+const _updateMemberRole = organizationService.updateMemberRole;
+const _listFeatureFlags = organizationService.listFeatureFlags;
+const _toggleFeatureFlag = organizationService.toggleFeatureFlag;
+const _listInvitations = invitationService.listInvitations;
+const _createInvitation = invitationService.createInvitation;
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
@@ -24,7 +34,7 @@ function getAuthRedirectTo(): string {
   return new URL(import.meta.env.BASE_URL, window.location.origin).toString();
 }
 
-const supabase = supabaseUrl && supabaseKey
+export const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: true,
@@ -262,7 +272,7 @@ export async function signOut(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Organization Management - thin wrappers delegating to service layer
+// Organization Management - thin wrappers delegating to @admini/workspace
 // (Backward-compatible exports so existing imports from supabase.ts still work)
 // Requirements: 8.1, 8.2, 8.3, 8.4
 // ---------------------------------------------------------------------------

@@ -21,7 +21,8 @@
       "@admini/privacy": ["packages/privacy/src/index.ts"],
       "@admini/api-client": ["packages/api-client/src/index.ts"],
       "@admini/ui": ["packages/ui/src/index.ts"],
-      "@admini/integrations": ["packages/integrations/src/index.ts"]
+      "@admini/integrations": ["packages/integrations/src/index.ts"],
+      "@admini/workspace": ["packages/workspace/src/index.ts"]
     }
   }
 }
