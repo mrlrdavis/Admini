@@ -178,7 +178,8 @@
 
 .tasks-tab__empty-title {
   font-size: var(--ws-font-size-lg);
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--ws-color-text);
   margin: 0 0 var(--ws-space-sm);
 }
 
@@ -186,6 +187,8 @@
   font-size: var(--ws-font-size-sm);
   color: var(--ws-color-text-muted);
   margin: 0;
+  max-width: 24ch;
+  margin-inline: auto;
 }
 
 /* FAB */
@@ -200,13 +203,15 @@
   height: 3.5rem;
   border-radius: 50%;
   border: none;
-  background: var(--ws-color-sage);
+  background: var(--ws-color-sage-dark);
   color: var(--ws-color-white);
   box-shadow: var(--ws-shadow-elevated);
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition: transform var(--ws-transition-fast), box-shadow var(--ws-transition-fast);
 }
 
-.tasks-tab__fab:hover {
-  background: var(--ws-color-sage-dark);
+.tasks-tab__fab:hover,
+.tasks-tab__fab:active {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(74, 107, 74, 0.25);
 }

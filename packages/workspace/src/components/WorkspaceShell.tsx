@@ -23,23 +23,29 @@ export const NATIVE_TABS: ReadonlySet<WorkspaceTab> = new Set([
 export function WorkspaceShell({
   user,
   userRole,
+  organizationId,
   userName,
   schoolName,
   prototypePath,
   onSignOut,
+  onDeleteAccount,
   onResetUserData,
+  onProfileUpdated,
   renderNavigation,
 }: WorkspaceShellProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('dashboard');
 
-  // Role guard: redirect non-admin users away from the admin tab
+  // Admin/principal can access the admin tab (REQ-16)
+  const canAccessAdmin = userRole === 'admin' || userRole === 'principal';
+
+  // Role guard: redirect non-admin/principal users away from the admin tab
   useEffect(() => {
-    if (activeTab === 'admin' && userRole !== 'admin') {
+    if (activeTab === 'admin' && !canAccessAdmin) {
       setActiveTab('dashboard');
     }
-  }, [activeTab, userRole]);
+  }, [activeTab, canAccessAdmin]);
 
-  // Build tab list, conditionally including Admin for admin role
+  // Build tab list, conditionally including Admin for admin/principal roles
   const visibleTabs: TabItem[] = useMemo(() => {
     const base: TabItem[] = [
       { id: 'capture', label: 'Capture' },
@@ -48,21 +54,25 @@ export function WorkspaceShell({
       { id: 'pulse', label: 'Pulse' },
       { id: 'more', label: 'More' },
     ];
-    if (userRole === 'admin') {
+    if (canAccessAdmin) {
       base.push({ id: 'admin', label: 'Admin' });
     }
     return base;
-  }, [userRole]);
+  }, [canAccessAdmin]);
 
   // IframeFallback visibility
   const iframeVisible = !NATIVE_TABS.has(activeTab);
 
-  // User payload for iframe bridge
+  // User payload for iframe bridge.
+  // Must match the format expected by prototype HTML message listeners:
+  // type: 'user' with name, email, schoolName, role at root level.
   const userPayload = useMemo(() => ({
-    type: 'user-data',
-    user: { id: user.id, email: user.email, displayName: userName, schoolName },
+    type: 'user',
+    name: userName,
+    email: user.email ?? '',
+    schoolName,
     role: userRole,
-  }), [user.id, user.email, userName, schoolName, userRole]);
+  }), [user.email, userName, schoolName, userRole]);
 
   function handleTabChange(tabId: string) {
     setActiveTab(tabId as WorkspaceTab);
@@ -71,11 +81,11 @@ export function WorkspaceShell({
   function renderTabContent(): ReactNode {
     switch (activeTab) {
       case 'dashboard': return <DashboardTab userName={userName} />;
-      case 'admin': return userRole === 'admin' ? <AdminTab organizationId={user.id} /> : null;
+      case 'admin': return canAccessAdmin ? <AdminTab organizationId={organizationId ?? user.id} userRole={userRole} /> : null;
       case 'capture': return <CaptureTab />;
       case 'tasks': return <TasksTab />;
       case 'pulse': return <PulseTab />;
-      case 'more': return <MoreTab onSignOut={onSignOut} />;
+      case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;
       default: return null;
     }
   }
@@ -88,8 +98,10 @@ export function WorkspaceShell({
         src={prototypePath}
         visible={iframeVisible}
         userPayload={userPayload}
+        userRole={userRole}
         onSignOut={onSignOut}
         onResetUserData={onResetUserData}
+        onProfileUpdated={onProfileUpdated}
       />
     </>
   );

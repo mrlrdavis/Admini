@@ -1,7 +1,7 @@
 /**
- * AdminI Mobile App — app.js
+ * AdminI Mobile App ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â app.js
  * All interactivity: tab switching, recording, word board, dark mode, etc.
- * In-memory state only — no persistent storage used.
+ * In-memory state only ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â no persistent storage used.
  */
 
 const App = (function () {
@@ -24,7 +24,7 @@ const App = (function () {
   // =========================================
   // QUICK CAPTURES DATA
   // =========================================
-  // No default quick captures for real users — start empty
+  // No default quick captures for real users ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â start empty
   const defaultQuickCaptures = [];
 
   let quickCaptures = JSON.parse(JSON.stringify(defaultQuickCaptures));
@@ -148,11 +148,11 @@ const App = (function () {
 
   // Word icon map
   const wordIcons = {
-    'Parent': '👤', 'Student': '🎒', 'Teacher': '📚', 'Staff': '🏫', 'Counselor': '💬', 'Visitor': '🚪',
-    'Concern': '⚠️', 'Praise': '⭐', 'Request': '📋', 'Incident': '🚨', 'Follow-up': '🔄', 'Reminder': '🔔', 'Observation': '👁️',
-    'Urgent': '🔴', 'High': '🟠', 'Normal': '🟢', 'Low': '⚪',
-    'Safety': '🛡️', 'Academic': '📖', 'Behavior': '🤝', 'Facilities': '🏗️', 'Budget': '💰', 'Schedule': '📅', 'Health': '❤️',
-    'Office': '🏢', 'Hallway': '🚶', 'Cafeteria': '🍽️', 'Gym': '🏀', 'Classroom': '✏️', 'Playground': '🎡', 'Parking': '🅿️', 'Library': '📕'
+    'Parent': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“Ãƒâ€šÃ‚Â¤', 'Student': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢', 'Teacher': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¦Ã‚Â¡', 'Staff': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â«', 'Counselor': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¬', 'Visitor': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Âª',
+    'Concern': 'ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â', 'Praise': 'ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚Â­Ãƒâ€šÃ‚Â', 'Request': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹', 'Incident': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¨', 'Follow-up': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾', 'Reminder': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â', 'Observation': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â',
+    'Urgent': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒâ€šÃ‚Â´', 'High': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â ', 'Normal': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¢', 'Low': 'ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Âª',
+    'Safety': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂºÃƒâ€šÃ‚Â¡ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â', 'Academic': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“', 'Behavior': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¤Ãƒâ€šÃ‚Â', 'Facilities': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â', 'Budget': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â°', 'Schedule': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦', 'Health': 'ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â',
+    'Office': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¢', 'Hallway': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¶', 'Cafeteria': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â', 'Gym': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬', 'Classroom': 'ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â', 'Playground': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½Ãƒâ€šÃ‚Â¡', 'Parking': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â', 'Library': 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢'
   };
 
   const wordIconChoices = [
@@ -178,13 +178,15 @@ const App = (function () {
   // =========================================
   // STATE
   // =========================================
+  let currentUserRole = '';
+
   const state = {
     activeTab: 'capture',
     captureMode: 'voice',
     isRecording: false,
     recordingInterval: null,
     selectedWords: {},          // { who: 'Parent', what: 'Concern', ... }
-    // No demo captures — empty for new users
+    // No demo captures ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â empty for new users
     recentCaptures: [],
     theme: null,
     boardEditing: false,
@@ -243,6 +245,7 @@ const App = (function () {
       if (!value) return;
       if (label === 'Name') value.textContent = name || 'Not provided';
       if (label === 'School') value.textContent = schoolName;
+      if (label === 'Email') value.textContent = profile?.email || 'Not provided';
       if (label === 'Role') value.textContent = role;
     });
   }
@@ -255,6 +258,7 @@ const App = (function () {
   }
 
   function applyUserProfile(profile) {
+    currentUserRole = (profile?.role || '').toLowerCase();
     setProfileText(profile);
   }
 
@@ -277,7 +281,15 @@ const App = (function () {
     startPulseTimer();
     initMobObs();
     loadPersistedTasks();
+    initProfileEditButtons();
     window.AdminiPrototype = { applyUserProfile };
+
+    // Refresh task list when the page regains visibility (multi-device consistency)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        loadPersistedTasks();
+      }
+    });
   }
 
   function initTheme() {
@@ -511,7 +523,7 @@ const App = (function () {
 
   function editCapture() {
     // Focus on transcription for editing (simulated)
-    showToast('Edit mode — tap confirm when done');
+    showToast('Edit mode ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â tap confirm when done');
   }
 
   function resetVoiceCapture() {
@@ -560,7 +572,7 @@ const App = (function () {
   }
 
   // =========================================
-  // WORD BOARD — DYNAMIC RENDERING
+  // WORD BOARD ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â DYNAMIC RENDERING
   // =========================================
   function renderWordBoard() {
     const board = document.getElementById('word-board');
@@ -592,7 +604,7 @@ const App = (function () {
     let sectionsHTML = wordBoardData.map(section => {
       const colClass = gridColClass[section.cat] || '';
       const wordsHTML = section.words.map(word => {
-        const icon = wordIcons[word] || '📌';
+        const icon = wordIcons[word] || 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¦Ã¢â‚¬â„¢';
         const isSelected = state.selectedWords[section.cat] === word;
         const selectedClass = isSelected ? ' selected' : '';
         const deleteBtn = isEditing ? `<button class="word-btn__delete" onclick="event.stopPropagation(); App.removeWordFromBoard('${section.cat}', '${escapeHTML(word)}')" aria-label="Remove ${word}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>` : '';
@@ -783,7 +795,7 @@ const App = (function () {
   }
 
   // =========================================
-  // QUICK CAPTURES — DYNAMIC RENDERING
+  // QUICK CAPTURES ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â DYNAMIC RENDERING
   // =========================================
   function renderQuickCaptures() {
     const container = document.getElementById('quick-captures-container');
@@ -927,7 +939,7 @@ const App = (function () {
   }
 
   // =========================================
-  // TAP MODE — WORD BOARD INTERACTION
+  // TAP MODE ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â WORD BOARD INTERACTION
   // =========================================
   function tapWord(btn) {
     if (state.boardEditing) return; // Don't select in edit mode
@@ -994,7 +1006,7 @@ const App = (function () {
     if (words.what) parts.push(words.what.toLowerCase());
     if (words.domain) parts.push(`related to ${words.domain.toLowerCase()}`);
     if (words.where) parts.push(`in ${words.where}`);
-    if (words.urgency) parts.push(`— ${words.urgency} priority`);
+    if (words.urgency) parts.push(`ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ${words.urgency} priority`);
     if (detail) parts.push(`(${detail})`);
 
     if (parts.length === 0) {
@@ -1006,7 +1018,7 @@ const App = (function () {
       if (words.who && words.what) {
         task = `${words.what} from ${words.who.toLowerCase()}`;
         if (words.domain) task += ` regarding ${words.domain.toLowerCase()}`;
-        if (words.where) task += ` — ${words.where}`;
+        if (words.where) task += ` ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ${words.where}`;
         if (detail) task += `. ${detail}`;
       } else {
         task = parts.join(' ');
@@ -1032,7 +1044,7 @@ const App = (function () {
     // Build text
     const parts = Object.values(words);
     let text = parts.join(' + ');
-    if (detail) text += ` — ${detail}`;
+    if (detail) text += ` ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ${detail}`;
 
     // Determine category
     let catClass = 'student';
@@ -1070,7 +1082,7 @@ const App = (function () {
   }
 
   // =========================================
-  // KPI CARDS — DASHBOARD
+  // KPI CARDS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â DASHBOARD
   // =========================================
   function renderKPICards() {
     const scroll = document.getElementById('kpi-scroll');
@@ -1378,7 +1390,7 @@ const App = (function () {
     const label = btn.dataset.label;
     const idx = state.newTaskLabels.indexOf(label);
     if (idx > -1) {
-      // Deselect — but keep at least one
+      // Deselect ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â but keep at least one
       if (state.newTaskLabels.length > 1) {
         state.newTaskLabels.splice(idx, 1);
         btn.classList.remove('active');
@@ -1555,11 +1567,11 @@ const App = (function () {
         const dy = e.changedTouches[0].clientY - startY;
         if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return; // too small or vertical
         if (dx < 0 && state.sheetPage === 0) {
-          // Swipe left → page 2 (only if title filled)
+          // Swipe left ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ page 2 (only if title filled)
           const input = document.getElementById('new-task-input');
           if (input && input.value.trim()) goToPage2();
         } else if (dx > 0 && state.sheetPage === 1) {
-          // Swipe right → back to page 1
+          // Swipe right ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ back to page 1
           sheetBack();
         }
       }, { passive: true });
@@ -1601,7 +1613,7 @@ const App = (function () {
     const title = input.value.trim();
     if (!title) return;
 
-    // Check for duplicates/related — only if not already confirmed
+    // Check for duplicates/related ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â only if not already confirmed
     const dupBanner = document.getElementById('dup-banner');
     if (!state.dupConfirmed) {
       const related = findRelatedTasks(title);
@@ -1750,7 +1762,7 @@ const App = (function () {
   }
 
   // =========================================
-  // MORE TAB — SUB-VIEWS
+  // MORE TAB ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â SUB-VIEWS
   // =========================================
   function showSubView(name) {
     const menu = document.getElementById('more-menu');
@@ -1758,6 +1770,20 @@ const App = (function () {
     if (menu) menu.style.display = 'none';
     document.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
     if (view) view.classList.add('active');
+    // Admin-only notice for integrations management
+    if (name === 'integrations') {
+      const isAdmin = currentUserRole === 'admin' || currentUserRole === 'principal';
+      let notice = view.querySelector('.admin-only-notice');
+      if (!isAdmin && !notice) {
+        const el = document.createElement('div');
+        el.className = 'admin-only-notice';
+        el.style.cssText = 'margin:var(--space-4);padding:var(--space-3);background:#fef3c7;border:1px solid #fcd34d;border-radius:var(--radius-md, 8px);font-size:var(--text-sm);color:#92400e;';
+        el.textContent = 'Admin only \u2014 only administrators or principals can connect or disconnect integrations.';
+        view.appendChild(el);
+      } else if (isAdmin && notice) {
+        notice.remove();
+      }
+    }
   }
 
   function hideSubView() {
@@ -2162,6 +2188,129 @@ const App = (function () {
   // =========================================
   // PUBLIC API
   // =========================================
+  // PROFILE EDITING
+  // =========================================
+  function showProfileEdit(field) {
+    const profileRows = [...document.querySelectorAll('#subview-settings .settings-item')];
+    let currentValue = '';
+    let label = '';
+    let readOnly = false;
+    let notice = '';
+
+    if (field === 'display-name') {
+      label = 'Display Name';
+      const row = profileRows.find(r => r.querySelector('.settings-item__label')?.textContent?.trim() === 'Name');
+      currentValue = row?.querySelector('.settings-item__value')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+    } else if (field === 'school') {
+      label = 'School Name';
+      const isAdmin = currentUserRole === 'admin' || currentUserRole === 'principal';
+      readOnly = !isAdmin;
+      notice = isAdmin
+        ? 'All organization members will see this update.'
+        : 'Admin only � only administrators or principals can change the school name.';
+      const row = profileRows.find(r => r.querySelector('.settings-item__label')?.textContent?.trim() === 'School');
+      currentValue = row?.querySelector('.settings-item__value')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+    } else if (field === 'email') {
+      label = 'Email';
+      readOnly = true;
+      const row = profileRows.find(r => r.querySelector('.settings-item__label')?.textContent?.trim() === 'Email');
+      currentValue = row?.querySelector('.settings-item__value')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+    } else if (field === 'role') {
+      label = 'Role';
+      readOnly = true;
+      const row = profileRows.find(r => r.querySelector('.settings-item__label')?.textContent?.trim() === 'Role');
+      currentValue = row?.querySelector('.settings-item__value')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+    }
+
+    const title = document.getElementById('profile-edit-title');
+    const body = document.getElementById('profile-edit-body');
+    if (title) title.textContent = readOnly ? label : 'Edit ' + label;
+
+    const escapedValue = (currentValue || '').replace(/"/g, '&quot;');
+    let html = '';
+    if (notice) {
+      html += '<div style="padding:var(--space-3);background:#fef3c7;border:1px solid #fcd34d;border-radius:var(--radius-md);font-size:var(--text-sm);color:#92400e;margin-bottom:var(--space-3);">' + notice + '</div>';
+    }
+    if (readOnly) {
+      html += '<div style="padding:var(--space-3);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-muted);">' + (escapedValue || 'Not provided') + '</div>';
+      html += '<div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-2);">This field is read-only and cannot be changed here.</div>';
+    } else {
+      html += '<input id="profile-edit-input" type="text" class="quick-detail__input" value="' + escapedValue + '" placeholder="Enter ' + label.toLowerCase() + '" style="width:100%;margin-bottom:var(--space-3);" />';
+      if (field === 'school') {
+        html += '<div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-3);">';
+        html += '<input id="profile-edit-notify-email" type="checkbox" style="width:16px;height:16px;cursor:pointer;" />';
+        html += '<label for="profile-edit-notify-email" style="font-size:var(--text-sm);color:var(--color-text);cursor:pointer;">Notify organization members by email about this change</label>';
+        html += '</div>';
+      }
+      html += '<div style="display:flex;gap:var(--space-3);justify-content:flex-end;">';
+      html += '<button class="btn btn--ghost btn--sm" onclick="App.hideProfileEdit()">Cancel</button>';
+      html += '<button class="btn btn--primary btn--sm" onclick="App.saveProfileField(\'' + field + '\')">Save</button>';
+      html += '</div>';
+    }
+    if (body) body.innerHTML = html;
+
+    const overlay = document.getElementById('profile-edit-overlay');
+    const sheet = document.getElementById('profile-edit-sheet');
+    if (overlay) overlay.classList.add('visible');
+    if (sheet) sheet.classList.add('visible');
+    if (!readOnly) {
+      setTimeout(() => {
+        const input = document.getElementById('profile-edit-input');
+        if (input) input.focus();
+      }, 350);
+    }
+  }
+
+  function hideProfileEdit() {
+    const overlay = document.getElementById('profile-edit-overlay');
+    const sheet = document.getElementById('profile-edit-sheet');
+    if (overlay) overlay.classList.remove('visible');
+    if (sheet) sheet.classList.remove('visible');
+  }
+
+  function saveProfileField(field) {
+    const input = document.getElementById('profile-edit-input');
+    if (!input) return;
+    const newValue = input.value.trim();
+    if (!newValue) return;
+
+    const profileRows = [...document.querySelectorAll('#subview-settings .settings-item')];
+    if (field === 'display-name') {
+      const row = profileRows.find(r => r.querySelector('.settings-item__label')?.textContent?.trim() === 'Name');
+      if (row) row.querySelector('.settings-item__value').textContent = newValue;
+      const greetingEl = document.getElementById('user-id');
+      if (greetingEl) greetingEl.textContent = newValue;
+    } else if (field === 'school') {
+      const row = profileRows.find(r => r.querySelector('.settings-item__label')?.textContent?.trim() === 'School');
+      if (row) row.querySelector('.settings-item__value').textContent = newValue;
+      const greetingSubtext = document.querySelector('.dashboard__greeting p');
+      if (greetingSubtext) {
+        greetingSubtext.textContent = newValue + ' - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      }
+    }
+    const payload = { type: 'profile:update', field: field, value: newValue };
+    if (field === 'school') {
+      const notifyCheckbox = document.getElementById('profile-edit-notify-email');
+      payload.notifyByEmail = notifyCheckbox ? notifyCheckbox.checked : false;
+    }
+    parent.postMessage(payload, '*');
+    hideProfileEdit();
+  }
+
+  function initProfileEditButtons() {
+    document.querySelectorAll('[data-profile-edit]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var field = btn.getAttribute('data-profile-edit');
+        showProfileEdit(field);
+      });
+    });
+  }
+
+  // =========================================
   return {
     switchTab,
     setMode,
@@ -2220,7 +2369,10 @@ const App = (function () {
     mobObsReset,
     setDue,
     setDueTime,
-    toggleCustomDue
+    toggleCustomDue,
+    showProfileEdit,
+    hideProfileEdit,
+    saveProfileField
   };
 
 })();

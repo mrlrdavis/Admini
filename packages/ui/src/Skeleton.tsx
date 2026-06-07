@@ -21,17 +21,14 @@ export function Skeleton({ width, height, className, borderRadius }: SkeletonPro
 
 export interface SkeletonCardProps {
   className?: string;
-  height?: string | number;
+  height?: number;
 }
 
-export function SkeletonCard({ className, height = 120 }: SkeletonCardProps): JSX.Element {
+export function SkeletonCard({ className, height = 80 }: SkeletonCardProps): JSX.Element {
   return (
     <div
-      className={`skeleton skeleton-card${className ? ` ${className}` : ''}`}
-      style={{
-        width: '100%',
-        height: typeof height === 'number' ? `${height}px` : height,
-      }}
+      className={`skeleton-card${className ? ` ${className}` : ''}`}
+      style={{ height: `${height}px` }}
       aria-hidden="true"
     />
   );

@@ -1,4 +1,4 @@
-/* app.js — AdminI Desktop App */
+/* app.js - AdminI Desktop App */
 (function () {
   'use strict';
 
@@ -204,6 +204,7 @@
     const name = profile?.name || profile?.email || '';
     const schoolName = profile?.schoolName || 'Not provided';
     const role = profile?.role || 'Not provided';
+    currentUserRole = (profile?.role || '').toLowerCase();
     const email = profile?.email || 'Not provided';
     const initials = name
       ? name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
@@ -250,6 +251,11 @@
   }
 
   window.AdminiPrototype = { applyUserProfile, navigateTo, openIntegrationsSetup, openIntegrationsPanel };
+
+  // Expose profile editing functions for inline onclick handlers
+  window.closeDrawer = closeDrawer;
+  window.saveProfileField = saveProfileField;
+  window.handleIntegrationConnect = handleIntegrationConnect;
 
   function taskBridgeRequest(type, payload) {
     return new Promise((resolve, reject) => {
@@ -383,7 +389,7 @@
   const customWordIcons = {};
   const wordIconChoices = ['Pin', 'Person', 'School', 'Alert', 'Star', 'Check', 'Calendar', 'Clock', 'Note', 'Flag'];
   const wordIconSymbols = {
-    Pin: '•',
+    Pin: 'ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢',
     Person: '@',
     School: '#',
     Alert: '!',
@@ -405,7 +411,7 @@
       Domain: '#',
       Location: '>'
     };
-    return defaults[category] || '•';
+    return defaults[category] || 'ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢';
   }
 
   /* ============================================
@@ -433,6 +439,7 @@
      DRILL-DOWN DRAWER
      ============================================ */
   let drawerOpen = false;
+  let currentUserRole = '';
 
   function openDrawer(title, subtitle, contentHtml) {
     // Remove existing drawer if any
@@ -633,8 +640,8 @@
               const statusDot = s.status === 'present' ? 'coverage-present' :
                 (s.covered ? 'coverage-covered' : 'coverage-uncovered');
               const statusText = s.status === 'present' ? 'Present' :
-                `Absent — ${s.reason}`;
-              const coverageText = s.status === 'present' ? '—' :
+                `Absent ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ${s.reason}`;
+              const coverageText = s.status === 'present' ? 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â' :
                 (s.covered ? `Sub: ${s.sub}` : '<span class="uncovered-badge">UNCOVERED</span>');
               return `
               <tr>
@@ -1050,7 +1057,7 @@
   }
 
   /* ============================================
-     RENDER: CAPTURE VIEW — EDITABLE WORD BOARD
+     RENDER: CAPTURE VIEW ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â EDITABLE WORD BOARD
      ============================================ */
   let selectedWords = {};
 
@@ -1208,11 +1215,11 @@
       return;
     }
 
-    const who = selected['Who'] || '—';
-    const what = selected['What'] || '—';
+    const who = selected['Who'] || 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
+    const what = selected['What'] || 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
     const priority = selected['Priority'] || 'Normal';
-    const domain = selected['Domain'] || '—';
-    const location = selected['Location'] || '—';
+    const domain = selected['Domain'] || 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
+    const location = selected['Location'] || 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
     const detailText = detail ? detail.value : '';
 
     content.innerHTML = `
@@ -1221,7 +1228,7 @@
           ${words.map(w => `<span class="category-pill pill-instructional">${w}</span>`).join('')}
         </div>
         <div style="font-size:var(--text-sm);font-weight:500;">
-          ${who} — ${what} — ${domain} (${location})
+          ${who} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ${what} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ${domain} (${location})
         </div>
         ${detailText ? `<div style="font-size:var(--text-xs);color:var(--color-text-muted);font-style:italic;">"${detailText}"</div>` : ''}
         <div style="font-size:var(--text-xs);color:var(--color-text-faint);">Priority: ${priority}</div>
@@ -1389,6 +1396,7 @@
   function renderIntegrationsView() {
     const grid = document.getElementById('integrationGrid');
     if (!grid) return;
+    const isAdmin = currentUserRole === 'admin' || currentUserRole === 'principal';
     if (!integrations.length) {
       // Show all available integrations when none selected during onboarding
       const allSystems = Object.entries(integrationNameMap).map(([provider, name]) => ({
@@ -1410,8 +1418,17 @@
           <div class="integration-status available">Available</div>
         </div>
       `).join('');
+      if (!isAdmin) {
+        grid.insertAdjacentHTML('beforeend', '<div style="grid-column:1/-1;padding:var(--space-3);background:var(--color-warning-bg, #fef3c7);border:1px solid var(--color-warning-border, #fcd34d);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-warning-text, #92400e);">Admin only � only administrators or principals can manage integrations.</div>');
+      }
       grid.querySelectorAll('.toggle-switch').forEach(el => {
-        el.addEventListener('click', () => { el.classList.toggle('on'); });
+        el.addEventListener('click', () => {
+          if (!isAdmin) {
+            openDrawer('Admin Only', 'Integration management', '<div style="padding:var(--space-4);"><div style="padding:var(--space-3);background:var(--color-warning-bg, #fef3c7);border:1px solid var(--color-warning-border, #fcd34d);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-warning-text, #92400e);">Only administrators or principals can connect or disconnect integrations.</div></div>');
+            return;
+          }
+          el.classList.toggle('on');
+        });
       });
       return;
     }
@@ -1430,9 +1447,16 @@
       </div>
     `).join('');
 
+    if (!isAdmin) {
+      grid.insertAdjacentHTML('beforeend', '<div style="grid-column:1/-1;padding:var(--space-3);background:var(--color-warning-bg, #fef3c7);border:1px solid var(--color-warning-border, #fcd34d);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-warning-text, #92400e);">Admin only � only administrators or principals can manage integrations.</div>');
+    }
     // Re-bind toggle switches for new elements
     grid.querySelectorAll('.toggle-switch').forEach(el => {
       el.addEventListener('click', () => {
+        if (!isAdmin) {
+          openDrawer('Admin Only', 'Integration management', '<div style="padding:var(--space-4);"><div style="padding:var(--space-3);background:var(--color-warning-bg, #fef3c7);border:1px solid var(--color-warning-border, #fcd34d);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-warning-text, #92400e);">Only administrators or principals can connect or disconnect integrations.</div></div>');
+          return;
+        }
         el.classList.toggle('on');
       });
     });
@@ -1977,6 +2001,103 @@
     `;
   }
 
+  function openProfileEditDrawer(field) {
+    const settingRows = [...document.querySelectorAll('#view-settings .setting-row')];
+    let currentValue = '';
+    let label = '';
+    if (field === 'display-name') {
+      label = 'Display Name';
+      const row = settingRows.find(r => r.querySelector('.setting-label')?.textContent?.trim() === 'Display Name');
+      currentValue = row?.querySelector('.setting-desc')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+      openDrawer('Edit Display Name', 'Update your display name', buildProfileInputContent(field, label, currentValue, false));
+    } else if (field === 'school') {
+      label = 'School Name';
+      const row = settingRows.find(r => r.querySelector('.setting-label')?.textContent?.trim() === 'School');
+      currentValue = row?.querySelector('.setting-desc')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+      const isAdmin = currentUserRole === 'admin' || currentUserRole === 'principal';
+      const schoolReadOnly = !isAdmin;
+      const schoolNotice = isAdmin
+        ? 'All organization members will see this update.'
+        : 'Admin only — only administrators or principals can change the school name.';
+      openDrawer(isAdmin ? 'Edit School Name' : 'School Name', isAdmin ? 'Update your school name' : 'Admin-only setting', buildProfileInputContent(field, label, currentValue, schoolReadOnly, schoolNotice));
+    } else if (field === 'email') {
+      label = 'Email';
+      const row = settingRows.find(r => r.querySelector('.setting-label')?.textContent?.trim() === 'Email');
+      currentValue = row?.querySelector('.setting-desc')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+      openDrawer('Email Address', 'Your account email', buildProfileInputContent(field, label, currentValue, true));
+    } else if (field === 'role') {
+      label = 'Role';
+      const row = settingRows.find(r => r.querySelector('.setting-label')?.textContent?.trim() === 'Role');
+      currentValue = row?.querySelector('.setting-desc')?.textContent?.trim() || '';
+      if (currentValue === 'Not provided') currentValue = '';
+      openDrawer('Role', 'Your current role', buildProfileInputContent(field, label, currentValue, true));
+    }
+  }
+
+  function buildProfileInputContent(field, label, currentValue, readOnly, notice) {
+    const inputId = 'profile-edit-' + field;
+    const escapedValue = (currentValue || '').replace(/"/g, '&quot;');
+    let html = '<div style="padding:var(--space-4);display:grid;gap:var(--space-4);">';
+    if (notice) {
+      html += '<div style="padding:var(--space-3);background:var(--color-warning-bg, #fef3c7);border:1px solid var(--color-warning-border, #fcd34d);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-warning-text, #92400e);">' + notice + '</div>';
+    }
+    html += '<div style="display:grid;gap:var(--space-2);">';
+    html += '<label for="' + inputId + '" style="font-size:var(--text-sm);font-weight:600;color:var(--color-text);">' + label + '</label>';
+    if (readOnly) {
+      html += '<div style="padding:var(--space-3);background:var(--color-surface-alt, var(--color-surface));border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-base);color:var(--color-text-muted);cursor:not-allowed;">' + (escapedValue || 'Not provided') + '</div>';
+      html += '<div style="font-size:var(--text-xs);color:var(--color-text-muted);">This field is read-only and cannot be changed here.</div>';
+    } else {
+      html += '<input id="' + inputId + '" type="text" value="' + escapedValue + '" style="width:100%;padding:var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-base);background:var(--color-surface);color:var(--color-text);" placeholder="Enter ' + label.toLowerCase() + '" />';
+    }
+    html += '</div>';
+    if (!readOnly) {
+      if (field === 'school') {
+        html += '<div style="display:flex;align-items:center;gap:var(--space-2);padding-top:var(--space-2);">';
+        html += '<input id="profile-edit-notify-email" type="checkbox" style="width:16px;height:16px;cursor:pointer;" />';
+        html += '<label for="profile-edit-notify-email" style="font-size:var(--text-sm);color:var(--color-text);cursor:pointer;">Notify organization members by email about this change</label>';
+        html += '</div>';
+      }
+      html += '<div style="display:flex;gap:var(--space-3);justify-content:flex-end;padding-top:var(--space-2);">';
+      html += '<button class="btn btn-ghost btn-sm" onclick="closeDrawer()">Cancel</button>';
+      html += '<button class="btn btn-primary btn-sm" onclick="saveProfileField(\'' + field + '\')">Save</button>';
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function saveProfileField(field) {
+    const inputEl = document.getElementById('profile-edit-' + field);
+    if (!inputEl) return;
+    const newValue = inputEl.value.trim();
+    if (!newValue) return;
+    const settingRows = [...document.querySelectorAll('#view-settings .setting-row')];
+    if (field === 'display-name') {
+      const row = settingRows.find(r => r.querySelector('.setting-label')?.textContent?.trim() === 'Display Name');
+      if (row) row.querySelector('.setting-desc').textContent = newValue;
+      const userNameEl = document.querySelector('.user-name');
+      if (userNameEl) userNameEl.textContent = newValue;
+      const initials = newValue.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+      const avatarEl = document.querySelector('.user-avatar');
+      if (avatarEl) avatarEl.textContent = initials;
+    } else if (field === 'school') {
+      const row = settingRows.find(r => r.querySelector('.setting-label')?.textContent?.trim() === 'School');
+      if (row) row.querySelector('.setting-desc').textContent = newValue;
+      const schoolEl = document.querySelector('.user-school');
+      if (schoolEl) schoolEl.textContent = newValue;
+    }
+    const payload = { type: 'profile:update', field: field, value: newValue };
+    if (field === 'school') {
+      const notifyCheckbox = document.getElementById('profile-edit-notify-email');
+      payload.notifyByEmail = notifyCheckbox ? notifyCheckbox.checked : false;
+    }
+    parent.postMessage(payload, '*');
+    closeDrawer();
+  }
+
   function focusSettingRow(labelText) {
     navigateTo('settings');
     requestAnimationFrame(() => {
@@ -2042,6 +2163,11 @@
     openDrawer(topic, 'Help & Support', '<div style="padding:var(--space-2);font-size:var(--text-sm);line-height:1.7;color:var(--color-text);">' + content + '</div>');
   }
   function showIntegrationConnectModal(systemName, toggleEl) {
+    const isAdmin = currentUserRole === 'admin' || currentUserRole === 'principal';
+    if (!isAdmin) {
+      openDrawer('Admin Only', 'Integration management', '<div style="padding:var(--space-4);"><div style="padding:var(--space-3);background:var(--color-warning-bg, #fef3c7);border:1px solid var(--color-warning-border, #fcd34d);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-warning-text, #92400e);">Only administrators or principals can connect or disconnect integrations.</div></div>');
+      return;
+    }
     openDrawer(`Connect ${systemName}`, 'Integration setup', `
       <div style="display:grid;gap:var(--space-4);padding:var(--space-2);">
         <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:0;">Choose how to connect <strong>${systemName}</strong> to AdminI:</p>
@@ -2122,7 +2248,18 @@
 
     document.querySelectorAll('[data-settings-action]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        openDrawer('Edit setup information', 'User-provided profile data', emptyDrawerContent('Managed through signup and setup', 'Display name, school, email, role, and setup information come from the user-provided signup and onboarding flow. To retest it, use Delete Account to clear local data and return to onboarding.'));
+        const action = btn.getAttribute('data-settings-action');
+        if (action === 'profile-display-name') {
+          openProfileEditDrawer('display-name');
+        } else if (action === 'profile-school') {
+          openProfileEditDrawer('school');
+        } else if (action === 'profile-email') {
+          openProfileEditDrawer('email');
+        } else if (action === 'profile-role') {
+          openProfileEditDrawer('role');
+        } else {
+          openDrawer('Edit setting', 'Configuration', emptyDrawerContent('Not editable', 'This setting is managed elsewhere.'));
+        }
       });
     });
 
@@ -2150,6 +2287,13 @@
   renderObservationsView();
   bindStaticActions();
   loadPersistedTasks();
+
+  // Refresh task list when the page regains visibility (multi-device consistency)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      loadPersistedTasks();
+    }
+  });
 
   // Tap detail input updates preview
   const tapDetail = document.getElementById('tapDetail');

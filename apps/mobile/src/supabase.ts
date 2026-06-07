@@ -1,4 +1,4 @@
-﻿import { createIndexedDbStorage } from '@admini/shared';
+import { createIndexedDbStorage, mapSupabaseError } from '@admini/shared';
 import { createClient, type Provider, type User } from '@supabase/supabase-js';
 import {
   organizationService,
@@ -111,26 +111,23 @@ export type AuthUser = Pick<User, 'id' | 'email'> & {
 async function getRequiredCurrentUser(): Promise<User> {
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
   const { data, error } = await supabase.auth.getUser();
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
   if (!data.user) throw new Error('You must be signed in to manage tasks.');
   return data.user;
 }
 
 export async function getOrCreateProfile(): Promise<DbProfile> {
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
-  const user = await getRequiredCurrentUser();
-  const existing = await supabase
-    .from('profiles')
-    .select('id, organization_id, email, display_name, role')
-    .eq('id', user.id)
-    .maybeSingle<DbProfile>();
-  if (existing.error) throw existing.error;
-  if (existing.data) return existing.data;
+  await getRequiredCurrentUser();
 
+  // Always use the ensure_user_profile RPC which joins profiles with
+  // organization_memberships to return the authoritative role. The profiles
+  // table itself does not store role or organization_id � those live on
+  // organization_memberships and are returned via the RPC join.
   const profile = await supabase
     .rpc('ensure_user_profile')
     .single<DbProfile>();
-  if (profile.error) throw profile.error;
+  if (profile.error) throw new Error(mapSupabaseError(profile.error));
   return profile.data;
 }
 
@@ -141,9 +138,10 @@ export async function listTasks(): Promise<PersistedTask[]> {
     .from('tasks')
     .select('id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at')
     .neq('status', 'archived')
+    .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .returns<DbTask[]>();
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
   return (data ?? []).map(mapTask);
 }
 
@@ -163,20 +161,29 @@ export async function createTask(input: CreateTaskInput): Promise<PersistedTask>
     })
     .select('id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at')
     .single<DbTask>();
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
   return mapTask(data);
 }
 
-export async function updateTaskStatus(id: string, status: DbTask['status']): Promise<PersistedTask> {
+export async function updateTaskStatus(id: string, status: DbTask['status'], expectedUpdatedAt?: string): Promise<PersistedTask> {
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
   await getOrCreateProfile();
-  const { data, error } = await supabase
+
+  // Use optimistic locking: if expectedUpdatedAt is provided, only update if
+  // the row hasn't been modified since the client last fetched it (REQ-17).
+  let query = supabase
     .from('tasks')
     .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', id)
+    .eq('id', id);
+
+  if (expectedUpdatedAt) {
+    query = query.eq('updated_at', expectedUpdatedAt);
+  }
+
+  const { data, error } = await query
     .select('id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at')
     .single<DbTask>();
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
   return mapTask(data);
 }
 
@@ -188,7 +195,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   return {
     id: data.user.id,
     email: data.user.email,
-    displayName: data.user.user_metadata?.display_name ?? null,
+    displayName: data.user.user_metadata?.display_name
+      ?? data.user.user_metadata?.full_name
+      ?? data.user.user_metadata?.name
+      ?? null,
     schoolName: data.user.user_metadata?.school_name ?? null
   };
 }
@@ -204,7 +214,7 @@ export async function signInWithPassword(input: { email: string; password: strin
     email: input.email,
     password: input.password
   });
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
   if (!data.user) throw new Error('Sign in did not return a user.');
   return {
     id: data.user.id,
@@ -219,7 +229,7 @@ export async function sendPasswordReset(email: string): Promise<void> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: getAuthRedirectTo()
   });
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
 }
 
 export async function signUpWithPassword(input: {
@@ -239,7 +249,7 @@ export async function signUpWithPassword(input: {
       }
     }
   });
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
 
   return {
     user: data.user ? {
@@ -261,14 +271,222 @@ export async function signInWithOAuthProvider(provider: Extract<Provider, 'googl
       scopes: undefined
     }
   });
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
   if (data.url) window.location.assign(data.url);
+}
+
+
+export type UpdateProfileInput = {
+  displayName?: string;
+  schoolName?: string;
+};
+
+export type UpdateProfileResult = {
+  success: boolean;
+  error?: string;
+  profile?: DbProfile;
+};
+
+/**
+ * Updates the user's profile in both the profiles table and auth.users metadata.
+ * - display_name updates profiles.display_name AND auth.users.raw_user_meta_data
+ * - school_name updates organizations.name for all org members AND auth.users.raw_user_meta_data
+ */
+export async function updateProfile(input: UpdateProfileInput): Promise<UpdateProfileResult> {
+  if (!supabase) {
+    return { success: false, error: 'Supabase is not configured for this environment.' };
+  }
+
+  try {
+    const user = await getRequiredCurrentUser();
+
+    // Build the metadata update payload
+    const metadataUpdate: Record<string, string> = {};
+    if (input.displayName !== undefined) {
+      metadataUpdate.display_name = input.displayName;
+    }
+    if (input.schoolName !== undefined) {
+      metadataUpdate.school_name = input.schoolName;
+    }
+
+    // 1. Update auth.users.raw_user_meta_data
+    if (Object.keys(metadataUpdate).length > 0) {
+      const { error: authError } = await supabase.auth.updateUser({
+        data: metadataUpdate
+      });
+      if (authError) {
+        return { success: false, error: mapSupabaseError(authError) };
+      }
+    }
+
+    // 2. Update the profiles table (display_name)
+    if (input.displayName !== undefined) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ display_name: input.displayName })
+        .eq('id', user.id);
+      if (profileError) {
+        return { success: false, error: mapSupabaseError(profileError) };
+      }
+    }
+
+    // 3. Update organization name if school_name changed
+    if (input.schoolName !== undefined) {
+      const { data: profile, error: profileFetchError } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+      if (profileFetchError) {
+        return { success: false, error: mapSupabaseError(profileFetchError) };
+      }
+      if (profile?.organization_id) {
+        const { error: orgError } = await supabase
+          .from('organizations')
+          .update({ name: input.schoolName })
+          .eq('id', profile.organization_id);
+        if (orgError) {
+          return { success: false, error: mapSupabaseError(orgError) };
+        }
+      }
+    }
+
+    // 4. Fetch and return the updated profile
+    const updatedProfile = await getOrCreateProfile();
+    return { success: true, profile: updatedProfile };
+  } catch (err) {
+    return { success: false, error: mapSupabaseError(err) };
+  }
+}
+
+/**
+ * Maps a friendly wizard role label to the database admini_role enum value.
+ */
+function mapWizardRoleToDbRole(wizardRole: string): 'admin' | 'principal' | 'teacher' | 'staff' {
+  switch (wizardRole) {
+    case 'School leader':
+      return 'principal';
+    case 'Operations leader':
+      return 'admin';
+    case 'Instructional coach':
+      return 'teacher';
+    case 'Campus support':
+    case 'District staff':
+    default:
+      return 'staff';
+  }
+}
+
+/**
+ * Updates the current user's role in the organization_memberships table.
+ * Maps the wizard-friendly role label to the database enum value.
+ */
+export async function updateMembershipRole(wizardRole: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  const user = await getRequiredCurrentUser();
+  const dbRole = mapWizardRoleToDbRole(wizardRole);
+
+  // Find the user's membership record
+  const { data: membership, error: fetchError } = await supabase
+    .from('organization_memberships')
+    .select('id, organization_id')
+    .eq('profile_id', user.id)
+    .limit(1)
+    .single();
+  if (fetchError) throw new Error(mapSupabaseError(fetchError));
+  if (!membership) throw new Error('No organization membership found for user.');
+
+  // Update the role
+  const { error: updateError } = await supabase
+    .from('organization_memberships')
+    .update({ role: dbRole })
+    .eq('id', membership.id);
+  if (updateError) throw new Error(mapSupabaseError(updateError));
+}
+
+/**
+ * Checks whether the user has completed onboarding by reading auth.users metadata.
+ * Returns true if onboarding_complete is set in the user's metadata on the server.
+ * This is the server-side source of truth, not IndexedDB.
+ */
+export async function checkOnboardingComplete(): Promise<boolean> {
+  if (!supabase) return false;
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return false;
+  return data.user.user_metadata?.onboarding_complete === true;
+}
+
+/**
+ * Marks onboarding as complete in the user's auth metadata (server-side).
+ * This ensures the flag persists across devices and browser data clears.
+ */
+export async function markOnboardingComplete(): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.auth.updateUser({
+    data: { onboarding_complete: true }
+  });
+  if (error) throw new Error(mapSupabaseError(error));
+}
+
+/**
+ * Persists the user's onboarding preferences (focus and systems) to auth.users metadata.
+ * These are stored as user_metadata so they survive across devices and browser data clears.
+ * - focus: stored as a string (the selected focus area)
+ * - systems: stored as a string array (selected integration providers)
+ */
+export async function persistOnboardingPreferences(input: { focus: string; systems: string[] }): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      onboarding_focus: input.focus,
+      onboarding_systems: input.systems
+    }
+  });
+  if (error) throw new Error(mapSupabaseError(error));
+}
+
+export type AcceptInvitationResult = {
+  success: boolean;
+  organizationName?: string;
+  role?: string;
+  error?: string;
+};
+
+/**
+ * Accepts a pending invitation by calling the accept_invitation RPC function.
+ * The server-side function validates the token, adds the user to the organization,
+ * and returns the invitation details (org name, assigned role).
+ */
+export async function acceptInvitation(token: string): Promise<AcceptInvitationResult> {
+  if (!supabase) {
+    return { success: false, error: 'Supabase is not configured for this environment.' };
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('accept_invitation', {
+      invitation_token: token
+    });
+
+    if (error) {
+      return { success: false, error: mapSupabaseError(error) };
+    }
+
+    // The RPC returns the organization name and role assigned
+    const result = data as { organization_name?: string; role?: string } | null;
+    return {
+      success: true,
+      organizationName: result?.organization_name ?? undefined,
+      role: result?.role ?? undefined
+    };
+  } catch (err) {
+    return { success: false, error: mapSupabaseError(err) };
+  }
 }
 
 export async function signOut(): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  if (error) throw new Error(mapSupabaseError(error));
 }
 
 // ---------------------------------------------------------------------------
@@ -304,3 +522,20 @@ export const listFeatureFlags = _listFeatureFlags;
 
 /** Toggle a feature flag's enabled state. Delegates to organizationService. */
 export const toggleFeatureFlag = _toggleFeatureFlag;
+
+/**
+ * Deletes the current user's account by calling the delete_account RPC function.
+ * The server-side function handles cascading deletion of profile, memberships,
+ * tasks, and other user data, then deletes the auth.users entry.
+ * After deletion, the client signs out locally to clear session state.
+ */
+export async function deleteAccount(): Promise<void> {
+  if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  await getRequiredCurrentUser();
+
+  const { error } = await supabase.rpc('delete_account');
+  if (error) throw new Error(mapSupabaseError(error));
+
+  // Sign out locally to clear any remaining session/token state
+  await supabase.auth.signOut().catch(() => undefined);
+}

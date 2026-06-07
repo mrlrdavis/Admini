@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useOrgData } from '../hooks/useOrgData';
 import type { AdminiRole, OrgDetailsForm } from '../types';
 
@@ -10,6 +10,8 @@ import type { AdminiRole, OrgDetailsForm } from '../types';
 
 export interface AdminTabProps {
   organizationId: string;
+  /** Current user's role - used for client-side access gating (REQ-16). */
+  userRole: string;
 }
 
 /**
@@ -42,7 +44,7 @@ function getErrorMessage(err: unknown): string {
   return 'An unexpected error occurred';
 }
 
-export function AdminTab({ organizationId }: AdminTabProps) {
+export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   const {
     orgDetails,
     members,
@@ -55,6 +57,9 @@ export function AdminTab({ organizationId }: AdminTabProps) {
     createInvitation,
     toggleFeatureFlag,
   } = useOrgData(organizationId);
+
+  // Role-based access: only admin/principal can manage invitations (REQ-16)
+  const canManageInvitations = userRole === 'admin' || userRole === 'principal';
 
   // -------------------------------------------------------------------------
   // School Details Form State
@@ -120,6 +125,7 @@ export function AdminTab({ organizationId }: AdminTabProps) {
   async function handleInviteSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
+    if (!canManageInvitations) return;
 
     setInviteSaving(true);
     setInviteError(null);
@@ -317,74 +323,82 @@ export function AdminTab({ organizationId }: AdminTabProps) {
         )}
       </section>
 
-      {/* Invitations Section */}
+      {/* Invitations Section - restricted to admin/principal (REQ-16) */}
       <section className="admin-tab__section" aria-labelledby="invitations-heading">
         <h2 id="invitations-heading" className="admin-tab__section-title">
           Invitations
         </h2>
 
-        <form className="admin-tab__form admin-tab__invite-form" onSubmit={handleInviteSubmit}>
-          <label className="admin-tab__field">
-            <span className="admin-tab__field-label">Email</span>
-            <input
-              type="email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="user@example.com"
-              className="admin-tab__input"
-              required
-            />
-          </label>
-
-          <label className="admin-tab__field">
-            <span className="admin-tab__field-label">Role</span>
-            <select
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as AdminiRole)}
-              className="admin-tab__role-select"
-            >
-              <option value="admin">Admin</option>
-              <option value="principal">Principal</option>
-              <option value="teacher">Teacher</option>
-              <option value="staff">Staff</option>
-            </select>
-          </label>
-
-          {inviteError && (
-            <p className="admin-tab__error-message" role="alert">
-              {inviteError}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="admin-tab__submit"
-            disabled={inviteSaving}
-          >
-            {inviteSaving ? 'Sending...' : 'Send Invitation'}
-          </button>
-        </form>
-
-        {/* Pending Invitations List */}
-        {invitations.filter((inv) => inv.status === 'pending').length > 0 && (
+        {canManageInvitations ? (
           <>
-            <h3 className="admin-tab__subsection-title">Pending Invitations</h3>
-            <ul className="admin-tab__invitation-list">
-              {invitations
-                .filter((inv) => inv.status === 'pending')
-                .map((inv) => (
-                  <li key={inv.id} className="admin-tab__invitation-item">
-                    <span className="admin-tab__invitation-email">
-                      {inv.email}
-                    </span>
-                    <span className="admin-tab__invitation-role">{inv.role}</span>
-                    <span className="admin-tab__invitation-status">
-                      {inv.status}
-                    </span>
-                  </li>
-                ))}
-            </ul>
+            <form className="admin-tab__form admin-tab__invite-form" onSubmit={handleInviteSubmit}>
+              <label className="admin-tab__field">
+                <span className="admin-tab__field-label">Email</span>
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="user@example.com"
+                  className="admin-tab__input"
+                  required
+                />
+              </label>
+
+              <label className="admin-tab__field">
+                <span className="admin-tab__field-label">Role</span>
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value as AdminiRole)}
+                  className="admin-tab__role-select"
+                >
+                  <option value="admin">Admin</option>
+                  <option value="principal">Principal</option>
+                  <option value="teacher">Teacher</option>
+                  <option value="staff">Staff</option>
+                </select>
+              </label>
+
+              {inviteError && (
+                <p className="admin-tab__error-message" role="alert">
+                  {inviteError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className="admin-tab__submit"
+                disabled={inviteSaving}
+              >
+                {inviteSaving ? 'Sending...' : 'Send Invitation'}
+              </button>
+            </form>
+
+            {/* Pending Invitations List */}
+            {invitations.filter((inv) => inv.status === 'pending').length > 0 && (
+              <>
+                <h3 className="admin-tab__subsection-title">Pending Invitations</h3>
+                <ul className="admin-tab__invitation-list">
+                  {invitations
+                    .filter((inv) => inv.status === 'pending')
+                    .map((inv) => (
+                      <li key={inv.id} className="admin-tab__invitation-item">
+                        <span className="admin-tab__invitation-email">
+                          {inv.email}
+                        </span>
+                        <span className="admin-tab__invitation-role">{inv.role}</span>
+                        <span className="admin-tab__invitation-status">
+                          {inv.status}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </>
+            )}
           </>
+        ) : (
+          <p className="admin-tab__restricted-notice" role="status">
+            Only administrators and principals can manage invitations.
+          </p>
         )}
       </section>
 

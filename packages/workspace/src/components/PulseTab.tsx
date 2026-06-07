@@ -4,12 +4,15 @@
 // Daily pulse check-ins, stats, and timeline.
 
 import { useState } from 'react';
+import { SkeletonCard } from '@admini/ui';
 
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
-export interface PulseTabProps {}
+export interface PulseTabProps {
+  loading?: boolean;
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -22,21 +25,68 @@ interface PulseCheckpoint {
   status: 'responded' | 'skipped' | 'upcoming';
 }
 
+interface DayBlock {
+  period: string;
+  time: string;
+  activities: { label: string; type: 'focus' | 'meetings' | 'wrap-up' | 'default' }[];
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function PulseTab(_props: PulseTabProps) {
+export function PulseTab({ loading }: PulseTabProps) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
-  // Placeholder data — will be replaced with real pulse service calls
+  // Placeholder data - will be replaced with real pulse service calls
   const stats = {
-    responded: 0,
-    skipped: 0,
-    upcoming: 0,
+    tasksDone: 12,
+    focusHours: 4.5,
+    streak: 7,
   };
 
   const checkpoints: PulseCheckpoint[] = [];
+
+  const dayBlocks: DayBlock[] = [
+    {
+      period: 'Morning',
+      time: '8:00 - 12:00',
+      activities: [
+        { label: 'Deep work', type: 'focus' },
+        { label: 'Review PRs', type: 'default' },
+      ],
+    },
+    {
+      period: 'Afternoon',
+      time: '12:00 - 16:00',
+      activities: [
+        { label: 'Team sync', type: 'meetings' },
+        { label: 'Feature dev', type: 'focus' },
+      ],
+    },
+    {
+      period: 'End of Day',
+      time: '16:00 - 17:00',
+      activities: [
+        { label: 'Wrap-up', type: 'wrap-up' },
+      ],
+    },
+  ];
+
+  // -------------------------------------------------------------------------
+  // Loading state
+  // -------------------------------------------------------------------------
+
+  if (loading) {
+    return (
+      <div className="pulse-tab pulse-tab--loading" aria-busy="true">
+        <SkeletonCard height={60} />
+        <SkeletonCard height={100} />
+        <SkeletonCard height={140} />
+        <SkeletonCard height={120} />
+      </div>
+    );
+  }
 
   // -------------------------------------------------------------------------
   // Render
@@ -53,16 +103,16 @@ export function PulseTab(_props: PulseTabProps) {
       {/* Stats Row */}
       <div className="pulse-tab__stats">
         <div className="pulse-tab__stat-card">
-          <span className="pulse-tab__stat-value">{stats.responded}</span>
-          <span className="pulse-tab__stat-label">Responded</span>
+          <span className="pulse-tab__stat-value">{stats.tasksDone}</span>
+          <span className="pulse-tab__stat-label">Tasks Done</span>
         </div>
         <div className="pulse-tab__stat-card">
-          <span className="pulse-tab__stat-value">{stats.skipped}</span>
-          <span className="pulse-tab__stat-label">Skipped</span>
+          <span className="pulse-tab__stat-value">{stats.focusHours}</span>
+          <span className="pulse-tab__stat-label">Focus Hours</span>
         </div>
         <div className="pulse-tab__stat-card">
-          <span className="pulse-tab__stat-value">{stats.upcoming}</span>
-          <span className="pulse-tab__stat-label">Upcoming</span>
+          <span className="pulse-tab__stat-value">{stats.streak}</span>
+          <span className="pulse-tab__stat-label">Streak</span>
         </div>
       </div>
 
@@ -94,18 +144,26 @@ export function PulseTab(_props: PulseTabProps) {
       <section className="pulse-tab__day-structure">
         <h2 className="pulse-tab__section-title">Day Structure</h2>
         <div className="pulse-tab__day-card">
-          <div className="pulse-tab__day-row">
-            <span className="pulse-tab__day-period">Morning</span>
-            <span className="pulse-tab__day-time">8:00 - 12:00</span>
-          </div>
-          <div className="pulse-tab__day-row">
-            <span className="pulse-tab__day-period">Afternoon</span>
-            <span className="pulse-tab__day-time">12:00 - 16:00</span>
-          </div>
-          <div className="pulse-tab__day-row">
-            <span className="pulse-tab__day-period">End of Day</span>
-            <span className="pulse-tab__day-time">16:00 - 17:00</span>
-          </div>
+          {dayBlocks.map((block) => (
+            <div key={block.period} className="pulse-tab__day-row">
+              <span className="pulse-tab__day-period">{block.period}</span>
+              <span className="pulse-tab__day-time">{block.time}</span>
+              <div className="pulse-tab__day-activity">
+                {block.activities.map((activity) => (
+                  <span
+                    key={activity.label}
+                    className={`pulse-tab__activity-block${
+                      activity.type !== 'default'
+                        ? ` pulse-tab__activity-block--${activity.type}`
+                        : ''
+                    }`}
+                  >
+                    {activity.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

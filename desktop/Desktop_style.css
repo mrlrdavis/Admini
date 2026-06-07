@@ -1660,6 +1660,11 @@ html, body {
   transform: translateX(20px);
 }
 
+.toggle-switch.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .integration-name {
   font-size: var(--text-base);
   font-weight: 600;

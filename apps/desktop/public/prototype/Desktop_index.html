@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AdminI — School Intelligence Dashboard</title>
+  <title>AdminI â€” School Intelligence Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@400;500;600;700&family=Unbounded:wght@400;500;600;700&family=Inter:wght@400..700&display=swap" rel="stylesheet">
@@ -555,7 +555,7 @@
           <div class="setting-row">
             <div>
               <div class="setting-label">Active Hours</div>
-              <div class="setting-desc">7:30 AM – 4:30 PM</div>
+              <div class="setting-desc">7:30 AM â€“ 4:30 PM</div>
             </div>
             <button class="btn btn-ghost btn-sm" data-settings-action="pulse-active-hours">Edit</button>
           </div>
@@ -689,7 +689,7 @@
     </main>
     <div class="integration-reminder hidden" id="integration-reminder" role="button" tabindex="0" aria-live="polite" aria-hidden="true">
       <span class="integration-reminder__text" id="integration-reminder-text"></span>
-      <button type="button" class="integration-reminder__close" id="integration-reminder-close" aria-label="Close reminder">×</button>
+      <button type="button" class="integration-reminder__close" id="integration-reminder-close" aria-label="Close reminder">Ã—</button>
     </div>
   </div>
 
@@ -701,7 +701,7 @@
         const el = document.getElementById('headerSubtitle');
         if (!el) return;
         const now = new Date();
-        el.textContent = `${now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })} · ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        el.textContent = `${now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })} Â· ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
       }
       function sendName(name) {
         window.AdminiPrototype?.applyUserProfile?.({ name });
@@ -784,6 +784,9 @@
           if (data && data.type === 'user') {
             window.AdminiPrototype?.applyUserProfile?.(data);
             showIntegrationReminder(data.systems);
+          } else if (data && data.type === 'user-data' && data.user) {
+            const profile = { name: data.user.displayName, email: data.user.email, schoolName: data.user.schoolName, role: data.role };
+            window.AdminiPrototype?.applyUserProfile?.(profile);
           }
         } catch (e) {
           if (ev.data && ev.data.type === 'user') {

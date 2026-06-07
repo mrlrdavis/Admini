@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    PulseTab styles
    ========================================================================== */
 
@@ -45,9 +45,11 @@
   border-radius: var(--ws-radius-card);
   padding: var(--ws-space-md);
   box-shadow: var(--ws-shadow-card);
+  text-align: center;
 }
 
 .pulse-tab__stat-value {
+  font-family: var(--ws-font-display);
   font-size: var(--ws-font-size-xl);
   font-weight: 700;
   color: var(--ws-color-sage);
@@ -58,6 +60,7 @@
   color: var(--ws-color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-top: var(--ws-space-xs);
 }
 
 /* Section titles */
@@ -144,11 +147,24 @@
 }
 
 .pulse-tab__day-row {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--ws-space-sm) 0;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-md) var(--ws-space-sm) var(--ws-space-md) var(--ws-space-lg);
   border-bottom: 1px solid var(--ws-color-border);
+}
+
+.pulse-tab__day-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 70%;
+  border-radius: var(--ws-radius-pill);
+  background: linear-gradient(180deg, var(--ws-color-sage-light), var(--ws-color-sage-dark));
 }
 
 .pulse-tab__day-row:last-child {
@@ -157,12 +173,45 @@
 
 .pulse-tab__day-period {
   font-size: var(--ws-font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
+  min-width: 5rem;
 }
 
 .pulse-tab__day-time {
-  font-size: var(--ws-font-size-sm);
+  font-size: var(--ws-font-size-xs);
   color: var(--ws-color-text-muted);
+  min-width: 5.5rem;
+}
+
+.pulse-tab__day-activity {
+  flex: 1;
+  display: flex;
+  gap: var(--ws-space-xs);
+  align-items: center;
+}
+
+.pulse-tab__activity-block {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ws-space-xs);
+  padding: 2px var(--ws-space-sm);
+  font-size: var(--ws-font-size-xs);
+  background: color-mix(in srgb, var(--ws-color-sage) 10%, transparent);
+  color: var(--ws-color-sage-dark);
+  border-radius: var(--ws-radius-sm);
+  white-space: nowrap;
+}
+
+.pulse-tab__activity-block--focus {
+  background: color-mix(in srgb, var(--ws-color-sage) 15%, transparent);
+}
+
+.pulse-tab__activity-block--meetings {
+  background: color-mix(in srgb, var(--ws-color-sage-light) 25%, transparent);
+}
+
+.pulse-tab__activity-block--wrap-up {
+  background: color-mix(in srgb, var(--ws-color-sage-dark) 10%, transparent);
 }
 
 /* Notifications Toggle */

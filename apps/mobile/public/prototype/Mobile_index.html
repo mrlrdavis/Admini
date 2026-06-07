@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#FAFAFA">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>AdminI — School Admin Capture</title>
+  <title>AdminI ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â School Admin Capture</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="./Mobilestyle.css">
 </head>
 <body>
+
+
   <!-- Skip to content -->
   <a href="#main-content" class="sr-only">Skip to content</a>
 
@@ -363,9 +365,15 @@
             <div class="settings-item">
               <span class="settings-item__label">Name</span>
               <span class="settings-item__value">Not provided</span>
+              <button class="settings-item__edit-btn" onclick="App.showProfileEdit('display-name')" aria-label="Edit display name">Edit</button>
             </div>
             <div class="settings-item">
               <span class="settings-item__label">School</span>
+              <span class="settings-item__value">Not provided</span>
+              <button class="settings-item__edit-btn" onclick="App.showProfileEdit('school')" aria-label="Edit school name">Edit</button>
+            </div>
+            <div class="settings-item">
+              <span class="settings-item__label">Email</span>
               <span class="settings-item__value">Not provided</span>
             </div>
             <div class="settings-item">
@@ -754,7 +762,7 @@
       </div>
     </div>
 
-    <!-- ===== BOTTOM SHEET (Add Task) — Swipe Carousel ===== -->
+    <!-- ===== BOTTOM SHEET (Add Task) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Swipe Carousel ===== -->
     <div class="bottom-sheet-overlay" id="bottom-sheet-overlay" onclick="App.hideBottomSheet()"></div>
     <div class="bottom-sheet" id="bottom-sheet">
       <div class="bottom-sheet__handle"></div>
@@ -889,13 +897,23 @@
       </div>
     </div>
 
+    <!-- ===== BOTTOM SHEET (Profile Edit) ===== -->
+    <div class="bottom-sheet-overlay" id="profile-edit-overlay" onclick="App.hideProfileEdit()"></div>
+    <div class="bottom-sheet" id="profile-edit-sheet">
+      <div class="bottom-sheet__handle"></div>
+      <div class="bottom-sheet__content">
+        <div class="bottom-sheet__title" id="profile-edit-title">Edit Profile</div>
+        <div id="profile-edit-body"></div>
+      </div>
+    </div>
+
     <div class="integration-reminder hidden" id="integration-reminder" role="button" tabindex="0" aria-live="polite" aria-hidden="true">
       <span class="integration-reminder__text" id="integration-reminder-text"></span>
-      <button type="button" class="integration-reminder__close" id="integration-reminder-close" aria-label="Close reminder">×</button>
+      <button type="button" class="integration-reminder__close" id="integration-reminder-close" aria-label="Close reminder">ÃƒÆ’Ã¢â‚¬â€</button>
     </div>
   </div>
 
-  <script src="../shared/admini-privacy-layer.js"></script>
+  <script src="./admini-privacy-layer.js"></script>
   <script src="./Mobile_app.js"></script>
   <script>
     (function(){
@@ -993,6 +1011,10 @@
             setGreetingName(data.name);
             window.AdminiPrototype?.applyUserProfile?.(data);
             showIntegrationReminder(data.systems);
+          } else if (data && data.type === 'user-data' && data.user) {
+            const profile = { name: data.user.displayName, email: data.user.email, schoolName: data.user.schoolName, role: data.role };
+            setGreetingName(profile.name);
+            window.AdminiPrototype?.applyUserProfile?.(profile);
           }
         } catch (e) {
           if (ev.data && ev.data.type === 'user') {
@@ -1002,7 +1024,19 @@
           }
         }
       }, false);
-    })();
+    
+      // Standalone fallback: if not in iframe, auto-apply demo profile
+      if (window === window.parent) {
+        setTimeout(() => {
+          const greeting = document.getElementById('user-id');
+          if (greeting) greeting.textContent = 'Admin';
+          const greetingEl = document.getElementById('greeting');
+          if (greetingEl) greetingEl.innerHTML = getTimeGreeting() + ', <span id="user-id">Demo Admin</span>';
+          const subtext = document.querySelector('.dashboard__greeting p');
+          if (subtext) subtext.textContent = 'Demo School - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        }, 300);
+      }
+})();
   </script>
 </body>
 </html>

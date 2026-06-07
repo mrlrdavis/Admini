@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { getClient } from '../services/getClient';
+import type { ProfileUpdatePayload } from '../types';
 
 // ---------------------------------------------------------------------------
 // IframeFallback Component
@@ -23,8 +24,11 @@ export interface IframeFallbackProps {
   src: string;
   visible: boolean;
   userPayload: Record<string, unknown>;
+  /** Current user's role - used to enforce admin/principal-only school name edits at the bridge level (REQ-16). */
+  userRole?: string;
   onSignOut: () => void;
   onResetUserData: () => void;
+  onProfileUpdated?: (payload: ProfileUpdatePayload) => void;
 }
 
 function getErrorMessage(error: unknown): string {
@@ -41,6 +45,7 @@ async function listTasks() {
     .from('tasks')
     .select('*')
     .neq('status', 'archived')
+    .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
@@ -70,6 +75,57 @@ async function updateTaskStatus(id: string, status: TaskStatusInput) {
 }
 
 // ---------------------------------------------------------------------------
+// Profile update via shared Supabase client
+// ---------------------------------------------------------------------------
+// Maps iframe field names to updateProfile logic:
+//   'display-name' -> profiles.display_name + auth.users metadata
+//   'school'       -> organizations.name + auth.users metadata
+
+async function updateProfile(field: string, value: string): Promise<void> {
+  const client = getClient();
+
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError || !userData?.user) throw new Error('Not authenticated');
+  const userId = userData.user.id;
+
+  if (field === 'display-name') {
+    // Update auth metadata
+    const { error: authErr } = await client.auth.updateUser({
+      data: { display_name: value },
+    });
+    if (authErr) throw new Error(authErr.message);
+
+    // Update profiles table
+    const { error: profileErr } = await client
+      .from('profiles')
+      .update({ display_name: value })
+      .eq('id', userId);
+    if (profileErr) throw new Error(profileErr.message);
+  } else if (field === 'school') {
+    // Update auth metadata
+    const { error: authErr } = await client.auth.updateUser({
+      data: { school_name: value },
+    });
+    if (authErr) throw new Error(authErr.message);
+
+    // Fetch user's organization_id, then update organization name
+    const { data: profile, error: profileFetchErr } = await client
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', userId)
+      .single();
+    if (profileFetchErr) throw new Error(profileFetchErr.message);
+    if (profile?.organization_id) {
+      const { error: orgErr } = await client
+        .from('organizations')
+        .update({ name: value })
+        .eq('id', profile.organization_id);
+      if (orgErr) throw new Error(orgErr.message);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -77,8 +133,10 @@ export function IframeFallback({
   src,
   visible,
   userPayload,
+  userRole,
   onSignOut,
   onResetUserData,
+  onProfileUpdated,
 }: IframeFallbackProps) {
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const prevVisibleRef = useRef<boolean>(visible);
@@ -117,6 +175,43 @@ export function IframeFallback({
 
       if (data.type === 'reset-user-data') {
         onResetUserData();
+      }
+
+      if (data.type === 'profile:update') {
+        const field = String(data.field ?? '');
+        const value = String(data.value ?? '');
+
+        // REQ-16: Enforce admin/principal-only restriction on school name edits
+        // at the bridge level (defense-in-depth alongside UI-level checks).
+        if (field === 'school') {
+          const canEditSchool = userRole === 'admin' || userRole === 'principal';
+          if (!canEditSchool) {
+            frameRef.current?.contentWindow?.postMessage(
+              { type: 'profile:update:result', ok: false, field, error: 'Admin only \u2014 only administrators or principals can change the school name.' },
+              '*'
+            );
+            return;
+          }
+        }
+
+        if (field && value) {
+          void updateProfile(field, value)
+            .then(() => {
+              // Notify parent to refresh its state
+              onProfileUpdated?.({ field: field as ProfileUpdatePayload['field'], value });
+              // Send success back to iframe
+              frameRef.current?.contentWindow?.postMessage(
+                { type: 'profile:update:result', ok: true, field, value },
+                '*'
+              );
+            })
+            .catch((error: unknown) => {
+              frameRef.current?.contentWindow?.postMessage(
+                { type: 'profile:update:result', ok: false, field, error: getErrorMessage(error) },
+                '*'
+              );
+            });
+        }
       }
 
       if (data.type === 'tasks:list') {
@@ -170,7 +265,7 @@ export function IframeFallback({
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [onSignOut, onResetUserData]);
+  }, [onSignOut, onResetUserData, onProfileUpdated, userRole]);
 
   // Send userPayload when the iframe first loads
   function handleIframeLoad() {

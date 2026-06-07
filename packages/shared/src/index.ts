@@ -150,3 +150,5 @@ export async function listSyncQueueItems(): Promise<SyncQueueItem[]> {
 }
 
 export { clearAdminiBrowserState, createIndexedDbStorage } from './browser-storage';
+export { mapSupabaseError, withFriendlyError } from './supabase-errors';
+export type { SupabaseErrorLike } from './supabase-errors';

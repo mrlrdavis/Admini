@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
+﻿import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { configureClient, resetClient } from '../services/getClient';
 
@@ -10,12 +10,9 @@ export interface SupabaseClientProviderProps {
 }
 
 export function SupabaseClientProvider({ client, children }: SupabaseClientProviderProps) {
-  // Synchronously configure so services work during first render cycle
-  const configured = useRef(false);
-  if (!configured.current) {
-    configureClient(client);
-    configured.current = true;
-  }
+  // Always configure synchronously so services work during first render cycle.
+  // This is safe to call on every render (idempotent when client is the same).
+  configureClient(client);
 
   // Re-configure if client changes; clean up on unmount
   useEffect(() => {

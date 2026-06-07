@@ -122,7 +122,7 @@ export function LayoutShell({
       {layoutMode === 'desktop' && navElement && (
         <aside className="layout-shell__sidebar">{navElement}</aside>
       )}
-      <main className="layout-shell__content">
+      <main className={`layout-shell__content${loading ? '' : ' layout-shell__content--entered'}`}>
         {loading ? (
           <SkeletonContent />
         ) : (

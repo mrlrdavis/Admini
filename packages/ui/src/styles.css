@@ -1,4 +1,4 @@
-@font-face {
+﻿@font-face {
   font-family: 'Tomorrow';
   src: url('/fonts/Tomorrow-Regular.woff2') format('woff2');
   font-weight: 400;
@@ -69,6 +69,7 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+  --transition-press: 100ms ease;
 
   /* Typography */
   --font-display: 'Tomorrow', system-ui, -apple-system, sans-serif;
@@ -234,8 +235,20 @@ select {
   overflow-y: auto;
   overflow-x: hidden;
   max-width: 100%;
-  transition: opacity var(--transition-normal),
-              transform var(--transition-normal);
+  background: linear-gradient(
+    180deg,
+    var(--color-limestone-light) 0%,
+    var(--color-bg) 40%,
+    var(--color-bg) 100%
+  );
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.layout-shell__content--entered {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
 
 .layout-shell__bottom-bar {
@@ -300,8 +313,8 @@ select {
 
 /* Skeleton */
 @keyframes skeleton-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1.0; }
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
 }
 
 .skeleton {
@@ -310,5 +323,21 @@ select {
 }
 
 .skeleton-card {
-  border-radius: var(--radius-card);
+  width: 100%;
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-limestone-light, #e8e4df);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* Accessibility: disable transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .layout-shell__content--entered {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+
+  .skeleton,
+  .skeleton-card {
+    animation: none !important;
+  }
 }

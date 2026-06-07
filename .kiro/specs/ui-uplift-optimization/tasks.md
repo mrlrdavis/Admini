@@ -78,7 +78,7 @@ Transform the `packages/ui` design system from purple/violet to sage/limestone, 
     - Implement error boundary that catches fetch failures and renders error state with retry button
     - _Requirements: 3.3, 3.4, 3.6_
 
-  - [ ]* 3.3 Write property test for auto-mode layout detection
+  - [ ] 3.3 Write property test for auto-mode layout detection
     - **Property 7: Auto-Mode Layout Detection**
     - Generate random container widths and verify mobile layout when <=768px, desktop when >768px
     - **Validates: Requirements 4.2**

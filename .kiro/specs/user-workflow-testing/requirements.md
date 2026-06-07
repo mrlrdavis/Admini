@@ -131,7 +131,6 @@ Validate all core user workflows end-to-end across both Desktop and Mobile apps,
 ### REQ-16: Role-Based Access Control
 - [ ] Admin can edit school name, invite users, manage integrations
 - [ ] Principal can invite users but not delete the organization
-- [ ] Teacher/Staff can only edit their own profile fields
 - [ ] Non-admin clicking "Edit" on school name sees "Admin only" message
 - [ ] Role changes propagate to RLS (e.g., promoted user gains new permissions without re-login)
 

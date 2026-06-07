@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 // Tab identification
 export type WorkspaceTab = 'capture' | 'dashboard' | 'tasks' | 'pulse' | 'more' | 'admin';
@@ -97,14 +97,23 @@ export interface AuthUser {
   schoolName?: string | null;
 }
 
+// Profile update callback shape
+export interface ProfileUpdatePayload {
+  field: 'display-name' | 'school';
+  value: string;
+}
+
 // WorkspaceShell props
 export interface WorkspaceShellProps {
   user: AuthUser;
   userRole: string;
+  organizationId?: string;
   userName: string;
   schoolName: string;
   prototypePath: string;
   onSignOut: () => void;
+  onDeleteAccount?: () => Promise<void>;
   onResetUserData: () => void;
+  onProfileUpdated?: (payload: ProfileUpdatePayload) => void;
   renderNavigation: (props: NavigationAdapterProps) => ReactNode;
 }

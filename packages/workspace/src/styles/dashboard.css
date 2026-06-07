@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    DashboardTab styles
    ========================================================================== */
 
@@ -69,15 +69,38 @@
   padding: var(--ws-space-md) var(--ws-space-lg);
 }
 
+/* Section Headers */
+.dashboard-tab__section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--ws-space-md);
+}
+
+.dashboard-tab__section-header h2 {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.dashboard-tab__section-link {
+  background: none;
+  border: none;
+  color: var(--ws-color-sage);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--ws-transition-fast);
+}
+
+.dashboard-tab__section-link:hover {
+  color: var(--ws-color-sage-dark);
+}
+
 /* Priority Queue */
 .dashboard-tab__priority-queue {
   margin-bottom: var(--ws-space-xl);
-}
-
-.dashboard-tab__priority-queue h2 {
-  font-size: var(--ws-font-size-lg);
-  font-weight: 600;
-  margin: 0 0 var(--ws-space-md);
 }
 
 .dashboard-tab__task-list {
@@ -91,6 +114,7 @@
 
 .dashboard-tab__task-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--ws-space-md);
   background: var(--ws-color-white);
@@ -98,6 +122,12 @@
   padding: var(--ws-space-md);
   box-shadow: var(--ws-shadow-card);
   border-left: 3px solid var(--ws-color-sage);
+  transition: transform 100ms ease, box-shadow 100ms ease;
+}
+
+.dashboard-tab__task-item:active {
+  transform: scale(0.99);
+  box-shadow: 0 2px 8px rgba(84, 116, 92, 0.04);
 }
 
 .dashboard-tab__task-item[data-priority="urgent"] {
@@ -130,15 +160,22 @@
   color: var(--ws-color-text-muted);
 }
 
+.dashboard-tab__task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-sm);
+  width: 100%;
+  padding-top: var(--ws-space-xs);
+}
+
+.dashboard-tab__task-source {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+}
+
 /* Activity Feed */
 .dashboard-tab__activity-feed {
   margin-bottom: var(--ws-space-xl);
-}
-
-.dashboard-tab__activity-feed h2 {
-  font-size: var(--ws-font-size-lg);
-  font-weight: 600;
-  margin: 0 0 var(--ws-space-md);
 }
 
 .dashboard-tab__event-list {
@@ -174,17 +211,48 @@
   margin-bottom: var(--ws-space-xl);
 }
 
-.dashboard-tab__pulse-countdown h2 {
-  font-size: var(--ws-font-size-lg);
+.dashboard-tab__countdown-card {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  background: color-mix(in srgb, var(--ws-color-sage) 8%, var(--ws-color-white));
+  border: 1px solid color-mix(in srgb, var(--ws-color-sage) 18%, transparent);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-md) var(--ws-space-lg);
+  box-shadow: var(--ws-shadow-card);
+}
+
+.dashboard-tab__countdown-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  border-radius: var(--ws-radius-md);
+  font-size: 1.25rem;
+}
+
+.dashboard-tab__countdown-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+}
+
+.dashboard-tab__countdown-label {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   font-weight: 600;
-  margin: 0 0 var(--ws-space-sm);
 }
 
 .dashboard-tab__countdown-value {
   font-family: var(--ws-font-display);
-  font-size: var(--ws-font-size-2xl);
+  font-size: var(--ws-font-size-xl);
   font-weight: 700;
-  color: var(--ws-color-sage);
+  color: var(--ws-color-sage-dark);
 }
 
 /* Empty states */
