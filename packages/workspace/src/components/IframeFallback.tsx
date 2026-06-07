@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 import { getClient } from '../services/getClient';
 import type { ProfileUpdatePayload } from '../types';
 
@@ -108,18 +108,20 @@ async function updateProfile(field: string, value: string): Promise<void> {
     });
     if (authErr) throw new Error(authErr.message);
 
-    // Fetch user's organization_id, then update organization name
-    const { data: profile, error: profileFetchErr } = await client
-      .from('profiles')
+    // Fetch user's organization_id from organization_memberships, then update organization name
+    const { data: membership, error: membershipFetchErr } = await client
+      .from('organization_memberships')
       .select('organization_id')
-      .eq('id', userId)
+      .eq('profile_id', userId)
+      .order('joined_at', { ascending: true })
+      .limit(1)
       .single();
-    if (profileFetchErr) throw new Error(profileFetchErr.message);
-    if (profile?.organization_id) {
+    // If no membership rows returned (user has no org), skip org update without error
+    if (!membershipFetchErr && membership?.organization_id) {
       const { error: orgErr } = await client
         .from('organizations')
         .update({ name: value })
-        .eq('id', profile.organization_id);
+        .eq('id', membership.organization_id);
       if (orgErr) throw new Error(orgErr.message);
     }
   }

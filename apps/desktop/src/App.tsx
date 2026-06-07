@@ -183,7 +183,7 @@ export function App() {
         setOrganizationId(profile.organization_id);
 
         // Update display name from the profiles table (server source of truth)
-        if (profile.display_name) {
+        if (profile.display_name && profile.display_name !== user?.displayName) {
           setUser((prev) => prev ? { ...prev, displayName: profile.display_name } : prev);
         }
 
@@ -191,7 +191,7 @@ export function App() {
         if (profile.organization_id) {
           try {
             const orgDetails = await organizationService.getOrgDetails(profile.organization_id);
-            if (mounted && orgDetails?.name) {
+            if (mounted && orgDetails?.name && orgDetails.name !== user?.schoolName) {
               setUser((prev) => prev ? { ...prev, schoolName: orgDetails.name } : prev);
             }
           } catch {
@@ -208,7 +208,7 @@ export function App() {
         }
       });
     return () => { mounted = false; };
-  }, [user]);
+  }, [user?.id]);
 
   // Listen for auth state changes from Supabase (handles token refresh failures,
   // sign-out from another tab, or session expiry during active use).

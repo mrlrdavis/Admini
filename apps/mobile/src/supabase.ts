@@ -1,4 +1,4 @@
-import { createIndexedDbStorage, mapSupabaseError } from '@admini/shared';
+﻿import { createIndexedDbStorage, mapSupabaseError } from '@admini/shared';
 import { createClient, type Provider, type User } from '@supabase/supabase-js';
 import {
   organizationService,
@@ -13,7 +13,7 @@ import type {
   OrgInvitation,
 } from '@admini/workspace';
 
-// InvitationRole is identical to AdminiRole — alias for backward compatibility
+// InvitationRole is identical to AdminiRole â€” alias for backward compatibility
 type InvitationRole = AdminiRole;
 
 const _getOrgDetails = organizationService.getOrgDetails;
@@ -122,7 +122,7 @@ export async function getOrCreateProfile(): Promise<DbProfile> {
 
   // Always use the ensure_user_profile RPC which joins profiles with
   // organization_memberships to return the authoritative role. The profiles
-  // table itself does not store role or organization_id � those live on
+  // table itself does not store role or organization_id ï¿½ those live on
   // organization_memberships and are returned via the RPC join.
   const profile = await supabase
     .rpc('ensure_user_profile')
@@ -332,19 +332,19 @@ export async function updateProfile(input: UpdateProfileInput): Promise<UpdatePr
 
     // 3. Update organization name if school_name changed
     if (input.schoolName !== undefined) {
-      const { data: profile, error: profileFetchError } = await supabase
-        .from('profiles')
+      const { data: membership, error: membershipFetchError } = await supabase
+        .from('organization_memberships')
         .select('organization_id')
-        .eq('id', user.id)
+        .eq('profile_id', user.id)
+        .order('joined_at', { ascending: true })
+        .limit(1)
         .single();
-      if (profileFetchError) {
-        return { success: false, error: mapSupabaseError(profileFetchError) };
-      }
-      if (profile?.organization_id) {
+      // If no membership rows returned (user has no org), skip org update without error
+      if (!membershipFetchError && membership?.organization_id) {
         const { error: orgError } = await supabase
           .from('organizations')
           .update({ name: input.schoolName })
-          .eq('id', profile.organization_id);
+          .eq('id', membership.organization_id);
         if (orgError) {
           return { success: false, error: mapSupabaseError(orgError) };
         }

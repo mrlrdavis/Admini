@@ -399,7 +399,7 @@ describe('IframeFallback', () => {
         error: null,
       });
       const updateFn = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
-      const selectFn = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: singleFn }) });
+      const selectFn = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ limit: vi.fn().mockReturnValue({ single: singleFn }) }) }) });
       const adminClient = {
         from: vi.fn().mockReturnValue({
           select: selectFn,
@@ -444,7 +444,7 @@ describe('IframeFallback', () => {
         error: null,
       });
       const updateFn = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
-      const selectFn = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: singleFn }) });
+      const selectFn = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ limit: vi.fn().mockReturnValue({ single: singleFn }) }) }) });
       const principalClient = {
         from: vi.fn().mockReturnValue({
           select: selectFn,

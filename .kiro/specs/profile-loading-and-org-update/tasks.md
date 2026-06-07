@@ -10,7 +10,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
 
 ## Tasks
 
-- [ ] 1. Write bug condition exploration test
+- [x] 1. Write bug condition exploration test
   - **Property 1: Bug Condition** - Infinite Re-render Loop and Organization Update Failure
   - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
   - **DO NOT attempt to fix the test or the code when it fails**
@@ -27,7 +27,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
   - Mark task complete when tests are written, run, and failure is documented
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Existing Profile Loading and Update Behavior Unchanged
   - **IMPORTANT**: Follow observation-first methodology
   - Observe on UNFIXED code for non-buggy inputs:
@@ -45,9 +45,9 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 3. Fix for infinite re-render loop and organization update failure
+- [x] 3. Fix for infinite re-render loop and organization update failure
 
-  - [ ] 3.1 Change useEffect dependency from `[user]` to `[user?.id]` in desktop App.tsx
+  - [x] 3.1 Change useEffect dependency from `[user]` to `[user?.id]` in desktop App.tsx
     - In `apps/desktop/src/App.tsx`, locate the profile-loading useEffect
     - Change the dependency array from `[user]` to `[user?.id]`
     - This ensures the effect only re-runs on identity change (sign-in/sign-out), not on display field updates
@@ -56,7 +56,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - _Preservation: First-time sign-in population, sign-out reset to default role still work_
     - _Requirements: 2.3_
 
-  - [ ] 3.2 Add equality guard for displayName before setUser in desktop App.tsx
+  - [x] 3.2 Add equality guard for displayName before setUser in desktop App.tsx
     - Before calling `setUser` for display name, compare `profile.display_name` against current `user.displayName`
     - If values are equal (strict equality), skip the `setUser` call entirely
     - If values differ, call `setUser` exactly once with the updated displayName
@@ -65,7 +65,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - _Preservation: Users with null display_name still skip setUser (unchanged)_
     - _Requirements: 2.1_
 
-  - [ ] 3.3 Add equality guard for schoolName before setUser in desktop App.tsx
+  - [x] 3.3 Add equality guard for schoolName before setUser in desktop App.tsx
     - Before calling `setUser` for school name, compare fetched `orgDetails.name` against current `user.schoolName`
     - If values are equal, skip the `setUser` call
     - If fetched org name is null/undefined, skip the `setUser` call
@@ -75,7 +75,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - _Preservation: Users with no org membership still skip org name fetch without error_
     - _Requirements: 2.2_
 
-  - [ ] 3.4 Apply same useEffect and equality guard fixes to mobile App.tsx
+  - [x] 3.4 Apply same useEffect and equality guard fixes to mobile App.tsx
     - In `apps/mobile/src/App.tsx`, apply identical changes:
       - Change dependency array from `[user]` to `[user?.id]`
       - Add equality guard for displayName before setUser
@@ -85,7 +85,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - _Preservation: Mobile sign-out resets to default role (staff) correctly_
     - _Requirements: 2.1, 2.2, 2.3_
 
-  - [ ] 3.5 Fix organization_id query in desktop supabase.ts
+  - [x] 3.5 Fix organization_id query in desktop supabase.ts
     - In `apps/desktop/src/supabase.ts`, locate the `updateProfile` function
     - Replace `.from('profiles').select('organization_id').eq('id', user.id).single()` with `.from('organization_memberships').select('organization_id').eq('profile_id', user.id).order('joined_at', { ascending: true }).limit(1).single()`
     - If no rows returned (user has no membership), skip org update without error
@@ -95,7 +95,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - _Preservation: Display-name-only updates still skip org queries entirely_
     - _Requirements: 2.4, 2.5_
 
-  - [ ] 3.6 Fix organization_id query in mobile supabase.ts
+  - [x] 3.6 Fix organization_id query in mobile supabase.ts
     - In `apps/mobile/src/supabase.ts`, apply the same organization_memberships query fix as desktop
     - Replace profiles query with `.from('organization_memberships').select('organization_id').eq('profile_id', user.id).order('joined_at', { ascending: true }).limit(1).single()`
     - Handle no-rows gracefully (skip org update without error)
@@ -104,7 +104,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - _Preservation: Mobile display-name-only updates unaffected_
     - _Requirements: 2.4, 2.5_
 
-  - [ ] 3.7 Fix organization_id query in IframeFallback.tsx
+  - [x] 3.7 Fix organization_id query in IframeFallback.tsx
     - In `packages/workspace/src/components/IframeFallback.tsx`, locate the `updateProfile` function
     - Replace `.from('profiles').select('organization_id').eq('id', userId)` with `.from('organization_memberships').select('organization_id').eq('profile_id', userId).order('joined_at', { ascending: true }).limit(1).single()`
     - Handle no-rows gracefully (skip org update without throwing)
@@ -113,7 +113,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - _Preservation: IframeFallback profile:update message bridge continues to work for display-name-only updates_
     - _Requirements: 2.4, 2.5_
 
-  - [ ] 3.8 Verify bug condition exploration test now passes
+  - [x] 3.8 Verify bug condition exploration test now passes
     - **Property 1: Expected Behavior** - Infinite Re-render Loop Eliminated and Organization Update Persists
     - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
     - The test from task 1 encodes the expected behavior
@@ -124,7 +124,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
     - **EXPECTED OUTCOME**: Test PASSES (confirms both bugs are fixed)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-  - [ ] 3.9 Verify preservation tests still pass
+  - [x] 3.9 Verify preservation tests still pass
     - **Property 2: Preservation** - Existing Behavior Unchanged
     - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
     - Run preservation property tests from step 2
@@ -136,7 +136,7 @@ The approach is: explore the bug with tests first, preserve existing behavior, i
       - Auth metadata persistence: raw_user_meta_data still updated
       - Profile fetch failure: default role fallback still works
 
-- [ ] 4. Checkpoint - Ensure all tests pass
+- [x] 4. Checkpoint - Ensure all tests pass
   - Run full test suite to confirm no regressions
   - Verify exploration test (Property 1) passes on fixed code
   - Verify preservation tests (Property 2) pass on fixed code
