@@ -4,7 +4,7 @@
 // Requirements: 2.1, 2.4, 7.1
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { KPICard } from '@admini/ui';
+import { KPICard, SkeletonCard } from '@admini/ui';
 import {
   getTasks,
   getActivityEvents,
@@ -121,7 +121,9 @@ export function DashboardTab({ userName }: DashboardTabProps) {
   if (loading) {
     return (
       <div className="dashboard-tab dashboard-tab--loading" aria-busy="true">
-        <p>Loading dashboard...</p>
+        <SkeletonCard height={80} />
+        <SkeletonCard height={160} />
+        <SkeletonCard height={120} />
       </div>
     );
   }
@@ -167,20 +169,26 @@ export function DashboardTab({ userName }: DashboardTabProps) {
 
       {/* Priority Queue */}
       <section className="dashboard-tab__priority-queue">
-        <h2>Priority Queue</h2>
+        <header className="dashboard-tab__section-header">
+          <h2>Priority Queue</h2>
+          <button type="button" className="dashboard-tab__section-link">View all</button>
+        </header>
         {priorityQueue.length === 0 ? (
           <p className="dashboard-tab__empty">No open tasks</p>
         ) : (
           <ul className="dashboard-tab__task-list">
             {priorityQueue.map((task) => (
-              <li key={task.id} className="dashboard-tab__task-item" data-priority={task.priority}>
+              <li key={task.id} className="dashboard-tab__task-item ws-press-feedback" data-priority={task.priority}>
                 <span className="dashboard-tab__task-title">{task.title}</span>
                 <span className="dashboard-tab__task-priority">{task.priority}</span>
-                {task.dueAt && (
-                  <span className="dashboard-tab__task-due">
-                    Due: {new Date(task.dueAt).toLocaleDateString()}
-                  </span>
-                )}
+                <div className="dashboard-tab__task-meta">
+                  {task.dueAt && (
+                    <span className="dashboard-tab__task-due">
+                      Due {new Date(task.dueAt).toLocaleDateString()}
+                    </span>
+                  )}
+                  <span className="dashboard-tab__task-source" aria-label="source">📋</span>
+                </div>
               </li>
             ))}
           </ul>
@@ -189,7 +197,10 @@ export function DashboardTab({ userName }: DashboardTabProps) {
 
       {/* Activity Feed */}
       <section className="dashboard-tab__activity-feed">
-        <h2>Activity Feed</h2>
+        <header className="dashboard-tab__section-header">
+          <h2>Activity Feed</h2>
+          <button type="button" className="dashboard-tab__section-link">View all</button>
+        </header>
         {sortedEvents.length === 0 ? (
           <p className="dashboard-tab__empty">No recent activity</p>
         ) : (
@@ -210,11 +221,20 @@ export function DashboardTab({ userName }: DashboardTabProps) {
 
       {/* Pulse Countdown */}
       <section className="dashboard-tab__pulse-countdown">
-        <h2>Next Pulse</h2>
+        <header className="dashboard-tab__section-header">
+          <h2>Next Pulse</h2>
+          <button type="button" className="dashboard-tab__section-link">View all</button>
+        </header>
         {kpis?.nextPulseAt ? (
-          <p className="dashboard-tab__countdown-value">
-            {formatCountdown(kpis.nextPulseAt)}
-          </p>
+          <div className="dashboard-tab__countdown-card">
+            <span className="dashboard-tab__countdown-icon" aria-hidden="true">?</span>
+            <div className="dashboard-tab__countdown-info">
+              <span className="dashboard-tab__countdown-label">Next Pulse</span>
+              <span className="dashboard-tab__countdown-value">
+                {formatCountdown(kpis.nextPulseAt)}
+              </span>
+            </div>
+          </div>
         ) : (
           <p className="dashboard-tab__empty">No pulse scheduled</p>
         )}

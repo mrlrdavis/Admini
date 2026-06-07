@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Supabase Migration Update Notifier",
+  "description": "Notifies you when Supabase migration SQL files are created or edited, reminding you to apply the changes via the SQL editor and review any necessary data model updates.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "supabase/migrations/*.sql"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A Supabase migration file has been updated. Please summarize the changes made to this migration, list the specific SQL statements that need to be run in the Supabase SQL editor, and outline any necessary steps to update the data model to fit the new schema including by, if necessary, copying the entire contents (e.g., type updates, RLS policies, seed data changes, or related application code adjustments)."
+  },
+  "workspaceFolderName": "Admini",
+  "shortName": "supabase-migration-notify"
+}

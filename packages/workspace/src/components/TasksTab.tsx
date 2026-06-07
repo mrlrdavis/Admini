@@ -3,7 +3,8 @@
 // ---------------------------------------------------------------------------
 // Full task list with filtering, priority indicators, and add FAB.
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SkeletonCard } from '@admini/ui';
 import { getTasks } from '../services/dashboardService';
 import type { DashboardTask } from '../types';
 
@@ -48,6 +49,29 @@ function isThisWeek(dateStr: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Empty state messages per filter
+// ---------------------------------------------------------------------------
+
+const emptyStateContent: Record<TaskFilter, { title: string; desc: string }> = {
+  all: {
+    title: 'No tasks yet',
+    desc: 'Tasks you create or are assigned will appear here.',
+  },
+  today: {
+    title: 'No tasks today',
+    desc: 'Nothing due today. Enjoy the breathing room.',
+  },
+  'this-week': {
+    title: 'No tasks this week',
+    desc: 'Your week is clear. Time to plan ahead.',
+  },
+  delegated: {
+    title: 'No delegated tasks',
+    desc: 'Tasks you delegate to others will show up here.',
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -56,6 +80,22 @@ export function TasksTab(_props: TasksTabProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<TaskFilter>('all');
+
+  // Track indicator position via refs on each pill
+  const filterRefs = useRef<Record<TaskFilter, HTMLButtonElement | null>>({
+    all: null,
+    today: null,
+    'this-week': null,
+    delegated: null,
+  });
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const el = filterRefs.current[filter];
+    if (el) {
+      setIndicatorStyle({ left: el.offsetLeft, width: el.offsetWidth });
+    }
+  }, [filter]);
 
   // -------------------------------------------------------------------------
   // Data fetching
@@ -103,7 +143,10 @@ export function TasksTab(_props: TasksTabProps) {
   if (loading) {
     return (
       <div className="tasks-tab tasks-tab--loading" aria-busy="true">
-        <p>Loading tasks...</p>
+        <SkeletonCard height={40} />
+        <SkeletonCard height={72} />
+        <SkeletonCard height={72} />
+        <SkeletonCard height={72} />
       </div>
     );
   }
@@ -128,6 +171,8 @@ export function TasksTab(_props: TasksTabProps) {
     { id: 'delegated', label: 'Delegated' },
   ];
 
+  const emptyContent = emptyStateContent[filter];
+
   return (
     <div className="tasks-tab">
       {/* Header */}
@@ -140,6 +185,7 @@ export function TasksTab(_props: TasksTabProps) {
         {filters.map((f) => (
           <button
             key={f.id}
+            ref={(el) => { filterRefs.current[f.id] = el; }}
             type="button"
             className={`tasks-tab__filter-pill ${filter === f.id ? 'tasks-tab__filter-pill--active' : ''}`}
             onClick={() => setFilter(f.id)}
@@ -147,16 +193,18 @@ export function TasksTab(_props: TasksTabProps) {
             {f.label}
           </button>
         ))}
+        <span
+          className="tasks-tab__filter-indicator"
+          style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+        />
       </div>
 
       {/* Task List */}
       <section className="tasks-tab__list-section">
         {filteredTasks.length === 0 ? (
           <div className="tasks-tab__empty-state">
-            <p className="tasks-tab__empty-title">No tasks yet</p>
-            <p className="tasks-tab__empty-desc">
-              Tasks you create or are assigned will appear here.
-            </p>
+            <p className="tasks-tab__empty-title">{emptyContent.title}</p>
+            <p className="tasks-tab__empty-desc">{emptyContent.desc}</p>
           </div>
         ) : (
           <ul className="tasks-tab__task-list">

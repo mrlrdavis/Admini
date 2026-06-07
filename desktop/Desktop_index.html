@@ -784,6 +784,9 @@
           if (data && data.type === 'user') {
             window.AdminiPrototype?.applyUserProfile?.(data);
             showIntegrationReminder(data.systems);
+          } else if (data && data.type === 'user-data' && data.user) {
+            const profile = { name: data.user.displayName, email: data.user.email, schoolName: data.user.schoolName, role: data.role };
+            window.AdminiPrototype?.applyUserProfile?.(profile);
           }
         } catch (e) {
           if (ev.data && ev.data.type === 'user') {

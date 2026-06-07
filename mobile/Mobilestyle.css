@@ -1,4 +1,4 @@
-/* style.css — AdminI Mobile App */
+/* style.css â€” AdminI Mobile App */
 
 /* =============================================
    DESIGN TOKENS
@@ -905,7 +905,7 @@
 }
 
 /* =============================================
-   TAP MODE — WORD BOARD
+   TAP MODE â€” WORD BOARD
    ============================================= */
 .tap-mode {
   display: none;
@@ -2164,6 +2164,26 @@
   color: var(--color-text-muted);
 }
 
+.settings-item__edit-btn {
+  font-size: var(--text-xs);
+  color: var(--color-primary, #2563eb);
+  background: none;
+  border: none;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: var(--radius-sm, 4px);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-item__edit-btn:active {
+  background: var(--color-surface-hover, rgba(0,0,0,0.05));
+}
+
 /* =============================================
    BOTTOM SHEET MODAL
    ============================================= */
@@ -2290,7 +2310,7 @@
   transform: translateX(0);
 }
 
-/* ---- Label pills — oval, tap-friendly ---- */
+/* ---- Label pills â€” oval, tap-friendly ---- */
 .label-grid {
   display: flex;
   flex-wrap: wrap;
@@ -3022,7 +3042,7 @@
 }
 
 /* =============================================
-   KPI CARDS — INTERACTIVE
+   KPI CARDS â€” INTERACTIVE
    ============================================= */
 .kpi-card {
   cursor: pointer;
@@ -3383,7 +3403,7 @@
 }
 
 /* =============================================
-   OBSERVATIONS — Mobile
+   OBSERVATIONS â€” Mobile
    ============================================= */
 .menu-item__icon--observations { background: rgba(124, 58, 237, 0.1); color: #7C3AED; }
 [data-theme="dark"] .menu-item__icon--observations { background: rgba(167, 139, 250, 0.15); color: #A78BFA; }

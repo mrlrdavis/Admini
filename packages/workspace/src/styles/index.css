@@ -1,5 +1,5 @@
-/* ==========================================================================
-   @admini/workspace — Shared styles entry point
+﻿/* ==========================================================================
+   @admini/workspace - Shared styles entry point
    Design Tokens: sage/limestone palette, rounded cards, horizontal-scroll KPIs
    ========================================================================== */
 
@@ -67,4 +67,106 @@
   /* Transitions */
   --ws-transition-fast: 150ms ease;
   --ws-transition-normal: 250ms ease;
+}
+
+/* --------------------------------------------------------------------------
+   Utility Classes
+   -------------------------------------------------------------------------- */
+
+.ws-press-feedback {
+  transition: transform 100ms ease, box-shadow 100ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ws-press-feedback:active {
+  transform: scale(0.99);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* --------------------------------------------------------------------------
+   Workspace Content Area - Mobile Layout
+   -------------------------------------------------------------------------- */
+
+/* Bottom padding for tab bar clearance - applies whenever the fixed bottom bar
+   is visible (mobile layout mode uses class .layout-shell--mobile) */
+.layout-shell--mobile .layout-shell__content {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 16px horizontal padding on small mobile viewports (<= 428px) so content
+   fills the available width without feeling cramped */
+@media (max-width: 428px) {
+  .layout-shell__content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Typography Scaling - Clamp-based sizing for workspace section titles
+   -------------------------------------------------------------------------- */
+
+.ws-section-title,
+.dashboard-tab__section-header h2,
+.dashboard-tab__priority-queue > h2,
+.dashboard-tab__activity-feed > h2,
+.dashboard-tab__pulse-countdown > h2,
+.tasks-tab__title,
+.capture-tab__captures-title,
+.pulse-tab__section-title,
+.more-tab__section-title,
+.admin-tab__section-title {
+  font-size: clamp(20px, 4.5vw, 32px);
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: Reduced Motion
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Press feedback utility */
+  .ws-press-feedback {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+
+  /* Mic pulse ring animation (capture tab) */
+  .capture-tab__mic-btn--recording::before,
+  .capture-tab__mic-btn--recording::after {
+    animation: none !important;
+  }
+
+  /* Filter indicator sliding animation (tasks tab) */
+  .tasks-tab__filter-indicator {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+
+  /* Mode indicator sliding animation (capture tab) */
+  .capture-tab__mode-indicator {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+
+  /* FAB scale animation (tasks tab) */
+  .tasks-tab__fab {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+
+  /* Task item press feedback (dashboard tab) */
+  .dashboard-tab__task-item {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+
+  /* Toggle switch transition (pulse tab) */
+  .pulse-tab__toggle-track,
+  .pulse-tab__toggle-track::after {
+    transition-duration: 0ms !important;
+  }
+
+  /* Chevron hover animation (more tab) */
+  .more-tab__link-chevron {
+    transition-duration: 0ms !important;
+  }
 }

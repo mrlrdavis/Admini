@@ -1,8 +1,9 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // CaptureTab - Voice/Tap capture interface for quick observations and notes.
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react';
+import { SkeletonCard } from '@admini/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -32,7 +33,11 @@ const WORD_BOARD_CATEGORIES = {
 // Component
 // ---------------------------------------------------------------------------
 
-export function CaptureTab() {
+export interface CaptureTabProps {
+  loading?: boolean;
+}
+
+export function CaptureTab({ loading }: CaptureTabProps) {
   const [mode, setMode] = useState<CaptureMode>('voice');
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
@@ -80,6 +85,19 @@ export function CaptureTab() {
   }
 
   // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // Loading state
+  // -------------------------------------------------------------------------
+
+  if (loading) {
+    return (
+      <div className="capture-tab capture-tab--loading" aria-busy="true">
+        <SkeletonCard height={60} />
+        <SkeletonCard height={48} />
+        <SkeletonCard height={200} />
+      </div>
+    );
+  }
   // Render
   // -------------------------------------------------------------------------
 
@@ -107,6 +125,10 @@ export function CaptureTab() {
         >
           Tap
         </button>
+        <span
+          className={`capture-tab__mode-indicator ${mode === 'tap' ? 'capture-tab__mode-indicator--tap' : ''}`}
+          aria-hidden="true"
+        />
       </div>
 
       {/* Voice Mode */}
@@ -145,6 +167,9 @@ export function CaptureTab() {
           {/* AI Suggestion Card */}
           <div className="capture-tab__ai-suggestion">
             <div className="capture-tab__ai-suggestion-header">
+              <svg className="capture-tab__ai-sparkle" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                <path d="M8 0l1.5 5.5L16 8l-6.5 2.5L8 16l-1.5-5.5L0 8l6.5-2.5z" fill="currentColor"/>
+              </svg>
               <span className="capture-tab__ai-badge">AI</span>
               <span className="capture-tab__ai-label">Suggestion</span>
             </div>

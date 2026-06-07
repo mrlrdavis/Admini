@@ -5,16 +5,24 @@ import {
   createTask,
   getCurrentUser,
   getOrCreateProfile,
+  getOrgDetails,
   isSupabaseConfigured,
   listTasks,
   signInWithOAuthProvider,
   signInWithPassword,
   sendPasswordReset,
   signOut,
+  deleteAccount,
   signUpWithPassword,
   updateTaskStatus,
   supabase,
   type CreateTaskInput,
+  checkOnboardingComplete,
+  markOnboardingComplete,
+  updateProfile,
+  updateMembershipRole,
+  persistOnboardingPreferences,
+  acceptInvitation,
   type AuthUser
 } from './supabase';
 import { SupabaseClientProvider, WorkspaceShell } from '@admini/workspace';
@@ -36,6 +44,8 @@ type OnboardingAnswers = {
   role: string;
   focus: string;
   systems: string[];
+  schoolName: string;
+  displayName: string;
 };
 
 type TaskStatusInput = 'open' | 'in_progress' | 'completed' | 'archived';
@@ -57,6 +67,32 @@ export function App() {
   const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingAnswers | null>(null);
   const [userRole, setUserRole] = useState<string>('staff');
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | undefined>(undefined);
+
+  const [invitationToken, setInvitationToken] = useState<string | null>(null);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
+
+  // Parse invitation token from URL on app load so it persists through auth flow
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('invitation_token') ?? params.get('invite');
+    if (token) {
+      setInvitationToken(token);
+      // Store in sessionStorage so the token survives OAuth redirects
+      sessionStorage.setItem('admini_invitation_token', token);
+      // Clean the token from the URL to avoid leaking it in browser history
+      params.delete('invitation_token');
+      params.delete('invite');
+      const nextSearch = params.toString();
+      window.history.replaceState({}, '', `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`);
+    } else {
+      // Check sessionStorage in case we returned from an OAuth redirect
+      const stored = sessionStorage.getItem('admini_invitation_token');
+      if (stored) {
+        setInvitationToken(stored);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -99,8 +135,23 @@ export function App() {
     const answersKey = `onboarding_answers_${user.id}`;
 
     authStorage.getItem(completeKey)
-      .then((value) => {
-        if (mounted) setOnboardingComplete(value === 'true');
+      .then(async (value) => {
+        if (!mounted) return;
+        if (value === 'true') {
+          // IndexedDB cache says complete - trust it
+          setOnboardingComplete(true);
+        } else {
+          // IndexedDB does not have the flag - check server (handles Google OAuth
+          // users whose profile was auto-created by handle_new_user trigger, and
+          // users on new devices or after clearing browser data)
+          const serverComplete = await checkOnboardingComplete();
+          if (!mounted) return;
+          if (serverComplete) {
+            // Server says complete - update local cache
+            await authStorage.setItem(completeKey, 'true');
+          }
+          setOnboardingComplete(serverComplete);
+        }
       })
       .catch(() => {
         if (mounted) setOnboardingComplete(false);
@@ -128,7 +179,9 @@ export function App() {
     };
   }, [user]);
 
-  // Fetch profile to obtain role for WorkspaceShell
+  // Fetch profile from Supabase profiles table to obtain role, display name,
+  // and organization/school name - ensures fields are pre-filled with server data
+  // (not just auth metadata which may be stale across devices). REQ-5, REQ-11
   useEffect(() => {
     let mounted = true;
     if (!user) {
@@ -137,11 +190,29 @@ export function App() {
       return () => { mounted = false; };
     }
     getOrCreateProfile()
-      .then((profile) => {
-        if (mounted) {
-          setUserRole('admin'); // TODO: restore to profile.role once DB membership is created
-          setProfileLoaded(true);
+      .then(async (profile) => {
+        if (!mounted) return;
+        setUserRole(profile.role);
+        setOrganizationId(profile.organization_id);
+
+        // Update display name from the profiles table (server source of truth)
+        if (profile.display_name) {
+          setUser((prev) => prev ? { ...prev, displayName: profile.display_name } : prev);
         }
+
+        // Fetch organization name (school name) from the organizations table
+        if (profile.organization_id) {
+          try {
+            const orgDetails = await getOrgDetails(profile.organization_id);
+            if (mounted && orgDetails?.name) {
+              setUser((prev) => prev ? { ...prev, schoolName: orgDetails.name } : prev);
+            }
+          } catch {
+            // Non-critical: fall back to auth metadata for school name
+          }
+        }
+
+        setProfileLoaded(true);
       })
       .catch(() => {
         if (mounted) {
@@ -152,12 +223,100 @@ export function App() {
     return () => { mounted = false; };
   }, [user]);
 
+  // Listen for auth state changes from Supabase (handles token refresh failures,
+  // sign-out from another tab, or session expiry during active use).
+  // When a SIGNED_OUT event fires, redirect to sign-in gracefully.
+  useEffect(() => {
+    if (!supabase) return;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        // SIGNED_OUT fires when: sign-out is called, token refresh fails,
+        // or the session is invalidated server-side.
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Re-validate session when the page regains visibility (multi-device consistency)
+  useEffect(() => {
+    if (!user) return;
+
+    function handleVisibilityChange() {
+      if (document.visibilityState !== 'visible') return;
+      if (!supabase) return;
+
+      supabase.auth.getSession().then(({ data, error }) => {
+        if (error || !data.session) {
+          // Session is invalid or expired - redirect to sign-in
+          setUser(null);
+        }
+      });
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
+  // Accept pending invitation after user is authenticated
+  useEffect(() => {
+    if (!user || !invitationToken) return;
+    let mounted = true;
+
+    acceptInvitation(invitationToken).then((result) => {
+      if (!mounted) return;
+      if (result.success) {
+        // Clear the invitation token from state and sessionStorage
+        setInvitationToken(null);
+        sessionStorage.removeItem('admini_invitation_token');
+        // Update school name in local state if the invitation provided one
+        if (result.organizationName) {
+          setUser((prev) => prev ? { ...prev, schoolName: result.organizationName } : prev);
+        }
+      } else {
+        // Show user-friendly error and clear the token to prevent retry loops
+        setInvitationError(result.error ?? 'This invitation link is no longer valid. Please ask your administrator to send a new one.');
+        setInvitationToken(null);
+        sessionStorage.removeItem('admini_invitation_token');
+      }
+    });
+
+    return () => { mounted = false; };
+  }, [user, invitationToken]);
+
   async function completeOnboarding(answers: OnboardingAnswers) {
     if (!user) return;
     const completeKey = `onboarding_complete_${user.id}`;
     const answersKey = `onboarding_answers_${user.id}`;
     await authStorage.setItem(completeKey, 'true');
     await authStorage.setItem(answersKey, JSON.stringify(answers));
+    // Persist onboarding completion to server (auth metadata) so it survives
+    // device changes and browser data clears
+    await markOnboardingComplete();
+    // Update display name from wizard
+    if (answers.displayName) {
+      await updateProfile({ displayName: answers.displayName });
+    }
+    // Update the organization name from the wizard's school name
+    if (answers.schoolName) {
+      await updateProfile({ schoolName: answers.schoolName });
+    }
+    // Update the user's role in organization_memberships from wizard selection
+    if (answers.role) {
+      await updateMembershipRole(answers.role);
+    }
+    // Persist focus and systems preferences to server (auth metadata)
+    await persistOnboardingPreferences({ focus: answers.focus, systems: answers.systems });
+    // Update the local user state with the chosen display name
+    if (answers.displayName) {
+      setUser((prev) => prev ? { ...prev, displayName: answers.displayName } : prev);
+    }
     setOnboardingAnswers(answers);
     setOnboardingComplete(true);
   }
@@ -168,6 +327,9 @@ export function App() {
     setShowIntegrations(false);
     setOnboardingComplete(null);
     setOnboardingAnswers(null);
+    setProfileLoaded(false);
+    setUserRole('staff');
+    setOrganizationId(undefined);
     setUser(null);
   }
 
@@ -210,9 +372,22 @@ export function App() {
   // Authenticated and onboarded: render native WorkspaceShell
   return (
     <SupabaseClientProvider client={supabase!}>
+      {invitationError && (
+        <div className="invitation-error-banner" role="alert">
+          <span className="invitation-error-message">{invitationError}</span>
+          <button
+            className="invitation-error-dismiss"
+            onClick={() => setInvitationError(null)}
+            aria-label="Dismiss invitation error"
+          >
+            &times;
+          </button>
+        </div>
+      )}
       <WorkspaceShell
         user={user}
-        userRole={onboardingAnswers?.role ?? 'staff'}
+        userRole={userRole}
+        organizationId={organizationId}
         userName={userName}
         schoolName={schoolName}
         prototypePath={prototypePath}
@@ -220,6 +395,23 @@ export function App() {
           signOut().finally(() => setUser(null));
         }}
         onResetUserData={resetUserData}
+        onDeleteAccount={async () => {
+          await deleteAccount();
+          await clearAdminiBrowserState();
+          setUser(null);
+        }}
+        onProfileUpdated={(payload) => {
+          setUser((prev) => {
+            if (!prev) return prev;
+            if (payload.field === 'display-name') {
+              return { ...prev, displayName: payload.value };
+            }
+            if (payload.field === 'school') {
+              return { ...prev, schoolName: payload.value };
+            }
+            return prev;
+          });
+        }}
         renderNavigation={({ activeTab, tabs, onTabChange }) => (
           <TabBar tabs={tabs} activeTab={activeTab} onTabChange={onTabChange as (tabId: string) => void} />
         )}
@@ -242,10 +434,40 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const [returningTagline, setReturningTagline] = useState(() => getRandomTagline());
   const timeContext = getTimeContext(now);
   const [visualMode, setVisualMode] = useState<VisualMode>(() => timeContext.phase === 'evening' ? 'night' : 'day');
   const passwordScore = getPasswordScore(password);
+
+  // Inline validation state
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function validateEmail(value: string): string {
+    if (!value) return 'Please enter a valid email address';
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(value)) return 'Please enter a valid email address';
+    return '';
+  }
+
+  function validatePassword(value: string): string {
+    if (!value || value.length < 6) return 'Password must be at least 6 characters';
+    return '';
+  }
+
+  function validateDisplayName(value: string): string {
+    if (!value.trim()) return 'Display name cannot be empty';
+    return '';
+  }
+
+  function clearFieldError(field: string) {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 15000);
@@ -268,10 +490,13 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
       setError('Single sign-on is almost ready. Restart Admini so the new connection settings can load.');
       return;
     }
+    setOauthLoading(true);
     try {
       await signInWithOAuthProvider(provider);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Single sign-on could not start.');
+    } finally {
+      setOauthLoading(false);
     }
   }
 
@@ -279,6 +504,16 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
     event.preventDefault();
     setStatus('');
     setError('');
+    const errors: Record<string, string> = {};
+    const emailErr = validateEmail(email);
+    if (emailErr) errors.email = emailErr;
+    const passErr = validatePassword(password);
+    if (passErr) errors.password = passErr;
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+    setFieldErrors({});
     if (!isSupabaseConfigured) {
       setError('Sign in is almost ready. Restart Admini so the new connection settings can load.');
       return;
@@ -316,6 +551,20 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
     event.preventDefault();
     setStatus('');
     setError('');
+    // Step-based inline validation
+    if (signUpStep === 0) {
+      const err = validateDisplayName(displayName);
+      if (err) { setFieldErrors({ displayName: err }); return; }
+    } else if (signUpStep === 1) {
+      if (!schoolName.trim()) { setFieldErrors({ schoolName: 'School name cannot be empty' }); return; }
+    } else if (signUpStep === 2) {
+      const err = validateEmail(email);
+      if (err) { setFieldErrors({ email: err }); return; }
+    } else if (signUpStep === 3) {
+      const err = validatePassword(password);
+      if (err) { setFieldErrors({ password: err }); return; }
+    }
+    setFieldErrors({});
     if (signUpStep < 3) {
       setSignUpStep((current) => current + 1);
       playBubbleSound();
@@ -374,12 +623,14 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
           <AuthStoryPanel greeting={timeContext.greeting} tagline={returningTagline} onBack={() => setView('home')} />
           <div className="auth-conversation">
             <form className="minimal-form" onSubmit={handleSignIn}>
-                <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></label>
-                <label>Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" /></label>
+                <label>Email<input type="email" value={email} onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }} onBlur={() => { const err = validateEmail(email); if (err) setFieldErrors((prev) => ({ ...prev, email: err })); }} autoComplete="email" /></label>
+                {fieldErrors.email && <span className="field-error" role="alert">{fieldErrors.email}</span>}
+                <label>Password<input type="password" value={password} onChange={(e) => { setPassword(e.target.value); clearFieldError('password'); }} onBlur={() => { const err = validatePassword(password); if (err) setFieldErrors((prev) => ({ ...prev, password: err })); }} autoComplete="current-password" /></label>
+                {fieldErrors.password && <span className="field-error" role="alert">{fieldErrors.password}</span>}
                 <button className="forgot-link" type="button" onClick={handlePasswordReset}>Forgot your password?</button>
                 <button className="bubble-submit" disabled={submitting} type="submit" onPointerEnter={playBubbleSound}>{submitting ? 'Opening...' : 'Open Admini'}</button>
               </form>
-              <button type="button" className="google-link" onClick={() => handleOAuth('google')} onPointerEnter={playBubbleSound}>or sign in with Google</button>
+              <button type="button" className="google-link" onClick={() => handleOAuth('google')} onPointerEnter={playBubbleSound} disabled={oauthLoading}>{oauthLoading ? 'Connecting...' : 'or sign in with Google'}</button>
             <AuthMessages error={error} status={status} />
           </div>
         </section>
@@ -401,6 +652,8 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
               onSchoolName={setSchoolName}
               onEmail={setEmail}
               onPassword={setPassword}
+              fieldErrors={fieldErrors}
+              clearFieldError={clearFieldError}
             />
             <div className="wizard-actions">
               {signUpStep > 0 ? <button type="button" onClick={() => setSignUpStep((current) => current - 1)} onPointerEnter={playBubbleSound}>Back</button> : null}
@@ -459,7 +712,9 @@ function SignUpQuestion({
   onDisplayName,
   onSchoolName,
   onEmail,
-  onPassword
+  onPassword,
+  fieldErrors,
+  clearFieldError
 }: {
   step: number;
   displayName: string;
@@ -471,25 +726,45 @@ function SignUpQuestion({
   onSchoolName: (value: string) => void;
   onEmail: (value: string) => void;
   onPassword: (value: string) => void;
+  fieldErrors: Record<string, string>;
+  clearFieldError: (field: string) => void;
 }) {
   if (step === 0) {
-    return <label className="big-question">What should I call you?<input value={displayName} onChange={(event) => onDisplayName(event.target.value)} required autoFocus /></label>;
+    return (
+      <div className="big-question-wrapper">
+        <label className="big-question">What should I call you?<input value={displayName} onChange={(event) => { onDisplayName(event.target.value); clearFieldError('displayName'); }} autoFocus /></label>
+        {fieldErrors.displayName && <span className="field-error" role="alert">{fieldErrors.displayName}</span>}
+      </div>
+    );
   }
   if (step === 1) {
-    return <label className="big-question">What is your school's name?<input value={schoolName} onChange={(event) => onSchoolName(event.target.value)} required /></label>;
+    return (
+      <div className="big-question-wrapper">
+        <label className="big-question">What is your school's name?<input value={schoolName} onChange={(event) => { onSchoolName(event.target.value); clearFieldError('schoolName'); }} /></label>
+        {fieldErrors.schoolName && <span className="field-error" role="alert">{fieldErrors.schoolName}</span>}
+      </div>
+    );
   }
   if (step === 2) {
-    return <label className="big-question">What email should Admini use?<input type="email" value={email} onChange={(event) => onEmail(event.target.value)} required autoComplete="email" /></label>;
+    return (
+      <div className="big-question-wrapper">
+        <label className="big-question">What email should Admini use?<input type="email" value={email} onChange={(event) => { onEmail(event.target.value); clearFieldError('email'); }} autoComplete="email" /></label>
+        {fieldErrors.email && <span className="field-error" role="alert">{fieldErrors.email}</span>}
+      </div>
+    );
   }
   return (
-    <label className="big-question">
-      Create a password.
-      <input type="password" minLength={8} value={password} onChange={(event) => onPassword(event.target.value)} required autoComplete="new-password" />
-      <span className="meter-label">Make it a good one</span>
-      <span className="password-meter" aria-hidden="true">
-        {[0, 1, 2, 3].map((index) => <span className={index < passwordScore ? 'filled' : ''} key={index} />)}
-      </span>
-    </label>
+    <div className="big-question-wrapper">
+      <label className="big-question">
+        Create a password.
+        <input type="password" value={password} onChange={(event) => { onPassword(event.target.value); clearFieldError('password'); }} autoComplete="new-password" />
+        <span className="meter-label">Make it a good one</span>
+        <span className="password-meter" aria-hidden="true">
+          {[0, 1, 2, 3].map((index) => <span className={index < passwordScore ? 'filled' : ''} key={index} />)}
+        </span>
+      </label>
+      {fieldErrors.password && <span className="field-error" role="alert">{fieldErrors.password}</span>}
+    </div>
   );
 }
 
@@ -502,12 +777,26 @@ function AuthMessages({ error, status }: { error: string; status: string }) {
   );
 }
 
-function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string; onComplete: (answers: OnboardingAnswers) => Promise<void>; }) {
+function FirstTimeOnboardingWizard({ userName, schoolName: initialSchoolName = '', onComplete }: { userName: string; schoolName?: string; onComplete: (answers: OnboardingAnswers) => Promise<void>; }) {
   const [step, setStep] = useState(0);
+  const [displayName, setDisplayName] = useState(userName || '');
   const [role, setRole] = useState('');
   const [focus, setFocus] = useState('');
   const [systems, setSystems] = useState<string[]>([]);
+  const [schoolName, setSchoolName] = useState(initialSchoolName);
   const [applying, setApplying] = useState(false);
+
+  // Skip school name step if already provided (invited users)
+  const skipSchoolName = Boolean(initialSchoolName && initialSchoolName.trim());
+  const totalSteps = skipSchoolName ? 4 : 5;
+
+  // Compute display step number (accounts for skipped school name step)
+  function getDisplayStep(): number {
+    if (!skipSchoolName) return step + 1;
+    if (step <= 2) return step + 1;
+    if (step === 4) return 4;
+    return step;
+  }
 
   const roleOptions = [
     'School leader',
@@ -538,18 +827,28 @@ function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string;
 
   function chooseRole(option: string) {
     setRole(option);
-    setStep(1);
+    setStep(2);
   }
 
   function chooseFocus(option: string) {
     setFocus(option);
-    setStep(2);
+    // Skip school name step if already provided
+    setStep(skipSchoolName ? 4 : 3);
+  }
+
+  function handleBack() {
+    setStep((current) => {
+      if (current === 0) return 0;
+      // When going back from systems step and school name is skipped, jump to focus
+      if (skipSchoolName && current === 4) return 2;
+      return current - 1;
+    });
   }
 
   async function handleApply() {
     setApplying(true);
     try {
-      await onComplete({ role, focus, systems });
+      await onComplete({ role, focus, systems, schoolName, displayName });
     } finally {
       setApplying(false);
     }
@@ -558,13 +857,37 @@ function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string;
   return (
     <section className="onboarding-page">
       <header className="onboarding-header">
-        <h1>{getTimeGreeting()}, <span id="user-id">{userName}</span></h1>
+        <h1>{getTimeGreeting()}, <span id="user-id">{displayName || userName}</span></h1>
         <p>This guided tour keeps your workspace clean and recommends only the settings and integrations that make sense for your role. You can change everything later.</p>
       </header>
 
       <div className="onboarding-step">
-        <p className="step-counter">Step {step + 1} of 3</p>
+        <p className="step-counter">Step {getDisplayStep()} of {totalSteps}</p>
         {step === 0 && (
+          <div>
+            <h2>What should I call you?</h2>
+            <p>We grabbed this from your account. Feel free to change it.</p>
+            <div className="school-name-input">
+              <input
+                type="text"
+                placeholder="Your name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="bubble-submit"
+                disabled={!displayName.trim()}
+                onClick={() => setStep(1)}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
           <div>
             <h2>Who are you?</h2>
             <p>Pick the role that best matches how you want to use Admini.</p>
@@ -583,7 +906,7 @@ function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string;
           </div>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <div>
             <h2>What do you want to do first?</h2>
             <p>This helps Admini suggest the right defaults and keep the first view clutter-free.</p>
@@ -602,7 +925,31 @@ function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string;
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && !skipSchoolName && (
+          <div>
+            <h2>What's the name of your school?</h2>
+            <p>This helps Admini label your workspace so your team knows where they belong.</p>
+            <div className="school-name-input">
+              <input
+                type="text"
+                placeholder="e.g. Riverside Elementary"
+                value={schoolName}
+                onChange={(e) => setSchoolName(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="bubble-submit"
+                disabled={!schoolName.trim()}
+                onClick={() => setStep(4)}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
           <div>
             <h2>Which systems do you plan to connect?</h2>
             <p>Choose only the systems you want to sync now. Admini will leave everything else disconnected.</p>
@@ -629,7 +976,7 @@ function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string;
           className="wizard-back-arrow"
           aria-label="Go back"
           disabled={step === 0}
-          onClick={() => setStep((current) => Math.max(0, current - 1))}
+          onClick={handleBack}
         >
           &larr;
         </button>
@@ -640,6 +987,7 @@ function FirstTimeOnboardingWizard({ userName, onComplete }: { userName: string;
     </section>
   );
 }
+
 function getTimeGreeting() {
   const h = new Date().getHours();
   if (h < 12) return 'Good morning';
@@ -650,7 +998,7 @@ function getTimeGreeting() {
 function BreathingOverlay({ onClose }: { onClose: () => void }) {
   return (
     <section className="breathing-overlay" aria-live="polite">
-      <button className="breathing-overlay__close" type="button" onClick={onClose} aria-label="Close breathing exercise">×</button>
+      <button className="breathing-overlay__close" type="button" onClick={onClose} aria-label="Close breathing exercise">ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â</button>
       <div className="breath-orb" />
       <p>inhale</p>
       <span>exhale</span>
@@ -837,7 +1185,7 @@ function ProtectedWorkspace({
           <div className="workspace-backdrop" />
         </div>
         <div className="onboarding-modal">
-          <FirstTimeOnboardingWizard userName={userName} onComplete={onCompleteOnboarding} />
+          <FirstTimeOnboardingWizard userName={userName} schoolName={schoolName} onComplete={onCompleteOnboarding} />
         </div>
       </main>
     );

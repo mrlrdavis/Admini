@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    CaptureTab styles
    ========================================================================== */
 
@@ -28,12 +28,30 @@
 
 /* Mode Toggle */
 .capture-tab__mode-toggle {
+  position: relative;
   display: flex;
   gap: var(--ws-space-xs);
   background: var(--ws-color-limestone);
   border-radius: var(--ws-radius-pill);
   padding: var(--ws-space-xs);
   margin-bottom: var(--ws-space-lg);
+}
+
+.capture-tab__mode-indicator {
+  position: absolute;
+  top: var(--ws-space-xs);
+  bottom: var(--ws-space-xs);
+  left: var(--ws-space-xs);
+  width: calc(50% - var(--ws-space-xs));
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-pill);
+  box-shadow: var(--ws-shadow-card);
+  transition: transform var(--ws-transition-normal);
+  pointer-events: none;
+}
+
+.capture-tab__mode-indicator--tap {
+  transform: translateX(100%);
 }
 
 .capture-tab__mode-btn {
@@ -47,12 +65,12 @@
   color: var(--ws-color-text-muted);
   cursor: pointer;
   transition: all var(--ws-transition-fast);
+  position: relative;
+  z-index: 1;
 }
 
 .capture-tab__mode-btn--active {
-  background: var(--ws-color-white);
   color: var(--ws-color-sage);
-  box-shadow: var(--ws-shadow-card);
 }
 
 /* Voice Mode */
@@ -71,6 +89,7 @@
 }
 
 .capture-tab__mic-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,6 +107,27 @@
   background: var(--ws-color-sage);
   color: var(--ws-color-white);
   box-shadow: 0 0 0 0.5rem rgba(107, 142, 107, 0.2);
+}
+
+/* Mic pulse ring animations (staggered) */
+@keyframes mic-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.capture-tab__mic-btn--recording::before,
+.capture-tab__mic-btn--recording::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--ws-color-sage);
+  animation: mic-pulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+.capture-tab__mic-btn--recording::after {
+  animation-delay: 1s;
 }
 
 .capture-tab__mic-label {
@@ -131,6 +171,10 @@
   align-items: center;
   gap: var(--ws-space-sm);
   margin-bottom: var(--ws-space-sm);
+}
+
+.capture-tab__ai-sparkle {
+  color: var(--ws-color-sage);
 }
 
 .capture-tab__ai-badge {

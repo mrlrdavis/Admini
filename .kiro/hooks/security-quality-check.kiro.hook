@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Security & Code Quality",
+  "description": "Runs a vulnerability scan and strips out console.log statements before a write operation",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Before writing this file, perform a security and code quality review: 1) Check for any potential security vulnerabilities (hardcoded secrets, SQL injection risks, XSS vectors). 2) Remove or flag any console.log statements that should not be in production code. 3) Report any issues found and fix them in the content being written."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "enabled": true,
+  "name": "Asset Management",
+  "description": "Automatically indexes newly added images or assets to a central asset registry file",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.svg",
+      "*.webp",
+      "*.ico",
+      "*.mp4",
+      "*.webm",
+      "*.pdf"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new asset file has been added to the project. Update the central asset index file to include this new asset. Record the file path, file type, and a brief description. If no central asset index exists, create one at assets/index.json or a similar appropriate location."
+  }
+}

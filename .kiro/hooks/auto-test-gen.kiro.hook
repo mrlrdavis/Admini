@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Automatic Test Generation",
+  "description": "Triggers the agent to write and run unit tests every time a source file is saved",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.ts",
+      "*.tsx",
+      "*.js",
+      "*.jsx",
+      "*.vue"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file has been saved. Review the changes and generate or update the corresponding unit test file. Ensure tests cover new or modified functions, then run the test suite to verify they pass."
+  }
+}

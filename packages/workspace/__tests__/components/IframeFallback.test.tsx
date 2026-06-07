@@ -22,12 +22,12 @@ function createMockClient(overrides?: {
 
   const insertFn = vi.fn().mockReturnValue({ select: () => ({ single: singleFn }) });
   const updateFn = vi.fn().mockReturnValue({ eq: () => ({ select: () => ({ single: singleFn }) }) });
-  const neqFn = vi.fn().mockReturnValue({
-    order: vi.fn().mockResolvedValue({
-      data: overrides?.selectData ?? [{ id: '1', title: 'Task 1' }],
-      error: overrides?.selectError ?? null,
-    }),
+  const orderFn = vi.fn().mockResolvedValue({
+    data: overrides?.selectData ?? [{ id: '1', title: 'Task 1' }],
+    error: overrides?.selectError ?? null,
   });
+  const gtFn = vi.fn().mockReturnValue({ order: orderFn });
+  const neqFn = vi.fn().mockReturnValue({ gt: gtFn });
 
   const fromFn = vi.fn().mockReturnValue({
     select: vi.fn().mockReturnValue({ neq: neqFn }),
@@ -319,6 +319,166 @@ describe('IframeFallback', () => {
       rerender(createElement(IframeFallback, { ...props, visible: true }));
 
       expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('school name edit role restriction (REQ-16)', () => {
+    it('blocks school name update from iframe when userRole is staff', async () => {
+      const mockPostMessage = vi.fn();
+      const onProfileUpdated = vi.fn();
+      const { container } = render(
+        createElement(IframeFallback, defaultProps({ userRole: 'staff', onProfileUpdated }))
+      );
+      const iframe = container.querySelector('iframe') as HTMLIFrameElement;
+
+      Object.defineProperty(iframe, 'contentWindow', {
+        value: { postMessage: mockPostMessage },
+        writable: true,
+      });
+
+      await act(async () => {
+        window.dispatchEvent(
+          new MessageEvent('message', {
+            data: { type: 'profile:update', field: 'school', value: 'Hacker School' },
+          })
+        );
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should NOT call onProfileUpdated
+      expect(onProfileUpdated).not.toHaveBeenCalled();
+      // Should send error back to iframe
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'profile:update:result',
+          ok: false,
+          field: 'school',
+        }),
+        '*'
+      );
+    });
+
+    it('blocks school name update from iframe when userRole is teacher', async () => {
+      const mockPostMessage = vi.fn();
+      const onProfileUpdated = vi.fn();
+      const { container } = render(
+        createElement(IframeFallback, defaultProps({ userRole: 'teacher', onProfileUpdated }))
+      );
+      const iframe = container.querySelector('iframe') as HTMLIFrameElement;
+
+      Object.defineProperty(iframe, 'contentWindow', {
+        value: { postMessage: mockPostMessage },
+        writable: true,
+      });
+
+      await act(async () => {
+        window.dispatchEvent(
+          new MessageEvent('message', {
+            data: { type: 'profile:update', field: 'school', value: 'Hacker School' },
+          })
+        );
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(onProfileUpdated).not.toHaveBeenCalled();
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'profile:update:result',
+          ok: false,
+          field: 'school',
+          error: expect.stringContaining('Admin only'),
+        }),
+        '*'
+      );
+    });
+
+    it('allows school name update from iframe when userRole is admin', async () => {
+      resetClient();
+      const singleFn = vi.fn().mockResolvedValue({
+        data: { organization_id: 'org-1' },
+        error: null,
+      });
+      const updateFn = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
+      const selectFn = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: singleFn }) });
+      const adminClient = {
+        from: vi.fn().mockReturnValue({
+          select: selectFn,
+          update: updateFn,
+        }),
+        auth: {
+          getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }),
+          updateUser: vi.fn().mockResolvedValue({ error: null }),
+        },
+      } as unknown as SupabaseClient;
+      configureClient(adminClient);
+
+      const mockPostMessage = vi.fn();
+      const onProfileUpdated = vi.fn();
+      const { container } = render(
+        createElement(IframeFallback, defaultProps({ userRole: 'admin', onProfileUpdated }))
+      );
+      const iframe = container.querySelector('iframe') as HTMLIFrameElement;
+
+      Object.defineProperty(iframe, 'contentWindow', {
+        value: { postMessage: mockPostMessage },
+        writable: true,
+      });
+
+      await act(async () => {
+        window.dispatchEvent(
+          new MessageEvent('message', {
+            data: { type: 'profile:update', field: 'school', value: 'New School' },
+          })
+        );
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should call onProfileUpdated with the new value
+      expect(onProfileUpdated).toHaveBeenCalledWith({ field: 'school', value: 'New School' });
+    });
+
+    it('allows school name update from iframe when userRole is principal', async () => {
+      resetClient();
+      const singleFn = vi.fn().mockResolvedValue({
+        data: { organization_id: 'org-1' },
+        error: null,
+      });
+      const updateFn = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
+      const selectFn = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: singleFn }) });
+      const principalClient = {
+        from: vi.fn().mockReturnValue({
+          select: selectFn,
+          update: updateFn,
+        }),
+        auth: {
+          getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }),
+          updateUser: vi.fn().mockResolvedValue({ error: null }),
+        },
+      } as unknown as SupabaseClient;
+      configureClient(principalClient);
+
+      const mockPostMessage = vi.fn();
+      const onProfileUpdated = vi.fn();
+      const { container } = render(
+        createElement(IframeFallback, defaultProps({ userRole: 'principal', onProfileUpdated }))
+      );
+      const iframe = container.querySelector('iframe') as HTMLIFrameElement;
+
+      Object.defineProperty(iframe, 'contentWindow', {
+        value: { postMessage: mockPostMessage },
+        writable: true,
+      });
+
+      await act(async () => {
+        window.dispatchEvent(
+          new MessageEvent('message', {
+            data: { type: 'profile:update', field: 'school', value: 'New School' },
+          })
+        );
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(onProfileUpdated).toHaveBeenCalledWith({ field: 'school', value: 'New School' });
     });
   });
 
