@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
@@ -22,7 +22,8 @@
       "@admini/api-client": ["packages/api-client/src/index.ts"],
       "@admini/ui": ["packages/ui/src/index.ts"],
       "@admini/integrations": ["packages/integrations/src/index.ts"],
-      "@admini/workspace": ["packages/workspace/src/index.ts"]
+      "@admini/workspace": ["packages/workspace/src/index.ts"],
+      "@admini/pwa": ["packages/pwa/src/index.ts"]
     }
   }
 }

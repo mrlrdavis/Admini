@@ -1,4 +1,4 @@
-import { integrationCatalog } from '@admini/integrations';
+﻿import { integrationCatalog } from '@admini/integrations';
 import { clearAdminiBrowserState, createIndexedDbStorage, nowIso, type IntegrationCatalogItem, type IntegrationProvider } from '@admini/shared';
 import { useEffect, useMemo, useState, useRef, type FormEvent } from 'react';
 import {
@@ -27,6 +27,7 @@ import {
 } from './supabase';
 import { SupabaseClientProvider, WorkspaceShell } from '@admini/workspace';
 import { TabBar } from '@admini/ui';
+import { InstallButton } from '@admini/pwa';
 
 type AuthView = 'home' | 'sign-in' | 'sign-up';
 type VisualMode = 'day' | 'night';
@@ -416,6 +417,7 @@ export function App() {
           <TabBar tabs={tabs} activeTab={activeTab} onTabChange={onTabChange as (tabId: string) => void} />
         )}
       />
+      <InstallButton />
     </SupabaseClientProvider>
   );
 }
@@ -998,7 +1000,7 @@ function getTimeGreeting() {
 function BreathingOverlay({ onClose }: { onClose: () => void }) {
   return (
     <section className="breathing-overlay" aria-live="polite">
-      <button className="breathing-overlay__close" type="button" onClick={onClose} aria-label="Close breathing exercise">ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â</button>
+      <button className="breathing-overlay__close" type="button" onClick={onClose} aria-label="Close breathing exercise">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</button>
       <div className="breath-orb" />
       <p>inhale</p>
       <span>exhale</span>
