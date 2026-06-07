@@ -61,7 +61,8 @@ function createListMockClient(opts?: {
     data: opts?.listData ?? sampleTasks,
     error: opts?.listError ?? null,
   });
-  const neqFn = vi.fn().mockReturnValue({ order: orderFn });
+  const gtFn = vi.fn().mockReturnValue({ order: orderFn });
+  const neqFn = vi.fn().mockReturnValue({ gt: gtFn });
   const selectFn = vi.fn().mockReturnValue({ neq: neqFn });
   const fromFn = vi.fn().mockReturnValue({ select: selectFn });
 
@@ -70,6 +71,7 @@ function createListMockClient(opts?: {
     fromFn,
     selectFn,
     neqFn,
+    gtFn,
     orderFn,
   };
 }

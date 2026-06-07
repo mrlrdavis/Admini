@@ -120,7 +120,7 @@ Validate all core user workflows end-to-end across Desktop and Mobile apps, fix 
   - [x] 10.5 Data retention policies enforced
     - _Requirements: REQ-17_
 
-- [ ] 11. Settings - Profile Management
+- [x] 11. Settings - Profile Management
   - [x] 11.1 Wire Profile button in MoreTab to open a profile editing view/drawer
     - _Requirements: REQ-5, REQ-16_
   - [x] 11.2 Create ProfileSettings component with editable fields: display name, email (read-only), school name (admin-only)
@@ -131,93 +131,93 @@ Validate all core user workflows end-to-end across Desktop and Mobile apps, fix 
     - _Requirements: REQ-5, REQ-15_
   - [x] 11.5 Admin/principal role check gates school name editing (non-admins see read-only)
     - _Requirements: REQ-16_
-  - [-] 11.6 Show success toast or inline confirmation on save
+  - [x] 11.6 Show success toast or inline confirmation on save
     - _Requirements: REQ-5_
   - [x] 11.7 Handle profile update errors with user-friendly messages
     - _Requirements: REQ-15_
 
-- [ ] 12. Settings - Notifications Preferences
+- [x] 12. Settings - Notifications Preferences
   - [x] 12.1 Wire Notifications button in MoreTab to open notification settings view
     - _Requirements: REQ-11_
-  - [-] 12.2 Create NotificationSettings component with toggle switches (email notifications, push notifications, activity digest)
+  - [x] 12.2 Create NotificationSettings component with toggle switches (email notifications, push notifications, activity digest)
     - _Requirements: REQ-11_
-  - [-] 12.3 Store notification preferences in Supabase profile metadata (JSON column)
+  - [x] 12.3 Store notification preferences in Supabase profile metadata (JSON column)
     - _Requirements: REQ-11_
-  - [~] 12.4 Load existing preferences on mount, save on toggle change
+  - [x] 12.4 Load existing preferences on mount, save on toggle change
     - _Requirements: REQ-11_
-  - [~] 12.5 Debounce saves to avoid excessive writes
+  - [x] 12.5 Debounce saves to avoid excessive writes
     - _Requirements: REQ-11_
-  - [~] 12.6 Handle save failures gracefully with retry option
+  - [x] 12.6 Handle save failures gracefully with retry option
     - _Requirements: REQ-15_
 
-- [ ] 13. Settings - App Preferences
+- [x] 13. Settings - App Preferences
   - [x] 13.1 Wire Preferences button in MoreTab to open app preferences view
     - _Requirements: REQ-11_
-  - [-] 13.2 Create AppPreferences component with: theme toggle (light/dark/system), default tab selection, compact mode toggle
+  - [x] 13.2 Create AppPreferences component with: theme toggle (light/dark/system), default tab selection, compact mode toggle
     - _Requirements: REQ-11_
-  - [-] 13.3 Store preferences in IndexedDB (local-only, not server-synced)
+  - [x] 13.3 Store preferences in IndexedDB (local-only, not server-synced)
     - _Requirements: REQ-11_
-  - [~] 13.4 Apply theme preference via data-theme attribute on document root
+  - [x] 13.4 Apply theme preference via data-theme attribute on document root
     - _Requirements: REQ-11_
-  - [~] 13.5 Apply compact mode via root CSS class that reduces spacing tokens
+  - [x] 13.5 Apply compact mode via root CSS class that reduces spacing tokens
     - _Requirements: REQ-11_
 
-- [~] 14. Checkpoint - Ensure all tests pass
+- [x] 14. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 15. Settings - Integrations Access
-  - [~] 15.1 Wire Connected Apps button in MoreTab to show connected integrations list
+- [x] 15. Settings - Integrations Access
+  - [x] 15.1 Wire Connected Apps button in MoreTab to show connected integrations list
     - _Requirements: REQ-10_
-  - [~] 15.2 Wire Add Integration button to open integration catalog (reuse IntegrationsPanel from desktop)
+  - [x] 15.2 Wire Add Integration button to open integration catalog (reuse IntegrationsPanel from desktop)
     - _Requirements: REQ-10_
-  - [~] 15.3 Extract IntegrationsPanel from apps/desktop/src/App.tsx into shared component or render inline
+  - [x] 15.3 Extract IntegrationsPanel from apps/desktop/src/App.tsx into shared component or render inline
     - _Requirements: REQ-10, REQ-13_
-  - [~] 15.4 Show connection status badges (connected/disconnected) on each integration
+  - [x] 15.4 Show connection status badges (connected/disconnected) on each integration
     - _Requirements: REQ-10_
-  - [~] 15.5 Implement disconnect flow (remove from IndexedDB, show confirmation)
+  - [x] 15.5 Implement disconnect flow (remove from IndexedDB, show confirmation)
     - _Requirements: REQ-10_
 
-- [ ] 16. Settings - Account Management
-  - [~] 16.1 Add Delete Account button to Account section in MoreTab
+- [x] 16. Settings - Account Management
+  - [x] 16.1 Add Delete Account button to Account section in MoreTab
     - _Requirements: REQ-1_
-  - [~] 16.2 Implement delete account flow: confirmation modal, call Supabase edge function, sign out, redirect to auth
+  - [x] 16.2 Implement delete account flow: confirmation modal, call Supabase edge function, sign out, redirect to auth
     - _Requirements: REQ-1_
-  - [~] 16.3 Add Change Password button (only shown for email/password users, not OAuth)
+  - [x] 16.3 Add Change Password button (only shown for email/password users, not OAuth)
     - _Requirements: REQ-1_
-  - [~] 16.4 Implement change password flow: current password, new password, confirm, call Supabase auth.updateUser
+  - [x] 16.4 Implement change password flow: current password, new password, confirm, call Supabase auth.updateUser
     - _Requirements: REQ-1_
-  - [~] 16.5 Add Export Data button with placeholder or basic JSON export of user tasks and profile
+  - [x] 16.5 Add Export Data button with placeholder or basic JSON export of user tasks and profile
     - _Requirements: REQ-17_
-  - [~] 16.6 Handle all errors with user-friendly messages and loading states
+  - [x] 16.6 Handle all errors with user-friendly messages and loading states
     - _Requirements: REQ-15_
 
-- [ ] 17. Settings - Navigation and State Management
+- [x] 17. Settings - Navigation and State Management
   - [x] 17.1 Add navigation state to MoreTab (which settings sub-view is active)
     - _Requirements: REQ-11_
-  - [-] 17.2 Implement back navigation from each settings sub-view to MoreTab menu
+  - [x] 17.2 Implement back navigation from each settings sub-view to MoreTab menu
     - _Requirements: REQ-11_
-  - [-] 17.3 Add route-like state management (stack-based) so back button works naturally
+  - [x] 17.3 Add route-like state management (stack-based) so back button works naturally
     - _Requirements: REQ-11_
-  - [~] 17.4 Animate transitions between MoreTab menu and sub-views (slide-in from right)
+  - [x] 17.4 Animate transitions between MoreTab menu and sub-views (slide-in from right)
     - _Requirements: REQ-11_
-  - [~] 17.5 Ensure settings views are accessible (focus management, aria-labels)
+  - [x] 17.5 Ensure settings views are accessible (focus management, aria-labels)
     - _Requirements: REQ-11_
-  - [~] 17.6 Persist last-visited settings section for quick return
+  - [x] 17.6 Persist last-visited settings section for quick return
     - _Requirements: REQ-11_
 
-- [ ] 18. Settings - Mobile-Specific Fixes
-  - [~] 18.1 Ensure all settings views fit within mobile viewport without horizontal scroll
+- [x] 18. Settings - Mobile-Specific Fixes
+  - [x] 18.1 Ensure all settings views fit within mobile viewport without horizontal scroll
     - _Requirements: REQ-13_
-  - [~] 18.2 Add safe-area padding to settings views (bottom for tab bar, top for notch)
+  - [x] 18.2 Add safe-area padding to settings views (bottom for tab bar, top for notch)
     - _Requirements: REQ-13_
-  - [~] 18.3 Test toggle switches are large enough for touch (44x44px minimum)
+  - [x] 18.3 Test toggle switches are large enough for touch (44x44px minimum)
     - _Requirements: REQ-13_
-  - [~] 18.4 Ensure keyboard does not obscure active input fields in profile/password forms
+  - [x] 18.4 Ensure keyboard does not obscure active input fields in profile/password forms
     - _Requirements: REQ-13_
-  - [~] 18.5 Add pull-to-refresh on integrations list to refresh connection status
+  - [x] 18.5 Add pull-to-refresh on integrations list to refresh connection status
     - _Requirements: REQ-10, REQ-13_
 
-- [~] 19. Final checkpoint - Ensure all tests pass
+- [x] 19. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

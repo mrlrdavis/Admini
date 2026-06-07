@@ -1,0 +1,280 @@
+/* ==========================================================================
+   ProfileSettings styles
+   Inline editing, success toast, validation error states
+   ========================================================================== */
+
+.profile-settings {
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Rows */
+.profile-settings__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--ws-space-md) var(--ws-space-lg);
+  border-bottom: 1px solid var(--ws-color-border);
+  gap: var(--ws-space-sm);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.profile-settings__row:last-child {
+  border-bottom: none;
+}
+
+.profile-settings__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.profile-settings__label {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  font-weight: 500;
+}
+
+.profile-settings__value {
+  font-size: var(--ws-font-size-base);
+  color: var(--ws-color-text);
+}
+
+/* Edit inline area */
+.profile-settings__edit-inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+  width: 100%;
+}
+
+.profile-settings__input {
+  width: 100%;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  box-sizing: border-box;
+  transition: border-color var(--ws-transition-fast);
+  /* Ensure input scrolls into view above virtual keyboard on mobile */
+  scroll-margin-bottom: 40vh;
+}
+
+.profile-settings__input:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ws-color-sage) 20%, transparent);
+}
+
+.profile-settings__input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Action buttons */
+.profile-settings__actions {
+  display: flex;
+  gap: var(--ws-space-sm);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.profile-settings__btn-cancel {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  font-size: var(--ws-font-size-sm);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+  min-height: 36px;
+  transition: background var(--ws-transition-fast);
+}
+
+.profile-settings__btn-cancel:hover {
+  background: var(--ws-color-limestone);
+}
+
+.profile-settings__btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-settings__btn-save {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  transition: opacity var(--ws-transition-fast);
+  min-width: 5rem;
+  min-height: 36px;
+}
+
+.profile-settings__btn-save:hover {
+  opacity: 0.9;
+}
+
+.profile-settings__btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Edit button */
+.profile-settings__edit-btn {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  font-size: var(--ws-font-size-sm);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 36px;
+  transition: background var(--ws-transition-fast);
+}
+
+.profile-settings__edit-btn:hover {
+  background: var(--ws-color-limestone);
+}
+
+.profile-settings__edit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Admin only notice */
+.profile-settings__admin-notice {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Inline validation error
+   -------------------------------------------------------------------------- */
+
+.profile-settings__error {
+  margin: 0;
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-error);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Success toast / inline confirmation
+   Shows after a successful save, auto-dismisses after ~2.5s.
+   Non-blocking on mobile - appears inline next to the field value.
+   -------------------------------------------------------------------------- */
+
+.profile-settings__success {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ws-space-xs);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-success);
+  background: color-mix(in srgb, var(--ws-color-success) 10%, transparent);
+  padding: 2px var(--ws-space-sm);
+  border-radius: var(--ws-radius-pill);
+  animation: profile-success-fade-in 0.2s ease-out;
+  white-space: nowrap;
+}
+
+@keyframes profile-success-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Success toast banner (top-level, for more prominent feedback)
+   Positioned at the top of the profile settings area.
+   -------------------------------------------------------------------------- */
+
+.profile-settings__toast {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-sm);
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  background: color-mix(in srgb, var(--ws-color-success) 12%, var(--ws-color-white));
+  border: 1px solid color-mix(in srgb, var(--ws-color-success) 30%, transparent);
+  border-radius: var(--ws-radius-md);
+  margin-bottom: var(--ws-space-md);
+  animation: profile-toast-slide-in 0.25s ease-out;
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-success);
+  box-sizing: border-box;
+}
+
+.profile-settings__toast-icon {
+  font-size: var(--ws-font-size-lg);
+  flex-shrink: 0;
+}
+
+@keyframes profile-toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Viewport Fixes (narrow screens)
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 374px) {
+  .profile-settings__row {
+    padding: var(--ws-space-md);
+    flex-wrap: wrap;
+  }
+
+  .profile-settings__actions {
+    width: 100%;
+  }
+
+  .profile-settings__btn-save,
+  .profile-settings__btn-cancel {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-settings__success,
+  .profile-settings__toast {
+    animation: none;
+  }
+}

@@ -2,25 +2,44 @@
  * App Preferences Storage
  *
  * Local-only preferences stored in IndexedDB.
- * These are NOT server-synced — they stay on the device.
+ * These are NOT server-synced - they stay on the device.
+ *
+ * Falls back to localStorage when IndexedDB is unavailable
+ * (e.g., some private browsing modes).
  */
 
-export interface AppPreferences {
+export interface AppPreferencesData {
   theme: 'light' | 'dark' | 'system';
   defaultTab: string;
   compactMode: boolean;
 }
 
-const DEFAULT_PREFERENCES: AppPreferences = {
+/** @deprecated Use AppPreferencesData instead */
+export type AppPreferences = AppPreferencesData;
+
+export const DEFAULT_PREFERENCES: AppPreferencesData = {
   theme: 'system',
   defaultTab: 'dashboard',
   compactMode: false,
 };
 
-const DB_NAME = 'admini_app_preferences';
+const DB_NAME = 'admini-app-prefs';
 const DB_VERSION = 1;
 const STORE_NAME = 'preferences';
-const PREFS_KEY = 'app_preferences';
+const PREFS_KEY = 'app-prefs';
+const LS_KEY = 'admini_app_preferences';
+
+// ---------------------------------------------------------------------------
+// IndexedDB helpers
+// ---------------------------------------------------------------------------
+
+function isIndexedDBAvailable(): boolean {
+  try {
+    return typeof indexedDB !== 'undefined' && indexedDB !== null;
+  } catch {
+    return false;
+  }
+}
 
 function openPreferencesDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -38,17 +57,48 @@ function openPreferencesDb(): Promise<IDBDatabase> {
   });
 }
 
+// ---------------------------------------------------------------------------
+// localStorage fallback helpers
+// ---------------------------------------------------------------------------
+
+function getFromLocalStorage(): Partial<AppPreferencesData> | null {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? (JSON.parse(raw) as Partial<AppPreferencesData>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveToLocalStorage(prefs: AppPreferencesData): void {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(prefs));
+  } catch {
+    // Storage quota exceeded or localStorage blocked - silently ignore
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
 /**
  * Retrieve stored app preferences, falling back to defaults for any missing fields.
+ * Uses IndexedDB as primary store; falls back to localStorage if unavailable.
  */
-export async function getAppPreferences(): Promise<AppPreferences> {
+export async function getAppPreferences(): Promise<AppPreferencesData> {
+  if (!isIndexedDBAvailable()) {
+    const stored = getFromLocalStorage();
+    return { ...DEFAULT_PREFERENCES, ...stored };
+  }
+
   try {
     const db = await openPreferencesDb();
-    const stored = await new Promise<Partial<AppPreferences> | null>((resolve, reject) => {
+    const stored = await new Promise<Partial<AppPreferencesData> | null>((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const request = tx.objectStore(STORE_NAME).get(PREFS_KEY);
       request.onsuccess = () => {
-        const result = request.result as { key: string; value: Partial<AppPreferences> } | undefined;
+        const result = request.result as { key: string; value: Partial<AppPreferencesData> } | undefined;
         resolve(result?.value ?? null);
       };
       request.onerror = () => reject(request.error);
@@ -57,36 +107,52 @@ export async function getAppPreferences(): Promise<AppPreferences> {
 
     return { ...DEFAULT_PREFERENCES, ...stored };
   } catch {
-    // If IndexedDB is unavailable (e.g., private browsing), return defaults
-    return { ...DEFAULT_PREFERENCES };
+    // IndexedDB failed at runtime - fall back to localStorage
+    const stored = getFromLocalStorage();
+    return { ...DEFAULT_PREFERENCES, ...stored };
   }
 }
 
 /**
  * Merge partial preferences with existing stored preferences and save.
+ * Uses IndexedDB as primary store; falls back to localStorage if unavailable.
  */
-export async function saveAppPreferences(prefs: Partial<AppPreferences>): Promise<void> {
-  const db = await openPreferencesDb();
+export async function saveAppPreferences(prefs: Partial<AppPreferencesData>): Promise<void> {
+  if (!isIndexedDBAvailable()) {
+    const current = getFromLocalStorage();
+    const merged: AppPreferencesData = { ...DEFAULT_PREFERENCES, ...current, ...prefs };
+    saveToLocalStorage(merged);
+    return;
+  }
 
-  // Read current value to merge
-  const current = await new Promise<Partial<AppPreferences> | null>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const request = tx.objectStore(STORE_NAME).get(PREFS_KEY);
-    request.onsuccess = () => {
-      const result = request.result as { key: string; value: Partial<AppPreferences> } | undefined;
-      resolve(result?.value ?? null);
-    };
-    request.onerror = () => reject(request.error);
-  });
+  try {
+    const db = await openPreferencesDb();
 
-  const merged: AppPreferences = { ...DEFAULT_PREFERENCES, ...current, ...prefs };
+    // Read current value to merge
+    const current = await new Promise<Partial<AppPreferencesData> | null>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const request = tx.objectStore(STORE_NAME).get(PREFS_KEY);
+      request.onsuccess = () => {
+        const result = request.result as { key: string; value: Partial<AppPreferencesData> } | undefined;
+        resolve(result?.value ?? null);
+      };
+      request.onerror = () => reject(request.error);
+    });
 
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put({ key: PREFS_KEY, value: merged });
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+    const merged: AppPreferencesData = { ...DEFAULT_PREFERENCES, ...current, ...prefs };
 
-  db.close();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put({ key: PREFS_KEY, value: merged });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+
+    db.close();
+  } catch {
+    // IndexedDB failed at runtime - fall back to localStorage
+    const current = getFromLocalStorage();
+    const merged: AppPreferencesData = { ...DEFAULT_PREFERENCES, ...current, ...prefs };
+    saveToLocalStorage(merged);
+  }
 }

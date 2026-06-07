@@ -1,0 +1,228 @@
+/* ==========================================================================
+   AppPreferences styles
+   ========================================================================== */
+
+.app-preferences {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-lg);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Fieldset reset for theme radio group */
+.app-preferences__fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-preferences__legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+  margin-bottom: var(--ws-space-md);
+  padding: 0;
+}
+
+/* Row layout for each preference */
+.app-preferences__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-md) 0;
+  border-bottom: 1px solid var(--ws-color-border);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.app-preferences__row:last-child {
+  border-bottom: none;
+}
+
+.app-preferences__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Title and description */
+.app-preferences__title {
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+  color: var(--ws-color-text);
+  display: block;
+}
+
+.app-preferences__description {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  display: block;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Theme radio group - segmented control style */
+.app-preferences__theme-group {
+  display: flex;
+  gap: var(--ws-space-sm);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.app-preferences__theme-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Visually hidden radio input */
+.app-preferences__radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Segmented label acting as button - 44x44px minimum touch target */
+.app-preferences__theme-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  background: var(--ws-color-white);
+  transition: all var(--ws-transition-fast);
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-preferences__theme-label:hover {
+  background: var(--ws-color-limestone);
+}
+
+.app-preferences__radio:checked + .app-preferences__theme-label {
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  border-color: var(--ws-color-sage);
+}
+
+.app-preferences__radio:focus-visible + .app-preferences__theme-label {
+  outline: 2px solid var(--ws-color-sage);
+  outline-offset: 2px;
+}
+
+/* Select dropdown for default tab - 44x44px minimum touch target */
+.app-preferences__select {
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  background: var(--ws-color-white);
+  cursor: pointer;
+  appearance: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-preferences__select:focus-visible {
+  outline: 2px solid var(--ws-color-sage);
+  outline-offset: 2px;
+}
+
+/* Toggle switch for compact mode - 44x44px minimum touch target */
+.app-preferences__toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  min-width: 44px;
+  min-height: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-preferences__toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 28px;
+  border-radius: var(--ws-radius-pill);
+  background: var(--ws-color-border);
+  transition: background var(--ws-transition-fast);
+}
+
+.app-preferences__toggle--active::before {
+  background: var(--ws-color-sage);
+}
+
+.app-preferences__toggle-thumb {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ws-color-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transform: translateX(-10px);
+  transition: transform var(--ws-transition-fast);
+}
+
+.app-preferences__toggle--active .app-preferences__toggle-thumb {
+  transform: translateX(10px);
+}
+
+.app-preferences__toggle:focus-visible {
+  outline: 2px solid var(--ws-color-sage);
+  outline-offset: 2px;
+  border-radius: var(--ws-radius-pill);
+}
+
+/* Mobile Viewport Fixes (< 375px) */
+@media (max-width: 374px) {
+  .app-preferences__row {
+    flex-wrap: wrap;
+    gap: var(--ws-space-sm);
+  }
+
+  .app-preferences__theme-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .app-preferences__select {
+    width: 100%;
+  }
+}

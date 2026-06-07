@@ -1,11 +1,19 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    MoreTab styles
    ========================================================================== */
 
 .more-tab {
-  padding: var(--ws-space-lg);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--ws-space-lg))
+           calc(env(safe-area-inset-right, 0px) + var(--ws-space-lg))
+           calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-lg))
+           calc(env(safe-area-inset-left, 0px) + var(--ws-space-lg));
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Header */
@@ -67,6 +75,7 @@
   cursor: pointer;
   transition: background var(--ws-transition-fast);
   text-align: left;
+  box-sizing: border-box;
 }
 
 .more-tab__link-btn:hover {
@@ -80,10 +89,13 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
+  flex-shrink: 0;
 }
 
 .more-tab__link-label {
   font-weight: 400;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 /* Account actions */
@@ -105,6 +117,7 @@
   font-family: var(--ws-font-body);
   cursor: pointer;
   transition: all var(--ws-transition-fast);
+  box-sizing: border-box;
 }
 
 .more-tab__sign-out-btn:hover {
@@ -126,6 +139,9 @@
   justify-content: space-between;
   padding: var(--ws-space-md) var(--ws-space-lg);
   border-bottom: 1px solid var(--ws-color-border);
+  gap: var(--ws-space-sm);
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .more-tab__profile-row:last-child {
@@ -138,6 +154,8 @@
   gap: var(--ws-space-xs);
   flex: 1;
   min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .more-tab__profile-label {
@@ -166,6 +184,9 @@
   font-size: var(--ws-font-size-base);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
+  box-sizing: border-box;
+  /* Ensure input scrolls into view above virtual keyboard on mobile */
+  scroll-margin-bottom: 40vh;
 }
 
 .more-tab__profile-input:disabled {
@@ -177,6 +198,7 @@
   display: flex;
   gap: var(--ws-space-sm);
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .more-tab__btn-cancel {
@@ -214,6 +236,18 @@
   cursor: not-allowed;
 }
 
+.more-tab__error-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+  margin-top: var(--ws-space-xs);
+}
+
+.more-tab__error-container .more-tab__btn-secondary {
+  align-self: flex-start;
+  margin-top: var(--ws-space-xs);
+}
+
 .more-tab__save-error {
   margin: 0;
   font-size: var(--ws-font-size-sm);
@@ -230,6 +264,7 @@
   color: var(--ws-color-text);
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .more-tab__edit-btn:disabled {
@@ -241,4 +276,375 @@
   font-size: var(--ws-font-size-xs);
   color: var(--ws-color-text-muted);
   font-style: italic;
+}
+
+/* ==========================================================================
+   Navigation Transition Animations
+   ========================================================================== */
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-30%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Forward navigation: sub-view slides in from the right */
+.more-tab--sub-view {
+  animation: slide-in-right 0.25s ease-out;
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--ws-space-lg));
+  padding-right: calc(env(safe-area-inset-right, 0px) + var(--ws-space-lg));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-lg));
+  padding-left: calc(env(safe-area-inset-left, 0px) + var(--ws-space-lg));
+}
+
+/* Back navigation: main menu slides in from the left */
+.more-tab--returning {
+  animation: slide-in-left 0.2s ease-out;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .more-tab--sub-view,
+  .more-tab--returning {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Danger Zone (Account sub-view)
+   ========================================================================== */
+
+.more-tab__danger-zone {
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-lg);
+  background: color-mix(in srgb, var(--ws-color-error) 5%, transparent);
+  box-sizing: border-box;
+}
+
+.more-tab__danger-description {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  margin: 0 0 var(--ws-space-md);
+  line-height: 1.5;
+}
+
+.more-tab__danger-btn {
+  width: 100%;
+  padding: var(--ws-space-md);
+  background: var(--ws-color-error);
+  border: none;
+  border-radius: var(--ws-radius-card);
+  color: var(--ws-color-white);
+  font-size: var(--ws-font-size-base);
+  font-weight: 600;
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  transition: opacity var(--ws-transition-fast), background var(--ws-transition-fast);
+  box-sizing: border-box;
+}
+
+.more-tab__danger-btn:hover {
+  opacity: 0.9;
+}
+
+.more-tab__danger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Delete Account Button (main menu)
+   ========================================================================== */
+
+.more-tab__delete-account-btn {
+  width: 100%;
+  padding: var(--ws-space-md);
+  background: transparent;
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-card);
+  color: var(--ws-color-error);
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  transition: all var(--ws-transition-fast);
+  box-sizing: border-box;
+}
+
+.more-tab__delete-account-btn:hover {
+  background: var(--ws-color-error);
+  color: var(--ws-color-white);
+}
+
+.more-tab__delete-account-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Confirmation Dialog
+   ========================================================================== */
+
+.more-tab__confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--ws-space-lg))
+           calc(env(safe-area-inset-right, 0px) + var(--ws-space-lg))
+           calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-lg))
+           calc(env(safe-area-inset-left, 0px) + var(--ws-space-lg));
+}
+
+.more-tab__confirm-dialog {
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-xl);
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.more-tab__confirm-title {
+  font-family: var(--ws-font-display);
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-md);
+  color: var(--ws-color-text);
+}
+
+.more-tab__confirm-message {
+  font-size: var(--ws-font-size-base);
+  color: var(--ws-color-text-muted);
+  margin: 0 0 var(--ws-space-xl);
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.more-tab__confirm-actions {
+  display: flex;
+  gap: var(--ws-space-md);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.more-tab__confirm-delete-btn {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-error);
+  color: var(--ws-color-white);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  transition: opacity var(--ws-transition-fast);
+}
+
+.more-tab__confirm-delete-btn:hover {
+  opacity: 0.9;
+}
+
+.more-tab__confirm-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Placeholder note styling */
+.more-tab__placeholder-note {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  font-style: italic;
+  margin: 0;
+  padding: var(--ws-space-md);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-sm);
+}
+
+/* ==========================================================================
+   Account Management section (Change Password, etc.)
+   ========================================================================== */
+
+.more-tab__account-action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+  margin-bottom: var(--ws-space-lg);
+}
+
+.more-tab__account-action-description {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.more-tab__btn-secondary {
+  width: 100%;
+  padding: var(--ws-space-md);
+  background: transparent;
+  border: 1px solid var(--ws-color-primary);
+  border-radius: var(--ws-radius-card);
+  color: var(--ws-color-primary);
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  transition: all var(--ws-transition-fast);
+  box-sizing: border-box;
+}
+
+.more-tab__btn-secondary:hover {
+  background: var(--ws-color-primary);
+  color: var(--ws-color-white);
+}
+
+.more-tab__btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.more-tab__oauth-notice {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  font-style: italic;
+  margin: 0;
+  padding: var(--ws-space-md);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-sm);
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   Change Password Form
+   ========================================================================== */
+
+.more-tab__password-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-lg);
+  box-shadow: var(--ws-shadow-card);
+  box-sizing: border-box;
+}
+
+.more-tab__password-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+}
+
+.more-tab__password-label {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-text-muted);
+}
+
+.more-tab__password-actions {
+  display: flex;
+  gap: var(--ws-space-sm);
+  justify-content: flex-end;
+  margin-top: var(--ws-space-sm);
+  flex-wrap: wrap;
+}
+
+.more-tab__password-success {
+  margin: 0;
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-success, #16a34a);
+  background: color-mix(in srgb, var(--ws-color-success, #16a34a) 10%, transparent);
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border-radius: var(--ws-radius-sm);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Mobile Viewport Fixes (< 375px)
+   Ensures no horizontal overflow on narrow screens (320px minimum)
+   ========================================================================== */
+
+@media (max-width: 374px) {
+  .more-tab {
+    padding: calc(env(safe-area-inset-top, 0px) + var(--ws-space-md))
+             calc(env(safe-area-inset-right, 0px) + var(--ws-space-md))
+             calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-md))
+             calc(env(safe-area-inset-left, 0px) + var(--ws-space-md));
+  }
+
+  .more-tab__link-btn {
+    padding: var(--ws-space-md) var(--ws-space-md);
+  }
+
+  .more-tab__profile-row {
+    padding: var(--ws-space-md);
+    flex-wrap: wrap;
+  }
+
+  .more-tab__confirm-dialog {
+    padding: var(--ws-space-lg);
+    max-width: calc(100vw - 2 * var(--ws-space-md));
+  }
+
+  .more-tab__confirm-actions {
+    flex-direction: column;
+  }
+
+  .more-tab__danger-zone {
+    padding: var(--ws-space-md);
+  }
+
+  .more-tab__password-form {
+    padding: var(--ws-space-md);
+  }
+
+  .more-tab__password-actions {
+    flex-direction: column;
+  }
+
+  .more-tab__password-actions > button {
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   Settings Views Global Mobile Constraint
+   Shared container rules ensuring no settings sub-view overflows horizontally
+   on viewports as narrow as 320px.
+   ========================================================================== */
+
+.more-tab--sub-view,
+.profile-settings,
+.notification-settings,
+.app-preferences,
+.connected-integrations,
+.integration-catalog {
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
 }
