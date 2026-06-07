@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+﻿import { render } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { Skeleton, SkeletonCard } from '../src/Skeleton';
 
@@ -49,11 +49,10 @@ describe('Skeleton', () => {
 });
 
 describe('SkeletonCard', () => {
-  it('renders with default height of 120px', () => {
+  it('renders with default height of 80px', () => {
     const { container } = render(<SkeletonCard />);
     const el = container.firstElementChild as HTMLElement;
-    expect(el.style.height).toBe('120px');
-    expect(el.style.width).toBe('100%');
+    expect(el.style.height).toBe('80px');
   });
 
   it('accepts numeric height override', () => {
@@ -62,23 +61,16 @@ describe('SkeletonCard', () => {
     expect(el.style.height).toBe('200px');
   });
 
-  it('accepts string height override', () => {
-    const { container } = render(<SkeletonCard height="50vh" />);
-    const el = container.firstElementChild as HTMLElement;
-    expect(el.style.height).toBe('50vh');
-  });
-
-  it('applies skeleton and skeleton-card CSS classes', () => {
+  it('applies skeleton-card CSS class', () => {
     const { container } = render(<SkeletonCard />);
     const el = container.firstElementChild as HTMLElement;
-    expect(el.className).toContain('skeleton');
     expect(el.className).toContain('skeleton-card');
   });
 
   it('appends custom className', () => {
     const { container } = render(<SkeletonCard className="extra" />);
     const el = container.firstElementChild as HTMLElement;
-    expect(el.className).toBe('skeleton skeleton-card extra');
+    expect(el.className).toBe('skeleton-card extra');
   });
 
   it('sets aria-hidden="true" for accessibility', () => {

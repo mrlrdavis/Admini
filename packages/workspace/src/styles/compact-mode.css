@@ -1,0 +1,15 @@
+/* ==========================================================================
+   Compact Mode - Reduced spacing tokens
+   Applied via .compact-mode class on document.documentElement
+   Requirement: REQ-11 - Compact mode toggle works
+   ========================================================================== */
+
+.compact-mode {
+  /* Spacing tokens reduced ~30-40% from defaults */
+  --ws-space-xs: 0.125rem;   /* 2px  (was 0.25rem / 4px) */
+  --ws-space-sm: 0.25rem;    /* 4px  (was 0.5rem / 8px) */
+  --ws-space-md: 0.625rem;   /* 10px (was 1rem / 16px) */
+  --ws-space-lg: 1rem;       /* 16px (was 1.5rem / 24px) */
+  --ws-space-xl: 1.375rem;   /* 22px (was 2rem / 32px) */
+  --ws-space-2xl: 2rem;      /* 32px (was 3rem / 48px) */
+}

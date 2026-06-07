@@ -12,8 +12,8 @@ export interface NotificationPreferences {
 }
 
 const DEFAULT_PREFERENCES: NotificationPreferences = {
-  emailNotifications: false,
-  pushNotifications: false,
+  emailNotifications: true,
+  pushNotifications: true,
   activityDigest: false,
 };
 
@@ -22,72 +22,91 @@ const DEFAULT_PREFERENCES: NotificationPreferences = {
 // ---------------------------------------------------------------------------
 
 /**
- * Retrieve the current user's notification preferences from auth user_metadata.
- * Returns defaults (all false) if no preferences have been saved yet.
+ * Load notification preferences from the profiles table's
+ * `notification_preferences` JSONB column.
+ *
+ * Returns defaults if:
+ * - The column doesn't exist yet (graceful fallback)
+ * - The column value is null/empty
+ * - Individual fields are missing or invalid
  */
-export async function getNotificationPreferences(
+export async function loadNotificationPreferences(
   userId: string,
 ): Promise<NotificationPreferences> {
   const client = getClient();
-  const { data, error } = await client.auth.getUser();
 
-  if (error || !data.user) {
-    throw new Error(mapSupabaseError(error ?? { message: 'Not authenticated' }));
-  }
+  try {
+    const { data, error } = await client
+      .from('profiles')
+      .select('notification_preferences')
+      .eq('id', userId)
+      .single();
 
-  const stored = data.user.user_metadata?.notification_preferences;
+    // If there's an error (e.g., column doesn't exist), return defaults
+    if (error) {
+      return { ...DEFAULT_PREFERENCES };
+    }
 
-  if (!stored || typeof stored !== 'object') {
+    const stored = data?.notification_preferences;
+
+    if (!stored || typeof stored !== 'object') {
+      return { ...DEFAULT_PREFERENCES };
+    }
+
+    return {
+      emailNotifications:
+        typeof stored.emailNotifications === 'boolean'
+          ? stored.emailNotifications
+          : DEFAULT_PREFERENCES.emailNotifications,
+      pushNotifications:
+        typeof stored.pushNotifications === 'boolean'
+          ? stored.pushNotifications
+          : DEFAULT_PREFERENCES.pushNotifications,
+      activityDigest:
+        typeof stored.activityDigest === 'boolean'
+          ? stored.activityDigest
+          : DEFAULT_PREFERENCES.activityDigest,
+    };
+  } catch {
+    // Network or unexpected error - return defaults
     return { ...DEFAULT_PREFERENCES };
   }
-
-  return {
-    emailNotifications:
-      typeof stored.emailNotifications === 'boolean'
-        ? stored.emailNotifications
-        : DEFAULT_PREFERENCES.emailNotifications,
-    pushNotifications:
-      typeof stored.pushNotifications === 'boolean'
-        ? stored.pushNotifications
-        : DEFAULT_PREFERENCES.pushNotifications,
-    activityDigest:
-      typeof stored.activityDigest === 'boolean'
-        ? stored.activityDigest
-        : DEFAULT_PREFERENCES.activityDigest,
-  };
 }
 
 /**
- * Save (merge) notification preferences into the user's auth metadata.
- * Only the provided fields are updated; existing fields are preserved.
+ * Save notification preferences to the profiles table's
+ * `notification_preferences` JSONB column.
+ *
+ * Merges the provided preferences with existing ones so partial updates
+ * don't wipe out other fields.
  */
 export async function saveNotificationPreferences(
   userId: string,
-  prefs: Partial<NotificationPreferences>,
+  prefs: NotificationPreferences,
 ): Promise<void> {
   const client = getClient();
 
-  // Read existing preferences first so we merge rather than overwrite
-  const { data: userData, error: userError } = await client.auth.getUser();
-  if (userError || !userData.user) {
-    throw new Error(mapSupabaseError(userError ?? { message: 'Not authenticated' }));
-  }
-
-  const existing = userData.user.user_metadata?.notification_preferences ?? {};
+  // Load existing preferences to merge with
+  const existing = await loadNotificationPreferences(userId);
   const merged: NotificationPreferences = {
-    emailNotifications:
-      prefs.emailNotifications ?? existing.emailNotifications ?? DEFAULT_PREFERENCES.emailNotifications,
-    pushNotifications:
-      prefs.pushNotifications ?? existing.pushNotifications ?? DEFAULT_PREFERENCES.pushNotifications,
-    activityDigest:
-      prefs.activityDigest ?? existing.activityDigest ?? DEFAULT_PREFERENCES.activityDigest,
+    emailNotifications: prefs.emailNotifications ?? existing.emailNotifications,
+    pushNotifications: prefs.pushNotifications ?? existing.pushNotifications,
+    activityDigest: prefs.activityDigest ?? existing.activityDigest,
   };
 
-  const { error } = await client.auth.updateUser({
-    data: { notification_preferences: merged },
-  });
+  const { error } = await client
+    .from('profiles')
+    .update({ notification_preferences: merged })
+    .eq('id', userId);
 
   if (error) {
     throw new Error(mapSupabaseError(error));
   }
 }
+
+// ---------------------------------------------------------------------------
+// Legacy aliases (backward compatibility)
+// ---------------------------------------------------------------------------
+
+/** @deprecated Use loadNotificationPreferences instead */
+export const getNotificationPreferences = loadNotificationPreferences;

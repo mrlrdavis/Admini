@@ -1,21 +1,87 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { SkeletonCard } from '@admini/ui';
 import { mapSupabaseError } from '@admini/shared';
 import { getClient } from '../services/getClient';
+import { loadNotificationPreferences, saveNotificationPreferences } from '../services/notificationPreferences';
+import type { NotificationPreferences } from '../services/notificationPreferences';
 import type { ProfileUpdatePayload } from '../types';
 import { ProfileSettings } from './ProfileSettings';
 import { NotificationSettings } from './NotificationSettings';
 import { AppPreferences } from './AppPreferences';
+import { ConnectedIntegrations } from './ConnectedIntegrations';
+import { IntegrationCatalog } from './IntegrationCatalog';
+import { useThemePreference } from '../hooks/useThemePreference';
+import { useCompactMode } from '../hooks/useCompactMode';
+import { useDebouncedSave } from '../hooks/useDebouncedSave';
 
 // ---------------------------------------------------------------------------
 // MoreTab - Settings, integrations access, and account actions.
 // ---------------------------------------------------------------------------
+
+/**
+ * Detects whether an error message indicates a session/auth expiry.
+ * Used to show an actionable Sign In button alongside the error (REQ-15).
+ */
+function isSessionExpiredError(message: string | null | undefined): boolean {
+  if (!message) return false;
+  const lower = message.toLowerCase();
+  return lower.includes('sign in again') || lower.includes('session has expired') || lower.includes('not authenticated');
+}
 
 // ---------------------------------------------------------------------------
 // Sub-view type for navigation state
 // ---------------------------------------------------------------------------
 
 export type MoreTabSubView = 'profile' | 'notifications' | 'preferences' | 'integrations' | 'account' | null;
+
+// ---------------------------------------------------------------------------
+// SessionStorage key for persisting last-visited settings section
+// ---------------------------------------------------------------------------
+
+const LAST_SETTINGS_SECTION_KEY = 'admini_last_settings_section';
+
+const VALID_SUB_VIEWS: ReadonlySet<string> = new Set([
+  'profile',
+  'notifications',
+  'preferences',
+  'integrations',
+  'account',
+]);
+
+/** Safely read the last-visited section from sessionStorage. Returns null if unavailable or invalid. */
+function getPersistedSection(): MoreTabSubView {
+  try {
+    const stored = sessionStorage.getItem(LAST_SETTINGS_SECTION_KEY);
+    if (stored && VALID_SUB_VIEWS.has(stored)) {
+      return stored as MoreTabSubView;
+    }
+  } catch {
+    // sessionStorage unavailable (e.g., private browsing restrictions) - ignore
+  }
+  return null;
+}
+
+/** Safely persist the current section to sessionStorage. */
+function persistSection(view: MoreTabSubView): void {
+  try {
+    if (view) {
+      sessionStorage.setItem(LAST_SETTINGS_SECTION_KEY, view);
+    } else {
+      sessionStorage.removeItem(LAST_SETTINGS_SECTION_KEY);
+    }
+  } catch {
+    // sessionStorage unavailable - silently ignore
+  }
+}
+
+/** Clear the persisted section from sessionStorage. */
+function clearPersistedSection(): void {
+  try {
+    sessionStorage.removeItem(LAST_SETTINGS_SECTION_KEY);
+  } catch {
+    // sessionStorage unavailable - silently ignore
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Profile update helper - performs the actual Supabase profile update
@@ -83,16 +149,300 @@ export interface MoreTabProps {
 // ---------------------------------------------------------------------------
 
 export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userName, schoolName, email, onProfileUpdated }: MoreTabProps) {
-  const [activeSubView, setActiveSubView] = useState<MoreTabSubView>(null);
+  // Stack-based navigation: initialize from persisted section for quick return
+  const [viewStack, setViewStack] = useState<MoreTabSubView[]>(() => {
+    const persisted = getPersistedSection();
+    return persisted ? [persisted] : [];
+  });
+  const [isReturning, setIsReturning] = useState(false);
+  const { compactMode, setCompactMode } = useCompactMode();
+  const { themePreference, setThemePreference } = useThemePreference();
+  const activeSubView: MoreTabSubView = viewStack[viewStack.length - 1] ?? null;
+
   const [editingField, setEditingField] = useState<'display-name' | 'school' | null>(null);
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Account / auth provider detection state
+  const [isEmailUser, setIsEmailUser] = useState<boolean | null>(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+
+  // Change password form state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  // Export Data state
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  // Notification preferences state
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPreferences>({
+    emailNotifications: false,
+    pushNotifications: false,
+    activityDigest: false,
+  });
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifError, setNotifError] = useState<string | null>(null);
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [notifRetryCount, setNotifRetryCount] = useState(0);
+  const MAX_NOTIF_RETRIES = 3;
+
   const isAdminOrPrincipal = userRole === 'admin' || userRole === 'principal';
+
+  // ---------------------------------------------------------------------------
+  // Accessibility: focus management refs
+  // ---------------------------------------------------------------------------
+
+  /** Ref for sub-view heading - receives focus when navigating into a sub-view */
+  const subViewHeadingRef = useRef<HTMLHeadingElement>(null);
+  /** Ref for the back button in sub-views - alternative focus target */
+  const backButtonRef = useRef<HTMLButtonElement>(null);
+  /** Tracks which menu button triggered navigation (for focus restoration on goBack) */
+  const lastFocusedMenuRef = useRef<HTMLButtonElement | null>(null);
+  /** Ref for the settings menu heading - receives focus on goBack to main menu */
+  const menuHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  // ---------------------------------------------------------------------------
+  // Accessibility: manage focus on sub-view navigation
+  // When navigating to a sub-view, focus the heading so screen readers announce
+  // the new view. When returning to the main menu, restore focus to the button
+  // that triggered the navigation (or the menu heading as fallback).
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (activeSubView !== null) {
+      // Small delay to allow the DOM to render the sub-view before focusing
+      const timer = setTimeout(() => {
+        if (subViewHeadingRef.current) {
+          subViewHeadingRef.current.focus();
+        } else if (backButtonRef.current) {
+          backButtonRef.current.focus();
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    } else if (isReturning) {
+      // Returning to main menu - restore focus to the triggering button
+      const timer = setTimeout(() => {
+        if (lastFocusedMenuRef.current) {
+          lastFocusedMenuRef.current.focus();
+          lastFocusedMenuRef.current = null;
+        } else if (menuHeadingRef.current) {
+          menuHeadingRef.current.focus();
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [activeSubView, isReturning]);
+
+  // ---------------------------------------------------------------------------
+  // Persist active section to sessionStorage whenever it changes
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    persistSection(activeSubView);
+  }, [activeSubView]);
+
+  // ---------------------------------------------------------------------------
+  // Detect auth provider when account sub-view is active
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (activeSubView !== 'account') return;
+
+    let cancelled = false;
+
+    async function detectAuthProvider() {
+      try {
+        const client = getClient();
+        const { data: userData, error: userError } = await client.auth.getUser();
+        if (userError || !userData?.user) return;
+
+        const user = userData.user;
+        // Check identities array for email provider
+        const hasEmailIdentity = user.identities?.some(
+          (identity) => identity.provider === 'email'
+        ) ?? false;
+        // Fallback: check app_metadata.provider
+        const appProvider = user.app_metadata?.provider;
+        const isEmail = hasEmailIdentity || appProvider === 'email';
+
+        if (!cancelled) {
+          setIsEmailUser(isEmail);
+        }
+      } catch {
+        // If detection fails, default to not showing the button
+        if (!cancelled) {
+          setIsEmailUser(false);
+        }
+      }
+    }
+
+    detectAuthProvider();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSubView]);
+
+  // ---------------------------------------------------------------------------
+  // Load notification preferences when the notifications sub-view becomes active
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (activeSubView !== 'notifications') return;
+
+    let cancelled = false;
+
+    async function fetchPrefs() {
+      setNotifLoading(true);
+      setNotifError(null);
+      try {
+        const client = getClient();
+        const { data: userData, error: userError } = await client.auth.getUser();
+        if (userError || !userData?.user) {
+          throw new Error('Unable to load preferences. Please sign in again.');
+        }
+        const prefs = await loadNotificationPreferences(userData.user.id);
+        if (!cancelled) {
+          setNotifPrefs(prefs);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setNotifError(
+            err instanceof Error ? err.message : 'Failed to load notification preferences.',
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setNotifLoading(false);
+        }
+      }
+    }
+
+    fetchPrefs();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSubView]);
+
+  // ---------------------------------------------------------------------------
+  // Debounced save for notification preferences (avoids excessive writes on rapid toggles)
+  // ---------------------------------------------------------------------------
+
+  const debouncedSaveNotifPrefs = useDebouncedSave<NotificationPreferences>(
+    useCallback(async (prefs: NotificationPreferences) => {
+      setNotifSaving(true);
+      setNotifError(null);
+      try {
+        const client = getClient();
+        const { data: userData, error: userError } = await client.auth.getUser();
+        if (userError || !userData?.user) {
+          throw new Error('Unable to save preferences. Please sign in again.');
+        }
+        await saveNotificationPreferences(userData.user.id, prefs);
+      } catch (err) {
+        setNotifError(
+          err instanceof Error ? err.message : 'Failed to save notification preferences.',
+        );
+      } finally {
+        setNotifSaving(false);
+      }
+    }, []),
+    800,
+  );
+
+  const handleNotifChange = useCallback(
+    (key: string, value: boolean) => {
+      // Update local state immediately for instant UI feedback
+      setNotifPrefs((prev) => {
+        const updated = { ...prev, [key]: value };
+        // Schedule debounced save with the updated preferences
+        debouncedSaveNotifPrefs(updated);
+        return updated;
+      });
+      setNotifError(null);
+      setNotifRetryCount(0);
+    },
+    [debouncedSaveNotifPrefs],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Retry handler for notification preference save failures
+  // ---------------------------------------------------------------------------
+
+  const handleNotifRetry = useCallback(async () => {
+    if (notifRetryCount >= MAX_NOTIF_RETRIES) {
+      setNotifError('Maximum retry attempts reached. Please try again later.');
+      return;
+    }
+    setNotifRetryCount((prev) => prev + 1);
+    setNotifSaving(true);
+    setNotifError(null);
+    try {
+      const client = getClient();
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError || !userData?.user) {
+        throw new Error('Unable to save preferences. Please sign in again.');
+      }
+      await saveNotificationPreferences(userData.user.id, notifPrefs);
+    } catch (err) {
+      setNotifError(
+        err instanceof Error ? err.message : 'Failed to save notification preferences.',
+      );
+    } finally {
+      setNotifSaving(false);
+    }
+  }, [notifPrefs, notifRetryCount]);
+
+  // ---------------------------------------------------------------------------
+  // Navigation helpers (stack-based)
+  // ---------------------------------------------------------------------------
+
+  /** Push a view onto the navigation stack, storing the triggering button for focus restoration */
+  function navigateTo(view: MoreTabSubView, event?: React.MouseEvent<HTMLButtonElement>) {
+    if (view !== null) {
+      // Store the button that triggered navigation so focus can return on goBack
+      if (event?.currentTarget) {
+        lastFocusedMenuRef.current = event.currentTarget;
+      }
+      setIsReturning(false);
+      setViewStack((prev) => [...prev, view]);
+    }
+  }
+
+  /** Pop the top view from the stack (go back one level) */
+  function goBack() {
+    setIsReturning(true);
+    setViewStack((prev) => {
+      const next = prev.slice(0, -1);
+      // Clear persisted section when navigating back to main menu
+      if (next.length === 0) {
+        clearPersistedSection();
+      }
+      return next;
+    });
+    setEditingField(null);
+    setEditValue('');
+    setSaveError(null);
+  }
+
+  /** Clear the entire stack back to main menu */
+  function resetToMenu() {
+    setViewStack([]);
+    clearPersistedSection();
+    setEditingField(null);
+    setEditValue('');
+    setSaveError(null);
+  }
 
   function handleEditClick(field: 'display-name' | 'school') {
     if (field === 'school' && !isAdminOrPrincipal) {
@@ -123,8 +473,6 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
       setEditingField(null);
       setEditValue('');
     } catch (err) {
-      // Errors from saveProfileField are already user-friendly (mapped via mapSupabaseError).
-      // Handle unexpected error shapes gracefully so the UI never breaks.
       if (typeof err === 'string') {
         setSaveError(err);
       } else if (err instanceof Error) {
@@ -142,8 +490,6 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
       await saveProfileField(payload.field, payload.value);
       onProfileUpdated?.(payload);
     } catch (err) {
-      // Re-throw as a proper Error with the user-friendly message so
-      // ProfileSettings can display it inline via its catch block.
       if (err instanceof Error) {
         throw err;
       }
@@ -158,17 +504,122 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
     try {
       await onDeleteAccount();
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Failed to delete account. Please try again.');
+      setDeleteError(mapSupabaseError(err));
       setDeleting(false);
     }
   }
 
-  function handleBackToMenu() {
-    setActiveSubView(null);
-    setEditingField(null);
-    setEditValue('');
-    setSaveError(null);
+  // ---------------------------------------------------------------------------
+  // Change Password handler
+  // ---------------------------------------------------------------------------
+
+  function handleCancelChangePassword() {
+    setShowChangePassword(false);
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordError(null);
+    setPasswordSuccess(false);
   }
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(false);
+
+    // Validation
+    if (newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match.');
+      return;
+    }
+
+    setPasswordSaving(true);
+    try {
+      const client = getClient();
+      const { error } = await client.auth.updateUser({ password: newPassword });
+      if (error) {
+        setPasswordError(mapSupabaseError(error));
+        return;
+      }
+      setPasswordSuccess(true);
+      setNewPassword('');
+      setConfirmPassword('');
+      // Auto-hide the form after a short delay on success
+      setTimeout(() => {
+        setShowChangePassword(false);
+        setPasswordSuccess(false);
+      }, 2000);
+    } catch (err) {
+      setPasswordError(mapSupabaseError(err));
+    } finally {
+      setPasswordSaving(false);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Export Data handler - fetches profile + tasks and triggers JSON download
+  // ---------------------------------------------------------------------------
+
+  async function handleExportData() {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const client = getClient();
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError || !userData?.user) {
+        throw new Error('Unable to export data. Please sign in again.');
+      }
+      const userId = userData.user.id;
+
+      // Fetch profile
+      const { data: profile, error: profileErr } = await client
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (profileErr) {
+        throw new Error(mapSupabaseError(profileErr));
+      }
+
+      // Fetch tasks
+      const { data: tasks, error: tasksErr } = await client
+        .from('tasks')
+        .select('*')
+        .eq('user_id', userId);
+      if (tasksErr) {
+        throw new Error(mapSupabaseError(tasksErr));
+      }
+
+      // Build export object
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        profile: profile ?? {},
+        tasks: tasks ?? [],
+      };
+
+      // Create blob and trigger download
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const date = new Date().toISOString().split('T')[0];
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `admini-export-${date}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(mapSupabaseError(err));
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  // Suppress unused variable warning - resetToMenu is available for future use
+  void resetToMenu;
 
   if (loading) {
     return (
@@ -186,17 +637,18 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
   // -------------------------------------------------------------------------
   if (activeSubView === 'profile') {
     return (
-      <div className="more-tab more-tab--sub-view">
+      <div className="more-tab more-tab--sub-view" role="region" aria-label="Profile settings">
         <header className="more-tab__header">
           <button
             type="button"
+            ref={backButtonRef}
             className="more-tab__back-btn"
-            onClick={handleBackToMenu}
+            onClick={goBack}
             aria-label="Back to settings menu"
           >
             {'\u2190'} Back
           </button>
-          <h1 className="more-tab__title">Profile</h1>
+          <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Profile</h1>
         </header>
 
         <section className="more-tab__section" aria-labelledby="profile-sub-view-heading">
@@ -217,60 +669,71 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
   // -------------------------------------------------------------------------
   if (activeSubView === 'notifications') {
     return (
-      <div className="more-tab more-tab--sub-view">
+      <div className="more-tab more-tab--sub-view" role="region" aria-label="Notification settings">
         <header className="more-tab__header">
           <button
             type="button"
+            ref={backButtonRef}
             className="more-tab__back-btn"
-            onClick={handleBackToMenu}
+            onClick={goBack}
             aria-label="Back to settings menu"
           >
             {'\u2190'} Back
           </button>
-          <h1 className="more-tab__title">Notifications</h1>
+          <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Notifications</h1>
         </header>
 
         <section className="more-tab__section" aria-labelledby="notifications-sub-view-heading">
           <h2 id="notifications-sub-view-heading" className="more-tab__section-title">Notification Preferences</h2>
-          <NotificationSettings
-            onChange={(key, value) => {
-              // Preference persistence will be wired in tasks 12.3-12.5
-              void key;
-              void value;
-            }}
-          />
+          {notifLoading ? (
+            <div className="more-tab__notif-loading" aria-busy="true">
+              <SkeletonCard height={44} />
+              <SkeletonCard height={44} />
+              <SkeletonCard height={44} />
+            </div>
+          ) : (
+            <NotificationSettings
+              emailNotifications={notifPrefs.emailNotifications}
+              pushNotifications={notifPrefs.pushNotifications}
+              activityDigest={notifPrefs.activityDigest}
+              onChange={handleNotifChange}
+              saving={notifSaving}
+              error={notifError}
+              onRetry={notifRetryCount < MAX_NOTIF_RETRIES ? handleNotifRetry : undefined}
+            />
+          )}
         </section>
       </div>
     );
   }
-
-
 
   // -------------------------------------------------------------------------
   // Preferences sub-view
   // -------------------------------------------------------------------------
   if (activeSubView === 'preferences') {
     return (
-      <div className="more-tab more-tab--sub-view">
+      <div className="more-tab more-tab--sub-view" role="region" aria-label="App preferences settings">
         <header className="more-tab__header">
           <button
             type="button"
+            ref={backButtonRef}
             className="more-tab__back-btn"
-            onClick={handleBackToMenu}
+            onClick={goBack}
             aria-label="Back to settings menu"
           >
             {'\u2190'} Back
           </button>
-          <h1 className="more-tab__title">App Preferences</h1>
+          <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>App Preferences</h1>
         </header>
 
         <section className="more-tab__section" aria-labelledby="preferences-sub-view-heading">
           <h2 id="preferences-sub-view-heading" className="more-tab__section-title">App Preferences</h2>
           <AppPreferences
+            theme={themePreference}
             onChange={(key, value) => {
-              // Preference persistence will be wired in task 13.3
-              void key;
-              void value;
+              if (key === 'theme' && typeof value === 'string') {
+                setThemePreference(value as 'light' | 'dark' | 'system');
+              }
             }}
           />
         </section>
@@ -278,30 +741,40 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
     );
   }
 
-
   // -------------------------------------------------------------------------
   // Integrations sub-view
   // -------------------------------------------------------------------------
   if (activeSubView === 'integrations') {
     return (
-      <div className="more-tab more-tab--sub-view">
+      <div className="more-tab more-tab--sub-view" role="region" aria-label="Integrations settings">
         <header className="more-tab__header">
           <button
             type="button"
+            ref={backButtonRef}
             className="more-tab__back-btn"
-            onClick={handleBackToMenu}
+            onClick={goBack}
             aria-label="Back to settings menu"
           >
             {'\u2190'} Back
           </button>
-          <h1 className="more-tab__title">Integrations</h1>
+          <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Integrations</h1>
         </header>
 
         <section className="more-tab__section" aria-labelledby="integrations-sub-view-heading">
-          <h2 id="integrations-sub-view-heading" className="more-tab__section-title">Connected Apps</h2>
-          <p className="more-tab__placeholder-note">
-            Integration management (connected apps list, connection status, disconnect flow) will be added in a future update.
-          </p>
+          {showCatalog ? (
+            <>
+              <h2 id="integrations-sub-view-heading" className="more-tab__section-title">Add Integration</h2>
+              <IntegrationCatalog
+                onBack={() => setShowCatalog(false)}
+                onConnected={() => setShowCatalog(false)}
+              />
+            </>
+          ) : (
+            <>
+              <h2 id="integrations-sub-view-heading" className="more-tab__section-title">Connected Apps</h2>
+              <ConnectedIntegrations onAddIntegration={() => setShowCatalog(true)} />
+            </>
+          )}
         </section>
       </div>
     );
@@ -312,25 +785,225 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
   // -------------------------------------------------------------------------
   if (activeSubView === 'account') {
     return (
-      <div className="more-tab more-tab--sub-view">
+      <div className="more-tab more-tab--sub-view" role="region" aria-label="Account management settings">
         <header className="more-tab__header">
           <button
             type="button"
+            ref={backButtonRef}
             className="more-tab__back-btn"
-            onClick={handleBackToMenu}
+            onClick={goBack}
             aria-label="Back to settings menu"
           >
             {'\u2190'} Back
           </button>
-          <h1 className="more-tab__title">Account</h1>
+          <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Account</h1>
         </header>
 
         <section className="more-tab__section" aria-labelledby="account-sub-view-heading">
           <h2 id="account-sub-view-heading" className="more-tab__section-title">Account Management</h2>
-          <p className="more-tab__placeholder-note">
-            Account management (delete account, change password, export data) will be added in a future update.
-          </p>
+
+          {/* Change Password - only for email/password users */}
+          {isEmailUser === true && (
+            <div className="more-tab__account-action">
+              <p className="more-tab__account-action-description">Update your account password</p>
+              {!showChangePassword && (
+                <button
+                  type="button"
+                  className="more-tab__btn-secondary"
+                  onClick={() => setShowChangePassword(true)}
+                  aria-label="Change password"
+                >
+                  Change Password
+                </button>
+              )}
+              {showChangePassword && (
+                <form
+                  className="more-tab__password-form"
+                  onSubmit={handleChangePassword}
+                  aria-label="Change password form"
+                >
+                  {passwordSuccess && (
+                    <p className="more-tab__password-success" role="status">
+                      Password updated successfully.
+                    </p>
+                  )}
+                  {passwordError && (
+                    <div className="more-tab__error-container" role="alert">
+                      <p className="more-tab__save-error">{passwordError}</p>
+                      {isSessionExpiredError(passwordError) && (
+                        <button
+                          type="button"
+                          className="more-tab__btn-secondary"
+                          onClick={onSignOut}
+                          aria-label="Sign in again"
+                        >
+                          Sign in again
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <div className="more-tab__password-field">
+                    <label htmlFor="new-password" className="more-tab__password-label">
+                      New Password
+                    </label>
+                    <input
+                      id="new-password"
+                      type="password"
+                      className="more-tab__profile-input"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      minLength={8}
+                      placeholder="Minimum 8 characters"
+                      disabled={passwordSaving}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+                  <div className="more-tab__password-field">
+                    <label htmlFor="confirm-password" className="more-tab__password-label">
+                      Confirm Password
+                    </label>
+                    <input
+                      id="confirm-password"
+                      type="password"
+                      className="more-tab__profile-input"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      minLength={8}
+                      placeholder="Re-enter new password"
+                      disabled={passwordSaving}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+                  <div className="more-tab__password-actions">
+                    <button
+                      type="button"
+                      className="more-tab__btn-cancel"
+                      onClick={handleCancelChangePassword}
+                      disabled={passwordSaving}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="more-tab__btn-save"
+                      disabled={passwordSaving || newPassword.length < 8 || !confirmPassword}
+                    >
+                      {passwordSaving ? 'Updating...' : 'Update Password'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* OAuth-only notice */}
+          {isEmailUser === false && (
+            <p className="more-tab__oauth-notice" role="note">
+              Password management is not available for accounts using Google sign-in
+            </p>
+          )}
+
+          {/* Loading state while detecting auth method */}
+          {isEmailUser === null && (
+            <p className="more-tab__placeholder-note">Loading account details...</p>
+          )}
         </section>
+
+        {/* Export Data */}
+        <section className="more-tab__section" aria-labelledby="account-export-heading">
+          <h2 id="account-export-heading" className="more-tab__section-title">Export Data</h2>
+          <p className="more-tab__account-action-description">Download a copy of your profile and task data</p>
+          <button
+            type="button"
+            className="more-tab__btn-secondary"
+            onClick={handleExportData}
+            disabled={exporting}
+            aria-label="Export data"
+          >
+            {exporting ? 'Exporting...' : 'Export Data'}
+          </button>
+          {exportError && (
+            <div className="more-tab__error-container" role="alert">
+              <p className="more-tab__save-error">{exportError}</p>
+              {isSessionExpiredError(exportError) && (
+                <button
+                  type="button"
+                  className="more-tab__btn-secondary"
+                  onClick={onSignOut}
+                  aria-label="Sign in again"
+                >
+                  Sign in again
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Danger Zone */}
+        <section className="more-tab__section more-tab__danger-zone" aria-labelledby="account-danger-zone-heading">
+          <h2 id="account-danger-zone-heading" className="more-tab__section-title">Danger Zone</h2>
+          <p className="more-tab__danger-description">
+            Permanently delete your account and all associated data. This cannot be undone.
+          </p>
+          {onDeleteAccount && (
+            <button
+              type="button"
+              className="more-tab__danger-btn"
+              onClick={() => { setDeleteError(null); setShowDeleteConfirm(true); }}
+              disabled={deleting}
+              aria-label="Delete account"
+            >
+              {deleting ? 'Deleting...' : 'Delete Account'}
+            </button>
+          )}
+          {deleteError && (
+            <div className="more-tab__error-container" role="alert">
+              <p className="more-tab__save-error">{deleteError}</p>
+              {isSessionExpiredError(deleteError) && (
+                <button
+                  type="button"
+                  className="more-tab__btn-secondary"
+                  onClick={onSignOut}
+                  aria-label="Sign in again"
+                >
+                  Sign in again
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Delete Account Confirmation Dialog */}
+        {showDeleteConfirm && (
+          <div className="more-tab__confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title-account">
+            <div className="more-tab__confirm-dialog">
+              <h3 id="delete-confirm-title-account" className="more-tab__confirm-title">Delete Account</h3>
+              <p className="more-tab__confirm-message">
+                Are you sure you want to permanently delete your account? This action cannot be undone. All your data, tasks, and profile information will be removed.
+              </p>
+              <div className="more-tab__confirm-actions">
+                <button
+                  type="button"
+                  className="more-tab__btn-cancel"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="more-tab__confirm-delete-btn"
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting...' : 'Yes, Delete My Account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -339,10 +1012,10 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
   // Main menu view
   // -------------------------------------------------------------------------
   return (
-    <div className="more-tab">
+    <div className={`more-tab${isReturning ? " more-tab--returning" : ""}`} role="region" aria-label="Settings menu" onAnimationEnd={() => setIsReturning(false)}>
       {/* Header */}
       <header className="more-tab__header">
-        <h1 className="more-tab__title">Settings</h1>
+        <h1 ref={menuHeadingRef} className="more-tab__title" tabIndex={-1}>Settings</h1>
       </header>
 
       {/* Profile Section */}
@@ -414,7 +1087,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
                 <span className="more-tab__profile-value">{schoolName || 'Not provided'}</span>
               )}
               {!isAdminOrPrincipal && editingField !== 'school' && (
-                <span className="more-tab__admin-only-notice" role="note">Admin only ï¿½ only administrators or principals can change the school name.</span>
+                <span className="more-tab__admin-only-notice" role="note">Admin only &#x2014; only administrators or principals can change the school name.</span>
               )}
             </div>
             {editingField !== 'school' && (
@@ -453,19 +1126,19 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
         <h2 id="more-tab-settings-heading" className="more-tab__section-title">Settings</h2>
         <ul className="more-tab__list" role="list">
           <li className="more-tab__list-item">
-            <button type="button" className="more-tab__link-btn" onClick={() => setActiveSubView('profile')}>
+            <button type="button" className="more-tab__link-btn" onClick={(e) => navigateTo('profile', e)}>
               <span className="more-tab__link-icon" aria-hidden="true">{'\uD83D\uDC64'}</span>
               <span className="more-tab__link-label">Profile</span>
             </button>
           </li>
           <li className="more-tab__list-item">
-            <button type="button" className="more-tab__link-btn" onClick={() => setActiveSubView('notifications')}>
+            <button type="button" className="more-tab__link-btn" onClick={(e) => navigateTo('notifications', e)}>
               <span className="more-tab__link-icon" aria-hidden="true">{'\ud83d\udd14'}</span>
               <span className="more-tab__link-label">Notifications</span>
             </button>
           </li>
           <li className="more-tab__list-item">
-            <button type="button" className="more-tab__link-btn" onClick={() => setActiveSubView('preferences')}>
+            <button type="button" className="more-tab__link-btn" onClick={(e) => navigateTo('preferences', e)}>
               <span className="more-tab__link-icon" aria-hidden="true">{'\u2699\ufe0f'}</span>
               <span className="more-tab__link-label">Preferences</span>
             </button>
@@ -478,7 +1151,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
         <h2 id="more-tab-integrations-heading" className="more-tab__section-title">Integrations</h2>
         <ul className="more-tab__list" role="list">
           <li className="more-tab__list-item">
-            <button type="button" className="more-tab__link-btn" onClick={() => setActiveSubView('integrations')}>
+            <button type="button" className="more-tab__link-btn" onClick={(e) => navigateTo('integrations', e)}>
               <span className="more-tab__link-icon" aria-hidden="true">{'\ud83d\udd17'}</span>
               <span className="more-tab__link-label">Connected Apps</span>
             </button>
@@ -495,6 +1168,14 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
       {/* Account Actions Section */}
       <section className="more-tab__section" aria-labelledby="more-tab-account-heading">
         <h2 id="more-tab-account-heading" className="more-tab__section-title">Account</h2>
+        <ul className="more-tab__list" role="list">
+          <li className="more-tab__list-item">
+            <button type="button" className="more-tab__link-btn" onClick={(e) => navigateTo('account', e)}>
+              <span className="more-tab__link-icon" aria-hidden="true">{'\uD83D\uDEE0\uFE0F'}</span>
+              <span className="more-tab__link-label">Manage Account</span>
+            </button>
+          </li>
+        </ul>
         <div className="more-tab__actions">
           <button
             type="button"
@@ -515,7 +1196,19 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
             </button>
           )}
           {deleteError && (
-            <p className="more-tab__save-error" role="alert">{deleteError}</p>
+            <div className="more-tab__error-container" role="alert">
+              <p className="more-tab__save-error">{deleteError}</p>
+              {isSessionExpiredError(deleteError) && (
+                <button
+                  type="button"
+                  className="more-tab__btn-secondary"
+                  onClick={onSignOut}
+                  aria-label="Sign in again"
+                >
+                  Sign in again
+                </button>
+              )}
+            </div>
           )}
         </div>
       </section>
@@ -552,3 +1245,4 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
     </div>
   );
 }
+

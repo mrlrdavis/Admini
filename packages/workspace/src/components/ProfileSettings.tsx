@@ -103,7 +103,17 @@ export function ProfileSettings({
   }
 
   return (
-    <div className="profile-settings" aria-label="Profile settings">
+    <div className="profile-settings" role="region" aria-label="Profile settings">
+      {/* Success toast banner - shows at the top after any save */}
+      {savedField && (
+        <div className="profile-settings__toast" role="status" aria-live="polite">
+          <span className="profile-settings__toast-icon">{'\u2713'}</span>
+          <span>
+            {savedField === 'display-name' ? 'Display name' : 'School name'} Updated successfully
+          </span>
+        </div>
+      )}
+
       {/* Display Name */}
       <div className="profile-settings__row">
         <div className="profile-settings__info">
@@ -146,7 +156,7 @@ export function ProfileSettings({
             <>
               <span className="profile-settings__value">{userName || 'Not provided'}</span>
               {savedField === 'display-name' && (
-                <span className="profile-settings__success" role="status">{'\u2713 Updated'}</span>
+                <span className="profile-settings__success" aria-hidden="true">{'\u2713 Updated'}</span>
               )}
             </>
           )}
@@ -213,7 +223,7 @@ export function ProfileSettings({
             <>
               <span className="profile-settings__value">{schoolName || 'Not provided'}</span>
               {savedField === 'school' && (
-                <span className="profile-settings__success" role="status">{'\u2713 Updated'}</span>
+                <span className="profile-settings__success" aria-hidden="true">{'\u2713 Updated'}</span>
               )}
             </>
           )}

@@ -227,3 +227,142 @@ describe('MoreTab - Delete Account flow (REQ-1)', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests: Back navigation from settings sub-views (REQ-11, Task 17.2)
+// ---------------------------------------------------------------------------
+
+describe('MoreTab - Back navigation from sub-views (REQ-11)', () => {
+  it('navigating to profile sub-view and back returns to main menu', () => {
+    render(createElement(MoreTab, defaultProps()));
+
+    // Navigate to profile sub-view
+    const profileBtn = screen.getByText('Profile', { selector: '.more-tab__link-label' });
+    fireEvent.click(profileBtn.closest('button')!);
+
+    // Should see sub-view with back button
+    const backBtn = screen.getByRole('button', { name: /back to settings menu/i });
+    expect(backBtn).toBeDefined();
+    expect(screen.getByText('Profile', { selector: '.more-tab__title' })).toBeDefined();
+
+    // Click back
+    fireEvent.click(backBtn);
+
+    // Should be back on main menu (Settings heading visible)
+    expect(screen.getByText('Settings', { selector: '.more-tab__title' })).toBeDefined();
+  });
+
+  it('navigating to notifications sub-view and back returns to main menu', () => {
+    render(createElement(MoreTab, defaultProps()));
+
+    const notificationsBtn = screen.getByText('Notifications', { selector: '.more-tab__link-label' });
+    fireEvent.click(notificationsBtn.closest('button')!);
+
+    const backBtn = screen.getByRole('button', { name: /back to settings menu/i });
+    expect(backBtn).toBeDefined();
+    expect(screen.getByText('Notifications', { selector: '.more-tab__title' })).toBeDefined();
+
+    fireEvent.click(backBtn);
+
+    expect(screen.getByText('Settings', { selector: '.more-tab__title' })).toBeDefined();
+  });
+
+  it('navigating to preferences sub-view and back returns to main menu', () => {
+    render(createElement(MoreTab, defaultProps()));
+
+    const preferencesBtn = screen.getByText('Preferences', { selector: '.more-tab__link-label' });
+    fireEvent.click(preferencesBtn.closest('button')!);
+
+    const backBtn = screen.getByRole('button', { name: /back to settings menu/i });
+    expect(backBtn).toBeDefined();
+    expect(screen.getByText('App Preferences', { selector: '.more-tab__title' })).toBeDefined();
+
+    fireEvent.click(backBtn);
+
+    expect(screen.getByText('Settings', { selector: '.more-tab__title' })).toBeDefined();
+  });
+
+  it('navigating to integrations sub-view and back returns to main menu', () => {
+    render(createElement(MoreTab, defaultProps()));
+
+    const integrationsBtn = screen.getByText('Connected Apps', { selector: '.more-tab__link-label' });
+    fireEvent.click(integrationsBtn.closest('button')!);
+
+    const backBtn = screen.getByRole('button', { name: /back to settings menu/i });
+    expect(backBtn).toBeDefined();
+    expect(screen.getByText('Integrations', { selector: '.more-tab__title' })).toBeDefined();
+
+    fireEvent.click(backBtn);
+
+    expect(screen.getByText('Settings', { selector: '.more-tab__title' })).toBeDefined();
+  });
+
+  it('navigating to account sub-view and back returns to main menu', () => {
+    render(createElement(MoreTab, defaultProps()));
+
+    const accountBtn = screen.getByText('Manage Account', { selector: '.more-tab__link-label' });
+    fireEvent.click(accountBtn.closest('button')!);
+
+    const backBtn = screen.getByRole('button', { name: /back to settings menu/i });
+    expect(backBtn).toBeDefined();
+    expect(screen.getByText('Account', { selector: '.more-tab__title' })).toBeDefined();
+
+    fireEvent.click(backBtn);
+
+    expect(screen.getByText('Settings', { selector: '.more-tab__title' })).toBeDefined();
+  });
+
+  it('all back buttons have consistent aria-label for accessibility', () => {
+    render(createElement(MoreTab, defaultProps()));
+
+    // Test each sub-view's back button aria-label
+    const subViews = [
+      { label: 'Profile', selector: '.more-tab__link-label' },
+      { label: 'Notifications', selector: '.more-tab__link-label' },
+      { label: 'Preferences', selector: '.more-tab__link-label' },
+      { label: 'Connected Apps', selector: '.more-tab__link-label' },
+      { label: 'Manage Account', selector: '.more-tab__link-label' },
+    ];
+
+    for (const subView of subViews) {
+      // Navigate to sub-view
+      const btn = screen.getByText(subView.label, { selector: subView.selector });
+      fireEvent.click(btn.closest('button')!);
+
+      // Verify back button has proper aria-label
+      const backBtn = screen.getByRole('button', { name: /back to settings menu/i });
+      expect(backBtn).toBeDefined();
+      expect(backBtn.getAttribute('aria-label')).toBe('Back to settings menu');
+
+      // Go back
+      fireEvent.click(backBtn);
+    }
+  });
+
+  it('handleBackToMenu resets editing state when navigating back', () => {
+    render(createElement(MoreTab, defaultProps({ userRole: 'admin' })));
+
+    // Start editing display name to set editing state
+    const editButtons = screen.getAllByRole('button', { name: /edit display name/i });
+    fireEvent.click(editButtons[0]);
+
+    // Verify editing input is shown
+    expect(screen.getByLabelText('Display name')).toBeDefined();
+
+    // Cancel first to return to main menu
+    const cancelBtn = screen.getByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelBtn);
+
+    // Now navigate to profile sub-view
+    const profileBtn = screen.getByText('Profile', { selector: '.more-tab__link-label' });
+    fireEvent.click(profileBtn.closest('button')!);
+
+    // Come back via back button
+    const backBtn = screen.getByRole('button', { name: /back to settings menu/i });
+    fireEvent.click(backBtn);
+
+    // After coming back, no editing state should remain (no input fields visible)
+    expect(screen.queryByLabelText('Display name')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+});

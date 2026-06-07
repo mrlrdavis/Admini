@@ -1,4 +1,4 @@
-﻿@font-face {
+@font-face {
   font-family: 'Tomorrow';
   src: url('/fonts/Tomorrow-Regular.woff2') format('woff2');
   font-weight: 400;
@@ -234,6 +234,8 @@ select {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  /* Provide scroll padding so focused inputs stay above the virtual keyboard */
+  scroll-padding-bottom: 40vh;
   max-width: 100%;
   background: linear-gradient(
     180deg,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { createElement } from 'react';
 import { ProfileSettings, type ProfileSettingsProps } from '../../src/components/ProfileSettings';
 
@@ -444,11 +444,13 @@ describe('ProfileSettings - Success feedback after save', () => {
 
     const input = screen.getByLabelText('Display name') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'New Name' } });
-    fireEvent.click(screen.getByText('Save'));
 
-    await waitFor(() => {
-      expect(screen.getByRole('status').textContent).toContain('Updated');
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      await vi.advanceTimersByTimeAsync(100);
     });
+
+    expect(screen.getByRole('status').textContent).toContain('Updated');
   });
 
   it('shows "? Updated" message after successful school name save', async () => {
@@ -462,11 +464,13 @@ describe('ProfileSettings - Success feedback after save', () => {
 
     const input = screen.getByLabelText('School name') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'New School' } });
-    fireEvent.click(screen.getByText('Save'));
 
-    await waitFor(() => {
-      expect(screen.getByRole('status').textContent).toContain('Updated');
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      await vi.advanceTimersByTimeAsync(100);
     });
+
+    expect(screen.getByRole('status').textContent).toContain('Updated');
   });
 
   it('success message has role="status" for accessibility', async () => {
@@ -476,13 +480,15 @@ describe('ProfileSettings - Success feedback after save', () => {
 
     const input = screen.getByLabelText('Display name') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Accessible Name' } });
-    fireEvent.click(screen.getByText('Save'));
 
-    await waitFor(() => {
-      const statusEl = screen.getByRole('status');
-      expect(statusEl).toBeDefined();
-      expect(statusEl.textContent).toContain('Updated');
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      await vi.advanceTimersByTimeAsync(100);
     });
+
+    const statusEl = screen.getByRole('status');
+    expect(statusEl).toBeDefined();
+    expect(statusEl.textContent).toContain('Updated');
   });
 
   it('success message auto-dismisses after ~2.5 seconds', async () => {
@@ -492,18 +498,22 @@ describe('ProfileSettings - Success feedback after save', () => {
 
     const input = screen.getByLabelText('Display name') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Temp Name' } });
-    fireEvent.click(screen.getByText('Save'));
 
-    await waitFor(() => {
-      expect(screen.getByRole('status')).toBeDefined();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      await vi.advanceTimersByTimeAsync(100);
     });
 
-    // Advance past the 2.5s timeout
-    vi.advanceTimersByTime(3000);
+    // Toast should be visible
+    expect(screen.getByRole('status')).toBeDefined();
 
-    await waitFor(() => {
-      expect(screen.queryByRole('status')).toBeNull();
+    // Advance past the 2.5s auto-dismiss timeout
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
     });
+
+    // Toast should be gone
+    expect(screen.queryByRole('status')).toBeNull();
   });
 
   it('does not show success message when save fails', async () => {
@@ -513,12 +523,13 @@ describe('ProfileSettings - Success feedback after save', () => {
 
     const input = screen.getByLabelText('Display name') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Fail Name' } });
-    fireEvent.click(screen.getByText('Save'));
 
-    await waitFor(() => {
-      expect(screen.getByRole('alert').textContent).toContain('Save failed');
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      await vi.advanceTimersByTimeAsync(100);
     });
 
+    expect(screen.getByRole('alert').textContent).toContain('Save failed');
     expect(screen.queryByRole('status')).toBeNull();
   });
 
@@ -530,11 +541,13 @@ describe('ProfileSettings - Success feedback after save', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit display name' }));
     const input = screen.getByLabelText('Display name') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'First Save' } });
-    fireEvent.click(screen.getByText('Save'));
 
-    await waitFor(() => {
-      expect(screen.getByRole('status')).toBeDefined();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      await vi.advanceTimersByTimeAsync(100);
     });
+
+    expect(screen.getByRole('status')).toBeDefined();
 
     // Start editing again - success message should clear
     fireEvent.click(screen.getByRole('button', { name: 'Edit display name' }));

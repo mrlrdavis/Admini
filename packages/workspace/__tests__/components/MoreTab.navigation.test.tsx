@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createElement } from 'react';
 import { MoreTab, type MoreTabProps } from '../../src/components/MoreTab';
@@ -31,6 +31,10 @@ function clickProfileSettingsButton() {
 // ---------------------------------------------------------------------------
 
 describe('MoreTab - Profile button navigation', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
   it('renders a Profile button in the Settings section', () => {
     render(createElement(MoreTab, defaultProps()));
 

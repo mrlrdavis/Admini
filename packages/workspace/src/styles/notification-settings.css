@@ -1,0 +1,151 @@
+/* ==========================================================================
+   NotificationSettings - Toggle switches for notification preferences
+   ========================================================================== */
+
+.notification-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.notification-settings__error {
+  margin: 0;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-error);
+  background: #fdf0f0;
+  border-radius: var(--ws-radius-sm);
+}
+
+/* Row: label + toggle side by side */
+.notification-settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  border: 1px solid var(--ws-color-border);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Label group (title + description) */
+.notification-settings__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.notification-settings__title {
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+  color: var(--ws-color-text);
+}
+
+.notification-settings__description {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Toggle switch button - minimum 44x44px touch target */
+.notification-settings__toggle {
+  position: relative;
+  width: 52px;
+  height: 32px;
+  min-width: 52px;
+  min-height: 44px;
+  padding: 6px 0;
+  border: none;
+  border-radius: var(--ws-radius-pill);
+  background: var(--ws-color-border);
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.notification-settings__toggle:focus-visible {
+  outline: 2px solid var(--ws-color-sage);
+  outline-offset: 2px;
+}
+
+.notification-settings__toggle--active {
+  background: var(--ws-color-sage);
+}
+
+.notification-settings__toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Toggle thumb (the circle that slides) */
+.notification-settings__toggle-thumb {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ws-color-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transform: translateX(4px);
+  transition: transform var(--ws-transition-fast);
+  pointer-events: none;
+}
+
+.notification-settings__toggle--active .notification-settings__toggle-thumb {
+  transform: translateX(24px);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .notification-settings__toggle,
+  .notification-settings__toggle-thumb {
+    transition-duration: 0ms !important;
+  }
+}
+
+/* Retry button - ensure 44x44px minimum touch target */
+.notification-settings__retry-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-sage);
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-white);
+  color: var(--ws-color-sage);
+  font-size: var(--ws-font-size-sm);
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.notification-settings__retry-btn:focus-visible {
+  outline: 2px solid var(--ws-color-sage);
+  outline-offset: 2px;
+}
+
+.notification-settings__retry-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile Viewport Fixes (< 375px) */
+@media (max-width: 374px) {
+  .notification-settings__row {
+    padding: var(--ws-space-sm) var(--ws-space-md);
+    gap: var(--ws-space-sm);
+  }
+}

@@ -1,17 +1,29 @@
+import { useState } from 'react';
+
 // ---------------------------------------------------------------------------
 // AppPreferences - App-level preference controls.
 // Renders theme selection (light/dark/system), default tab selector,
-// and compact mode toggle.
+// and compact mode toggle. Uses local React state until IndexedDB persistence
+// is wired in task 13.3.
 // ---------------------------------------------------------------------------
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
+/**
+ * Represents the full set of app-level preferences.
+ */
+export interface AppPreferencesData {
+  theme: ThemePreference;
+  defaultTab: string;
+  compactMode: boolean;
+}
+
 export interface AppPreferencesProps {
-  /** Current theme selection. Defaults to 'system'. */
+  /** Initial theme selection. Defaults to 'system'. */
   theme?: ThemePreference;
-  /** Which tab opens on launch. Defaults to 'dashboard'. */
+  /** Initial tab that opens on launch. Defaults to 'dashboard'. */
   defaultTab?: string;
-  /** Whether compact mode (reduced spacing) is enabled. Defaults to false. */
+  /** Initial compact mode state. Defaults to false. */
   compactMode?: boolean;
   /** Called when any preference changes. */
   onChange: (key: string, value: string | boolean) => void;
@@ -19,8 +31,8 @@ export interface AppPreferencesProps {
 
 const TAB_OPTIONS = [
   { value: 'dashboard', label: 'Dashboard' },
-  { value: 'tasks', label: 'Tasks' },
   { value: 'capture', label: 'Capture' },
+  { value: 'tasks', label: 'Tasks' },
   { value: 'more', label: 'More' },
 ];
 
@@ -31,16 +43,41 @@ const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
 ];
 
 export function AppPreferences({
-  theme = 'system',
-  defaultTab = 'dashboard',
-  compactMode = false,
+  theme: initialTheme = 'system',
+  defaultTab: initialDefaultTab = 'dashboard',
+  compactMode: initialCompactMode = false,
   onChange,
 }: AppPreferencesProps) {
+  const [theme, setTheme] = useState<ThemePreference>(initialTheme);
+  const [defaultTab, setDefaultTab] = useState<string>(initialDefaultTab);
+  const [compactMode, setCompactMode] = useState<boolean>(initialCompactMode);
+
+  function handleThemeChange(value: ThemePreference) {
+    setTheme(value);
+    onChange('theme', value);
+  }
+
+  function handleDefaultTabChange(value: string) {
+    setDefaultTab(value);
+    onChange('defaultTab', value);
+  }
+
+  function handleCompactModeChange() {
+    const newValue = !compactMode;
+    setCompactMode(newValue);
+    onChange('compactMode', newValue);
+  }
+
   return (
-    <div className="app-preferences" aria-label="App preferences">
+    <div className="app-preferences" role="region" aria-label="App preferences">
       {/* Theme Selection */}
-      <fieldset className="app-preferences__row">
-        <legend className="app-preferences__label">Theme</legend>
+      <fieldset className="app-preferences__fieldset">
+        <legend className="app-preferences__legend">
+          <span className="app-preferences__title">Theme</span>
+          <span className="app-preferences__description">
+            Choose how the app looks. System matches your device setting.
+          </span>
+        </legend>
         <div className="app-preferences__theme-group" role="radiogroup" aria-label="Theme selection">
           {THEME_OPTIONS.map((option) => (
             <label key={option.value} className="app-preferences__theme-option">
@@ -50,8 +87,7 @@ export function AppPreferences({
                 name="theme"
                 value={option.value}
                 checked={theme === option.value}
-                onChange={() => onChange('theme', option.value)}
-                aria-label={`${option.label} theme`}
+                onChange={() => handleThemeChange(option.value)}
               />
               <span className="app-preferences__theme-label">{option.label}</span>
             </label>
@@ -61,15 +97,20 @@ export function AppPreferences({
 
       {/* Default Tab Selection */}
       <div className="app-preferences__row">
-        <label className="app-preferences__label" htmlFor="app-preferences-default-tab">
-          Default Tab
-        </label>
+        <div className="app-preferences__row-text">
+          <label className="app-preferences__title" htmlFor="app-preferences-default-tab">
+            Default Tab
+          </label>
+          <span className="app-preferences__description" id="app-preferences-default-tab-desc">
+            The tab shown when you open the app.
+          </span>
+        </div>
         <select
           id="app-preferences-default-tab"
           className="app-preferences__select"
           value={defaultTab}
-          onChange={(e) => onChange('defaultTab', e.target.value)}
-          aria-label="Default tab on launch"
+          onChange={(e) => handleDefaultTabChange(e.target.value)}
+          aria-describedby="app-preferences-default-tab-desc"
         >
           {TAB_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -81,23 +122,24 @@ export function AppPreferences({
 
       {/* Compact Mode Toggle */}
       <div className="app-preferences__row">
-        <label className="app-preferences__label" htmlFor="app-preferences-compact-mode">
-          Compact Mode
-        </label>
+        <div className="app-preferences__row-text">
+          <label className="app-preferences__title" htmlFor="app-preferences-compact-mode">
+            Compact Mode
+          </label>
+          <span className="app-preferences__description" id="app-preferences-compact-mode-desc">
+            Reduce spacing and padding for a denser layout.
+          </span>
+        </div>
         <button
           id="app-preferences-compact-mode"
           type="button"
           role="switch"
-          className={`app-preferences__toggle ${compactMode ? 'app-preferences__toggle--active' : ''}`}
+          className={`app-preferences__toggle${compactMode ? ' app-preferences__toggle--active' : ''}`}
           aria-checked={compactMode}
-          onClick={() => onChange('compactMode', !compactMode)}
+          aria-describedby="app-preferences-compact-mode-desc"
+          onClick={handleCompactModeChange}
         >
-          <span className="app-preferences__toggle-track">
-            <span className="app-preferences__toggle-thumb" />
-          </span>
-          <span className="app-preferences__toggle-text">
-            {compactMode ? 'On' : 'Off'}
-          </span>
+          <span className="app-preferences__toggle-thumb" />
         </button>
       </div>
     </div>

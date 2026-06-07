@@ -16,6 +16,8 @@ export interface NotificationSettingsProps {
   saving?: boolean;
   /** Error message to display. */
   error?: string | null;
+  /** Called when the user clicks the Retry button after a save failure. */
+  onRetry?: () => void;
 }
 
 export function NotificationSettings({
@@ -25,13 +27,26 @@ export function NotificationSettings({
   onChange,
   saving,
   error,
+  onRetry,
 }: NotificationSettingsProps) {
   return (
-    <div className="notification-settings" aria-label="Notification settings">
+    <div className="notification-settings" role="region" aria-label="Notification settings">
       {error && (
-        <p className="notification-settings__error" role="alert">
-          {error}
-        </p>
+        <div className="notification-settings__error-container" role="alert">
+          <p className="notification-settings__error">
+            {error}
+          </p>
+          {onRetry && (
+            <button
+              type="button"
+              className="notification-settings__retry-btn"
+              onClick={onRetry}
+              disabled={saving}
+            >
+              Retry
+            </button>
+          )}
+        </div>
       )}
 
       {/* Email Notifications */}

@@ -1,0 +1,346 @@
+﻿/* ==========================================================================
+   ConnectedIntegrations styles
+   ========================================================================== */
+
+.connected-integrations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-lg);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Loading skeleton */
+.connected-integrations--loading {
+  gap: var(--ws-space-md);
+}
+
+.connected-integrations__skeleton {
+  height: 72px;
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-card);
+  animation: integrations-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes integrations-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* List */
+.connected-integrations__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+/* Card */
+.connected-integrations__card {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-md) var(--ws-space-lg);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  box-shadow: var(--ws-shadow-card);
+  transition: box-shadow var(--ws-transition-fast);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.connected-integrations__card:hover {
+  box-shadow: var(--ws-shadow-elevated);
+}
+
+/* Icon */
+.connected-integrations__icon {
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+
+/* Info */
+.connected-integrations__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.connected-integrations__name {
+  font-size: var(--ws-font-size-base);
+  font-weight: 500;
+  color: var(--ws-color-text);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.connected-integrations__description {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status badge */
+.connected-integrations__status {
+  font-size: var(--ws-font-size-xs);
+  font-weight: 500;
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  border-radius: var(--ws-radius-pill);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.connected-integrations__status--connected {
+  background: color-mix(in srgb, var(--ws-color-success) 15%, transparent);
+  color: var(--ws-color-success);
+}
+
+.connected-integrations__status--disconnected {
+  background: var(--ws-color-limestone);
+  color: var(--ws-color-text-muted);
+}
+
+/* Add Integration button */
+.connected-integrations__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ws-space-sm);
+  width: 100%;
+  padding: var(--ws-space-md);
+  border: 2px dashed var(--ws-color-border);
+  border-radius: var(--ws-radius-card);
+  background: transparent;
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  font-weight: 500;
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+  transition: border-color var(--ws-transition-fast), color var(--ws-transition-fast);
+  box-sizing: border-box;
+}
+
+.connected-integrations__add-btn:hover {
+  border-color: var(--ws-color-sage);
+  color: var(--ws-color-sage);
+}
+
+/* Refresh button */
+.connected-integrations__refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ws-space-xs);
+  align-self: flex-end;
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-white);
+  font-size: var(--ws-font-size-sm);
+  font-family: var(--ws-font-body);
+  font-weight: 500;
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: border-color var(--ws-transition-fast), color var(--ws-transition-fast), background var(--ws-transition-fast);
+}
+
+.connected-integrations__refresh-btn:hover:not(:disabled) {
+  border-color: var(--ws-color-sage);
+  color: var(--ws-color-sage);
+  background: color-mix(in srgb, var(--ws-color-sage) 5%, transparent);
+}
+
+.connected-integrations__refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Refresh icon */
+.connected-integrations__refresh-icon {
+  display: inline-block;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.connected-integrations__refresh-icon--spinning {
+  animation: integrations-spin 0.8s linear infinite;
+}
+
+@keyframes integrations-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .connected-integrations__skeleton {
+    animation: none;
+  }
+
+  .connected-integrations__refresh-icon--spinning {
+    animation: none;
+  }
+}
+
+/* Disconnect button */
+.connected-integrations__disconnect-btn {
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  font-size: var(--ws-font-size-xs);
+  font-family: var(--ws-font-body);
+  font-weight: 500;
+  color: var(--ws-color-error);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--ws-transition-fast), color var(--ws-transition-fast);
+}
+
+.connected-integrations__disconnect-btn:hover {
+  background: var(--ws-color-error);
+  color: var(--ws-color-white);
+}
+
+/* Success indicator */
+.connected-integrations__success {
+  font-size: var(--ws-font-size-xs);
+  font-weight: 500;
+  color: var(--ws-color-success);
+  white-space: nowrap;
+  flex-shrink: 0;
+  animation: disconnect-fade-in 0.2s ease-out;
+}
+
+@keyframes disconnect-fade-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Confirmation overlay */
+.connected-integrations__confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--ws-space-lg);
+}
+
+.connected-integrations__confirm-dialog {
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-xl);
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.connected-integrations__confirm-title {
+  font-family: var(--ws-font-display);
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-md);
+  color: var(--ws-color-text);
+}
+
+.connected-integrations__confirm-message {
+  font-size: var(--ws-font-size-base);
+  color: var(--ws-color-text-muted);
+  margin: 0 0 var(--ws-space-xl);
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.connected-integrations__confirm-actions {
+  display: flex;
+  gap: var(--ws-space-md);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.connected-integrations__btn-cancel {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  font-size: var(--ws-font-size-sm);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+}
+
+.connected-integrations__btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.connected-integrations__btn-disconnect {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-error);
+  color: var(--ws-color-white);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  font-family: var(--ws-font-body);
+  cursor: pointer;
+  transition: opacity var(--ws-transition-fast);
+}
+
+.connected-integrations__btn-disconnect:hover {
+  opacity: 0.9;
+}
+
+.connected-integrations__btn-disconnect:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* ==========================================================================
+   Mobile Viewport Fixes (< 375px)
+   ========================================================================== */
+
+@media (max-width: 374px) {
+  .connected-integrations__card {
+    padding: var(--ws-space-md);
+    flex-wrap: wrap;
+    gap: var(--ws-space-sm);
+  }
+
+  .connected-integrations__description {
+    white-space: normal;
+  }
+
+  .connected-integrations__confirm-dialog {
+    padding: var(--ws-space-lg);
+    max-width: calc(100vw - 2 * var(--ws-space-md));
+  }
+
+  .connected-integrations__confirm-actions {
+    flex-direction: column;
+  }
+}

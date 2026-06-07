@@ -1,6 +1,6 @@
 import { integrationCatalog } from '@admini/integrations';
-import { clearAdminiBrowserState, createIndexedDbStorage, nowIso, type IntegrationCatalogItem, type IntegrationProvider } from '@admini/shared';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { clearAdminiBrowserState, createIndexedDbStorage } from '@admini/shared';
+import { useEffect, useState, type FormEvent } from 'react';
 import {
   supabase,
   getCurrentUser,
@@ -21,18 +21,11 @@ import {
   type AuthUser
 } from './supabase';
 import { DesktopWorkspace } from './Workspace';
-import { organizationService } from '@admini/workspace';
+import { IntegrationCatalog, organizationService } from '@admini/workspace';
 
 type AuthView = 'home' | 'sign-in' | 'sign-up';
 type VisualMode = 'day' | 'night';
-type IntegrationRecord = {
-  provider: IntegrationProvider;
-  status: 'available' | 'connecting' | 'connected' | 'error';
-  authMode?: string;
-  lastSyncAt?: string;
-};
 
-const integrationStorage = createIndexedDbStorage('integrations');
 const authStorage = createIndexedDbStorage('auth');
 
 type OnboardingAnswers = {
@@ -361,7 +354,7 @@ export function App() {
           </button>
         </div>
       )}
-      {showIntegrations ? <IntegrationsPanel /> : (
+      {showIntegrations ? <IntegrationCatalog /> : (
         <DesktopWorkspace
           user={user}
           userRole={userRole}
@@ -1055,75 +1048,3 @@ function playBubbleSound() {
   oscillator.stop(hoverAudioContext.currentTime + 0.13);
 }
 
-
-function IntegrationsPanel() {
-  const [records, setRecords] = useState<Record<string, IntegrationRecord>>({});
-  const connectedCount = useMemo(() => Object.values(records).filter((record) => record.status === 'connected').length, [records]);
-
-  useEffect(() => {
-    integrationStorage.getItem('connections').then((raw) => {
-      if (raw) setRecords(JSON.parse(raw) as Record<string, IntegrationRecord>);
-    });
-  }, []);
-
-  async function saveRecord(item: IntegrationCatalogItem, authMode: string) {
-    const next = {
-      ...records,
-      [item.provider]: {
-        provider: item.provider,
-        status: 'connected',
-        authMode,
-        lastSyncAt: nowIso()
-      } satisfies IntegrationRecord
-    };
-    setRecords(next);
-    await integrationStorage.setItem('connections', JSON.stringify(next));
-  }
-
-  function connect(item: IntegrationCatalogItem, authMode: string) {
-    if (authMode === 'oauth' || authMode === 'sso') {
-      const params = new URLSearchParams({
-        provider: item.provider,
-        mode: authMode,
-        returnTo: window.location.href
-      });
-      window.open(`/api/integrations/${item.provider}/authorize?${params.toString()}`, 'admini-integration-oauth', 'width=720,height=760');
-    }
-    void saveRecord(item, authMode);
-  }
-
-  return (
-    <section className="integrations-page">
-      <header>
-        <p className="mini-kicker">Integrations</p>
-        <h1>Add connected systems</h1>
-        <p>{connectedCount} connected. OAuth handoffs route through the Cloudflare Worker; connection state is mirrored in IndexedDB.</p>
-      </header>
-      <div className="integration-grid">
-        {integrationCatalog.map((item) => {
-          const record = records[item.provider];
-          return (
-            <article className="integration-card" key={item.provider}>
-              <div>
-                <span className="integration-category">{item.category}</span>
-                <h2>{item.name}</h2>
-                <p>{item.description}</p>
-              </div>
-              <div className={record?.status === 'connected' ? 'connection-status connected' : 'connection-status'}>
-                {record?.status === 'connected' ? `Connected via ${record.authMode}` : 'Available'}
-              </div>
-              <div className="integration-actions">
-                {item.authModes.map((authMode) => (
-                  <button type="button" key={authMode} onClick={() => connect(item, authMode)}>
-                    {authMode.replace('_', ' ')}
-                  </button>
-                ))}
-              </div>
-              <small>Persists to {item.persistenceTargets.join(' + ')}</small>
-            </article>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
