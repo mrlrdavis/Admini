@@ -43,6 +43,10 @@ export * as integrationStatusStorage from './services/integrationStatusStorage';
 export * as captureService from './services/captureService';
 export { saveCapture, loadCaptures } from './services/captureService';
 export type { Capture } from './services/captureService';
+export { deleteCapture } from './services/captureService';
+export * as meetingNotesService from './services/meetingNotesService';
+export { listMeetingNotes, createMeetingNote, updateMeetingNote, deleteMeetingNote } from './services/meetingNotesService';
+export type { MeetingNote } from './services/meetingNotesService';
 export { loadIntegrationStatuses, saveIntegrationStatus, removeIntegrationStatus } from './services/integrationStatusStorage';
 export type { IntegrationConnectionStatus } from './services/integrationStatusStorage';
 

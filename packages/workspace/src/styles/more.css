@@ -649,3 +649,85 @@
   max-width: 100%;
   overflow-x: hidden;
 }
+
+/* ==========================================================================
+   Sub-view Header (compact)
+   ========================================================================== */
+
+.more-tab__sub-header {
+  display: flex;
+  align-items: center;
+  padding: var(--ws-space-sm) 0;
+  margin-bottom: var(--ws-space-md);
+}
+
+/* ==========================================================================
+   Back Button (right-aligned arrow)
+   ========================================================================== */
+
+.more-tab__back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-text);
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+}
+
+.more-tab__back-btn:hover {
+  background: var(--ws-color-limestone);
+}
+
+/* ==========================================================================
+   Help Page
+   ========================================================================== */
+
+.more-tab__help-content {
+  padding: var(--ws-space-md) 0;
+}
+
+.more-tab__help-title {
+  font-size: var(--ws-font-size-xl);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-lg);
+  color: var(--ws-color-text);
+}
+
+.more-tab__help-section {
+  margin-bottom: var(--ws-space-lg);
+  padding-bottom: var(--ws-space-lg);
+  border-bottom: 1px solid var(--ws-color-border);
+}
+
+.more-tab__help-section:last-child {
+  border-bottom: none;
+}
+
+.more-tab__help-section h3 {
+  font-size: var(--ws-font-size-lg);
+  margin: 0 0 var(--ws-space-sm);
+  color: var(--ws-color-text);
+}
+
+.more-tab__help-section p {
+  font-size: var(--ws-font-size-base);
+  line-height: 1.6;
+  color: var(--ws-color-text-muted);
+  margin: 0 0 var(--ws-space-sm);
+}
+
+.more-tab__help-section p:last-child {
+  margin-bottom: 0;
+}
+
+.more-tab__help-section a {
+  color: var(--ws-color-sage-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

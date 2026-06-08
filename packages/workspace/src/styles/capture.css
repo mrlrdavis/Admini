@@ -42,7 +42,7 @@
   top: var(--ws-space-xs);
   bottom: var(--ws-space-xs);
   left: var(--ws-space-xs);
-  width: calc(50% - var(--ws-space-xs));
+  width: calc(33.333% - var(--ws-space-xs));
   background: var(--ws-color-white);
   border-radius: var(--ws-radius-pill);
   box-shadow: var(--ws-shadow-card);
@@ -376,4 +376,208 @@
   display: block;
   -webkit-line-clamp: unset;
   overflow: visible;
+}
+
+/* Meeting Notes Mode */
+.capture-tab__notes-mode {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+}
+
+.capture-tab__notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ws-space-md);
+}
+
+.capture-tab__notes-search {
+  flex: 1;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+  background: var(--ws-color-white, #ffffff);
+  color: var(--ws-color-text);
+}
+
+.capture-tab__notes-search:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+}
+
+.capture-tab__new-note-btn {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.capture-tab__notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.capture-tab__note-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  box-shadow: var(--ws-shadow-card);
+  cursor: pointer;
+  transition: box-shadow var(--ws-transition-fast);
+}
+
+.capture-tab__note-card:hover {
+  box-shadow: var(--ws-shadow-elevated);
+}
+
+.capture-tab__note-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.capture-tab__note-title {
+  font-weight: 500;
+  font-size: var(--ws-font-size-base);
+  color: var(--ws-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.capture-tab__note-meta {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+}
+
+.capture-tab__note-delete-btn {
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-error);
+  font-size: var(--ws-font-size-xs);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.capture-tab__note-delete-btn:hover {
+  background: rgba(214, 48, 49, 0.06);
+}
+
+/* Note Editor */
+.capture-tab__note-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-lg);
+  box-shadow: var(--ws-shadow-card);
+}
+
+.capture-tab__note-editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+}
+
+.capture-tab__note-editor-label {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-text-muted);
+}
+
+.capture-tab__note-editor-input {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-base);
+  color: var(--ws-color-text);
+  background: var(--ws-color-white, #ffffff);
+}
+
+.capture-tab__note-editor-input:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+}
+
+.capture-tab__note-editor-textarea {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  background: var(--ws-color-white, #ffffff);
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.capture-tab__note-editor-textarea:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+}
+
+.capture-tab__note-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ws-space-sm);
+}
+
+.capture-tab__note-cancel-btn {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+}
+
+.capture-tab__note-save-btn {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.capture-tab__note-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.capture-tab__note-error {
+  color: var(--ws-color-error);
+  font-size: var(--ws-font-size-sm);
+}
+
+.capture-tab__notes-empty {
+  text-align: center;
+  padding: var(--ws-space-xl);
+  color: var(--ws-color-text-muted);
+  font-size: var(--ws-font-size-sm);
+}
+
+/* Mode indicator for 3 tabs */
+.capture-tab__mode-indicator--notes {
+  transform: translateX(200%);
 }

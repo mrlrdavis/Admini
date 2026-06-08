@@ -32,7 +32,7 @@ function isSessionExpiredError(message: string | null | undefined): boolean {
 // Sub-view type for navigation state
 // ---------------------------------------------------------------------------
 
-export type MoreTabSubView = 'profile' | 'notifications' | 'preferences' | 'integrations' | 'account' | null;
+export type MoreTabSubView = 'profile' | 'notifications' | 'preferences' | 'integrations' | 'account' | 'help' | null;
 
 // ---------------------------------------------------------------------------
 // SessionStorage key for persisting last-visited settings section
@@ -46,6 +46,7 @@ const VALID_SUB_VIEWS: ReadonlySet<string> = new Set([
   'preferences',
   'integrations',
   'account',
+  'help',
 ]);
 
 /** Safely read the last-visited section from sessionStorage. Returns null if unavailable or invalid. */
@@ -1001,6 +1002,62 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
   }
 
   // -------------------------------------------------------------------------
+  // Help sub-view
+  // -------------------------------------------------------------------------
+  if (activeSubView === 'help') {
+    return (
+      <section className="more-tab more-tab--sub-view" role="region" aria-label="Help">
+        <header className="more-tab__sub-header">
+          <button
+            type="button"
+            ref={backButtonRef}
+            className="more-tab__back-btn"
+            onClick={goBack}
+            aria-label="Back to settings menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20" aria-hidden="true"><path d="M19 12H5" /><polyline points="12 19 5 12 12 5" /></svg>
+          </button>
+        </header>
+        <div className="more-tab__help-content">
+          <h2 ref={subViewHeadingRef} className="more-tab__help-title" tabIndex={-1}>How to use AdminI</h2>
+
+          <div className="more-tab__help-section">
+            <h3>📊 Dashboard</h3>
+            <p>Your daily overview showing tasks, activity, and key metrics. Cards update in real-time as you complete work.</p>
+          </div>
+
+          <div className="more-tab__help-section">
+            <h3>📝 Capture</h3>
+            <p><strong>Voice:</strong> Tap the microphone to transcribe observations using speech recognition.</p>
+            <p><strong>Tap:</strong> Use the word board for quick categorized captures, or type free-text notes.</p>
+            <p><strong>Notes:</strong> Create, edit, and search meeting notes with attendee tracking.</p>
+          </div>
+
+          <div className="more-tab__help-section">
+            <h3>✅ Tasks</h3>
+            <p>Create tasks with titles, notes, due dates, and assignments. Use filter pills to view tasks by timeframe or delegation status. Tap the + button to add new tasks.</p>
+          </div>
+
+          <div className="more-tab__help-section">
+            <h3>💓 Pulse</h3>
+            <p>Track your daily rhythm with scheduled check-ins. The Day Structure shows your typical schedule blocks. Stats update as you complete work throughout the day.</p>
+          </div>
+
+          <div className="more-tab__help-section">
+            <h3>⚙️ More (Settings)</h3>
+            <p>Manage your profile, notification preferences, app theme, connected integrations, and account settings.</p>
+          </div>
+
+          <div className="more-tab__help-section">
+            <h3>🔧 Admin</h3>
+            <p>Organization management for admins and principals. Manage school details, team members, invitations, and feature flags. Contact support at <a href="mailto:support@pencilsdown.co">support@pencilsdown.co</a> for assistance.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // -------------------------------------------------------------------------
   // Main menu view
   // -------------------------------------------------------------------------
   return (
@@ -1165,6 +1222,12 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
             <button type="button" className="more-tab__link-btn" onClick={(e) => navigateTo('account', e)}>
               <span className="more-tab__link-icon" aria-hidden="true">{'\uD83D\uDEE0\uFE0F'}</span>
               <span className="more-tab__link-label">Manage Account</span>
+            </button>
+          </li>
+          <li className="more-tab__list-item">
+            <button type="button" className="more-tab__link-btn" onClick={(e) => navigateTo('help', e)}>
+              <span className="more-tab__link-icon" aria-hidden="true">{'\u2753'}</span>
+              <span className="more-tab__link-label">Help</span>
             </button>
           </li>
         </ul>

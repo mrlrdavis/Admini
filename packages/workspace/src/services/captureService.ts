@@ -83,3 +83,12 @@ export async function loadCaptures(organizationId: string): Promise<Capture[]> {
     createdAt: row.created_at,
   }));
 }
+
+export async function deleteCapture(captureId: string): Promise<void> {
+  const client = getClient();
+  const { error } = await client
+    .from('captures')
+    .delete()
+    .eq('id', captureId);
+  if (error) throw new Error(mapSupabaseError(error));
+}
