@@ -19,7 +19,7 @@ import { resolve } from 'node:path';
 function extractScriptContent(htmlPath: string): string {
   const html = readFileSync(htmlPath, 'utf-8');
   const match = html.match(/<script>([\s\S]*?)<\/script>/);
-  if (!match) throw new Error(`No script tag found in ${htmlPath}`);
+  if (!match || !match[1]) throw new Error(`No script tag found in ${htmlPath}`);
   return match[1];
 }
 
