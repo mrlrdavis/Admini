@@ -291,7 +291,7 @@ export async function updateMembershipRole(wizardRole: string): Promise<void> {
   if (updateError) throw new Error(mapSupabaseError(updateError));
 }
 
-export async function persistOnboardingPreferences(input: { focus: string; systems: string[] }): Promise<void> {
+export async function persistOnboardingPreferences(input: { focus: string | string[]; systems: string[] }): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.auth.updateUser({
     data: {

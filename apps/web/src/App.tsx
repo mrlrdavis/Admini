@@ -1,4 +1,4 @@
-﻿import { integrationCatalog } from '@admini/integrations';
+import { integrationCatalog } from '@admini/integrations';
 import { clearAdminiBrowserState, createIndexedDbStorage } from '@admini/shared';
 import { useEffect, useState } from 'react';
 import {
@@ -24,7 +24,7 @@ const authStorage = createIndexedDbStorage('auth');
 
 type OnboardingAnswers = {
   role: string;
-  focus: string;
+  focus: string[];
   systems: string[];
   schoolName: string;
   displayName: string;
@@ -359,7 +359,7 @@ function FirstTimeOnboardingWizard({ userName, schoolName: initialSchoolName = '
   const [step, setStep] = useState(0);
   const [displayName, setDisplayName] = useState(userName || '');
   const [role, setRole] = useState('');
-  const [focus, setFocus] = useState('');
+  const [focus, setFocus] = useState<string[]>([]);
   const [systems, setSystems] = useState<string[]>([]);
   const [schoolName, setSchoolName] = useState(initialSchoolName);
   const [applying, setApplying] = useState(false);
@@ -406,9 +406,10 @@ function FirstTimeOnboardingWizard({ userName, schoolName: initialSchoolName = '
     setStep(2);
   }
 
-  function chooseFocus(option: string) {
-    setFocus(option);
-    setStep(skipSchoolName ? 4 : 3);
+  function toggleFocus(option: string) {
+    setFocus((current) => current.includes(option)
+      ? current.filter((item) => item !== option)
+      : [...current, option]);
   }
 
   function handleBack() {
@@ -489,20 +490,30 @@ function FirstTimeOnboardingWizard({ userName, schoolName: initialSchoolName = '
 
         {step === 2 && (
           <div>
-            <h2>What do you want to do first?</h2>
-            <p>This helps Admini suggest the right defaults and keep the first view clutter-free.</p>
+            <h2>What do you want to focus on?</h2>
+            <p>Select all that apply. This helps Admini suggest the right defaults and keep the first view clutter-free.</p>
             <div className="option-grid">
               {focusOptions.map((option) => (
                 <button
                   key={option}
                   type="button"
-                  className={option === focus ? 'option selected' : 'option'}
-                  onClick={() => chooseFocus(option)}
+                  className={focus.includes(option) ? 'option selected' : 'option'}
+                  onClick={() => toggleFocus(option)}
                 >
+                  {focus.includes(option) && <span className="option-check">&#10003; </span>}
                   {option}
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              className="bubble-submit"
+              disabled={focus.length === 0}
+              onClick={() => setStep(skipSchoolName ? 4 : 3)}
+              style={{ marginTop: '1rem' }}
+            >
+              Continue
+            </button>
           </div>
         )}
 

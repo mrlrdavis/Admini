@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // CaptureTab - Voice/Tap/Notes capture interface for quick observations and notes.
 // ---------------------------------------------------------------------------
 
@@ -12,6 +12,8 @@ import {
   type MeetingNote,
 } from '../services/meetingNotesService';
 import { SkeletonCard } from '@admini/ui';
+import { showToast } from './Toast';
+import { getClient } from '../services/getClient';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,6 +60,9 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
   const [editCaptureText, setEditCaptureText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [taskSuggestionId, setTaskSuggestionId] = useState<string | null>(null);
+  const [lastCaptureText, setLastCaptureText] = useState<string | null>(null);
+  const [showTaskSuggestion, setShowTaskSuggestion] = useState(false);
 
   // Meeting Notes state
   const [notes, setNotes] = useState<MeetingNote[]>([]);
@@ -202,6 +207,10 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
 
     // Optimistic UI update
     setCaptures((prev) => [capture, ...prev]);
+    setTaskSuggestionId(capture.id);
+    setTimeout(() => setTaskSuggestionId(null), 8000);
+    setLastCaptureText(text);
+    setShowTaskSuggestion(true);
     setTranscription('');
     setSelectedWords({});
     setTapFreeText('');
@@ -265,6 +274,23 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
     setNoteBody('');
     setNoteAttendees('');
     setNoteError(null);
+  }
+
+  function insertFormat(prefix: string, suffix: string) {
+    const textarea = document.getElementById('note-body') as HTMLTextAreaElement;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = noteBody.substring(start, end);
+    const before = noteBody.substring(0, start);
+    const after = noteBody.substring(end);
+    const formatted = prefix + selected + suffix;
+    setNoteBody(before + formatted + after);
+    // Restore cursor position after React re-render
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
+    }, 0);
   }
 
   async function handleSaveNote() {
@@ -552,6 +578,13 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
 
               <div className="capture-tab__note-editor-field">
                 <label className="capture-tab__note-editor-label" htmlFor="note-body">Body</label>
+                <div className="capture-tab__note-toolbar">
+                  <button type="button" title="Bold" onClick={() => insertFormat('**', '**')}>B</button>
+                  <button type="button" title="Italic" onClick={() => insertFormat('_', '_')}><em>I</em></button>
+                  <button type="button" title="Heading" onClick={() => insertFormat('## ', '')}>H</button>
+                  <button type="button" title="List" onClick={() => insertFormat('- ', '')}>{'\u2022'}</button>
+                  <button type="button" title="Checkbox" onClick={() => insertFormat('[ ] ', '')}>{'\u2610'}</button>
+                </div>
                 <textarea
                   id="note-body"
                   className="capture-tab__note-editor-textarea"
@@ -608,6 +641,44 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
         </button>
       )}
 
+      {/* Task suggestion from capture */}
+      {showTaskSuggestion && lastCaptureText && (
+        <div className="capture-tab__task-suggestion">
+          <p className="capture-tab__task-suggestion-text">Create a task from this capture?</p>
+          <div className="capture-tab__task-suggestion-actions">
+            <button
+              type="button"
+              className="capture-tab__task-suggestion-btn"
+              onClick={() => {
+                if (organizationId && userId) {
+                  const client = getClient();
+                  client.from('tasks').insert({
+                    organization_id: organizationId,
+                    created_by: userId,
+                    title: lastCaptureText.slice(0, 100),
+                    description: lastCaptureText.length > 100 ? lastCaptureText : null,
+                    priority: 'normal',
+                    status: 'open',
+                  }).then(() => {
+                    showToast('Task created from capture', { action: undefined });
+                  });
+                }
+                setShowTaskSuggestion(false);
+              }}
+            >
+              Create Task
+            </button>
+            <button
+              type="button"
+              className="capture-tab__task-suggestion-dismiss"
+              onClick={() => setShowTaskSuggestion(false)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Quick Captures List - only for voice/tap modes */}
       {mode !== 'notes' && (
         <section className="capture-tab__captures">
@@ -643,6 +714,19 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
                         <span className="capture-tab__capture-time">{capture.timestamp}</span>
                         <button type="button" className="capture-tab__capture-edit-btn" onClick={(e) => { e.stopPropagation(); setEditingCaptureId(capture.id); setEditCaptureText(capture.text); }} aria-label="Edit capture">&#x270E;</button>
                         <button type="button" className="capture-tab__note-delete-btn" onClick={(e) => handleDeleteCapture(capture.id, e)} aria-label="Delete capture">&times;</button>
+                        {taskSuggestionId === capture.id && (
+                          <button
+                            type="button"
+                            className="capture-tab__task-suggest-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              showToast('Task suggestion: Open Tasks tab to create from "' + capture.text.slice(0, 40) + '..."');
+                              setTaskSuggestionId(null);
+                            }}
+                          >
+                            ? Create Task from this
+                          </button>
+                        )}
                       </>
                     )}
                   </li>

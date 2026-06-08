@@ -641,3 +641,86 @@
   font-size: var(--ws-font-size-xs);
   cursor: pointer;
 }
+
+/* Task suggestion from capture */
+.capture-tab__task-suggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-md);
+  margin-top: var(--ws-space-md);
+  background: color-mix(in srgb, var(--ws-color-sage) 8%, var(--ws-color-white));
+  border: 1px solid color-mix(in srgb, var(--ws-color-sage) 20%, transparent);
+  border-radius: var(--ws-radius-card);
+  animation: toast-slide-up 0.25s ease-out;
+}
+
+.capture-tab__task-suggestion-text {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
+  margin: 0;
+  font-weight: 500;
+}
+
+.capture-tab__task-suggestion-actions {
+  display: flex;
+  gap: var(--ws-space-sm);
+  flex-shrink: 0;
+}
+
+.capture-tab__task-suggestion-btn {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.capture-tab__task-suggestion-dismiss {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-text-muted);
+  font-size: var(--ws-font-size-xs);
+  cursor: pointer;
+}
+/* Rich text toolbar for meeting notes */
+.capture-tab__note-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-sm) var(--ws-radius-sm) 0 0;
+  border: 1px solid var(--ws-color-border);
+  border-bottom: none;
+}
+
+.capture-tab__note-toolbar button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--ws-color-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ws-transition-fast);
+}
+
+.capture-tab__note-toolbar button:hover {
+  background: var(--ws-color-white);
+}
+
+.capture-tab__note-toolbar + .capture-tab__note-editor-textarea {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}

@@ -12,6 +12,8 @@ import {
   sortByUrgency,
 } from '../services/dashboardService';
 import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
+import { BadgesSection } from './BadgesSection';
+import { BadgesPanel } from './BadgesPanel';
 
 // Re-export sortByUrgency for testing and backward compatibility
 export { sortByUrgency } from '../services/dashboardService';
@@ -245,6 +247,12 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
         <KPICard label="Completed" value={kpis?.completedThisWeek ?? 0} />
         <KPICard label="Overdue" value={kpis?.overdueTasks ?? 0} />
       </section>
+
+      {/* Badges/Achievements */}
+      <BadgesSection completedCount={kpis?.completedThisWeek ?? 0} />
+
+      {/* Badges Panel - localStorage-based achievements */}
+      <BadgesPanel />
 
       {/* Priority Queue */}
       <section className="dashboard-tab__priority-queue">

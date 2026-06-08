@@ -329,3 +329,128 @@
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Dark mode - comprehensive text/element visibility fixes */
+:root[data-theme='dark'] .more-tab,
+:root[data-theme='dark'] .more-tab__link-btn,
+:root[data-theme='dark'] .more-tab__link-label,
+:root[data-theme='dark'] .more-tab__section-title,
+:root[data-theme='dark'] .more-tab__title,
+:root[data-theme='dark'] .more-tab__profile-value,
+:root[data-theme='dark'] .more-tab__profile-label {
+  color: #e8e8ec;
+}
+
+:root[data-theme='dark'] .more-tab__link-btn:hover {
+  background: #2c2c32;
+}
+
+:root[data-theme='dark'] .more-tab__profile-fields,
+:root[data-theme='dark'] .more-tab__list,
+:root[data-theme='dark'] .notification-settings,
+:root[data-theme='dark'] .app-preferences,
+:root[data-theme='dark'] .profile-settings,
+:root[data-theme='dark'] .integration-catalog,
+:root[data-theme='dark'] .connected-integrations {
+  color: #e8e8ec;
+}
+
+:root[data-theme='dark'] .more-tab__profile-input,
+:root[data-theme='dark'] .profile-settings__input,
+:root[data-theme='dark'] .tasks-tab__add-input,
+:root[data-theme='dark'] .tasks-tab__add-textarea,
+:root[data-theme='dark'] .tasks-tab__subtask-input,
+:root[data-theme='dark'] .capture-tab__tap-freetext,
+:root[data-theme='dark'] .capture-tab__notes-search,
+:root[data-theme='dark'] .capture-tab__note-editor-input,
+:root[data-theme='dark'] .capture-tab__note-editor-textarea {
+  background: #2c2c32;
+  color: #e8e8ec;
+  border-color: #4a4a52;
+}
+
+:root[data-theme='dark'] .notification-settings__toggle {
+  background: #4a4a52;
+}
+
+:root[data-theme='dark'] .notification-settings__title,
+:root[data-theme='dark'] .notification-settings__description {
+  color: #e8e8ec;
+}
+
+:root[data-theme='dark'] .more-tab__btn-secondary,
+:root[data-theme='dark'] .more-tab__btn-save,
+:root[data-theme='dark'] .more-tab__btn-cancel,
+:root[data-theme='dark'] .more-tab__edit-btn {
+  color: #e8e8ec;
+  border-color: #4a4a52;
+}
+
+:root[data-theme='dark'] .tasks-tab__add-form,
+:root[data-theme='dark'] .tasks-tab__menu-dropdown,
+:root[data-theme='dark'] .capture-tab__note-editor,
+:root[data-theme='dark'] .pulse-tab__day-edit-form {
+  background: #2c2c32;
+  border-color: #4a4a52;
+}
+
+:root[data-theme='dark'] .tasks-tab__menu-dropdown button,
+:root[data-theme='dark'] .tasks-tab__filter-pill,
+:root[data-theme='dark'] .tasks-tab__form-label,
+:root[data-theme='dark'] .tasks-tab__priority-btn {
+  color: #c0c0c8;
+}
+
+:root[data-theme='dark'] .tasks-tab__filter-pill {
+  background: #2c2c32;
+  border-color: #4a4a52;
+}
+
+:root[data-theme='dark'] .desktop-sidebar__brand {
+  color: #8FB38F;
+}
+
+:root[data-theme='dark'] .desktop-sidebar__theme-toggle {
+  background: rgba(44, 44, 50, 0.68);
+  border-color: rgba(200, 200, 210, 0.4);
+}
+
+:root[data-theme='dark'] .more-tab__help-section h3,
+:root[data-theme='dark'] .more-tab__help-title {
+  color: #e8e8ec;
+}
+
+:root[data-theme='dark'] .more-tab__help-section p {
+  color: #a0a0aa;
+}
+
+:root[data-theme='dark'] .capture-tab__category-label,
+:root[data-theme='dark'] .capture-tab__captures-title {
+  color: #c0c0c8;
+}
+
+:root[data-theme='dark'] .capture-tab__pill {
+  background: #2c2c32;
+  border-color: #4a4a52;
+  color: #c0c0c8;
+}
+
+:root[data-theme='dark'] .capture-tab__note-card,
+:root[data-theme='dark'] .capture-tab__note-editor {
+  background: #2c2c32;
+}
+
+:root[data-theme='dark'] .capture-tab__note-title,
+:root[data-theme='dark'] .capture-tab__note-editor-label {
+  color: #e8e8ec;
+}
+
+:root[data-theme='dark'] .pulse-tab__section-title,
+:root[data-theme='dark'] .pulse-tab__day-period {
+  color: #e8e8ec;
+}
+
+:root[data-theme='dark'] .admin-tab,
+:root[data-theme='dark'] .admin-tab__section-title {
+  color: #e8e8ec;
+}

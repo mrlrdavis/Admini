@@ -270,3 +270,126 @@
   font-weight: 500;
   margin-left: var(--ws-space-sm);
 }
+
+/* Badges/Achievements */
+.badges-section {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.badges-section__title {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-md);
+}
+
+.badges-section__grid {
+  display: flex;
+  gap: var(--ws-space-sm);
+  overflow-x: auto;
+  padding-bottom: var(--ws-space-sm);
+}
+
+.badges-section__badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--ws-space-md);
+  min-width: 5rem;
+  border-radius: var(--ws-radius-card);
+  text-align: center;
+}
+
+.badges-section__badge--earned {
+  background: color-mix(in srgb, var(--ws-color-sage) 10%, var(--ws-color-white));
+  border: 1px solid color-mix(in srgb, var(--ws-color-sage) 20%, transparent);
+}
+
+.badges-section__badge--locked {
+  background: var(--ws-color-limestone);
+  opacity: 0.6;
+}
+
+.badges-section__emoji {
+  font-size: 1.5rem;
+}
+
+.badges-section__label {
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  color: var(--ws-color-text);
+}
+
+.badges-section__progress {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+}
+
+/* Badges Panel */
+.badges-panel {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.badges-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ws-space-md);
+}
+
+.badges-panel__title {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.badges-panel__count {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  font-weight: 500;
+}
+
+.badges-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--ws-space-sm);
+}
+
+.badges-panel__badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--ws-space-md) var(--ws-space-sm);
+  border-radius: var(--ws-radius-card);
+  background: var(--ws-color-limestone);
+  opacity: 0.4;
+  text-align: center;
+  position: relative;
+  transition: opacity var(--ws-transition-fast), transform var(--ws-transition-fast);
+}
+
+.badges-panel__badge--unlocked {
+  opacity: 1;
+  background: color-mix(in srgb, var(--ws-color-sage) 10%, var(--ws-color-white));
+  box-shadow: var(--ws-shadow-card);
+}
+
+.badges-panel__emoji {
+  font-size: 1.75rem;
+}
+
+.badges-panel__label {
+  font-size: var(--ws-font-size-xs);
+  font-weight: 500;
+  color: var(--ws-color-text);
+}
+
+.badges-panel__check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.75rem;
+  color: var(--ws-color-success);
+  font-weight: 700;
+}

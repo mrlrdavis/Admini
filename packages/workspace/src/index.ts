@@ -20,6 +20,7 @@ export type { ConnectedIntegrationsProps } from './components/ConnectedIntegrati
 export { IntegrationCatalog } from './components/IntegrationCatalog';
 export type { IntegrationCatalogProps } from './components/IntegrationCatalog';
 export { IframeFallback } from './components/IframeFallback';
+export { BadgesPanel, unlockBadge } from './components/BadgesPanel';
 
 // Hooks
 export { useDebouncedSave } from './hooks/useDebouncedSave';
