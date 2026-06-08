@@ -1,4 +1,4 @@
-﻿[build]
+[build]
 command = "npm run build:app"
 publish = "dist/netlify"
 
@@ -34,18 +34,18 @@ status = 200
 
 [[headers]]
 for = "/*"
-[headers.values]
+  [headers.values]
   X-Content-Type-Options = "nosniff"
   Referrer-Policy = "strict-origin-when-cross-origin"
   Permissions-Policy = "camera=(), microphone=(self), geolocation=()"
 
 [[headers]]
 for = "/sw.js"
-[headers.values]
+  [headers.values]
   Cache-Control = "no-cache"
   Content-Type = "application/javascript"
 
 [[headers]]
 for = "/manifest.webmanifest"
-[headers.values]
+  [headers.values]
   Content-Type = "application/manifest+json"
