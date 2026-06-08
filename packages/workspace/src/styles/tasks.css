@@ -444,3 +444,67 @@
   color: var(--ws-color-sage-dark);
   background: var(--ws-color-limestone);
 }
+
+/* Task actions / 3-dot menu */
+.tasks-tab__task-actions {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tasks-tab__menu-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  cursor: pointer;
+  border-radius: var(--ws-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ws-color-text-muted);
+  transition: background var(--ws-transition-fast);
+}
+
+.tasks-tab__menu-btn:hover {
+  background: var(--ws-color-limestone);
+}
+
+.tasks-tab__menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 50;
+  min-width: 160px;
+  background: var(--ws-color-white, #fff);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-md);
+  box-shadow: var(--ws-shadow-elevated);
+  padding: var(--ws-space-xs) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-tab__menu-dropdown button {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+}
+
+.tasks-tab__menu-dropdown button:hover {
+  background: var(--ws-color-limestone);
+}
+
+.tasks-tab__menu-delete {
+  color: var(--ws-color-error) !important;
+}
+
+.tasks-tab__task-title--done {
+  text-decoration: line-through;
+  opacity: 0.6;
+}

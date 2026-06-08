@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    @admini/workspace - Shared styles entry point
    Design Tokens: sage/limestone palette, rounded cards, horizontal-scroll KPIs
    ========================================================================== */
@@ -17,6 +17,7 @@
 @import './profile-settings.css';
 @import './compact-mode.css';
 @import './navigation.css';
+@import './toast.css';
 
 /* --------------------------------------------------------------------------
    Design Tokens (CSS Custom Properties)
@@ -232,7 +233,7 @@
 }
 /* Dark mode overrides for workspace content */
 :root[data-theme='dark'] .workspace-shell__content {
-  background: linear-gradient(180deg, #1a1e1a 0%, #252a25 40%, #252a25 100%);
+  background: linear-gradient(180deg, #1a1a1e 0%, #24242a 40%, #24242a 100%);
 }
 
 :root[data-theme='dark'] .dashboard-tab,
@@ -249,21 +250,82 @@
 :root[data-theme='dark'] .pulse-tab__stat-card,
 :root[data-theme='dark'] .pulse-tab__day-card,
 :root[data-theme='dark'] .pulse-tab__notification-row {
-  background: #2f352f;
-  color: #e4ebe5;
+  background: #2c2c32;
+  color: #e8e8ec;
 }
 
 :root[data-theme='dark'] .desktop-sidebar {
-  background: #1a1e1a;
-  border-right-color: #3d4a3e;
+  background: #1a1a1e;
+  border-right-color: #3a3a42;
 }
 
 :root[data-theme='dark'] .desktop-sidebar__tab {
-  color: #a3b3a5;
+  color: #a0a0aa;
 }
 
 :root[data-theme='dark'] .desktop-sidebar__tab:hover,
 :root[data-theme='dark'] .desktop-sidebar__tab--active {
-  background: #2f352f;
-  color: #e4ebe5;
+  background: #2c2c32;
+  color: #e8e8ec;
+}
+
+/* Toast System */
+.toast-container {
+  position: fixed;
+  bottom: calc(var(--ws-tab-bar-height, 56px) + var(--ws-space-lg, 1.5rem));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-sm);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  animation: toast-slide-up 0.25s ease-out;
+  max-width: 90vw;
+}
+
+.toast-item--success {
+  background: #2d7a4f;
+  color: #ffffff;
+}
+
+.toast-item--error {
+  background: #d63031;
+  color: #ffffff;
+}
+
+.toast-item--info {
+  background: #2c2c32;
+  color: #ffffff;
+}
+
+.toast-item__text {
+  flex: 1;
+}
+
+.toast-item__undo {
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@keyframes toast-slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }

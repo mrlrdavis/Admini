@@ -247,21 +247,53 @@
   color: var(--ws-color-error, #D63031);
   background: rgba(214, 48, 49, 0.06);
 }
-/* Theme toggle in sidebar */
+/* Theme toggle in sidebar - matches front porch sun/moon style */
 .desktop-sidebar__theme-toggle {
-  margin-top: var(--ws-space-md, 1rem);
-  padding: 10px var(--ws-space-lg, 1.5rem);
-  border: none;
-  background: transparent;
-  color: var(--ws-color-text-muted, #636E72);
-  font-size: 0.875rem;
-  font-weight: 500;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1.5px solid rgba(17, 17, 17, 0.72);
+  border-radius: 999px;
   cursor: pointer;
-  text-align: left;
-  transition: color 150ms ease, background 150ms ease;
+  display: inline-flex;
+  gap: 5px;
+  height: 34px;
+  justify-content: center;
+  margin: var(--ws-space-md, 1rem) var(--ws-space-lg, 1.5rem);
+  padding: 0 9px;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  width: 58px;
 }
 
 .desktop-sidebar__theme-toggle:hover {
-  color: var(--ws-color-sage-dark, #4A6B4A);
-  background: var(--ws-color-limestone, #F5F3EE);
+  transform: translateY(-2px);
+}
+
+.desktop-sidebar__theme-toggle .mode-sun,
+.desktop-sidebar__theme-toggle .mode-moon {
+  display: block;
+  height: 14px;
+  width: 14px;
+}
+
+.desktop-sidebar__theme-toggle .mode-sun {
+  background: #e6c76a;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgba(230, 199, 106, 0.2);
+}
+
+.desktop-sidebar__theme-toggle .mode-moon {
+  background: #556052;
+  border-radius: 999px;
+  position: relative;
+}
+
+.desktop-sidebar__theme-toggle .mode-moon::after {
+  background: rgba(255, 255, 255, 0.86);
+  border-radius: 999px;
+  content: '';
+  height: 12px;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 12px;
 }

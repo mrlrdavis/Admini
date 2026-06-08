@@ -1,17 +1,32 @@
 // ---------------------------------------------------------------------------
-// TasksTab - Native React implementation of the Tasks view
+// TasksTab - Task management interface with CRUD operations.
 // ---------------------------------------------------------------------------
-// Full task list with filtering, priority indicators, enhanced add form,
-// smart date display, and Supabase persistence.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SkeletonCard } from '@admini/ui';
-import { getTasks } from '../services/dashboardService';
+import { useState, useEffect } from 'react';
 import { getClient } from '../services/getClient';
-import type { DashboardTask } from '../types';
+import { showToast } from './Toast';
 
 // ---------------------------------------------------------------------------
-// Props
+// Types
+// ---------------------------------------------------------------------------
+
+type TaskPriority = 'low' | 'normal' | 'high' | 'urgent';
+type TaskStatus = 'open' | 'in_progress' | 'completed' | 'archived';
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+  dueAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  assignedTo?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Component
 // ---------------------------------------------------------------------------
 
 export interface TasksTabProps {
@@ -19,188 +34,130 @@ export interface TasksTabProps {
   organizationId?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type TaskFilter = 'all' | 'today' | 'this-week' | 'delegated';
-type TaskPriority = 'low' | 'normal' | 'high' | 'urgent';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function isToday(dateStr: string): boolean {
-  const d = new Date(dateStr);
-  const now = new Date();
-  return (
-    d.getFullYear() === now.getFullYear() &&
-    d.getMonth() === now.getMonth() &&
-    d.getDate() === now.getDate()
-  );
-}
-
-function isThisWeek(dateStr: string): boolean {
-  const d = new Date(dateStr);
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? 6 : day - 1;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - diff);
-  monday.setHours(0, 0, 0, 0);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
-  return d >= monday && d <= sunday;
-}
-
-/**
- * Smart date formatter:
- * - Today: "Today"
- * - Tomorrow: "Tomorrow"
- * - Within current Mon-Sun week: day name (e.g. "Wednesday")
- * - Otherwise: "Jun 15" style
- */
-export function formatSmartDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-
-  // Normalize to midnight for comparison
-  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-
-  if (target.getTime() === today.getTime()) return 'Today';
-  if (target.getTime() === tomorrow.getTime()) return 'Tomorrow';
-
-  // Check if within current week (Mon-Sun)
-  const day = now.getDay();
-  const diff = day === 0 ? 6 : day - 1;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - diff);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-
-  if (target >= monday && target <= sunday) {
-    return target.toLocaleDateString('en-US', { weekday: 'long' });
-  }
-
-  // Default: "Jun 15" style
-  return target.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-// ---------------------------------------------------------------------------
-// Empty state messages per filter
-// ---------------------------------------------------------------------------
-
-const emptyStateContent: Record<TaskFilter, { title: string; desc: string }> = {
-  all: {
-    title: 'No tasks yet',
-    desc: 'Tasks you create or are assigned will appear here.',
-  },
-  today: {
-    title: 'No tasks today',
-    desc: 'Nothing due today. Enjoy the breathing room.',
-  },
-  'this-week': {
-    title: 'No tasks this week',
-    desc: 'Your week is clear. Time to plan ahead.',
-  },
-  delegated: {
-    title: 'No delegated tasks',
-    desc: 'Tasks you delegate to others will show up here.',
-  },
-};
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 export function TasksTab({ userId, organizationId }: TasksTabProps) {
-  const [tasks, setTasks] = useState<DashboardTask[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<TaskFilter>('all');
+  const [filter, setFilter] = useState<'all' | TaskStatus>('all');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
-  // Enhanced form state
+  // Form state
   const [formTitle, setFormTitle] = useState('');
-  const [formAssignedTo, setFormAssignedTo] = useState('');
-  const [formNotes, setFormNotes] = useState('');
-  const [formDueDate, setFormDueDate] = useState('');
+  const [formDescription, setFormDescription] = useState('');
   const [formPriority, setFormPriority] = useState<TaskPriority>('normal');
   const [submitting, setSubmitting] = useState(false);
 
-  // Track indicator position via refs on each pill
-  const filterRefs = useRef<Record<TaskFilter, HTMLButtonElement | null>>({
-    all: null,
-    today: null,
-    'this-week': null,
-    delegated: null,
-  });
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  // -------------------------------------------------------------------------
+  // Load tasks
+  // -------------------------------------------------------------------------
 
   useEffect(() => {
-    const el = filterRefs.current[filter];
-    if (el) {
-      setIndicatorStyle({ left: el.offsetLeft, width: el.offsetWidth });
-    }
-  }, [filter]);
+    loadTasks();
+  }, []);
 
-  // -------------------------------------------------------------------------
-  // Data fetching
-  // -------------------------------------------------------------------------
-
-  const fetchData = useCallback(async () => {
+  async function loadTasks() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getTasks();
-      setTasks(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load tasks.');
+      const client = getClient();
+      const { data, error: queryError } = await client
+        .from('tasks')
+        .select('*')
+        .neq('status', 'archived')
+        .order('created_at', { ascending: false });
+
+      if (queryError) {
+        setError(queryError.message);
+        return;
+      }
+
+      setTasks(
+        (data ?? []).map((row: any) => ({
+          id: row.id,
+          title: row.title,
+          description: row.description ?? undefined,
+          priority: row.priority ?? 'normal',
+          status: row.status ?? 'open',
+          dueAt: row.due_at ?? undefined,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+          assignedTo: row.assigned_to ?? undefined,
+        }))
+      );
+    } catch (err: any) {
+      setError(err.message || 'Could not connect to database');
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  }
 
   // -------------------------------------------------------------------------
-  // Form helpers
+  // Handlers
   // -------------------------------------------------------------------------
 
   function resetForm() {
     setFormTitle('');
-    setFormAssignedTo('');
-    setFormNotes('');
-    setFormDueDate('');
+    setFormDescription('');
     setFormPriority('normal');
+    setEditingTaskId(null);
+  }
+
+  function handleEditTask(task: Task) {
+    setFormTitle(task.title);
+    setFormDescription(task.description || '');
+    setFormPriority(task.priority);
+    setEditingTaskId(task.id);
+    setShowAddForm(true);
   }
 
   async function handleSubmitTask() {
-    if (!formTitle.trim()) return;
+    if (!formTitle.trim() || submitting) return;
     setSubmitting(true);
 
-    const dueAt = formDueDate ? new Date(formDueDate + 'T00:00:00').toISOString() : undefined;
+    try {
+      const client = getClient();
 
-    // Attempt persistence to Supabase
-    if (userId && organizationId) {
-      try {
-        const client = getClient();
+      if (editingTaskId) {
+        // Update existing task
+        const { data, error: updateError } = await client
+          .from('tasks')
+          .update({
+            title: formTitle.trim(),
+            description: formDescription.trim() || null,
+            priority: formPriority,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editingTaskId)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+
+        setTasks(prev =>
+          prev.map(t =>
+            t.id === editingTaskId
+              ? {
+                  ...t,
+                  title: data.title,
+                  description: data.description ?? undefined,
+                  priority: data.priority,
+                  updatedAt: data.updated_at,
+                }
+              : t
+          )
+        );
+      } else {
+        // Create new task
         const insertPayload: Record<string, unknown> = {
-          organization_id: organizationId,
-          created_by: userId,
           title: formTitle.trim(),
-          description: formNotes.trim() || null,
+          description: formDescription.trim() || null,
           priority: formPriority,
           status: 'open',
-          due_at: dueAt || null,
-          assigned_to: formAssignedTo.trim() || null,
         };
+        if (userId) insertPayload.created_by = userId;
+        if (organizationId) insertPayload.organization_id = organizationId;
 
         const { data, error: insertError } = await client
           .from('tasks')
@@ -210,148 +167,105 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
 
         if (insertError) throw insertError;
 
-        // Map returned row into DashboardTask shape
-        const newTask: DashboardTask = {
+        const newTask: Task = {
           id: data.id,
-          organizationId: data.organization_id,
-          createdBy: data.created_by,
           title: data.title,
           description: data.description ?? undefined,
-          priority: data.priority,
-          status: data.status,
+          priority: data.priority ?? 'normal',
+          status: data.status ?? 'open',
           dueAt: data.due_at ?? undefined,
           createdAt: data.created_at,
           updatedAt: data.updated_at,
           assignedTo: data.assigned_to ?? undefined,
         };
-        setTasks((prev) => [newTask, ...prev]);
-      } catch {
-        // Fall back to local-only on persistence failure
-        const localTask: DashboardTask = {
-          id: Date.now().toString(),
-          title: formTitle.trim(),
-          description: formNotes.trim() || undefined,
-          priority: formPriority,
-          status: 'open',
-          dueAt: dueAt,
-          createdAt: new Date().toISOString(),
-          organizationId: organizationId,
-          createdBy: userId,
-          updatedAt: new Date().toISOString(),
-          assignedTo: formAssignedTo.trim() || undefined,
-        };
-        setTasks((prev) => [localTask, ...prev]);
+        setTasks(prev => [newTask, ...prev]);
       }
-    } else {
-      // No auth context - local only
-      const localTask: DashboardTask = {
-        id: Date.now().toString(),
-        title: formTitle.trim(),
-        description: formNotes.trim() || undefined,
-        priority: formPriority,
-        status: 'open',
-        dueAt: dueAt,
-        createdAt: new Date().toISOString(),
-        organizationId: organizationId ?? '',
-        createdBy: userId ?? '',
-        updatedAt: new Date().toISOString(),
-        assignedTo: formAssignedTo.trim() || undefined,
-      };
-      setTasks((prev) => [localTask, ...prev]);
+
+      resetForm();
+      setShowAddForm(false);
+    } catch {
+      // Silent - form stays open for retry
+    } finally {
+      setSubmitting(false);
     }
-
-    resetForm();
-    setShowAddForm(false);
-    setSubmitting(false);
   }
-
-  // -------------------------------------------------------------------------
-  // Task completion toggle
-  // -------------------------------------------------------------------------
 
   async function handleToggleComplete(taskId: string) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
-    const newStatus = task.status === 'completed' ? 'open' : 'completed';
+
+    const newStatus: TaskStatus = task.status === 'completed' ? 'open' : 'completed';
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+
+    if (newStatus === 'completed') {
+      showToast('Task completed', {
+        action: { label: 'Undo', onClick: () => handleToggleComplete(taskId) },
+      });
+    }
 
     try {
       const client = getClient();
-      await client.from('tasks').update({ status: newStatus }).eq('id', taskId);
+      await client
+        .from('tasks')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', taskId);
     } catch {
+      // Revert on error
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: task.status } : t));
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Task edit handler
-  // -------------------------------------------------------------------------
-
-  function handleEditTask(task: DashboardTask) {
-    setFormTitle(task.title);
-    setFormAssignedTo(task.assignedTo || '');
-    setFormNotes(task.description || '');
-    setFormDueDate(task.dueAt ? task.dueAt.split('T')[0] ?? '' : '');
-    setFormPriority((task.priority as TaskPriority) || 'normal');
-    setShowAddForm(true);
+  async function handleStatusChange(taskId: string, status: string) {
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: status as TaskStatus } : t));
+    try {
+      const client = getClient();
+      await client.from('tasks').update({ status, updated_at: new Date().toISOString() }).eq('id', taskId);
+    } catch {
+      // silent
+    }
   }
 
-  // -------------------------------------------------------------------------
-  // Expanded task state (for truncation toggle)
-  // -------------------------------------------------------------------------
-
-  const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(new Set());
-
-  function toggleTaskExpand(taskId: string) {
-    setExpandedTaskIds(prev => {
-      const next = new Set(prev);
-      if (next.has(taskId)) {
-        next.delete(taskId);
-      } else {
-        next.add(taskId);
-      }
-      return next;
-    });
+  async function handleDeleteTask(taskId: string) {
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    resetForm();
+    setShowAddForm(false);
+    showToast('Task deleted');
+    try {
+      const client = getClient();
+      await client.from('tasks').delete().eq('id', taskId);
+    } catch {
+      // Already removed from UI - silent
+    }
   }
 
   // -------------------------------------------------------------------------
   // Filtering
   // -------------------------------------------------------------------------
 
-  const filteredTasks = useMemo(() => {
-    switch (filter) {
-      case 'today':
-        return tasks.filter((t) => t.dueAt && isToday(t.dueAt));
-      case 'this-week':
-        return tasks.filter((t) => t.dueAt && isThisWeek(t.dueAt));
-      case 'delegated':
-        return tasks.filter((t) => Boolean(t.assignedTo));
-      default:
-        return tasks;
-    }
-  }, [tasks, filter]);
+  const filteredTasks = filter === 'all' ? tasks : tasks.filter(t => t.status === filter);
 
   // -------------------------------------------------------------------------
-  // Render
+  // Render - Loading
   // -------------------------------------------------------------------------
 
   if (loading) {
     return (
       <div className="tasks-tab tasks-tab--loading" aria-busy="true">
-        <SkeletonCard height={40} />
-        <SkeletonCard height={72} />
-        <SkeletonCard height={72} />
-        <SkeletonCard height={72} />
+        <p>Loading tasks...</p>
       </div>
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Render - Error
+  // -------------------------------------------------------------------------
+
   if (error) {
     return (
-      <div className="tasks-tab tasks-tab--error" role="alert">
+      <div className="tasks-tab tasks-tab--error">
         <div className="tasks-tab__error-banner">
           <p>{error}</p>
-          <button type="button" className="tasks-tab__retry-btn" onClick={fetchData}>
+          <button type="button" className="tasks-tab__retry-btn" onClick={loadTasks}>
             Retry
           </button>
         </div>
@@ -359,21 +273,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     );
   }
 
-  const filters: { id: TaskFilter; label: string }[] = [
-    { id: 'all', label: 'All' },
-    { id: 'today', label: 'Today' },
-    { id: 'this-week', label: 'This Week' },
-    { id: 'delegated', label: 'Delegated' },
-  ];
-
-  const emptyContent = emptyStateContent[filter];
-
-  const priorities: { value: TaskPriority; label: string }[] = [
-    { value: 'low', label: 'Low' },
-    { value: 'normal', label: 'Normal' },
-    { value: 'high', label: 'High' },
-    { value: 'urgent', label: 'Urgent' },
-  ];
+  // -------------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------------
 
   return (
     <div className="tasks-tab">
@@ -382,191 +284,159 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         <h1 className="tasks-tab__title">Tasks</h1>
       </header>
 
-      {/* Filter Pills */}
+      {/* Filters */}
       <div className="tasks-tab__filters">
-        {filters.map((f) => (
+        {(['all', 'open', 'in_progress', 'completed'] as const).map(f => (
           <button
-            key={f.id}
-            ref={(el) => { filterRefs.current[f.id] = el; }}
+            key={f}
             type="button"
-            className={`tasks-tab__filter-pill ${filter === f.id ? 'tasks-tab__filter-pill--active' : ''}`}
-            onClick={() => setFilter(f.id)}
+            className={`tasks-tab__filter-pill${filter === f ? ' tasks-tab__filter-pill--active' : ''}`}
+            onClick={() => setFilter(f)}
           >
-            {f.label}
+            {f === 'all' ? 'All' : f === 'in_progress' ? 'In Progress' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
-        <span
-          className="tasks-tab__filter-indicator"
-          style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
-        />
       </div>
 
-      {/* Task List */}
-      <section className="tasks-tab__list-section">
-        {filteredTasks.length === 0 ? (
-          <div className="tasks-tab__empty-state">
-            <p className="tasks-tab__empty-title">{emptyContent.title}</p>
-            <p className="tasks-tab__empty-desc">{emptyContent.desc}</p>
-          </div>
-        ) : (
-          <ul className="tasks-tab__task-list">
-            {filteredTasks.map((task) => {
-              const isExpanded = expandedTaskIds.has(task.id);
-              const isTruncatable = task.title.length > 60 || !!task.description;
-              return (
-              <li key={task.id} className="tasks-tab__task-card" data-priority={task.priority} data-status={task.status}>
-                <div className="tasks-tab__task-header">
-                  <button
-                    type="button"
-                    className={`tasks-tab__checkbox ${task.status === 'completed' ? 'tasks-tab__checkbox--checked' : ''}`}
-                    onClick={(e) => { e.stopPropagation(); handleToggleComplete(task.id); }}
-                    aria-label={task.status === 'completed' ? 'Mark incomplete' : 'Mark complete'}
-                  >
-                    {task.status === 'completed' ? '\u2713' : ''}
-                  </button>
-                  <span className={`tasks-tab__task-title ${!isExpanded ? 'tasks-tab__task-title--truncated' : ''}`}>{task.title}</span>
-                  <button
-                    type="button"
-                    className="tasks-tab__edit-btn"
-                    onClick={(e) => { e.stopPropagation(); handleEditTask(task); }}
-                    aria-label="Edit task"
-                  >
-                    &#9998;
-                  </button>
-                  <span className="tasks-tab__priority-pill">{task.priority}</span>
-                </div>
-                {isExpanded && task.description && (
-                  <p className="tasks-tab__task-description">{task.description}</p>
-                )}
-                {isTruncatable && (
-                  <button
-                    type="button"
-                    className="tasks-tab__expand-btn"
-                    onClick={() => toggleTaskExpand(task.id)}
-                  >
-                    {isExpanded ? 'show less' : 'show more'}
-                  </button>
-                )}
-                <div className="tasks-tab__task-meta">
-                  {task.dueAt && (
-                    <span className="tasks-tab__due-date">
-                      Due {formatSmartDate(task.dueAt)}
-                    </span>
-                  )}
-                  {task.assignedTo && (
-                    <span className="tasks-tab__assigned-to">{task.assignedTo}</span>
-                  )}
-                  <span className={`tasks-tab__status tasks-tab__status--${task.status}`}>
-                    {task.status.replace('_', ' ')}
-                  </span>
-                </div>
-              </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      {/* Enhanced Add Task Form */}
+      {/* Add Task Form */}
       {showAddForm && (
         <div className="tasks-tab__add-form">
           <div className="tasks-tab__form-group">
-            <label className="tasks-tab__form-label" htmlFor="task-title">Title *</label>
+            <label className="tasks-tab__form-label" htmlFor="task-title">Title</label>
             <input
               id="task-title"
-              type="text"
               className="tasks-tab__add-input"
-              placeholder="What needs to be done?"
+              type="text"
+              placeholder="Task title..."
               value={formTitle}
-              onChange={(e) => setFormTitle(e.target.value)}
-              autoFocus
+              onChange={e => setFormTitle(e.target.value)}
             />
           </div>
 
           <div className="tasks-tab__form-group">
-            <label className="tasks-tab__form-label" htmlFor="task-assigned-to">Assigned to</label>
-            <input
-              id="task-assigned-to"
-              type="text"
-              className="tasks-tab__add-input"
-              placeholder="Name or email"
-              value={formAssignedTo}
-              onChange={(e) => setFormAssignedTo(e.target.value)}
-            />
-          </div>
-
-          <div className="tasks-tab__form-group">
-            <label className="tasks-tab__form-label" htmlFor="task-notes">Notes</label>
+            <label className="tasks-tab__form-label" htmlFor="task-desc">Description</label>
             <textarea
-              id="task-notes"
+              id="task-desc"
               className="tasks-tab__add-textarea"
-              placeholder="Additional details..."
-              rows={3}
-              value={formNotes}
-              onChange={(e) => setFormNotes(e.target.value)}
-            />
-          </div>
-
-          <div className="tasks-tab__form-group">
-            <label className="tasks-tab__form-label" htmlFor="task-due-date">Due date</label>
-            <input
-              id="task-due-date"
-              type="date"
-              className="tasks-tab__add-input"
-              value={formDueDate}
-              onChange={(e) => setFormDueDate(e.target.value)}
+              placeholder="Optional description..."
+              value={formDescription}
+              onChange={e => setFormDescription(e.target.value)}
             />
           </div>
 
           <div className="tasks-tab__form-group">
             <label className="tasks-tab__form-label">Priority</label>
             <div className="tasks-tab__priority-selector">
-              {priorities.map((p) => (
+              {(['low', 'normal', 'high', 'urgent'] as const).map(p => (
                 <button
-                  key={p.value}
+                  key={p}
                   type="button"
-                  className={`tasks-tab__priority-btn ${formPriority === p.value ? 'tasks-tab__priority-btn--active' : ''}`}
-                  data-priority={p.value}
-                  onClick={() => setFormPriority(p.value)}
+                  className={`tasks-tab__priority-btn${formPriority === p ? ' tasks-tab__priority-btn--active' : ''}`}
+                  data-priority={p}
+                  onClick={() => setFormPriority(p)}
                 >
-                  {p.label}
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="tasks-tab__form-actions">
-            <button
-              type="button"
-              className="tasks-tab__cancel-btn"
-              onClick={() => { resetForm(); setShowAddForm(false); }}
-            >
+            {editingTaskId && (
+              <button
+                type="button"
+                className="tasks-tab__delete-btn"
+                onClick={() => handleDeleteTask(editingTaskId)}
+              >
+                Delete
+              </button>
+            )}
+            <button type="button" className="tasks-tab__cancel-btn" onClick={() => { resetForm(); setShowAddForm(false); }}>
               Cancel
             </button>
-            <button
-              type="button"
-              className="tasks-tab__submit-btn"
-              disabled={!formTitle.trim() || submitting}
-              onClick={handleSubmitTask}
-            >
-              {submitting ? 'Saving...' : 'Add Task'}
+            <button type="button" className="tasks-tab__submit-btn" disabled={!formTitle.trim() || submitting} onClick={handleSubmitTask}>
+              {submitting ? 'Saving...' : editingTaskId ? 'Update' : 'Add Task'}
             </button>
           </div>
         </div>
       )}
 
+      {/* Task List */}
+      <section className="tasks-tab__list-section">
+        {filteredTasks.length === 0 && !showAddForm ? (
+          <div className="tasks-tab__empty-state">
+            <h2 className="tasks-tab__empty-title">No tasks yet</h2>
+            <p className="tasks-tab__empty-desc">Tasks you create or are assigned will appear here.</p>
+          </div>
+        ) : (
+          <ul className="tasks-tab__task-list">
+            {filteredTasks.map(task => (
+              <li
+                key={task.id}
+                className="tasks-tab__task-card"
+                data-priority={task.priority}
+                data-status={task.status}
+              >
+                <div className="tasks-tab__task-header">
+                  <span className="tasks-tab__task-title">{task.title}</span>
+                  <span className="tasks-tab__priority-pill">{task.priority}</span>
+                  <div className="tasks-tab__task-actions">
+                    <button
+                      type="button"
+                      className="tasks-tab__menu-trigger"
+                      onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === task.id ? null : task.id); }}
+                      aria-label="Task actions"
+                    >
+                      &#x22EE;
+                    </button>
+                    {menuOpenId === task.id && (
+                      <div className="tasks-tab__menu-dropdown">
+                        <button type="button" onClick={() => { handleToggleComplete(task.id); setMenuOpenId(null); }}>
+                          {task.status === 'completed' ? 'Mark Incomplete' : 'Mark Complete'}
+                        </button>
+                        <button type="button" onClick={() => { handleStatusChange(task.id, 'archived'); setMenuOpenId(null); }}>
+                          Mark Blocked
+                        </button>
+                        <button type="button" onClick={() => { handleEditTask(task); setMenuOpenId(null); }}>
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {task.description && (
+                  <p className="tasks-tab__task-description">{task.description}</p>
+                )}
+                <div className="tasks-tab__task-meta">
+                  <span className={`tasks-tab__status tasks-tab__status--${task.status}`}>
+                    {task.status.replace('_', ' ')}
+                  </span>
+                  {task.dueAt && (
+                    <span className="tasks-tab__due-date">
+                      Due {new Date(task.dueAt).toLocaleDateString()}
+                    </span>
+                  )}
+                  {task.assignedTo && (
+                    <span className="tasks-tab__assigned-to">{task.assignedTo}</span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {/* FAB */}
-      <button
-        type="button"
-        className="tasks-tab__fab"
-        aria-label="Add task"
-        onClick={() => setShowAddForm(!showAddForm)}
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" width="24" height="24">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
+      {!showAddForm && (
+        <button
+          type="button"
+          className="tasks-tab__fab"
+          onClick={() => { resetForm(); setShowAddForm(true); }}
+          aria-label="Add task"
+        >
+          +
+        </button>
+      )}
     </div>
   );
 }

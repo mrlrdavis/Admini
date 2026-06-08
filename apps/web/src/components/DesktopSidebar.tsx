@@ -34,8 +34,9 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: Navi
           </li>
         ))}
       </ul>
-      <button type="button" className="desktop-sidebar__theme-toggle" onClick={() => setThemePreference(resolvedTheme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
-        {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+      <button type="button" className="desktop-sidebar__theme-toggle" onClick={() => setThemePreference(resolvedTheme === 'dark' ? 'light' : 'dark')} aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+        <span className="mode-sun" aria-hidden="true" />
+        <span className="mode-moon" aria-hidden="true" />
       </button>
       {onSignOut && (
         <button
