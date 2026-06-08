@@ -39,6 +39,7 @@ export default defineConfig({
       '@admini/api-client': fileURLToPath(new URL('../../packages/api-client/src/index.ts', import.meta.url)),
       '@admini/ui': fileURLToPath(new URL('../../packages/ui/src/index.ts', import.meta.url)),
       '@admini/integrations': fileURLToPath(new URL('../../packages/integrations/src/index.ts', import.meta.url)),
+      '@admini/workspace/styles.css': fileURLToPath(new URL('../../packages/workspace/src/styles/index.css', import.meta.url)),
       '@admini/workspace': fileURLToPath(new URL('../../packages/workspace/src/index.ts', import.meta.url)),
       '@admini/pwa': fileURLToPath(new URL('../../packages/pwa/src/index.ts', import.meta.url))
     }
