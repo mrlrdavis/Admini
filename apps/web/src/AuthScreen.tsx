@@ -32,15 +32,6 @@ function getRandomTagline() {
   return returningUserTaglines[Math.floor(Math.random() * returningUserTaglines.length)] ?? defaultReturningUserTagline;
 }
 
-function getPasswordScore(value: string): number {
-  return [
-    value.length >= 8,
-    /[A-Z]/.test(value),
-    /[0-9]/.test(value),
-    /[^A-Za-z0-9]/.test(value)
-  ].filter(Boolean).length;
-}
-
 function playBubbleSound() {
   const AudioContextConstructor = window.AudioContext ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioContextConstructor) return;
@@ -92,72 +83,6 @@ function AuthStoryPanel({
   );
 }
 
-function SignUpQuestion({
-  step,
-  displayName,
-  schoolName,
-  email,
-  password,
-  passwordScore,
-  onDisplayName,
-  onSchoolName,
-  onEmail,
-  onPassword,
-  fieldErrors,
-  clearFieldError
-}: {
-  step: number;
-  displayName: string;
-  schoolName: string;
-  email: string;
-  password: string;
-  passwordScore: number;
-  onDisplayName: (value: string) => void;
-  onSchoolName: (value: string) => void;
-  onEmail: (value: string) => void;
-  onPassword: (value: string) => void;
-  fieldErrors: Record<string, string>;
-  clearFieldError: (field: string) => void;
-}) {
-  if (step === 0) {
-    return (
-      <div className="big-question-wrapper">
-        <label className="big-question">What should I call you?<input value={displayName} onChange={(event) => { onDisplayName(event.target.value); clearFieldError('displayName'); }} autoFocus /></label>
-        {fieldErrors.displayName && <span className="field-error" role="alert">{fieldErrors.displayName}</span>}
-      </div>
-    );
-  }
-  if (step === 1) {
-    return (
-      <div className="big-question-wrapper">
-        <label className="big-question">What is your school's name?<input value={schoolName} onChange={(event) => { onSchoolName(event.target.value); clearFieldError('schoolName'); }} /></label>
-        {fieldErrors.schoolName && <span className="field-error" role="alert">{fieldErrors.schoolName}</span>}
-      </div>
-    );
-  }
-  if (step === 2) {
-    return (
-      <div className="big-question-wrapper">
-        <label className="big-question">What email should Admini use?<input type="email" value={email} onChange={(event) => { onEmail(event.target.value); clearFieldError('email'); }} autoComplete="email" /></label>
-        {fieldErrors.email && <span className="field-error" role="alert">{fieldErrors.email}</span>}
-      </div>
-    );
-  }
-  return (
-    <div className="big-question-wrapper">
-      <label className="big-question">
-        Create a password.
-        <input type="password" value={password} onChange={(event) => { onPassword(event.target.value); clearFieldError('password'); }} autoComplete="new-password" />
-        <span className="meter-label">Make it a good one</span>
-        <span className="password-meter" aria-hidden="true">
-          {[0, 1, 2, 3].map((index) => <span className={index < passwordScore ? 'filled' : ''} key={index} />)}
-        </span>
-      </label>
-      {fieldErrors.password && <span className="field-error" role="alert">{fieldErrors.password}</span>}
-    </div>
-  );
-}
-
 function AuthMessages({ error, status }: { error: string; status: string }) {
   return (
     <>
@@ -184,9 +109,6 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUs
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [schoolName, setSchoolName] = useState('');
-  const [signUpStep, setSignUpStep] = useState(0);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -194,7 +116,6 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUs
   const [returningTagline, setReturningTagline] = useState(() => getRandomTagline());
   const timeContext = getTimeContext(now);
   const [visualMode, setVisualMode] = useState<VisualMode>(() => timeContext.phase === 'evening' ? 'night' : 'day');
-  const passwordScore = getPasswordScore(password);
 
   // Inline validation state
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -208,11 +129,6 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUs
 
   function validatePassword(value: string): string {
     if (!value || value.length < 6) return 'Password must be at least 6 characters';
-    return '';
-  }
-
-  function validateDisplayName(value: string): string {
-    if (!value.trim()) return 'Display name cannot be empty';
     return '';
   }
 
@@ -307,43 +223,32 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUs
     event.preventDefault();
     setStatus('');
     setError('');
-    if (signUpStep === 0) {
-      const err = validateDisplayName(displayName);
-      if (err) { setFieldErrors({ displayName: err }); return; }
-    } else if (signUpStep === 1) {
-      if (!schoolName.trim()) { setFieldErrors({ schoolName: 'School name cannot be empty' }); return; }
-    } else if (signUpStep === 2) {
-      const err = validateEmail(email);
-      if (err) { setFieldErrors({ email: err }); return; }
-    } else if (signUpStep === 3) {
-      const err = validatePassword(password);
-      if (err) { setFieldErrors({ password: err }); return; }
-    }
+
+    const emailErr = validateEmail(email);
+    if (emailErr) { setFieldErrors({ email: emailErr }); return; }
+    const passErr = validatePassword(password);
+    if (passErr) { setFieldErrors({ password: passErr }); return; }
+
     setFieldErrors({});
-    if (signUpStep < 3) {
-      setSignUpStep((current) => current + 1);
-      playBubbleSound();
-      return;
-    }
     if (!isSupabaseConfigured) {
       setError('Account creation is almost ready. Restart Admini so the new connection settings can load.');
       return;
     }
     setSubmitting(true);
     try {
-      const result = await signUpWithPassword({ email, password, displayName, schoolName });
+      const result = await signUpWithPassword({ email, password, displayName: '', schoolName: '' });
       if (result.needsEmailConfirmation) {
-        setStatus('You are in. Check your email to confirm the account.');
-        setView('sign-in');
+        setStatus('Check your email to confirm your account.');
       } else if (result.user) {
         onAuthenticated(result.user);
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Account creation failed.');
+      setError(caught instanceof Error ? caught.message : 'Sign up failed.');
     } finally {
       setSubmitting(false);
     }
   }
+
   return (
     <main className={`auth-page auth-page-${view} time-${timeContext.phase} visual-${visualMode}`}>
       <button className="breath-button" type="button" onClick={() => setBreathing(true)} onPointerEnter={playBubbleSound}>Breathe</button>
@@ -395,26 +300,16 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUs
           <AuthStoryPanel greeting={timeContext.greeting} tagline="cognitive load support for school administrators" compactTagline onBack={() => setView('home')} />
           <form className="auth-conversation" onSubmit={handleSignUp}>
             <p className="mini-kicker">First time here</p>
-            <SignUpQuestion
-              step={signUpStep}
-              displayName={displayName}
-              schoolName={schoolName}
-              email={email}
-              password={password}
-              passwordScore={passwordScore}
-              onDisplayName={setDisplayName}
-              onSchoolName={setSchoolName}
-              onEmail={setEmail}
-              onPassword={setPassword}
-              fieldErrors={fieldErrors}
-              clearFieldError={clearFieldError}
-            />
-            <div className="wizard-actions">
-              {signUpStep > 0 ? <button type="button" onClick={() => setSignUpStep((current) => current - 1)} onPointerEnter={playBubbleSound}>Back</button> : null}
+            <div className="minimal-form">
+              <label>Email<input type="email" value={email} onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }} autoComplete="email" /></label>
+              {fieldErrors.email && <span className="field-error" role="alert">{fieldErrors.email}</span>}
+              <label>Password<input type="password" value={password} onChange={(e) => { setPassword(e.target.value); clearFieldError('password'); }} autoComplete="new-password" /></label>
+              {fieldErrors.password && <span className="field-error" role="alert">{fieldErrors.password}</span>}
               <button className="bubble-submit" disabled={submitting} type="submit" onPointerEnter={playBubbleSound}>
-                {submitting ? 'Creating...' : signUpStep === 3 ? 'Create account' : 'Next'}
+                {submitting ? 'Creating...' : 'Create Account'}
               </button>
             </div>
+            <button type="button" className="google-link" onClick={() => handleOAuth('google')} onPointerEnter={playBubbleSound} disabled={oauthLoading}>{oauthLoading ? 'Connecting...' : 'or sign up with Google'}</button>
             <AuthMessages error={error} status={status} />
           </form>
         </section>
