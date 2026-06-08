@@ -444,6 +444,20 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           </ul>
         )}
       </section>
+
+      {/* Invite Team Section */}
+      <section className="admin-tab__section">
+        <h2 className="admin-tab__section-title">Invite Team Members</h2>
+        <p className="admin-tab__section-desc">
+          Send an invitation email to add staff to your school's AdminI workspace.
+        </p>
+        <a
+          href="mailto:ladariusdvs99@gmail.com?subject=AdminI%20Team%20Invitation%20Request&body=I%27d%20like%20to%20invite%20the%20following%20people%20to%20my%20AdminI%20workspace%3A%0A%0AName%3A%20%0AEmail%3A%20%0ARole%20(admin%2C%20principal%2C%20teacher%2C%20staff)%3A%20%0A%0ASchool%3A%20%0A"
+          className="admin-tab__invite-btn"
+        >
+          Invite via Email
+        </a>
+      </section>
     </div>
   );
 }

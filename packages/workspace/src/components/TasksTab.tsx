@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // TasksTab - Native React implementation of the Tasks view
 // ---------------------------------------------------------------------------
 // Full task list with filtering, priority indicators, enhanced add form,
@@ -266,6 +266,55 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   }
 
   // -------------------------------------------------------------------------
+  // Task completion toggle
+  // -------------------------------------------------------------------------
+
+  async function handleToggleComplete(taskId: string) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const newStatus = task.status === 'completed' ? 'open' : 'completed';
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+
+    try {
+      const client = getClient();
+      await client.from('tasks').update({ status: newStatus }).eq('id', taskId);
+    } catch {
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: task.status } : t));
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Task edit handler
+  // -------------------------------------------------------------------------
+
+  function handleEditTask(task: DashboardTask) {
+    setFormTitle(task.title);
+    setFormAssignedTo(task.assignedTo || '');
+    setFormNotes(task.description || '');
+    setFormDueDate(task.dueAt ? task.dueAt.split('T')[0] ?? '' : '');
+    setFormPriority((task.priority as TaskPriority) || 'normal');
+    setShowAddForm(true);
+  }
+
+  // -------------------------------------------------------------------------
+  // Expanded task state (for truncation toggle)
+  // -------------------------------------------------------------------------
+
+  const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(new Set());
+
+  function toggleTaskExpand(taskId: string) {
+    setExpandedTaskIds(prev => {
+      const next = new Set(prev);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+      return next;
+    });
+  }
+
+  // -------------------------------------------------------------------------
   // Filtering
   // -------------------------------------------------------------------------
 
@@ -361,12 +410,43 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           </div>
         ) : (
           <ul className="tasks-tab__task-list">
-            {filteredTasks.map((task) => (
-              <li key={task.id} className="tasks-tab__task-card" data-priority={task.priority}>
+            {filteredTasks.map((task) => {
+              const isExpanded = expandedTaskIds.has(task.id);
+              const isTruncatable = task.title.length > 60 || !!task.description;
+              return (
+              <li key={task.id} className="tasks-tab__task-card" data-priority={task.priority} data-status={task.status}>
                 <div className="tasks-tab__task-header">
-                  <span className="tasks-tab__task-title">{task.title}</span>
+                  <button
+                    type="button"
+                    className={`tasks-tab__checkbox ${task.status === 'completed' ? 'tasks-tab__checkbox--checked' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); handleToggleComplete(task.id); }}
+                    aria-label={task.status === 'completed' ? 'Mark incomplete' : 'Mark complete'}
+                  >
+                    {task.status === 'completed' ? '\u2713' : ''}
+                  </button>
+                  <span className={`tasks-tab__task-title ${!isExpanded ? 'tasks-tab__task-title--truncated' : ''}`}>{task.title}</span>
+                  <button
+                    type="button"
+                    className="tasks-tab__edit-btn"
+                    onClick={(e) => { e.stopPropagation(); handleEditTask(task); }}
+                    aria-label="Edit task"
+                  >
+                    &#9998;
+                  </button>
                   <span className="tasks-tab__priority-pill">{task.priority}</span>
                 </div>
+                {isExpanded && task.description && (
+                  <p className="tasks-tab__task-description">{task.description}</p>
+                )}
+                {isTruncatable && (
+                  <button
+                    type="button"
+                    className="tasks-tab__expand-btn"
+                    onClick={() => toggleTaskExpand(task.id)}
+                  >
+                    {isExpanded ? 'show less' : 'show more'}
+                  </button>
+                )}
                 <div className="tasks-tab__task-meta">
                   {task.dueAt && (
                     <span className="tasks-tab__due-date">
@@ -381,7 +461,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                   </span>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>

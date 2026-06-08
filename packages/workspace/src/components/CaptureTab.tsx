@@ -289,7 +289,12 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       }
       handleCancelNoteEdit();
     } catch (err: any) {
-      setNoteError(err.message || 'Failed to save note');
+      const msg = err.message || 'Failed to save note';
+      if (msg.includes('policy') || msg.includes('permission') || msg.includes('security')) {
+        setNoteError('Unable to save. Please complete onboarding to set up your organization first.');
+      } else {
+        setNoteError(msg);
+      }
     } finally {
       setNoteSaving(false);
     }

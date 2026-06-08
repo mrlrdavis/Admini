@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { SkeletonCard } from '@admini/ui';
 import { mapSupabaseError } from '@admini/shared';
 import { getClient } from '../services/getClient';
@@ -1068,35 +1068,35 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <h2 ref={subViewHeadingRef} className="more-tab__help-title" tabIndex={-1}>How to use AdminI</h2>
 
           <div className="more-tab__help-section">
-            <h3>ðŸ“Š Dashboard</h3>
+            <h3>📊 Dashboard</h3>
             <p>Your daily overview showing tasks, activity, and key metrics. Cards update in real-time as you complete work.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>ðŸ“ Capture</h3>
+            <h3>📝 Capture</h3>
             <p><strong>Voice:</strong> Tap the microphone to transcribe observations using speech recognition.</p>
             <p><strong>Tap:</strong> Use the word board for quick categorized captures, or type free-text notes.</p>
             <p><strong>Notes:</strong> Create, edit, and search meeting notes with attendee tracking.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>âœ… Tasks</h3>
+            <h3>✅ Tasks</h3>
             <p>Create tasks with titles, notes, due dates, and assignments. Use filter pills to view tasks by timeframe or delegation status. Tap the + button to add new tasks.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>ðŸ’“ Pulse</h3>
+            <h3>💓 Pulse</h3>
             <p>Track your daily rhythm with scheduled check-ins. The Day Structure shows your typical schedule blocks. Stats update as you complete work throughout the day.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>âš™ï¸ More (Settings)</h3>
+            <h3>⚙️ More (Settings)</h3>
             <p>Manage your profile, notification preferences, app theme, connected integrations, and account settings.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>ðŸ”§ Admin</h3>
-            <p>Organization management for admins and principals. Manage school details, team members, invitations, and feature flags. Contact support at <a href="mailto:support@pencilsdown.co">support@pencilsdown.co</a> for assistance.</p>
+            <h3>🔧 Admin</h3>
+            <p>Organization management for admins and principals. Manage school details, team members, invitations, and feature flags. Contact support at <a href="mailto:ladariusdvs99@gmail.com">ladariusdvs99@gmail.com</a> for assistance.</p>
           </div>
         </div>
       </section>
@@ -1252,7 +1252,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
             </button>
           </li>
           <li className="more-tab__list-item">
-            <button type="button" className="more-tab__link-btn">
+            <button type="button" className="more-tab__link-btn" onClick={(e) => { setShowCatalog(true); navigateTo('integrations', e); }}>
               <span className="more-tab__link-icon" aria-hidden="true">{'\u2795'}</span>
               <span className="more-tab__link-label">Add Integration</span>
             </button>
@@ -1285,7 +1285,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           >
             Sign Out
           </button>
-          {onDeleteAccount && (
+          {onDeleteAccount && userRole === 'admin' && (
             <button
               type="button"
               className="more-tab__delete-account-btn"
@@ -1295,6 +1295,11 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
             >
               {deleting ? 'Deleting...' : 'Delete Account'}
             </button>
+          )}
+          {userRole !== 'admin' && (
+            <p className="more-tab__account-action-description">
+              Account deletion requires admin permission. Contact <a href="mailto:ladariusdvs99@gmail.com">support</a> for assistance.
+            </p>
           )}
           {deleteError && (
             <div className="more-tab__error-container" role="alert">

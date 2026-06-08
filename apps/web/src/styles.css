@@ -1079,6 +1079,16 @@ body,
     transform: translateY(0);
   }
 }
+/* Product credit mobile fix - prevent overlap with sign-in link */
+@media (max-width: 768px) {
+  .product-credit {
+    position: static;
+    text-align: center;
+    margin-top: var(--ws-space-lg, 24px);
+    width: 100%;
+  }
+}
+
 /* iPhone SE (375x667) - Front Porch centering */
 @media (max-width: 375px) {
   .home-panel {
