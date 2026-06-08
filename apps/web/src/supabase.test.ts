@@ -26,7 +26,7 @@ describe('supabase module', () => {
   describe('isSupabaseConfigured', () => {
     it('is true when both env vars are set', async () => {
       vi.stubEnv('VITE_SUPABASE_URL', 'https://example.supabase.co');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+      vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-anon-key');
 
       const mod = await import('./supabase');
 
@@ -37,7 +37,7 @@ describe('supabase module', () => {
 
     it('is false when VITE_SUPABASE_URL is missing', async () => {
       vi.stubEnv('VITE_SUPABASE_URL', '');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+      vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-anon-key');
 
       const mod = await import('./supabase');
 
@@ -46,9 +46,9 @@ describe('supabase module', () => {
       vi.unstubAllEnvs();
     });
 
-    it('is false when VITE_SUPABASE_ANON_KEY is missing', async () => {
+    it('is false when VITE_SUPABASE_PUBLISHABLE_KEY is missing', async () => {
       vi.stubEnv('VITE_SUPABASE_URL', 'https://example.supabase.co');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
+      vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', '');
 
       const mod = await import('./supabase');
 
@@ -61,7 +61,7 @@ describe('supabase module', () => {
   describe('supabase client', () => {
     it('creates a client when env vars are configured', async () => {
       vi.stubEnv('VITE_SUPABASE_URL', 'https://example.supabase.co');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+      vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-anon-key');
 
       const mod = await import('./supabase');
       const { createClient } = await import('@supabase/supabase-js');
@@ -86,7 +86,7 @@ describe('supabase module', () => {
 
     it('returns null when env vars are not configured', async () => {
       vi.stubEnv('VITE_SUPABASE_URL', '');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
+      vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', '');
 
       const mod = await import('./supabase');
 
@@ -99,7 +99,7 @@ describe('supabase module', () => {
   describe('getAuthRedirectTo', () => {
     it('returns the current window origin', async () => {
       vi.stubEnv('VITE_SUPABASE_URL', 'https://example.supabase.co');
-      vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+      vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-anon-key');
 
       const mod = await import('./supabase');
 
