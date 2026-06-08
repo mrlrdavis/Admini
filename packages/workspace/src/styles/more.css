@@ -731,3 +731,10 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Export buttons layout */
+.more-tab__export-buttons {
+  display: flex;
+  gap: var(--ws-space-sm);
+  flex-wrap: wrap;
+}

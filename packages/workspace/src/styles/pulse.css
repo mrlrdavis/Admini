@@ -308,3 +308,140 @@
   color: var(--ws-color-text-muted);
   margin: 0;
 }
+/* Day Structure Edit Mode */
+.pulse-tab__day-edit-btn {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-sage-dark);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+}
+
+.pulse-tab__day-edit-btn:hover {
+  background: var(--ws-color-limestone);
+}
+
+.pulse-tab__day-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  box-shadow: var(--ws-shadow-card);
+}
+
+.pulse-tab__day-edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+  padding: var(--ws-space-sm);
+  border-bottom: 1px solid var(--ws-color-border);
+}
+
+.pulse-tab__day-edit-row:last-child {
+  border-bottom: none;
+}
+
+.pulse-tab__day-edit-period {
+  display: flex;
+  gap: var(--ws-space-sm);
+  align-items: center;
+}
+
+.pulse-tab__day-edit-input {
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+  background: var(--ws-color-white, #fff);
+  color: var(--ws-color-text);
+  width: 100%;
+  max-width: 120px;
+}
+
+.pulse-tab__day-edit-activities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ws-space-xs);
+  align-items: center;
+}
+
+.pulse-tab__day-edit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--ws-space-sm);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-xs);
+}
+
+.pulse-tab__day-edit-chip-remove {
+  background: none;
+  border: none;
+  color: var(--ws-color-error);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.pulse-tab__day-edit-add {
+  padding: 2px var(--ws-space-sm);
+  border: 1px dashed var(--ws-color-border);
+  border-radius: var(--ws-radius-pill);
+  background: transparent;
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-sage);
+  cursor: pointer;
+}
+
+.pulse-tab__day-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ws-space-sm);
+}
+
+.pulse-tab__day-save-btn {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pulse-tab__day-cancel-btn {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+}
+
+.pulse-tab__day-add-period {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px dashed var(--ws-color-sage);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-sage);
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+.pulse-tab__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ws-space-md);
+  margin-bottom: var(--ws-space-md);
+}

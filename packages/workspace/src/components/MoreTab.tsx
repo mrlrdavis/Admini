@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { SkeletonCard } from '@admini/ui';
 import { mapSupabaseError } from '@admini/shared';
 import { getClient } from '../services/getClient';
@@ -617,6 +617,53 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
     }
   }
 
+
+  // ---------------------------------------------------------------------------
+  // Export CSV handler - fetches tasks and triggers CSV download
+  // ---------------------------------------------------------------------------
+
+  async function handleExportCSV() {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const client = getClient();
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError || !userData?.user) throw new Error('Unable to export data. Please sign in again.');
+      const userId = userData.user.id;
+
+      const { data: tasks, error: tasksErr } = await client
+        .from('tasks')
+        .select('*')
+        .eq('created_by', userId);
+      if (tasksErr) throw new Error(mapSupabaseError(tasksErr));
+
+      // Build CSV
+      const headers = ['Title', 'Priority', 'Status', 'Due Date', 'Assigned To', 'Created At'];
+      const rows = (tasks || []).map((t: any) => [
+        t.title,
+        t.priority,
+        t.status,
+        t.due_at || '',
+        t.assigned_to || '',
+        t.created_at,
+      ]);
+      const csv = [headers.join(','), ...rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const date = new Date().toISOString().split('T')[0];
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `admini-tasks-${date}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setExportError(err.message || 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  }
+
   // Suppress unused variable warning - resetToMenu is available for future use
   void resetToMenu;
 
@@ -908,15 +955,14 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
         <section className="more-tab__section" aria-labelledby="account-export-heading">
           <h2 id="account-export-heading" className="more-tab__section-title">Export Data</h2>
           <p className="more-tab__account-action-description">Download a copy of your profile and task data</p>
-          <button
-            type="button"
-            className="more-tab__btn-secondary"
-            onClick={handleExportData}
-            disabled={exporting}
-            aria-label="Export data"
-          >
-            {exporting ? 'Exporting...' : 'Export Data'}
-          </button>
+          <div className="more-tab__export-buttons">
+            <button type="button" className="more-tab__btn-secondary" onClick={handleExportData} disabled={exporting}>
+              {exporting ? 'Exporting...' : 'Export JSON'}
+            </button>
+            <button type="button" className="more-tab__btn-secondary" onClick={handleExportCSV} disabled={exporting}>
+              {exporting ? 'Exporting...' : 'Export CSV'}
+            </button>
+          </div>
           {exportError && (
             <div className="more-tab__error-container" role="alert">
               <p className="more-tab__save-error">{exportError}</p>
@@ -1022,34 +1068,34 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <h2 ref={subViewHeadingRef} className="more-tab__help-title" tabIndex={-1}>How to use AdminI</h2>
 
           <div className="more-tab__help-section">
-            <h3>📊 Dashboard</h3>
+            <h3>ðŸ“Š Dashboard</h3>
             <p>Your daily overview showing tasks, activity, and key metrics. Cards update in real-time as you complete work.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>📝 Capture</h3>
+            <h3>ðŸ“ Capture</h3>
             <p><strong>Voice:</strong> Tap the microphone to transcribe observations using speech recognition.</p>
             <p><strong>Tap:</strong> Use the word board for quick categorized captures, or type free-text notes.</p>
             <p><strong>Notes:</strong> Create, edit, and search meeting notes with attendee tracking.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>✅ Tasks</h3>
+            <h3>âœ… Tasks</h3>
             <p>Create tasks with titles, notes, due dates, and assignments. Use filter pills to view tasks by timeframe or delegation status. Tap the + button to add new tasks.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>💓 Pulse</h3>
+            <h3>ðŸ’“ Pulse</h3>
             <p>Track your daily rhythm with scheduled check-ins. The Day Structure shows your typical schedule blocks. Stats update as you complete work throughout the day.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>⚙️ More (Settings)</h3>
+            <h3>âš™ï¸ More (Settings)</h3>
             <p>Manage your profile, notification preferences, app theme, connected integrations, and account settings.</p>
           </div>
 
           <div className="more-tab__help-section">
-            <h3>🔧 Admin</h3>
+            <h3>ðŸ”§ Admin</h3>
             <p>Organization management for admins and principals. Manage school details, team members, invitations, and feature flags. Contact support at <a href="mailto:support@pencilsdown.co">support@pencilsdown.co</a> for assistance.</p>
           </div>
         </div>
