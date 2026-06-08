@@ -1285,7 +1285,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           >
             Sign Out
           </button>
-          {onDeleteAccount && userRole === 'admin' && (
+          {onDeleteAccount && (userRole === 'admin' || userRole === 'principal') && (
             <button
               type="button"
               className="more-tab__delete-account-btn"
@@ -1296,7 +1296,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
               {deleting ? 'Deleting...' : 'Delete Account'}
             </button>
           )}
-          {userRole !== 'admin' && (
+          {(userRole !== 'admin' && userRole !== 'principal') && (
             <p className="more-tab__account-action-description">
               Account deletion requires admin permission. Contact <a href="mailto:ladariusdvs99@gmail.com">support</a> for assistance.
             </p>

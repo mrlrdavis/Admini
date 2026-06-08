@@ -263,3 +263,10 @@
   color: var(--ws-color-text-muted);
   font-style: italic;
 }
+
+.dashboard-tab__event-detail {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
+  font-weight: 500;
+  margin-left: var(--ws-space-sm);
+}

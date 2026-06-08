@@ -55,6 +55,8 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [tapFreeText, setTapFreeText] = useState('');
   const [captures, setCaptures] = useState<QuickCapture[]>([]);
   const [expandedCaptureId, setExpandedCaptureId] = useState<string | null>(null);
+  const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
+  const [editCaptureText, setEditCaptureText] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Meeting Notes state
@@ -225,6 +227,13 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       }
     }
     setCaptures((prev) => prev.filter((c) => c.id !== captureId));
+  }
+
+  function handleSaveEditCapture(captureId: string) {
+    if (!editCaptureText.trim()) return;
+    setCaptures(prev => prev.map(c => c.id === captureId ? { ...c, text: editCaptureText.trim() } : c));
+    setEditingCaptureId(null);
+    setEditCaptureText('');
   }
 
   // Meeting Notes Handlers
@@ -606,25 +615,33 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
             <ul className="capture-tab__capture-list">
               {captures.map((capture) => {
                 const isExpanded = expandedCaptureId === capture.id;
+                const isEditing = editingCaptureId === capture.id;
                 const isTruncatable = capture.text.length > 80;
                 return (
-                  <li
-                    key={capture.id}
-                    className={`capture-tab__capture-item`}
-                    onClick={() => setExpandedCaptureId(isExpanded ? null : capture.id)}
-                  >
-                    <span className={`capture-tab__capture-text`}>
-                      {isTruncatable && !isExpanded ? `...` : capture.text}
-                    </span>
-                    <span className="capture-tab__capture-time">{capture.timestamp}</span>
-                    <button
-                      type="button"
-                      className="capture-tab__note-delete-btn"
-                      onClick={(e) => handleDeleteCapture(capture.id, e)}
-                      aria-label="Delete capture"
-                    >
-                      &times;
-                    </button>
+                  <li key={capture.id} className="capture-tab__capture-item" onClick={() => !isEditing && setExpandedCaptureId(isExpanded ? null : capture.id)}>
+                    {isEditing ? (
+                      <div className="capture-tab__edit-inline" onClick={(e) => e.stopPropagation()}>
+                        <textarea
+                          className="capture-tab__edit-textarea"
+                          value={editCaptureText}
+                          onChange={(e) => setEditCaptureText(e.target.value)}
+                          rows={3}
+                        />
+                        <div className="capture-tab__edit-actions">
+                          <button type="button" className="capture-tab__edit-save" onClick={() => handleSaveEditCapture(capture.id)}>Save</button>
+                          <button type="button" className="capture-tab__edit-cancel" onClick={() => setEditingCaptureId(null)}>Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <span className={`capture-tab__capture-text${isTruncatable && !isExpanded ? ' capture-tab__capture-text--truncated' : ''}`}>
+                          {isTruncatable && !isExpanded ? capture.text.slice(0, 80) + '...' : capture.text}
+                        </span>
+                        <span className="capture-tab__capture-time">{capture.timestamp}</span>
+                        <button type="button" className="capture-tab__capture-edit-btn" onClick={(e) => { e.stopPropagation(); setEditingCaptureId(capture.id); setEditCaptureText(capture.text); }} aria-label="Edit capture">&#x270E;</button>
+                        <button type="button" className="capture-tab__note-delete-btn" onClick={(e) => handleDeleteCapture(capture.id, e)} aria-label="Delete capture">&times;</button>
+                      </>
+                    )}
                   </li>
                 );
               })}

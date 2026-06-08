@@ -22,6 +22,8 @@ export { sortByUrgency } from '../services/dashboardService';
 
 export interface DashboardTabProps {
   userName: string;
+  onNavigateToTab?: (tabId: string) => void;
+  onTabChange?: (tabId: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -60,16 +62,36 @@ function formatCountdown(targetIso: string): string {
   return `${minutes}m`;
 }
 
+/**
+ * Formats an activity event into a human-readable action string.
+ */
+function formatActivityAction(event: ActivityEvent): string {
+  const entityLabel = event.entityType === 'capture' ? 'capture'
+    : event.entityType === 'task' ? 'task'
+    : event.entityType === 'integration' ? 'integration'
+    : event.entityType === 'invitation' ? 'invitation'
+    : event.entityType;
+
+  const actionLabel = event.action === 'create' ? 'Created'
+    : event.action === 'update' ? 'Updated'
+    : event.action === 'delete' ? 'Deleted'
+    : event.action === 'accept' ? 'Accepted'
+    : event.action;
+
+  return `${actionLabel} a ${entityLabel}`;
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function DashboardTab({ userName }: DashboardTabProps) {
+export function DashboardTab({ userName, onNavigateToTab, onTabChange }: DashboardTabProps) {
   const [tasks, setTasks] = useState<DashboardTask[]>([]);
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAllEvents, setShowAllEvents] = useState(false);
 
   // -------------------------------------------------------------------------
   // Data fetching
@@ -113,6 +135,63 @@ export function DashboardTab({ userName }: DashboardTabProps) {
     () => [...events].sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0)),
     [events],
   );
+
+  /** Generate activity items from tasks (assigned tasks, completed tasks) */
+  const taskActivity = useMemo(() => {
+    return tasks
+      .filter(t => t.assignedTo || t.status === 'completed')
+      .slice(0, 10)
+      .map(t => ({
+        id: 'task-' + t.id,
+        action: t.status === 'completed' ? 'completed' : 'assigned',
+        entityType: 'task',
+        entityId: t.id,
+        createdAt: t.updatedAt || t.createdAt,
+        detail: t.status === 'completed'
+          ? `"${t.title}" was completed`
+          : `"${t.title}" assigned to ${t.assignedTo}`,
+      }));
+  }, [tasks]);
+
+  /** Combined activity: real events + task-derived activity, sorted reverse-chronologically */
+  const allActivity = useMemo(() => {
+    return [
+      ...sortedEvents.map(e => ({
+        id: e.id,
+        detail: `${formatActivityAction(e)}`,
+        createdAt: e.createdAt,
+      })),
+      ...taskActivity.map(a => ({
+        id: a.id,
+        detail: a.detail,
+        createdAt: a.createdAt,
+      })),
+    ].sort((a, b) => b.createdAt > a.createdAt ? 1 : -1).slice(0, 10);
+  }, [sortedEvents, taskActivity]);
+
+  /** Events to display: first 3 by default, up to 20 when expanded. */
+  const visibleEvents = useMemo(
+    () => showAllEvents ? sortedEvents.slice(0, 20) : sortedEvents.slice(0, 3),
+    [sortedEvents, showAllEvents],
+  );
+
+  // Suppress unused variable warnings - kept for backward compatibility
+  void visibleEvents;
+  void allActivity;
+  void onNavigateToTab;
+
+  /** Generate activity items from tasks when no sync_events exist */
+  const taskActivityFallback = useMemo(() => {
+    if (sortedEvents.length > 0) return [];
+    return tasks
+      .slice(0, 5)
+      .map((t) => ({
+        id: t.id,
+        action: t.assignedTo ? `Task assigned to ${t.assignedTo}` : `Task created`,
+        detail: t.title,
+        time: t.createdAt,
+      }));
+  }, [tasks, sortedEvents]);
 
   // -------------------------------------------------------------------------
   // Loading state
@@ -171,7 +250,9 @@ export function DashboardTab({ userName }: DashboardTabProps) {
       <section className="dashboard-tab__priority-queue">
         <header className="dashboard-tab__section-header">
           <h2>Priority Queue</h2>
-          <button type="button" className="dashboard-tab__section-link">View all</button>
+          <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('tasks')}>
+            View all
+          </button>
         </header>
         {priorityQueue.length === 0 ? (
           <p className="dashboard-tab__empty">No open tasks</p>
@@ -187,7 +268,7 @@ export function DashboardTab({ userName }: DashboardTabProps) {
                       Due {new Date(task.dueAt).toLocaleDateString()}
                     </span>
                   )}
-                  <span className="dashboard-tab__task-source" aria-label="source">📋</span>
+                  <span className="dashboard-tab__task-source" aria-label="source">??</span>
                 </div>
               </li>
             ))}
@@ -199,11 +280,13 @@ export function DashboardTab({ userName }: DashboardTabProps) {
       <section className="dashboard-tab__activity-feed">
         <header className="dashboard-tab__section-header">
           <h2>Activity Feed</h2>
-          <button type="button" className="dashboard-tab__section-link">View all</button>
+          <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('tasks')}>
+            View all
+          </button>
         </header>
-        {sortedEvents.length === 0 ? (
+        {sortedEvents.length === 0 && taskActivityFallback.length === 0 ? (
           <p className="dashboard-tab__empty">No recent activity</p>
-        ) : (
+        ) : sortedEvents.length > 0 ? (
           <ul className="dashboard-tab__event-list">
             {sortedEvents.map((event) => (
               <li key={event.id} className="dashboard-tab__event-item">
@@ -216,6 +299,18 @@ export function DashboardTab({ userName }: DashboardTabProps) {
               </li>
             ))}
           </ul>
+        ) : (
+          <ul className="dashboard-tab__event-list">
+            {taskActivityFallback.map((item) => (
+              <li key={item.id} className="dashboard-tab__event-item">
+                <span className="dashboard-tab__event-action">{item.action}</span>
+                <span className="dashboard-tab__event-detail">{item.detail}</span>
+                <span className="dashboard-tab__event-time">
+                  {new Date(item.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 
@@ -223,7 +318,9 @@ export function DashboardTab({ userName }: DashboardTabProps) {
       <section className="dashboard-tab__pulse-countdown">
         <header className="dashboard-tab__section-header">
           <h2>Next Pulse</h2>
-          <button type="button" className="dashboard-tab__section-link">View all</button>
+          <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('pulse')}>
+            View all
+          </button>
         </header>
         {kpis?.nextPulseAt ? (
           <div className="dashboard-tab__countdown-card">
