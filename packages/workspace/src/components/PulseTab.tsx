@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // PulseTab - Native React implementation of the Pulse view
 // ---------------------------------------------------------------------------
 // Daily pulse check-ins, stats, and timeline.
@@ -90,12 +90,7 @@ export function PulseTab({ loading }: PulseTabProps) {
     }
   }, []);
 
-  // Placeholder data - will be replaced with real pulse service calls
-  const stats = {
-    tasksDone: 0,
-    focusHours: 0,
-    streak: 0,
-  };
+
 
   const checkpoints: PulseCheckpoint[] = [];
 
@@ -201,21 +196,7 @@ export function PulseTab({ loading }: PulseTabProps) {
         <p className="pulse-tab__subtitle">Check in with your day</p>
       </header>
 
-      {/* Stats Row */}
-      <div className="pulse-tab__stats">
-        <div className="pulse-tab__stat-card">
-          <span className="pulse-tab__stat-value">{stats.tasksDone}</span>
-          <span className="pulse-tab__stat-label">Tasks Done</span>
-        </div>
-        <div className="pulse-tab__stat-card">
-          <span className="pulse-tab__stat-value">{stats.focusHours}</span>
-          <span className="pulse-tab__stat-label">Focus Hours</span>
-        </div>
-        <div className="pulse-tab__stat-card">
-          <span className="pulse-tab__stat-value">{stats.streak}</span>
-          <span className="pulse-tab__stat-label">Streak</span>
-        </div>
-      </div>
+
 
       {/* Pulse Timeline */}
       <section className="pulse-tab__timeline-section">

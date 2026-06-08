@@ -573,8 +573,13 @@ function FirstTimeOnboardingWizard({ userName, schoolName: initialSchoolName = '
           &larr;
         </button>
         <button type="button" className="bubble-submit" disabled={applying} onClick={handleApply}>
-          {applying ? 'Applying...' : 'Take me to AdminI'}
+          {applying ? 'Setting up...' : 'Take me to Admini'}
         </button>
+        {step === 4 && (
+          <button type="button" className="forgot-link" onClick={handleApply} disabled={applying}>
+            Not interested yet?
+          </button>
+        )}
       </div>
     </section>
   );

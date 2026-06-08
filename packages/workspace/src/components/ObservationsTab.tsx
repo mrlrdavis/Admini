@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { saveCapture } from '../services/captureService';
 import { showToast } from './Toast';
+import { unlockBadge } from './BadgesPanel';
 
 // Types
 interface Observation {
@@ -36,9 +37,9 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
   const [observations, setObservations] = useState<Observation[]>([]);
   const [observeeType, setObserveeType] = useState<'student' | 'staff'>('student');
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState<string[]>([]);
   const [subject, setSubject] = useState('');
-  const [classPeriod, setClassPeriod] = useState('');
+  const [classPeriod, setClassPeriod] = useState<string[]>([]);
   const [teachingStandard, setTeachingStandard] = useState('');
   const [note, setNote] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'student' | 'staff'>('all');
@@ -93,9 +94,9 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
 
   function resetForm() {
     setName('');
-    setCategory('');
+    setCategory([]);
     setSubject('');
-    setClassPeriod('');
+    setClassPeriod([]);
     setTeachingStandard('');
     setNote('');
     setEditingId(null);
@@ -108,9 +109,9 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
       id: editingId || Date.now().toString(),
       observeeType,
       name: name.trim(),
-      category: category || 'General',
+      category: category.length > 0 ? category.join(', ') : 'General',
       subject: observeeType === 'staff' ? subject : undefined,
-      classPeriod: observeeType === 'staff' ? classPeriod : undefined,
+      classPeriod: observeeType === 'staff' && classPeriod.length > 0 ? classPeriod.join(', ') : undefined,
       teachingStandard: observeeType === 'staff' ? teachingStandard : undefined,
       note: note.trim(),
       observer: userName || 'Unknown',
@@ -133,6 +134,7 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
     }
 
     showToast(editingId ? 'Observation updated' : 'Observation saved for ' + name);
+    if (!editingId) unlockBadge('first-observation');
     resetForm();
   }
 
@@ -140,9 +142,9 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
     setEditingId(obs.id);
     setObserveeType(obs.observeeType);
     setName(obs.name);
-    setCategory(obs.category);
+    setCategory(obs.category ? obs.category.split(', ') : []);
     setSubject(obs.subject || '');
-    setClassPeriod(obs.classPeriod || '');
+    setClassPeriod(obs.classPeriod ? obs.classPeriod.split(', ') : []);
     setTeachingStandard(obs.teachingStandard || '');
     setNote(obs.note);
   }
@@ -233,8 +235,8 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
 
       {/* Observee Type Toggle */}
       <div className="observations-tab__type-toggle">
-        <button type="button" className={'observations-tab__type-btn' + (observeeType === 'student' ? ' observations-tab__type-btn--active' : '')} onClick={() => { setObserveeType('student'); setName(''); setCategory(''); }}>Student</button>
-        <button type="button" className={'observations-tab__type-btn' + (observeeType === 'staff' ? ' observations-tab__type-btn--active' : '')} onClick={() => { setObserveeType('staff'); setName(''); setCategory(''); }}>Staff</button>
+        <button type="button" className={'observations-tab__type-btn' + (observeeType === 'student' ? ' observations-tab__type-btn--active' : '')} onClick={() => { setObserveeType('student'); setName(''); setCategory([]); }}>Student</button>
+        <button type="button" className={'observations-tab__type-btn' + (observeeType === 'staff' ? ' observations-tab__type-btn--active' : '')} onClick={() => { setObserveeType('staff'); setName(''); setCategory([]); }}>Staff</button>
       </div>
 
       {/* Observation Form */}
@@ -255,7 +257,7 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
           <label className="observations-tab__form-label">Category</label>
           <div className="observations-tab__categories">
             {categories.map((cat) => (
-              <button key={cat} type="button" className={'observations-tab__category-pill' + (category === cat ? ' observations-tab__category-pill--active' : '')} onClick={() => setCategory(category === cat ? '' : cat)}>{cat}</button>
+              <button key={cat} type="button" className={'observations-tab__category-pill' + (category.includes(cat) ? ' observations-tab__category-pill--active' : '')} onClick={() => setCategory(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])}>{cat}</button>
             ))}
           </div>
         </div>
@@ -270,7 +272,7 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
               <label className="observations-tab__form-label">Class Period</label>
               <div className="observations-tab__categories">
                 {CLASS_PERIODS.map((p) => (
-                  <button key={p} type="button" className={'observations-tab__category-pill' + (classPeriod === p ? ' observations-tab__category-pill--active' : '')} onClick={() => setClassPeriod(classPeriod === p ? '' : p)}>{p}</button>
+                  <button key={p} type="button" className={'observations-tab__category-pill' + (classPeriod.includes(p) ? ' observations-tab__category-pill--active' : '')} onClick={() => setClassPeriod(prev => prev.includes(p) ? prev.filter(c => c !== p) : [...prev, p])}>{p}</button>
                 ))}
               </div>
             </div>

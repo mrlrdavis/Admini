@@ -1,4 +1,4 @@
-﻿/**
+/**
  * App Preferences Storage
  *
  * Local-only preferences stored in IndexedDB.
@@ -19,7 +19,7 @@ export type AppPreferences = AppPreferencesData;
 
 export const DEFAULT_PREFERENCES: AppPreferencesData = {
   theme: 'system',
-  defaultTab: 'dashboard',
+  defaultTab: 'capture',
   compactMode: false,
 };
 
