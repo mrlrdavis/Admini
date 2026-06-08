@@ -42,7 +42,7 @@
   top: var(--ws-space-xs);
   bottom: var(--ws-space-xs);
   left: var(--ws-space-xs);
-  width: calc(33.333% - var(--ws-space-xs));
+  width: calc(25% - var(--ws-space-xs));
   background: var(--ws-color-white);
   border-radius: var(--ws-radius-pill);
   box-shadow: var(--ws-shadow-card);
@@ -577,9 +577,13 @@
   font-size: var(--ws-font-size-sm);
 }
 
-/* Mode indicator for 3 tabs */
+/* Mode indicator for 4 tabs */
 .capture-tab__mode-indicator--notes {
   transform: translateX(200%);
+}
+
+.capture-tab__mode-indicator--observations {
+  transform: translateX(300%);
 }
 
 .capture-tab__capture-edit-btn {
@@ -723,4 +727,56 @@
 .capture-tab__note-toolbar + .capture-tab__note-editor-textarea {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+.capture-tab__toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--ws-color-border);
+  margin: 0 4px;
+  align-self: center;
+}
+
+/* Observations Mode */
+.capture-tab__observations-mode {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-lg);
+}
+
+.capture-tab__observation-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+}
+
+.capture-tab__observation-select {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-base);
+  background: var(--ws-color-white, #fff);
+  color: var(--ws-color-text);
+  width: 100%;
+}
+
+.capture-tab__observation-select:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+}
+
+.capture-tab__observations-list {
+  margin-top: var(--ws-space-md);
+}
+
+.capture-tab__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+}
+
+.capture-tab__form-label {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-text-muted);
 }
