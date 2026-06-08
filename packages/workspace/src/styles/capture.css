@@ -190,6 +190,16 @@
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
 }
+.capture-tab__coming-soon-badge {
+  background: var(--ws-color-text-muted, #636E72);
+  color: var(--ws-color-white, #fff);
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--ws-radius-pill, 9999px);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 
 .capture-tab__ai-text {
   font-size: var(--ws-font-size-sm);

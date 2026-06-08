@@ -1,15 +1,15 @@
-﻿import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
+import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 
 const TAB_ICONS: Record<string, string> = {
-  capture: '📝',
-  dashboard: '📊',
-  tasks: '✅',
-  pulse: '💓',
-  more: '⚙️',
-  admin: '🔧',
+  capture: '??',
+  dashboard: '??',
+  tasks: '?',
+  pulse: '??',
+  more: '??',
+  admin: '??',
 };
 
-export function DesktopSidebar({ activeTab, tabs, onTabChange }: NavigationAdapterProps) {
+export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
   return (
     <nav className="desktop-sidebar" aria-label="Workspace navigation">
       <div className="desktop-sidebar__brand">AdminI.</div>
@@ -25,13 +25,23 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange }: NavigationAdapt
               aria-controls={`panel-${tab.id}`}
             >
               <span className="desktop-sidebar__icon" aria-hidden="true">
-                {TAB_ICONS[tab.id] ?? '📄'}
+                {TAB_ICONS[tab.id] ?? '??'}
               </span>
               <span className="desktop-sidebar__label">{tab.label}</span>
             </button>
           </li>
         ))}
       </ul>
+      {onSignOut && (
+        <button
+          type="button"
+          className="desktop-sidebar__sign-out"
+          onClick={onSignOut}
+          aria-label="Sign out"
+        >
+          Sign Out
+        </button>
+      )}
     </nav>
   );
 }

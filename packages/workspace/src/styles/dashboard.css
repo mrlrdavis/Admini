@@ -65,9 +65,10 @@
   scroll-snap-align: start;
   background: var(--ws-color-white);
   border-radius: var(--ws-radius-card);
-  box-shadow: var(--ws-shadow-card);
+  box-shadow: none;
+  border: none;
   padding: var(--ws-space-md) var(--ws-space-lg);
-  color: var(--ws-color-text, #2D3436);
+  color: #2D3436;
 }
 
 /* Section Headers */

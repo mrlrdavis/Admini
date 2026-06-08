@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    IntegrationCatalog styles
    ========================================================================== */
 
@@ -106,10 +106,10 @@
 }
 
 .integration-catalog__connect-btn {
-  background: var(--color-primary, #3b82f6);
-  border: none;
+  background: var(--ws-color-white, #ffffff);
+  color: var(--ws-color-text, #2D3436);
+  border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 0.5rem;
-  color: #fff;
   cursor: pointer;
   flex-shrink: 0;
   font-size: 0.8125rem;

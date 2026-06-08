@@ -87,6 +87,7 @@ export interface NavigationAdapterProps {
   activeTab: WorkspaceTab;
   tabs: TabItem[];
   onTabChange: (tabId: WorkspaceTab) => void;
+  onSignOut?: () => void;
 }
 
 // Auth user (minimal shape expected by workspace)

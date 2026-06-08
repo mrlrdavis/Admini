@@ -651,8 +651,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Profile</h1>
         </header>
 
-        <section className="more-tab__section" aria-labelledby="profile-sub-view-heading">
-          <h2 id="profile-sub-view-heading" className="more-tab__section-title">Edit Profile</h2>
+        <section className="more-tab__section">
           <ProfileSettings
             userName={userName}
             schoolName={schoolName}
@@ -683,8 +682,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Notifications</h1>
         </header>
 
-        <section className="more-tab__section" aria-labelledby="notifications-sub-view-heading">
-          <h2 id="notifications-sub-view-heading" className="more-tab__section-title">Notification Preferences</h2>
+        <section className="more-tab__section">
           {notifLoading ? (
             <div className="more-tab__notif-loading" aria-busy="true">
               <SkeletonCard height={44} />
@@ -726,8 +724,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>App Preferences</h1>
         </header>
 
-        <section className="more-tab__section" aria-labelledby="preferences-sub-view-heading">
-          <h2 id="preferences-sub-view-heading" className="more-tab__section-title">App Preferences</h2>
+        <section className="more-tab__section">
           <AppPreferences
             theme={themePreference}
             onChange={(key, value) => {
@@ -760,10 +757,9 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Integrations</h1>
         </header>
 
-        <section className="more-tab__section" aria-labelledby="integrations-sub-view-heading">
+        <section className="more-tab__section">
           {showCatalog ? (
             <>
-              <h2 id="integrations-sub-view-heading" className="more-tab__section-title">Add Integration</h2>
               <IntegrationCatalog
                 onBack={() => setShowCatalog(false)}
                 onConnected={() => setShowCatalog(false)}
@@ -771,7 +767,6 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
             </>
           ) : (
             <>
-              <h2 id="integrations-sub-view-heading" className="more-tab__section-title">Connected Apps</h2>
               <ConnectedIntegrations onAddIntegration={() => setShowCatalog(true)} />
             </>
           )}
@@ -799,8 +794,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <h1 ref={subViewHeadingRef} className="more-tab__title" tabIndex={-1}>Account</h1>
         </header>
 
-        <section className="more-tab__section" aria-labelledby="account-sub-view-heading">
-          <h2 id="account-sub-view-heading" className="more-tab__section-title">Account Management</h2>
+        <section className="more-tab__section">
 
           {/* Change Password - only for email/password users */}
           {isEmailUser === true && (
@@ -1115,7 +1109,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
           <div className="more-tab__profile-row">
             <div className="more-tab__profile-info">
               <span className="more-tab__profile-label">Role</span>
-              <span className="more-tab__profile-value">{userRole || 'Not provided'}</span>
+              <span className="more-tab__profile-value">{userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : 'Not provided'}</span>
             </div>
           </div>
         </div>

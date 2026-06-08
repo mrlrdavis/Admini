@@ -10,7 +10,7 @@ const TAB_ICONS: Record<string, string> = {
   admin: '\uD83D\uDD27',
 };
 
-export function MobileHamburger({ activeTab, tabs, onTabChange }: NavigationAdapterProps) {
+export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
   const [open, setOpen] = useState(false);
 
   function handleTabSelect(tabId: string) {
@@ -59,6 +59,16 @@ export function MobileHamburger({ activeTab, tabs, onTabChange }: NavigationAdap
               );
             })}
           </ul>
+          {onSignOut && (
+            <button
+              type="button"
+              className="mobile-nav-drawer__sign-out"
+              onClick={() => { onSignOut(); setOpen(false); }}
+              aria-label="Sign out"
+            >
+              Sign Out
+            </button>
+          )}
         </nav>
       </div>
     </>

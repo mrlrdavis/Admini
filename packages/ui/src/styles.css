@@ -285,7 +285,7 @@ select {
 
 .kpi-card__label {
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: #636E72;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -293,7 +293,7 @@ select {
 .kpi-card__value {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: #2D3436;
 }
 
 .kpi-card__trend {

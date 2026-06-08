@@ -242,6 +242,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
               </svg>
               <span className="capture-tab__ai-badge">AI</span>
               <span className="capture-tab__ai-label">Suggestion</span>
+              <span className="capture-tab__coming-soon-badge">Coming Soon</span>
             </div>
             <p className="capture-tab__ai-text">
               Start speaking to get AI-powered categorization suggestions.
