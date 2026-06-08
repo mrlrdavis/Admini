@@ -93,7 +93,9 @@ export function WorkspaceShell({
   return (
     <>
       {renderNavigation({ activeTab, tabs: visibleTabs, onTabChange: handleTabChange })}
-      {NATIVE_TABS.has(activeTab) && renderTabContent()}
+      <div className="workspace-shell__content">
+        {NATIVE_TABS.has(activeTab) && renderTabContent()}
+      </div>
       <IframeFallback
         src={prototypePath}
         visible={iframeVisible}

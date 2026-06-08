@@ -11,8 +11,6 @@
   display: flex;
   flex-direction: column;
   padding: var(--ws-space-lg, 1.5rem) 0;
-  position: sticky;
-  top: 0;
 }
 
 .desktop-sidebar__brand {
