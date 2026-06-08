@@ -216,3 +216,14 @@
     padding-top: 68px;
   }
 }
+/* Ensure page titles don't overlap the hamburger trigger on mobile */
+@media (max-width: 768px) {
+  .dashboard-tab__greeting,
+  .capture-tab__header,
+  .tasks-tab__header,
+  .pulse-tab__header,
+  .more-tab__header,
+  .admin-tab__header {
+    padding-left: 52px;
+  }
+}

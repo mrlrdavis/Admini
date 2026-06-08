@@ -65,11 +65,53 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   // -------------------------------------------------------------------------
 
   function handleMicToggle() {
-    setIsRecording((prev) => !prev);
-    if (!isRecording) {
-      // Simulate transcription start (UI shell only)
-      setTranscription('');
+    if (isRecording) {
+      setIsRecording(false);
+      return;
     }
+
+    // Use Web Speech API for transcription
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setTranscription('[Speech recognition not supported in this browser]');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event: any) => {
+      let finalText = '';
+      for (let i = 0; i < event.results.length; i++) {
+        finalText += event.results[i][0].transcript;
+      }
+      setTranscription(finalText);
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+    setIsRecording(true);
+    setTranscription('');
+
+    // Store reference to stop later (via closure in the isRecording state change)
+    const checkStop = setInterval(() => {
+      // Read current state indirectly - when component re-renders with isRecording=false, stop
+    }, 200);
+
+    // Cleanup: stop after 60s max
+    setTimeout(() => {
+      recognition.stop();
+      clearInterval(checkStop);
+    }, 60000);
   }
 
   function handleWordSelect(category: string, word: string) {

@@ -67,6 +67,7 @@
   border-radius: var(--ws-radius-card);
   box-shadow: var(--ws-shadow-card);
   padding: var(--ws-space-md) var(--ws-space-lg);
+  color: var(--ws-color-text, #2D3436);
 }
 
 /* Section Headers */
