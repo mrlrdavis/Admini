@@ -8,9 +8,10 @@ const TAB_ICONS: Record<string, string> = {
   pulse: '\uD83D\uDC93',
   more: '\u2699\uFE0F',
   admin: '\uD83D\uDD27',
+  observations: '\uD83D\uDC41',
 };
 
-const CORE_TAB_IDS = ['capture', 'dashboard', 'tasks', 'pulse'];
+const CORE_TAB_IDS = ['capture', 'dashboard', 'tasks', 'observations', 'pulse'];
 const UTILITY_TAB_IDS = ['more', 'admin'];
 
 export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {

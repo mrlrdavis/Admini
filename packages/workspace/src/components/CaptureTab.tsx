@@ -1,5 +1,5 @@
-// ---------------------------------------------------------------------------
-// CaptureTab - Voice/Tap/Notes capture interface for quick observations and notes.
+﻿// ---------------------------------------------------------------------------
+// CaptureTab - Voice/Tap/Notes capture interface for quick captures and notes.
 // ---------------------------------------------------------------------------
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -19,7 +19,7 @@ import { getClient } from '../services/getClient';
 // Types
 // ---------------------------------------------------------------------------
 
-type CaptureMode = 'voice' | 'tap' | 'notes' | 'observations';
+type CaptureMode = 'voice' | 'tap' | 'notes';
 
 interface QuickCapture {
   id: string;
@@ -61,7 +61,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [editCaptureText, setEditCaptureText] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Roster integration for observations
+  // Roster integration for Tap mode Students category
   const [roster, setRoster] = useState<string[]>([]);
   useEffect(() => {
     try {
@@ -70,18 +70,8 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
     } catch {}
   }, []);
 
-  // Observations state
-  const [observationStudent, setObservationStudent] = useState('');
-  const [observationCategory, setObservationCategory] = useState('');
-  const [observationNote, setObservationNote] = useState('');
-  const [observations, setObservations] = useState<{ id: string; student: string; category: string; note: string; timestamp: string }[]>([]);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('admini_observations');
-      if (raw) setObservations(JSON.parse(raw));
-    } catch {}
-  }, []);
+
   const [taskSuggestionId, setTaskSuggestionId] = useState<string | null>(null);
   const [lastCaptureText, setLastCaptureText] = useState<string | null>(null);
   const [showTaskSuggestion, setShowTaskSuggestion] = useState(false);
@@ -424,15 +414,8 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
         >
           Notes
         </button>
-        <button
-          type="button"
-          className={'capture-tab__mode-btn' + (mode === 'observations' ? ' capture-tab__mode-btn--active' : '')}
-          onClick={() => setMode('observations')}
-        >
-          Observe
-        </button>
         <span
-          className={'capture-tab__mode-indicator' + (mode === 'tap' ? ' capture-tab__mode-indicator--tap' : mode === 'notes' ? ' capture-tab__mode-indicator--notes' : mode === 'observations' ? ' capture-tab__mode-indicator--observations' : '')}
+          className={'capture-tab__mode-indicator' + (mode === 'tap' ? ' capture-tab__mode-indicator--tap' : mode === 'notes' ? ' capture-tab__mode-indicator--notes' : '')}
           aria-hidden="true"
         />
       </div>
@@ -681,115 +664,9 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
         </section>
       )}
 
-      {/* Observations Mode */}
-      {mode === 'observations' && (
-        <section className="capture-tab__observations-mode">
-          <div className="capture-tab__observation-form">
-            <div className="capture-tab__form-group">
-              <label className="capture-tab__form-label">Student</label>
-              {roster.length > 0 ? (
-                <select
-                  className="capture-tab__observation-select"
-                  value={observationStudent}
-                  onChange={(e) => setObservationStudent(e.target.value)}
-                >
-                  <option value="">Select student...</option>
-                  {roster.map((name) => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  className="capture-tab__add-input"
-                  placeholder="Student name..."
-                  value={observationStudent}
-                  onChange={(e) => setObservationStudent(e.target.value)}
-                />
-              )}
-            </div>
-            <div className="capture-tab__form-group">
-              <label className="capture-tab__form-label">Category</label>
-              <div className="capture-tab__pills">
-                {['Behavior', 'Academic', 'Social', 'Emotional', 'Physical', 'Attendance'].map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    className={'capture-tab__pill' + (observationCategory === cat ? ' capture-tab__pill--active' : '')}
-                    onClick={() => setObservationCategory(observationCategory === cat ? '' : cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="capture-tab__form-group">
-              <label className="capture-tab__form-label">Note</label>
-              <textarea
-                className="capture-tab__tap-freetext"
-                placeholder="Observation details..."
-                value={observationNote}
-                onChange={(e) => setObservationNote(e.target.value)}
-              />
-            </div>
-            <button
-              type="button"
-              className="capture-tab__save-btn"
-              disabled={!observationStudent || !observationNote.trim()}
-              onClick={() => {
-                const obs = {
-                  id: Date.now().toString(),
-                  student: observationStudent,
-                  category: observationCategory || 'General',
-                  note: observationNote.trim(),
-                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                };
-                const updated = [obs, ...observations];
-                setObservations(updated);
-                localStorage.setItem('admini_observations', JSON.stringify(updated));
-                setObservationStudent('');
-                setObservationCategory('');
-                setObservationNote('');
-                
-                // Also persist as a capture
-                if (organizationId && userId) {
-                  const text = obs.student + ' [' + obs.category + ']: ' + obs.note;
-                  saveCapture({ organizationId, userId, text, mode: 'tap' }).catch(() => {});
-                }
-                
-                // Show task suggestion
-                setLastCaptureText(obs.student + ' [' + obs.category + ']: ' + obs.note);
-                setShowTaskSuggestion(true);
-              }}
-            >
-              Save Observation
-            </button>
-          </div>
-
-          {/* Recent Observations */}
-          <div className="capture-tab__observations-list">
-            <h3 className="capture-tab__captures-title">Recent Observations</h3>
-            {observations.length === 0 ? (
-              <p className="capture-tab__empty">No observations yet. {roster.length === 0 ? 'Upload a roster in Admin to see student names here.' : ''}</p>
-            ) : (
-              <ul className="capture-tab__capture-list">
-                {observations.slice(0, 10).map((obs) => (
-                  <li key={obs.id} className="capture-tab__capture-item">
-                    <div style={{ flex: 1 }}>
-                      <strong>{obs.student}</strong> <span className="capture-tab__pill capture-tab__pill--active" style={{ fontSize: '0.7rem', padding: '1px 6px' }}>{obs.category}</span>
-                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--ws-color-text-muted)' }}>{obs.note}</p>
-                    </div>
-                    <span className="capture-tab__capture-time">{obs.timestamp}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
-      )}
 
       {/* Save Button - only for voice/tap modes */}
-      {mode !== 'notes' && mode !== 'observations' && (
+      {mode !== 'notes' && (
         <button
           type="button"
           className="capture-tab__save-btn"
@@ -838,7 +715,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       )}
 
       {/* Quick Captures List - only for voice/tap modes */}
-      {mode !== 'notes' && mode !== 'observations' && (
+      {mode !== 'notes' && (
         <section className="capture-tab__captures">
           <h2 className="capture-tab__captures-title">Recent Captures</h2>
           {captures.length === 0 ? (
@@ -897,4 +774,3 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
     </div>
   );
 }
-

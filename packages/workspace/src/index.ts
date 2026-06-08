@@ -1,4 +1,4 @@
-// Components
+﻿// Components
 export { WorkspaceShell, NATIVE_TABS } from './components/WorkspaceShell';
 export { DashboardTab } from './components/DashboardTab';
 export { AdminTab } from './components/AdminTab';
@@ -20,6 +20,8 @@ export type { ConnectedIntegrationsProps } from './components/ConnectedIntegrati
 export { IntegrationCatalog } from './components/IntegrationCatalog';
 export type { IntegrationCatalogProps } from './components/IntegrationCatalog';
 export { IframeFallback } from './components/IframeFallback';
+export { ObservationsTab } from './components/ObservationsTab';
+export type { ObservationsTabProps } from './components/ObservationsTab';
 export { BadgesPanel, unlockBadge } from './components/BadgesPanel';
 
 // Hooks

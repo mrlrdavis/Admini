@@ -396,6 +396,7 @@
 /* Badge Tooltip */
 .badges-panel__tooltip {
   position: absolute;
+  opacity: 1 !important;
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);

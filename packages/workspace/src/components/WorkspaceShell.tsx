@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // WorkspaceShell - Platform-agnostic shell component
 // ---------------------------------------------------------------------------
 // Manages tab state, role-gated tab visibility, native tab routing,
@@ -13,13 +13,14 @@ import { CaptureTab } from './CaptureTab';
 import { TasksTab } from './TasksTab';
 import { PulseTab } from './PulseTab';
 import { MoreTab } from './MoreTab';
+import { ObservationsTab } from './ObservationsTab';
 import { IframeFallback } from './IframeFallback';
 import { ToastContainer } from './Toast';
 import { getAppPreferences } from '../services/appPreferencesStorage';
 
 /** Set of tabs with native React implementations. */
 export const NATIVE_TABS: ReadonlySet<WorkspaceTab> = new Set([
-  'dashboard', 'admin', 'capture', 'tasks', 'pulse', 'more',
+  'dashboard', 'admin', 'capture', 'tasks', 'pulse', 'more', 'observations',
 ]);
 
 export function WorkspaceShell({
@@ -62,6 +63,7 @@ export function WorkspaceShell({
       { id: 'capture', label: 'Capture' },
       { id: 'dashboard', label: 'Dashboard' },
       { id: 'tasks', label: 'Tasks' },
+      { id: 'observations', label: 'Observations' },
       { id: 'pulse', label: 'Pulse' },
       { id: 'more', label: 'More' },
     ];
@@ -95,6 +97,7 @@ export function WorkspaceShell({
       case 'admin': return canAccessAdmin && organizationId ? <AdminTab organizationId={organizationId} userRole={userRole} /> : <div className="admin-tab admin-tab--empty"><p>Complete onboarding to access Admin settings.</p></div>;
       case 'capture': return <CaptureTab userId={user.id} organizationId={organizationId} />;
       case 'tasks': return <TasksTab userId={user.id} organizationId={organizationId} />;
+      case 'observations': return <ObservationsTab userId={user.id} organizationId={organizationId} userName={userName} />;
       case 'pulse': return <PulseTab />;
       case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;
       default: return null;
