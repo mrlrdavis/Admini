@@ -230,3 +230,40 @@
     min-width: 0;
   }
 }
+/* Dark mode overrides for workspace content */
+:root[data-theme='dark'] .workspace-shell__content {
+  background: linear-gradient(180deg, #1a1e1a 0%, #252a25 40%, #252a25 100%);
+}
+
+:root[data-theme='dark'] .dashboard-tab,
+:root[data-theme='dark'] .capture-tab,
+:root[data-theme='dark'] .tasks-tab,
+:root[data-theme='dark'] .pulse-tab,
+:root[data-theme='dark'] .more-tab {
+  color: #e4ebe5;
+}
+
+:root[data-theme='dark'] .dashboard-tab__kpis > *,
+:root[data-theme='dark'] .tasks-tab__task-card,
+:root[data-theme='dark'] .capture-tab__capture-item,
+:root[data-theme='dark'] .pulse-tab__stat-card,
+:root[data-theme='dark'] .pulse-tab__day-card,
+:root[data-theme='dark'] .pulse-tab__notification-row {
+  background: #2f352f;
+  color: #e4ebe5;
+}
+
+:root[data-theme='dark'] .desktop-sidebar {
+  background: #1a1e1a;
+  border-right-color: #3d4a3e;
+}
+
+:root[data-theme='dark'] .desktop-sidebar__tab {
+  color: #a3b3a5;
+}
+
+:root[data-theme='dark'] .desktop-sidebar__tab:hover,
+:root[data-theme='dark'] .desktop-sidebar__tab--active {
+  background: #2f352f;
+  color: #e4ebe5;
+}

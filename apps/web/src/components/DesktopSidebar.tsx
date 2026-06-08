@@ -1,4 +1,5 @@
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
+import { useThemePreference } from '@admini/workspace';
 
 const TAB_ICONS: Record<string, string> = {
   capture: '\uD83D\uDCDD',
@@ -10,6 +11,7 @@ const TAB_ICONS: Record<string, string> = {
 };
 
 export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
+  const { resolvedTheme, setThemePreference } = useThemePreference();
   return (
     <nav className="desktop-sidebar" aria-label="Workspace navigation">
       <div className="desktop-sidebar__brand">AdminI.</div>
@@ -32,6 +34,9 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: Navi
           </li>
         ))}
       </ul>
+      <button type="button" className="desktop-sidebar__theme-toggle" onClick={() => setThemePreference(resolvedTheme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
+        {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+      </button>
       {onSignOut && (
         <button
           type="button"

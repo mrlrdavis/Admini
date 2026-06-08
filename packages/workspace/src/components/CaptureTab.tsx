@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // CaptureTab - Voice/Tap/Notes capture interface for quick observations and notes.
 // ---------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [mode, setMode] = useState<CaptureMode>('voice');
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
-  const [selectedWords, setSelectedWords] = useState<Record<string, string>>({});
+  const [selectedWords, setSelectedWords] = useState<Record<string, string[]>>({});
   const [tapFreeText, setTapFreeText] = useState('');
   const [captures, setCaptures] = useState<QuickCapture[]>([]);
   const [expandedCaptureId, setExpandedCaptureId] = useState<string | null>(null);
@@ -166,10 +166,13 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   }
 
   function handleWordSelect(category: string, word: string) {
-    setSelectedWords((prev) => ({
-      ...prev,
-      [category]: prev[category] === word ? '' : word,
-    }));
+    setSelectedWords((prev) => {
+      const current = prev[category] || [];
+      if (current.includes(word)) {
+        return { ...prev, [category]: current.filter(w => w !== word) };
+      }
+      return { ...prev, [category]: [...current, word] };
+    });
   }
 
   function handleQuickCapture() {
@@ -178,12 +181,12 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       text = transcription;
     } else {
       const wordsText = Object.entries(selectedWords)
-        .filter(([, v]) => v)
-        .map(([k, v]) => `: `)
+        .filter(([, v]) => v.length > 0)
+        .map(([k, v]) => k + ': ' + v.join(', '))
         .join(' \u00b7 ');
       const freeText = tapFreeText.trim();
       if (wordsText && freeText) {
-        text = ` \u2014 `;
+        text = wordsText + ' \u2014 ' + freeText;
       } else {
         text = wordsText || freeText;
       }
@@ -349,27 +352,27 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       <div className="capture-tab__mode-toggle">
         <button
           type="button"
-          className={`capture-tab__mode-btn `}
+          className={'capture-tab__mode-btn' + (mode === 'voice' ? ' capture-tab__mode-btn--active' : '')}
           onClick={() => setMode('voice')}
         >
           Voice
         </button>
         <button
           type="button"
-          className={`capture-tab__mode-btn `}
+          className={'capture-tab__mode-btn' + (mode === 'tap' ? ' capture-tab__mode-btn--active' : '')}
           onClick={() => setMode('tap')}
         >
           Tap
         </button>
         <button
           type="button"
-          className={`capture-tab__mode-btn `}
+          className={'capture-tab__mode-btn' + (mode === 'notes' ? ' capture-tab__mode-btn--active' : '')}
           onClick={() => setMode('notes')}
         >
           Notes
         </button>
         <span
-          className={`capture-tab__mode-indicator  `}
+          className={'capture-tab__mode-indicator' + (mode === 'tap' ? ' capture-tab__mode-indicator--tap' : mode === 'notes' ? ' capture-tab__mode-indicator--notes' : '')}
           aria-hidden="true"
         />
       </div>
@@ -380,7 +383,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
           <div className="capture-tab__mic-area">
             <button
               type="button"
-              className={`capture-tab__mic-btn `}
+              className={'capture-tab__mic-btn' + (isRecording ? ' capture-tab__mic-btn--recording' : '')}
               onClick={handleMicToggle}
               aria-label={isRecording ? 'Stop recording' : 'Start recording'}
             >
@@ -436,7 +439,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
                     <button
                       key={word}
                       type="button"
-                      className={`capture-tab__pill `}
+                      className={'capture-tab__pill' + ((selectedWords[category] || []).includes(word) ? ' capture-tab__pill--active' : '')}
                       onClick={() => handleWordSelect(category, word)}
                     >
                       {word}
@@ -456,13 +459,13 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
           />
 
           {/* Selected summary */}
-          {Object.values(selectedWords).some(Boolean) && (
+          {Object.values(selectedWords).some(arr => arr.length > 0) && (
             <div className="capture-tab__selection-summary">
               {Object.entries(selectedWords)
-                .filter(([, v]) => v)
+                .filter(([, v]) => v.length > 0)
                 .map(([k, v]) => (
                   <span key={k} className="capture-tab__selection-tag">
-                    {k}: {v}
+                    {k}: {v.join(', ')}
                   </span>
                 ))}
             </div>
