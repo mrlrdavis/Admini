@@ -9,9 +9,11 @@
     "workers/*"
   ],
   "scripts": {
+    "dev": "npm run dev -w @admini/web",
     "dev:desktop": "npm run dev -w @admini/desktop",
     "dev:mobile": "npm run dev -w @admini/mobile",
     "build": "npm run build --workspaces --if-present",
+    "build:app": "npm run build -w @admini/web",
     "build:apps": "npm run build -w @admini/desktop && npm run build -w @admini/mobile && node scripts/prepare-netlify.mjs",
     "build:worker": "npm run build -w @admini/api-worker",
     "typecheck": "npm run typecheck --workspaces --if-present",

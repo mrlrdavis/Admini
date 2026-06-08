@@ -1,12 +1,39 @@
 create extension if not exists pgcrypto;
 
-create type public.admini_role as enum ('admin', 'principal', 'teacher', 'staff');
-create type public.invitation_status as enum ('pending', 'accepted', 'revoked', 'expired');
-create type public.capture_status as enum ('queued', 'synced', 'failed');
-create type public.task_status as enum ('open', 'in_progress', 'completed', 'archived');
-create type public.task_priority as enum ('low', 'normal', 'high', 'urgent');
-create type public.integration_provider as enum ('schoology', 'infinite_campus', 'google_classroom');
-create type public.integration_status as enum ('not_configured', 'mock', 'connected', 'error');
+DO $$ BEGIN
+  CREATE TYPE public.admini_role AS ENUM ('admin', 'principal', 'teacher', 'staff');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.invitation_status AS ENUM ('pending', 'accepted', 'revoked', 'expired');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.capture_status AS ENUM ('queued', 'synced', 'failed');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.task_status AS ENUM ('open', 'in_progress', 'completed', 'archived');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.task_priority AS ENUM ('low', 'normal', 'high', 'urgent');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.integration_provider AS ENUM ('schoology', 'infinite_campus', 'google_classroom');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE public.integration_status AS ENUM ('not_configured', 'mock', 'connected', 'error');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,

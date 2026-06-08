@@ -11,3 +11,5 @@ coverage/
 !.env.example
 server.out.log
 server.err.log
+.kiro/specs/integration-catalog-update/requirements.md
+.kiro/specs/integration-catalog-update/design.md

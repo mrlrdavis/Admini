@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Redirecting...</title></head>
+<body>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    registrations.forEach(function(reg) {
+      if (reg.scope.includes('/desktop/') || reg.scope.includes('/mobile/')) {
+        reg.unregister();
+      }
+    });
+  });
+}
+window.location.replace('/');
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=/"></noscript>
+</body>
+</html>

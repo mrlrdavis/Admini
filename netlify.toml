@@ -1,60 +1,51 @@
-[build]
-command = "npm run build:apps"
+﻿[build]
+command = "npm run build:app"
 publish = "dist/netlify"
 
 [build.environment]
 NODE_VERSION = "20"
 
+# Legacy path redirects (processed in order, before SPA fallback)
 [[redirects]]
 from = "/desktop"
-to = "/desktop/"
+to = "/"
 status = 301
 
 [[redirects]]
 from = "/desktop/*"
-to = "/desktop/index.html"
-status = 200
+to = "/:splat"
+status = 301
 
 [[redirects]]
 from = "/mobile"
-to = "/mobile/"
+to = "/"
 status = 301
 
 [[redirects]]
 from = "/mobile/*"
-to = "/mobile/index.html"
-status = 200
+to = "/:splat"
+status = 301
 
+# SPA fallback (must be last)
 [[redirects]]
-from = "/"
-to = "/desktop/"
-status = 302
+from = "/*"
+to = "/index.html"
+status = 200
 
 [[headers]]
 for = "/*"
 [headers.values]
-X-Content-Type-Options = "nosniff"
-Referrer-Policy = "strict-origin-when-cross-origin"
-Permissions-Policy = "camera=(), microphone=(self), geolocation=()"
+  X-Content-Type-Options = "nosniff"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  Permissions-Policy = "camera=(), microphone=(self), geolocation=()"
 
 [[headers]]
-  for = "/desktop/sw.js"
-  [headers.values]
-    Cache-Control = "no-cache"
-    Content-Type = "application/javascript"
+for = "/sw.js"
+[headers.values]
+  Cache-Control = "no-cache"
+  Content-Type = "application/javascript"
 
 [[headers]]
-  for = "/mobile/sw.js"
-  [headers.values]
-    Cache-Control = "no-cache"
-    Content-Type = "application/javascript"
-
-[[headers]]
-  for = "/desktop/manifest.webmanifest"
-  [headers.values]
-    Content-Type = "application/manifest+json"
-
-[[headers]]
-  for = "/mobile/manifest.webmanifest"
-  [headers.values]
-    Content-Type = "application/manifest+json"
+for = "/manifest.webmanifest"
+[headers.values]
+  Content-Type = "application/manifest+json"
