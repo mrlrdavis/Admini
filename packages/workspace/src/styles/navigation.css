@@ -210,3 +210,9 @@
   font-weight: 600;
   border-left: 3px solid var(--ws-color-sage, #6B8E6B);
 }
+/* Clear space for the fixed hamburger trigger on mobile */
+@media (max-width: 768px) {
+  .workspace-shell__content {
+    padding-top: 68px;
+  }
+}
