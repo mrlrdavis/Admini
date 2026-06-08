@@ -198,3 +198,35 @@
 .workspace-shell__content select {
   background-color: var(--ws-color-white, #ffffff);
 }
+/* --------------------------------------------------------------------------
+   Mobile Viewport Overflow Prevention
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .workspace-shell__content {
+    padding-left: var(--ws-space-md);
+    padding-right: var(--ws-space-md);
+  }
+
+  .dashboard-tab,
+  .pulse-tab,
+  .capture-tab,
+  .tasks-tab,
+  .more-tab {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .dashboard-tab__kpis {
+    max-width: 100%;
+  }
+
+  .pulse-tab__day-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pulse-tab__day-row {
+    min-width: 0;
+  }
+}

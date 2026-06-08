@@ -157,7 +157,7 @@
   transition: transform 250ms ease;
   display: flex;
   flex-direction: column;
-  padding: var(--ws-space-xl, 2rem) 0;
+  padding: 68px 0 var(--ws-space-xl, 2rem);
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
 }
 

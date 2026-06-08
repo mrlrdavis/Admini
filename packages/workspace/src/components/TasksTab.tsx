@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // TasksTab - Native React implementation of the Tasks view
 // ---------------------------------------------------------------------------
 // Full task list with filtering, priority indicators, and add FAB.
@@ -80,6 +80,8 @@ export function TasksTab(_props: TasksTabProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<TaskFilter>('all');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
 
   // Track indicator position via refs on each pill
   const filterRefs = useRef<Record<TaskFilter, HTMLButtonElement | null>>({
@@ -230,11 +232,68 @@ export function TasksTab(_props: TasksTabProps) {
         )}
       </section>
 
+      {/* Add Task Form */}
+      {showAddForm && (
+        <div className="tasks-tab__add-form">
+          <input
+            type="text"
+            className="tasks-tab__add-input"
+            placeholder="What needs to be done?"
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newTaskTitle.trim()) {
+                const newTask: DashboardTask = {
+                  id: Date.now().toString(),
+                  title: newTaskTitle.trim(),
+                  priority: 'normal',
+                  status: 'open',
+                  dueAt: undefined,
+                  createdAt: new Date().toISOString(),
+                  organizationId: '',
+                  createdBy: '',
+                  updatedAt: new Date().toISOString(),
+                  };
+                setTasks((prev) => [newTask, ...prev]);
+                setNewTaskTitle('');
+                setShowAddForm(false);
+              }
+            }}
+            autoFocus
+          />
+          <button
+            type="button"
+            className="tasks-tab__add-btn"
+            disabled={!newTaskTitle.trim()}
+            onClick={() => {
+              if (!newTaskTitle.trim()) return;
+              const newTask: DashboardTask = {
+                id: Date.now().toString(),
+                title: newTaskTitle.trim(),
+                priority: 'normal',
+                status: 'open',
+                dueAt: undefined,
+                createdAt: new Date().toISOString(),
+                organizationId: '',
+                createdBy: '',
+                updatedAt: new Date().toISOString(),
+              };
+              setTasks((prev) => [newTask, ...prev]);
+              setNewTaskTitle('');
+              setShowAddForm(false);
+            }}
+          >
+            Add
+          </button>
+        </div>
+      )}
+
       {/* FAB */}
       <button
         type="button"
         className="tasks-tab__fab"
         aria-label="Add task"
+        onClick={() => setShowAddForm(!showAddForm)}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" width="24" height="24">
           <line x1="12" y1="5" x2="12" y2="19" />
