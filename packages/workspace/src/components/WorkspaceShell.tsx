@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // WorkspaceShell - Platform-agnostic shell component
 // ---------------------------------------------------------------------------
 // Manages tab state, role-gated tab visibility, native tab routing,
@@ -14,7 +14,6 @@ import { TasksTab } from './TasksTab';
 import { PulseTab } from './PulseTab';
 import { MoreTab } from './MoreTab';
 import { IframeFallback } from './IframeFallback';
-import { ToastContainer } from './Toast';
 import { ToastContainer } from './Toast';
 
 /** Set of tabs with native React implementations. */
@@ -98,7 +97,6 @@ export function WorkspaceShell({
       <div className="workspace-shell__content">
         {NATIVE_TABS.has(activeTab) && renderTabContent()}
       </div>
-      <ToastContainer />
       <IframeFallback
         src={prototypePath}
         visible={iframeVisible}

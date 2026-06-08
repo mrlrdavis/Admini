@@ -508,3 +508,75 @@
   text-decoration: line-through;
   opacity: 0.6;
 }
+
+/* 3-dot menu */
+.tasks-tab__task-actions {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tasks-tab__menu-trigger {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--ws-color-text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  border-radius: var(--ws-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ws-transition-fast);
+}
+
+.tasks-tab__menu-trigger:hover {
+  background: var(--ws-color-limestone);
+}
+
+.tasks-tab__menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 50;
+  min-width: 160px;
+  background: var(--ws-color-white);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-md);
+  box-shadow: var(--ws-shadow-elevated);
+  padding: var(--ws-space-xs) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-tab__menu-dropdown button {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+}
+
+.tasks-tab__menu-dropdown button:hover {
+  background: var(--ws-color-limestone);
+}
+
+/* Delete button in form */
+.tasks-tab__delete-btn {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-error);
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  margin-right: auto;
+  transition: background var(--ws-transition-fast);
+}
+
+.tasks-tab__delete-btn:hover {
+  background: rgba(214, 48, 49, 0.06);
+}

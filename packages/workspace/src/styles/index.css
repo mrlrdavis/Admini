@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    @admini/workspace - Shared styles entry point
    Design Tokens: sage/limestone palette, rounded cards, horizontal-scroll KPIs
    ========================================================================== */
@@ -241,7 +241,7 @@
 :root[data-theme='dark'] .tasks-tab,
 :root[data-theme='dark'] .pulse-tab,
 :root[data-theme='dark'] .more-tab {
-  color: #e4ebe5;
+  color: #e8e8ec;
 }
 
 :root[data-theme='dark'] .dashboard-tab__kpis > *,
