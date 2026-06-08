@@ -40,9 +40,9 @@ export function PulseTab({ loading }: PulseTabProps) {
 
   // Placeholder data - will be replaced with real pulse service calls
   const stats = {
-    tasksDone: 12,
-    focusHours: 4.5,
-    streak: 7,
+    tasksDone: 0,
+    focusHours: 0,
+    streak: 0,
   };
 
   const checkpoints: PulseCheckpoint[] = [];

@@ -1,8 +1,9 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // CaptureTab - Voice/Tap capture interface for quick observations and notes.
 // ---------------------------------------------------------------------------
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { saveCapture, loadCaptures, type Capture } from '../services/captureService';
 import { SkeletonCard } from '@admini/ui';
 
 // ---------------------------------------------------------------------------
@@ -35,14 +36,29 @@ const WORD_BOARD_CATEGORIES = {
 
 export interface CaptureTabProps {
   loading?: boolean;
+  userId?: string;
+  organizationId?: string;
 }
 
-export function CaptureTab({ loading }: CaptureTabProps) {
+export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps) {
   const [mode, setMode] = useState<CaptureMode>('voice');
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
   const [selectedWords, setSelectedWords] = useState<Record<string, string>>({});
   const [captures, setCaptures] = useState<QuickCapture[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  // Load persisted captures on mount
+  useEffect(() => {
+    if (!organizationId) return;
+    loadCaptures(organizationId).then((saved) => {
+      setCaptures(saved.map((c) => ({
+        id: c.id,
+        text: c.text,
+        timestamp: new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      })));
+    }).catch(() => { /* silent fallback to empty */ });
+  }, [organizationId]);
 
   // -------------------------------------------------------------------------
   // Handlers

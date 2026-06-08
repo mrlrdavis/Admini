@@ -16,6 +16,7 @@
 @import './integration-catalog.css';
 @import './profile-settings.css';
 @import './compact-mode.css';
+@import './navigation.css';
 
 /* --------------------------------------------------------------------------
    Design Tokens (CSS Custom Properties)

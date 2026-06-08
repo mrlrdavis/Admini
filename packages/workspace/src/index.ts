@@ -40,6 +40,9 @@ export * as appPreferencesStorage from './services/appPreferencesStorage';
 export { getAppPreferences, saveAppPreferences, DEFAULT_PREFERENCES } from './services/appPreferencesStorage';
 export type { AppPreferencesData as AppPreferencesStorageData } from './services/appPreferencesStorage';
 export * as integrationStatusStorage from './services/integrationStatusStorage';
+export * as captureService from './services/captureService';
+export { saveCapture, loadCaptures } from './services/captureService';
+export type { Capture } from './services/captureService';
 export { loadIntegrationStatuses, saveIntegrationStatus, removeIntegrationStatus } from './services/integrationStatusStorage';
 export type { IntegrationConnectionStatus } from './services/integrationStatusStorage';
 

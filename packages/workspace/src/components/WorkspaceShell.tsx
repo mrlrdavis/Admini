@@ -82,7 +82,7 @@ export function WorkspaceShell({
     switch (activeTab) {
       case 'dashboard': return <DashboardTab userName={userName} />;
       case 'admin': return canAccessAdmin ? <AdminTab organizationId={organizationId ?? user.id} userRole={userRole} /> : null;
-      case 'capture': return <CaptureTab />;
+      case 'capture': return <CaptureTab userId={user.id} organizationId={organizationId} />;
       case 'tasks': return <TasksTab />;
       case 'pulse': return <PulseTab />;
       case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;
