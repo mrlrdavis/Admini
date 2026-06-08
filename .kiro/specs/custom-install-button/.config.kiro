@@ -1,1 +1,3 @@
-{"specId": "8458b91d-957c-49b7-a082-e0b5c2c67aca", "workflowType": "requirements-first", "specType": "feature"}
+specType=feature
+workflowType=requirements-first
+featureName=custom-install-button
