@@ -14,7 +14,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/offline.html',
-        navigateFallbackDenylist: [/^\/api\//]
+        navigateFallbackDenylist: [/^\/api\//, /[?&](code|error|access_token|refresh_token)=/]
       },
       manifest: {
         name: 'AdminI',
