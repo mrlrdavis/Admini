@@ -1,13 +1,13 @@
-﻿import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
+import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 
 const TAB_ICONS: Record<string, string> = {
-  capture: 'ðŸ“',
-  dashboard: 'ðŸ“Š',
-  tasks: 'âœ…',
-  pulse: 'ðŸ’“',
-  more: 'âš™ï¸',
-  admin: 'ðŸ”§',
-};
+  capture: '\uD83D\uDCDD',
+  dashboard: '\uD83D\uDCCA',
+  tasks: '\u2705',
+  pulse: '\uD83D\uDC93',
+  more: '\u2699\uFE0F',
+  admin: '\uD83D\uDD27',
+}
 
 export function DesktopSidebar({ activeTab, tabs, onTabChange }: NavigationAdapterProps) {
   return (
@@ -25,7 +25,7 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange }: NavigationAdapt
               aria-controls={`panel-${tab.id}`}
             >
               <span className="desktop-sidebar__icon" aria-hidden="true">
-                {TAB_ICONS[tab.id] ?? 'ðŸ“„'}
+                {TAB_ICONS[tab.id] ?? '\uD83D\uDCC4'}
               </span>
               <span className="desktop-sidebar__label">{tab.label}</span>
             </button>

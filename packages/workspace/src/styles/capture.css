@@ -325,6 +325,9 @@
 
 .capture-tab__capture-text {
   font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
+  line-height: 1.4;
+  cursor: pointer;
   flex: 1;
 }
 
@@ -338,4 +341,39 @@
   font-size: var(--ws-font-size-sm);
   color: var(--ws-color-text-muted);
   font-style: italic;
+}
+
+/* Tap mode free-text input */
+.capture-tab__tap-freetext {
+  width: 100%;
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  background: var(--ws-color-white, #ffffff);
+  resize: vertical;
+  min-height: 3rem;
+  margin-top: var(--ws-space-md);
+}
+
+.capture-tab__tap-freetext:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+}
+
+
+
+.capture-tab__capture-text--truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.capture-tab__capture-card--expanded .capture-tab__capture-text--truncated {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
 }

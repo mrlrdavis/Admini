@@ -1079,3 +1079,33 @@ body,
     transform: translateY(0);
   }
 }
+/* iPhone SE (375x667) - Front Porch centering */
+@media (max-width: 375px) {
+  .home-panel {
+    padding: 48px 16px 32px;
+    min-height: auto;
+    height: 100dvh;
+    justify-content: center;
+  }
+
+  .logo-name {
+    font-size: clamp(48px, 14vw, 84px);
+  }
+
+  .primary-tagline {
+    font-size: 14px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .bubble-actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .bubble-actions button {
+    width: 100%;
+    max-width: 240px;
+  }
+}

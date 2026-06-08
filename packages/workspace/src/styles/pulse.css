@@ -151,7 +151,7 @@
   display: flex;
   align-items: center;
   gap: var(--ws-space-md);
-  padding: var(--ws-space-md) var(--ws-space-sm) var(--ws-space-md) var(--ws-space-lg);
+  padding: var(--ws-space-md) var(--ws-space-lg);
   border-bottom: 1px solid var(--ws-color-border);
 }
 
@@ -188,6 +188,8 @@
   display: flex;
   gap: var(--ws-space-xs);
   align-items: center;
+  flex-wrap: wrap;
+  padding-right: var(--ws-space-md);
 }
 
 .pulse-tab__activity-block {

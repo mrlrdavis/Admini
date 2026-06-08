@@ -224,7 +224,7 @@
   .pulse-tab__header,
   .more-tab__header,
   .admin-tab__header {
-    padding-left: 52px;
+    margin-left: 48px;
   }
 }
 /* Sign Out buttons */

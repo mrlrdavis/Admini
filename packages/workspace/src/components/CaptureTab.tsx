@@ -45,7 +45,9 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
   const [selectedWords, setSelectedWords] = useState<Record<string, string>>({});
+  const [tapFreeText, setTapFreeText] = useState('');
   const [captures, setCaptures] = useState<QuickCapture[]>([]);
+  const [expandedCaptureId, setExpandedCaptureId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Load persisted captures on mount
@@ -122,12 +124,21 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   }
 
   function handleQuickCapture() {
-    const text = mode === 'voice'
-      ? transcription
-      : Object.entries(selectedWords)
-          .filter(([, v]) => v)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(' \u00b7 ');
+    let text: string;
+    if (mode === 'voice') {
+      text = transcription;
+    } else {
+      const wordsText = Object.entries(selectedWords)
+        .filter(([, v]) => v)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(' \u00b7 ');
+      const freeText = tapFreeText.trim();
+      if (wordsText && freeText) {
+        text = `${wordsText} \u2014 ${freeText}`;
+      } else {
+        text = wordsText || freeText;
+      }
+    }
 
     if (!text) return;
 
@@ -141,6 +152,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
     setCaptures((prev) => [capture, ...prev]);
     setTranscription('');
     setSelectedWords({});
+    setTapFreeText('');
 
     // Persist to Supabase if configured
     if (organizationId && userId) {
@@ -274,6 +286,15 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
             ))}
           </div>
 
+
+          {/* Free-text input */}
+          <textarea
+            className="capture-tab__tap-freetext"
+            placeholder="Add a note..."
+            value={tapFreeText}
+            onChange={(e) => setTapFreeText(e.target.value)}
+          />
+
           {/* Selected summary */}
           {Object.values(selectedWords).some(Boolean) && (
             <div className="capture-tab__selection-summary">
@@ -305,12 +326,22 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
           <p className="capture-tab__empty">No captures yet</p>
         ) : (
           <ul className="capture-tab__capture-list">
-            {captures.map((capture) => (
-              <li key={capture.id} className="capture-tab__capture-item">
-                <span className="capture-tab__capture-text">{capture.text}</span>
-                <span className="capture-tab__capture-time">{capture.timestamp}</span>
-              </li>
-            ))}
+            {captures.map((capture) => {
+              const isExpanded = expandedCaptureId === capture.id;
+              const isTruncatable = capture.text.length > 80;
+              return (
+                <li
+                  key={capture.id}
+                  className={`capture-tab__capture-item${isExpanded ? ' capture-tab__capture-card--expanded' : ''}`}
+                  onClick={() => setExpandedCaptureId(isExpanded ? null : capture.id)}
+                >
+                  <span className={`capture-tab__capture-text${isTruncatable && !isExpanded ? ' capture-tab__capture-text--truncated' : ''}`}>
+                    {isTruncatable && !isExpanded ? `${capture.text.slice(0, 80)}...` : capture.text}
+                  </span>
+                  <span className="capture-tab__capture-time">{capture.timestamp}</span>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
