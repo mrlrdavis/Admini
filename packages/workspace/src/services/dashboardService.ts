@@ -1,4 +1,4 @@
-import { getClient } from './getClient';
+﻿import { getClient } from './getClient';
 import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -17,6 +17,7 @@ type DbTask = {
   due_at: string | null;
   created_at: string;
   updated_at: string;
+  assigned_to: string | null;
 };
 
 /** Raw row shape returned by the sync_events table (activity feed source). */
@@ -69,6 +70,7 @@ export function mapTask(row: DbTask): DashboardTask {
     dueAt: row.due_at ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    assignedTo: row.assigned_to ?? undefined,
   };
 }
 

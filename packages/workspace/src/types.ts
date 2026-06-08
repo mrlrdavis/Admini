@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 
 // Tab identification
 export type WorkspaceTab = 'capture' | 'dashboard' | 'tasks' | 'pulse' | 'more' | 'admin';
@@ -58,6 +58,7 @@ export interface DashboardTask {
   dueAt?: string;
   createdAt: string;
   updatedAt: string;
+  assignedTo?: string;
 }
 
 export interface DashboardKPIs {

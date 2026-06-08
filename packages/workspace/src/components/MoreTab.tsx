@@ -588,7 +588,7 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
       const { data: tasks, error: tasksErr } = await client
         .from('tasks')
         .select('*')
-        .eq('user_id', userId);
+        .eq('created_by', userId);
       if (tasksErr) {
         throw new Error(mapSupabaseError(tasksErr));
       }

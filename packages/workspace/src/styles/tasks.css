@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    TasksTab styles
    ========================================================================== */
 
@@ -216,16 +216,7 @@
   box-shadow: 0 6px 20px rgba(74, 107, 74, 0.25);
 }
 
-/* Add Task Form */
-.tasks-tab__add-form {
-  display: flex;
-  gap: var(--ws-space-sm);
-  padding: var(--ws-space-md);
-  background: var(--ws-color-white);
-  border-radius: var(--ws-radius-card);
-  box-shadow: var(--ws-shadow-elevated);
-  margin-bottom: var(--ws-space-md);
-}
+
 
 .tasks-tab__add-input {
   flex: 1;
@@ -243,17 +234,138 @@
   border-color: var(--ws-color-sage);
 }
 
-.tasks-tab__add-btn {
+
+/* Enhanced Add Task Form */
+.tasks-tab__add-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-lg);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  box-shadow: var(--ws-shadow-elevated);
+  margin-bottom: var(--ws-space-md);
+}
+
+.tasks-tab__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-xs);
+}
+
+.tasks-tab__form-label {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-text-muted);
+}
+
+.tasks-tab__add-textarea {
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-base);
+  font-family: var(--ws-font-body);
+  color: var(--ws-color-text);
+  background: var(--ws-color-white);
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.tasks-tab__add-textarea:focus {
+  outline: none;
+  border-color: var(--ws-color-sage);
+}
+
+.tasks-tab__priority-selector {
+  display: flex;
+  gap: var(--ws-space-xs);
+  flex-wrap: wrap;
+}
+
+.tasks-tab__priority-btn {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-pill);
+  background: var(--ws-color-white);
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+  transition: all var(--ws-transition-fast);
+}
+
+.tasks-tab__priority-btn:hover {
+  border-color: var(--ws-color-sage);
+  color: var(--ws-color-sage);
+}
+
+.tasks-tab__priority-btn--active {
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  border-color: var(--ws-color-sage);
+}
+
+.tasks-tab__priority-btn--active[data-priority="urgent"] {
+  background: var(--ws-color-priority-urgent);
+  border-color: var(--ws-color-priority-urgent);
+}
+
+.tasks-tab__priority-btn--active[data-priority="high"] {
+  background: var(--ws-color-priority-high);
+  border-color: var(--ws-color-priority-high);
+}
+
+.tasks-tab__priority-btn--active[data-priority="low"] {
+  background: var(--ws-color-priority-low);
+  border-color: var(--ws-color-priority-low);
+}
+
+.tasks-tab__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ws-space-sm);
+  margin-top: var(--ws-space-sm);
+}
+
+.tasks-tab__cancel-btn {
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-white);
+  color: var(--ws-color-text-muted);
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  transition: all var(--ws-transition-fast);
+}
+
+.tasks-tab__cancel-btn:hover {
+  border-color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
+}
+
+.tasks-tab__submit-btn {
   padding: var(--ws-space-sm) var(--ws-space-lg);
   border: none;
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-sage);
   color: var(--ws-color-white);
+  font-size: var(--ws-font-size-sm);
   font-weight: 600;
   cursor: pointer;
+  transition: background var(--ws-transition-fast);
 }
 
-.tasks-tab__add-btn:disabled {
+.tasks-tab__submit-btn:hover {
+  background: var(--ws-color-sage-dark);
+}
+
+.tasks-tab__submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Assigned-to display in task card */
+.tasks-tab__assigned-to {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-sage-dark);
+  font-weight: 500;
 }

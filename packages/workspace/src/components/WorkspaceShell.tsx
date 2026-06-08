@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // WorkspaceShell - Platform-agnostic shell component
 // ---------------------------------------------------------------------------
 // Manages tab state, role-gated tab visibility, native tab routing,
@@ -83,7 +83,7 @@ export function WorkspaceShell({
       case 'dashboard': return <DashboardTab userName={userName} />;
       case 'admin': return canAccessAdmin && organizationId ? <AdminTab organizationId={organizationId} userRole={userRole} /> : <div className="admin-tab admin-tab--empty"><p>Complete onboarding to access Admin settings.</p></div>;
       case 'capture': return <CaptureTab userId={user.id} organizationId={organizationId} />;
-      case 'tasks': return <TasksTab />;
+      case 'tasks': return <TasksTab userId={user.id} organizationId={organizationId} />;
       case 'pulse': return <PulseTab />;
       case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;
       default: return null;
