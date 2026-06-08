@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // WorkspaceShell - Platform-agnostic shell component
 // ---------------------------------------------------------------------------
 // Manages tab state, role-gated tab visibility, native tab routing,
@@ -57,17 +57,17 @@ export function WorkspaceShell({
     }
   }, [activeTab, canAccessAdmin]);
 
-  // Build tab list, conditionally including Admin for admin/principal roles
+  // Build tab list, conditionally including Observations and Admin for admin/principal roles
   const visibleTabs: TabItem[] = useMemo(() => {
     const base: TabItem[] = [
       { id: 'capture', label: 'Capture' },
       { id: 'dashboard', label: 'Dashboard' },
       { id: 'tasks', label: 'Tasks' },
-      { id: 'observations', label: 'Observations' },
       { id: 'pulse', label: 'Pulse' },
-      { id: 'more', label: 'More' },
+      { id: 'more', label: 'Settings' },
     ];
     if (canAccessAdmin) {
+      base.splice(3, 0, { id: 'observations', label: 'Observations' });
       base.push({ id: 'admin', label: 'Admin' });
     }
     return base;
@@ -97,7 +97,7 @@ export function WorkspaceShell({
       case 'admin': return canAccessAdmin && organizationId ? <AdminTab organizationId={organizationId} userRole={userRole} /> : <div className="admin-tab admin-tab--empty"><p>Complete onboarding to access Admin settings.</p></div>;
       case 'capture': return <CaptureTab userId={user.id} organizationId={organizationId} />;
       case 'tasks': return <TasksTab userId={user.id} organizationId={organizationId} />;
-      case 'observations': return <ObservationsTab userId={user.id} organizationId={organizationId} userName={userName} />;
+      case 'observations': return <ObservationsTab userId={user.id} organizationId={organizationId} userName={userName} userRole={userRole} />;
       case 'pulse': return <PulseTab />;
       case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;
       default: return null;

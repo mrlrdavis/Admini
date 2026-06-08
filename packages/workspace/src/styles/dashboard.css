@@ -396,11 +396,11 @@
 /* Badge Tooltip */
 .badges-panel__tooltip {
   position: absolute;
-  opacity: 1 !important;
+  opacity: 1;
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: #2D3436;
+  background: #1a1a1e;
   color: #ffffff;
   padding: 8px 12px;
   border-radius: 8px;
@@ -421,7 +421,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: #2D3436;
+  border-top-color: #1a1a1e;
 }
 
 .badges-panel__tooltip-text {
@@ -431,4 +431,22 @@
 .badges-panel__tooltip-date {
   font-size: 0.625rem;
   opacity: 0.7;
+}
+
+.badges-panel__info-icon {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 0.6rem;
+  color: var(--ws-color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.badges-panel__info-icon:hover {
+  opacity: 1;
 }

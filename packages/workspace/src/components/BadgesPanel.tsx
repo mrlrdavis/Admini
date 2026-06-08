@@ -70,10 +70,14 @@ export function BadgesPanel() {
             className={'badges-panel__badge' + (badge.unlocked ? ' badges-panel__badge--unlocked' : '')}
             onMouseEnter={() => setHoveredBadge(badge.id)}
             onMouseLeave={() => setHoveredBadge(null)}
+            onClick={() => setHoveredBadge(hoveredBadge === badge.id ? null : badge.id)}
           >
             <span className="badges-panel__emoji">{badge.emoji}</span>
             <span className="badges-panel__label">{badge.label}</span>
             {badge.unlocked && <span className="badges-panel__check">{'\u2713'}</span>}
+            <button type="button" className="badges-panel__info-icon" aria-label={'Info about ' + badge.label} onClick={(e) => { e.stopPropagation(); setHoveredBadge(hoveredBadge === badge.id ? null : badge.id); }}>
+              {'\u24D8'}
+            </button>
             {hoveredBadge === badge.id && (
               <div className="badges-panel__tooltip">
                 <span className="badges-panel__tooltip-text">{badge.description}</span>
