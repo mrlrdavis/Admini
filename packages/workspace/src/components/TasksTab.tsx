@@ -1,8 +1,8 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // TasksTab - Task management interface with CRUD operations.
 // ---------------------------------------------------------------------------
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getClient } from '../services/getClient';
 import { showToast } from './Toast';
 
@@ -23,6 +23,22 @@ interface Task {
   createdAt: string;
   updatedAt: string;
   assignedTo?: string;
+  subtasks?: { id: string; title: string; completed: boolean }[];
+}
+
+// ---------------------------------------------------------------------------
+// Subtask localStorage helpers
+// ---------------------------------------------------------------------------
+
+function saveSubtasks(taskId: string, subtasks: { id: string; title: string; completed: boolean }[]) {
+  localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(subtasks));
+}
+
+function loadSubtasks(taskId: string): { id: string; title: string; completed: boolean }[] {
+  try {
+    const raw = localStorage.getItem('admini_subtasks_' + taskId);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
 }
 
 // ---------------------------------------------------------------------------
@@ -47,7 +63,24 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formPriority, setFormPriority] = useState<TaskPriority>('normal');
+  const [formSubtasks, setFormSubtasks] = useState<{ id: string; title: string; completed: boolean }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  // View mode state
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+
+  const calendarDays = useMemo(() => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Monday start
+    const days: Date[] = [];
+    for (let i = -startDay; i < 42 - startDay; i++) {
+      days.push(new Date(year, month, 1 + i));
+    }
+    return days;
+  }, [calendarMonth]);
 
   // -------------------------------------------------------------------------
   // Load tasks
@@ -101,6 +134,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     setFormTitle('');
     setFormDescription('');
     setFormPriority('normal');
+    setFormSubtasks([]);
     setEditingTaskId(null);
   }
 
@@ -108,6 +142,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     setFormTitle(task.title);
     setFormDescription(task.description || '');
     setFormPriority(task.priority);
+    setFormSubtasks(loadSubtasks(task.id));
     setEditingTaskId(task.id);
     setShowAddForm(true);
   }
@@ -134,6 +169,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           .single();
 
         if (updateError) throw updateError;
+
+        // Save subtasks to localStorage
+        saveSubtasks(editingTaskId, formSubtasks);
 
         setTasks(prev =>
           prev.map(t =>
@@ -166,6 +204,11 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           .single();
 
         if (insertError) throw insertError;
+
+        // Save subtasks to localStorage
+        if (formSubtasks.length > 0) {
+          saveSubtasks(data.id, formSubtasks);
+        }
 
         const newTask: Task = {
           id: data.id,
@@ -298,6 +341,36 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         ))}
       </div>
 
+      {/* View Toggle */}
+      <div className="tasks-tab__view-toggle">
+        <button type="button" className={'tasks-tab__view-btn' + (viewMode === 'list' ? ' tasks-tab__view-btn--active' : '')} onClick={() => setViewMode('list')}>List</button>
+        <button type="button" className={'tasks-tab__view-btn' + (viewMode === 'calendar' ? ' tasks-tab__view-btn--active' : '')} onClick={() => setViewMode('calendar')}>Calendar</button>
+      </div>
+
+      {/* Calendar View */}
+      {viewMode === 'calendar' && (
+        <div className="tasks-tab__calendar">
+          <div className="tasks-tab__calendar-header">
+            <button type="button" onClick={() => setCalendarMonth(m => new Date(m.getFullYear(), m.getMonth() - 1))}>{'\u2190'}</button>
+            <span>{calendarMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
+            <button type="button" onClick={() => setCalendarMonth(m => new Date(m.getFullYear(), m.getMonth() + 1))}>{'\u2192'}</button>
+          </div>
+          <div className="tasks-tab__calendar-grid">
+            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => <span key={d} className="tasks-tab__calendar-day-label">{d}</span>)}
+            {calendarDays.map((day, i) => {
+              const dayTasks = tasks.filter(t => t.dueAt && new Date(t.dueAt).toDateString() === day.toDateString());
+              const isToday = day.toDateString() === new Date().toDateString();
+              return (
+                <div key={i} className={'tasks-tab__calendar-cell' + (isToday ? ' tasks-tab__calendar-cell--today' : '') + (dayTasks.length > 0 ? ' tasks-tab__calendar-cell--has-tasks' : '')}>
+                  <span className="tasks-tab__calendar-date">{day.getDate()}</span>
+                  {dayTasks.length > 0 && <span className="tasks-tab__calendar-dot" />}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Add Task Form */}
       {showAddForm && (
         <div className="tasks-tab__add-form">
@@ -341,6 +414,33 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
             </div>
           </div>
 
+          {/* Subtasks */}
+          <div className="tasks-tab__form-group">
+            <label className="tasks-tab__form-label">Subtasks</label>
+            <div className="tasks-tab__subtasks-list">
+              {formSubtasks.map((st, idx) => (
+                <div key={st.id} className="tasks-tab__subtask-row">
+                  <input
+                    type="checkbox"
+                    checked={st.completed}
+                    onChange={() => setFormSubtasks(prev => prev.map((s, i) => i === idx ? { ...s, completed: !s.completed } : s))}
+                  />
+                  <input
+                    type="text"
+                    className="tasks-tab__subtask-input"
+                    value={st.title}
+                    onChange={(e) => setFormSubtasks(prev => prev.map((s, i) => i === idx ? { ...s, title: e.target.value } : s))}
+                    placeholder="Subtask..."
+                  />
+                  <button type="button" className="tasks-tab__subtask-remove" onClick={() => setFormSubtasks(prev => prev.filter((_, i) => i !== idx))}>{'\u00D7'}</button>
+                </div>
+              ))}
+              <button type="button" className="tasks-tab__subtask-add" onClick={() => setFormSubtasks(prev => [...prev, { id: Date.now().toString(), title: '', completed: false }])}>
+                + Add subtask
+              </button>
+            </div>
+          </div>
+
           <div className="tasks-tab__form-actions">
             {editingTaskId && (
               <button
@@ -362,69 +462,77 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       )}
 
       {/* Task List */}
-      <section className="tasks-tab__list-section">
-        {filteredTasks.length === 0 && !showAddForm ? (
-          <div className="tasks-tab__empty-state">
-            <h2 className="tasks-tab__empty-title">No tasks yet</h2>
-            <p className="tasks-tab__empty-desc">Tasks you create or are assigned will appear here.</p>
-          </div>
-        ) : (
-          <ul className="tasks-tab__task-list">
-            {filteredTasks.map(task => (
-              <li
-                key={task.id}
-                className="tasks-tab__task-card"
-                data-priority={task.priority}
-                data-status={task.status}
-              >
-                <div className="tasks-tab__task-header">
-                  <span className="tasks-tab__task-title">{task.title}</span>
-                  <span className="tasks-tab__priority-pill">{task.priority}</span>
-                  <div className="tasks-tab__task-actions">
-                    <button
-                      type="button"
-                      className="tasks-tab__menu-trigger"
-                      onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === task.id ? null : task.id); }}
-                      aria-label="Task actions"
-                    >
-                      &#x22EE;
-                    </button>
-                    {menuOpenId === task.id && (
-                      <div className="tasks-tab__menu-dropdown">
-                        <button type="button" onClick={() => { handleToggleComplete(task.id); setMenuOpenId(null); }}>
-                          {task.status === 'completed' ? 'Mark Incomplete' : 'Mark Complete'}
-                        </button>
-                        <button type="button" onClick={() => { handleStatusChange(task.id, 'archived'); setMenuOpenId(null); }}>
-                          Mark Blocked
-                        </button>
-                        <button type="button" onClick={() => { handleEditTask(task); setMenuOpenId(null); }}>
-                          Edit
-                        </button>
-                      </div>
+      {viewMode === 'list' && (
+        <section className="tasks-tab__list-section">
+          {filteredTasks.length === 0 && !showAddForm ? (
+            <div className="tasks-tab__empty-state">
+              <h2 className="tasks-tab__empty-title">No tasks yet</h2>
+              <p className="tasks-tab__empty-desc">Tasks you create or are assigned will appear here.</p>
+            </div>
+          ) : (
+            <ul className="tasks-tab__task-list">
+              {filteredTasks.map(task => (
+                <li
+                  key={task.id}
+                  className="tasks-tab__task-card"
+                  data-priority={task.priority}
+                  data-status={task.status}
+                >
+                  <div className="tasks-tab__task-header">
+                    <span className="tasks-tab__task-title">{task.title}</span>
+                    <span className="tasks-tab__priority-pill">{task.priority}</span>
+                    <div className="tasks-tab__task-actions">
+                      <button
+                        type="button"
+                        className="tasks-tab__menu-trigger"
+                        onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === task.id ? null : task.id); }}
+                        aria-label="Task actions"
+                      >
+                        &#x22EE;
+                      </button>
+                      {menuOpenId === task.id && (
+                        <div className="tasks-tab__menu-dropdown">
+                          <button type="button" onClick={() => { handleToggleComplete(task.id); setMenuOpenId(null); }}>
+                            {task.status === 'completed' ? 'Mark Incomplete' : 'Mark Complete'}
+                          </button>
+                          <button type="button" onClick={() => { handleStatusChange(task.id, 'archived'); setMenuOpenId(null); }}>
+                            Mark Blocked
+                          </button>
+                          <button type="button" onClick={() => { handleEditTask(task); setMenuOpenId(null); }}>
+                            Edit
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {task.description && (
+                    <p className="tasks-tab__task-description">{task.description}</p>
+                  )}
+                  <div className="tasks-tab__task-meta">
+                    <span className={`tasks-tab__status tasks-tab__status--${task.status}`}>
+                      {task.status.replace('_', ' ')}
+                    </span>
+                    {task.dueAt && (
+                      <span className="tasks-tab__due-date">
+                        Due {new Date(task.dueAt).toLocaleDateString()}
+                      </span>
+                    )}
+                    {task.assignedTo && (
+                      <span className="tasks-tab__assigned-to">{task.assignedTo}</span>
                     )}
                   </div>
-                </div>
-                {task.description && (
-                  <p className="tasks-tab__task-description">{task.description}</p>
-                )}
-                <div className="tasks-tab__task-meta">
-                  <span className={`tasks-tab__status tasks-tab__status--${task.status}`}>
-                    {task.status.replace('_', ' ')}
-                  </span>
-                  {task.dueAt && (
-                    <span className="tasks-tab__due-date">
-                      Due {new Date(task.dueAt).toLocaleDateString()}
-                    </span>
-                  )}
-                  {task.assignedTo && (
-                    <span className="tasks-tab__assigned-to">{task.assignedTo}</span>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+                  {(() => {
+                    const st = loadSubtasks(task.id);
+                    if (st.length === 0) return null;
+                    const done = st.filter(s => s.completed).length;
+                    return <span className="tasks-tab__subtask-count">{done}/{st.length} subtasks</span>;
+                  })()}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       {/* FAB */}
       {!showAddForm && (

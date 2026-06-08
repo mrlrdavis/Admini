@@ -297,3 +297,9 @@
   top: 0;
   width: 12px;
 }
+/* Divider above utility tabs in sidebar */
+.desktop-sidebar__divider {
+  height: 1px;
+  background: var(--ws-color-border, #DFE6E9);
+  margin: var(--ws-space-md, 1rem) var(--ws-space-lg, 1.5rem);
+}

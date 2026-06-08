@@ -580,3 +580,158 @@
 .tasks-tab__delete-btn:hover {
   background: rgba(214, 48, 49, 0.06);
 }
+
+/* Subtasks in form */
+.tasks-tab__subtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.tasks-tab__subtask-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-sm);
+}
+
+.tasks-tab__subtask-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ws-color-sage);
+}
+
+.tasks-tab__subtask-input {
+  flex: 1;
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+  background: var(--ws-color-white, #fff);
+  color: var(--ws-color-text);
+}
+
+.tasks-tab__subtask-remove {
+  border: none;
+  background: transparent;
+  color: var(--ws-color-error);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.tasks-tab__subtask-add {
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  border: 1px dashed var(--ws-color-sage);
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  color: var(--ws-color-sage);
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+.tasks-tab__subtask-count {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-sage-dark);
+  font-weight: 500;
+}
+
+/* View Toggle (List/Calendar) */
+.tasks-tab__view-toggle {
+  display: flex;
+  gap: var(--ws-space-xs);
+  margin-bottom: var(--ws-space-md);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-pill);
+  padding: 3px;
+  width: fit-content;
+}
+
+.tasks-tab__view-btn {
+  padding: var(--ws-space-xs) var(--ws-space-md);
+  border: none;
+  border-radius: var(--ws-radius-pill);
+  background: transparent;
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text-muted);
+  cursor: pointer;
+  transition: all var(--ws-transition-fast);
+}
+
+.tasks-tab__view-btn--active {
+  background: var(--ws-color-white);
+  color: var(--ws-color-text);
+  box-shadow: var(--ws-shadow-card);
+}
+
+/* Calendar */
+.tasks-tab__calendar {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.tasks-tab__calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ws-space-md);
+}
+
+.tasks-tab__calendar-header button {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--ws-color-text);
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+}
+
+.tasks-tab__calendar-header span {
+  font-weight: 600;
+  font-size: var(--ws-font-size-base);
+}
+
+.tasks-tab__calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.tasks-tab__calendar-day-label {
+  text-align: center;
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+  padding: var(--ws-space-xs);
+  font-weight: 600;
+}
+
+.tasks-tab__calendar-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--ws-space-sm) var(--ws-space-xs);
+  border-radius: var(--ws-radius-sm);
+  min-height: 2.5rem;
+}
+
+.tasks-tab__calendar-cell--today {
+  background: color-mix(in srgb, var(--ws-color-sage) 12%, transparent);
+}
+
+.tasks-tab__calendar-cell--has-tasks .tasks-tab__calendar-date {
+  font-weight: 600;
+  color: var(--ws-color-sage-dark);
+}
+
+.tasks-tab__calendar-date {
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
+}
+
+.tasks-tab__calendar-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ws-color-sage);
+  margin-top: 2px;
+}
