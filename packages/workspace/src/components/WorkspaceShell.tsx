@@ -15,6 +15,7 @@ import { PulseTab } from './PulseTab';
 import { MoreTab } from './MoreTab';
 import { IframeFallback } from './IframeFallback';
 import { ToastContainer } from './Toast';
+import { getAppPreferences } from '../services/appPreferencesStorage';
 
 /** Set of tabs with native React implementations. */
 export const NATIVE_TABS: ReadonlySet<WorkspaceTab> = new Set([
@@ -35,6 +36,15 @@ export function WorkspaceShell({
   renderNavigation,
 }: WorkspaceShellProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('dashboard');
+
+  // Load saved default tab preference on mount
+  useEffect(() => {
+    getAppPreferences().then(prefs => {
+      if (prefs.defaultTab && NATIVE_TABS.has(prefs.defaultTab as WorkspaceTab)) {
+        setActiveTab(prefs.defaultTab as WorkspaceTab);
+      }
+    }).catch(() => {});
+  }, []);
 
   // Admin/principal can access the admin tab (REQ-16)
   const canAccessAdmin = userRole === 'admin' || userRole === 'principal';

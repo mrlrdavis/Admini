@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // TasksTab - Task management interface with CRUD operations.
 // ---------------------------------------------------------------------------
 
@@ -62,6 +62,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   // Form state
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [formAssignedTo, setFormAssignedTo] = useState('');
+  const [formDueAt, setFormDueAt] = useState('');
   const [formPriority, setFormPriority] = useState<TaskPriority>('normal');
   const [formSubtasks, setFormSubtasks] = useState<{ id: string; title: string; completed: boolean }[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -133,6 +135,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   function resetForm() {
     setFormTitle('');
     setFormDescription('');
+    setFormAssignedTo('');
+    setFormDueAt('');
     setFormPriority('normal');
     setFormSubtasks([]);
     setEditingTaskId(null);
@@ -141,6 +145,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   function handleEditTask(task: Task) {
     setFormTitle(task.title);
     setFormDescription(task.description || '');
+    setFormAssignedTo(task.assignedTo || '');
+    setFormDueAt(task.dueAt ? task.dueAt.split('T')[0] ?? '' : '');
     setFormPriority(task.priority);
     setFormSubtasks(loadSubtasks(task.id));
     setEditingTaskId(task.id);
@@ -161,6 +167,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           .update({
             title: formTitle.trim(),
             description: formDescription.trim() || null,
+            assigned_to: formAssignedTo.trim() || null,
+            due_at: formDueAt || null,
             priority: formPriority,
             updated_at: new Date().toISOString(),
           })
@@ -191,6 +199,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         const insertPayload: Record<string, unknown> = {
           title: formTitle.trim(),
           description: formDescription.trim() || null,
+          assigned_to: formAssignedTo.trim() || null,
+          due_at: formDueAt || null,
           priority: formPriority,
           status: 'open',
         };
@@ -394,6 +404,29 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
               placeholder="Optional description..."
               value={formDescription}
               onChange={e => setFormDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="tasks-tab__form-group">
+            <label className="tasks-tab__form-label" htmlFor="task-assigned">Assign To</label>
+            <input
+              id="task-assigned"
+              className="tasks-tab__add-input"
+              type="text"
+              placeholder="Name or email"
+              value={formAssignedTo}
+              onChange={e => setFormAssignedTo(e.target.value)}
+            />
+          </div>
+
+          <div className="tasks-tab__form-group">
+            <label className="tasks-tab__form-label" htmlFor="task-due">Due Date</label>
+            <input
+              id="task-due"
+              className="tasks-tab__add-input"
+              type="date"
+              value={formDueAt}
+              onChange={e => setFormDueAt(e.target.value)}
             />
           </div>
 

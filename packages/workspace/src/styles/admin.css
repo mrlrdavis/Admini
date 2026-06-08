@@ -270,3 +270,29 @@
   color: var(--ws-color-text-muted);
   margin: 0 0 var(--ws-space-md);
 }
+
+/* Roster Upload */
+.admin-tab__roster-upload {
+  margin-top: var(--ws-space-md);
+}
+
+.admin-tab__file-input {
+  display: none;
+}
+
+.admin-tab__upload-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--ws-space-sm) var(--ws-space-lg);
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  border-radius: var(--ws-radius-sm);
+  font-weight: 600;
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  transition: background var(--ws-transition-fast);
+}
+
+.admin-tab__upload-btn:hover {
+  background: var(--ws-color-sage-dark);
+}

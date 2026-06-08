@@ -393,3 +393,41 @@
   color: var(--ws-color-success);
   font-weight: 700;
 }
+/* Badge Tooltip */
+.badges-panel__tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2D3436;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.badges-panel__tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #2D3436;
+}
+
+.badges-panel__tooltip-text {
+  font-weight: 500;
+}
+
+.badges-panel__tooltip-date {
+  font-size: 0.625rem;
+  opacity: 0.7;
+}

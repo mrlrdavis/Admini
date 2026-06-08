@@ -60,6 +60,15 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
   const [editCaptureText, setEditCaptureText] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Roster integration for observations
+  const [roster, setRoster] = useState<string[]>([]);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('admini_roster');
+      if (raw) setRoster(JSON.parse(raw));
+    } catch {}
+  }, []);
   const [taskSuggestionId, setTaskSuggestionId] = useState<string | null>(null);
   const [lastCaptureText, setLastCaptureText] = useState<string | null>(null);
   const [showTaskSuggestion, setShowTaskSuggestion] = useState(false);
@@ -454,10 +463,14 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       )}
 
       {/* Tap Mode */}
-      {mode === 'tap' && (
+      {mode === 'tap' && (() => {
+        const dynamicCategories = roster.length > 0
+          ? { ...WORD_BOARD_CATEGORIES, Students: roster.slice(0, 12) }
+          : WORD_BOARD_CATEGORIES;
+        return (
         <section className="capture-tab__tap-mode">
           <div className="capture-tab__word-board">
-            {Object.entries(WORD_BOARD_CATEGORIES).map(([category, words]) => (
+            {Object.entries(dynamicCategories).map(([category, words]) => (
               <div key={category} className="capture-tab__category-row">
                 <span className="capture-tab__category-label">{category}</span>
                 <div className="capture-tab__pills">
@@ -497,7 +510,8 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
             </div>
           )}
         </section>
-      )}
+        );
+      })()}
 
       {/* Notes Mode */}
       {mode === 'notes' && (

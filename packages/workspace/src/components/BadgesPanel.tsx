@@ -44,6 +44,7 @@ export function unlockBadge(badgeId: string): boolean {
 
 export function BadgesPanel() {
   const [badges, setBadges] = useState<Badge[]>([]);
+  const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
 
   useEffect(() => {
     const unlocked = loadUnlockedBadges();
@@ -64,10 +65,21 @@ export function BadgesPanel() {
       </div>
       <div className="badges-panel__grid">
         {badges.map(badge => (
-          <div key={badge.id} className={'badges-panel__badge' + (badge.unlocked ? ' badges-panel__badge--unlocked' : '')}>
+          <div
+            key={badge.id}
+            className={'badges-panel__badge' + (badge.unlocked ? ' badges-panel__badge--unlocked' : '')}
+            onMouseEnter={() => setHoveredBadge(badge.id)}
+            onMouseLeave={() => setHoveredBadge(null)}
+          >
             <span className="badges-panel__emoji">{badge.emoji}</span>
             <span className="badges-panel__label">{badge.label}</span>
             {badge.unlocked && <span className="badges-panel__check">{'\u2713'}</span>}
+            {hoveredBadge === badge.id && (
+              <div className="badges-panel__tooltip">
+                <span className="badges-panel__tooltip-text">{badge.description}</span>
+                {badge.unlockedAt && <span className="badges-panel__tooltip-date">Unlocked {new Date(badge.unlockedAt).toLocaleDateString()}</span>}
+              </div>
+            )}
           </div>
         ))}
       </div>
