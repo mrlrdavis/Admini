@@ -188,3 +188,13 @@
     transition-duration: 0ms !important;
   }
 }
+/* --------------------------------------------------------------------------
+   Global Input Background Fix
+   Ensures all form inputs in workspace have visible white backgrounds
+   -------------------------------------------------------------------------- */
+
+.workspace-shell__content input,
+.workspace-shell__content textarea,
+.workspace-shell__content select {
+  background-color: var(--ws-color-white, #ffffff);
+}

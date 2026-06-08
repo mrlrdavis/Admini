@@ -65,6 +65,7 @@
   font-size: var(--ws-font-size-base);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
+  background: var(--ws-color-white, #ffffff);
   box-sizing: border-box;
   transition: border-color var(--ws-transition-fast);
   /* Ensure input scrolls into view above virtual keyboard on mobile */
