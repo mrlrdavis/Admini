@@ -81,7 +81,7 @@ export function WorkspaceShell({
   function renderTabContent(): ReactNode {
     switch (activeTab) {
       case 'dashboard': return <DashboardTab userName={userName} />;
-      case 'admin': return canAccessAdmin ? <AdminTab organizationId={organizationId ?? user.id} userRole={userRole} /> : null;
+      case 'admin': return canAccessAdmin && organizationId ? <AdminTab organizationId={organizationId} userRole={userRole} /> : <div className="admin-tab admin-tab--empty"><p>Complete onboarding to access Admin settings.</p></div>;
       case 'capture': return <CaptureTab userId={user.id} organizationId={organizationId} />;
       case 'tasks': return <TasksTab />;
       case 'pulse': return <PulseTab />;
