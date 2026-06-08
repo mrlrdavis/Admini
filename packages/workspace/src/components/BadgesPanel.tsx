@@ -47,6 +47,31 @@ export function BadgesPanel() {
   const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
 
   useEffect(() => {
+    // Track daily usage for streaks
+    try {
+      const today = new Date().toISOString().split('T')[0] ?? '';
+      const streakRaw = localStorage.getItem('admini_streak_days');
+      const days: string[] = streakRaw ? JSON.parse(streakRaw) : [];
+      if (!days.includes(today)) {
+        days.push(today);
+        // Keep only last 30 days
+        const recent = days.slice(-30);
+        localStorage.setItem('admini_streak_days', JSON.stringify(recent));
+      }
+      // Check consecutive days from today backwards
+      let streak = 0;
+      const sorted = days.sort().reverse();
+      for (let i = 0; i < sorted.length; i++) {
+        const expected = new Date();
+        expected.setDate(expected.getDate() - i);
+        if (sorted[i] === (expected.toISOString().split('T')[0] ?? '')) {
+          streak++;
+        } else break;
+      }
+      if (streak >= 3) unlockBadge('streak-3');
+      if (streak >= 7) unlockBadge('streak-7');
+    } catch {}
+
     const unlocked = loadUnlockedBadges();
     setBadges(BADGE_DEFINITIONS.map(def => ({
       ...def,

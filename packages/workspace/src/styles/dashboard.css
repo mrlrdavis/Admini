@@ -363,7 +363,7 @@
   padding: var(--ws-space-md) var(--ws-space-sm);
   border-radius: var(--ws-radius-card);
   background: var(--ws-color-limestone);
-  opacity: 0.4;
+  opacity: 1;
   text-align: center;
   position: relative;
   transition: opacity var(--ws-transition-fast), transform var(--ws-transition-fast);

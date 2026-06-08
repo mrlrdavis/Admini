@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getClient } from '../services/getClient';
 import { showToast } from './Toast';
+import { unlockBadge } from './BadgesPanel';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -232,6 +233,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           assignedTo: data.assigned_to ?? undefined,
         };
         setTasks(prev => [newTask, ...prev]);
+        // Check badges
+        unlockBadge('first-task');
       }
 
       resetForm();
@@ -251,6 +254,11 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
 
     if (newStatus === 'completed') {
+      // Check completion badges
+      const completedCount = tasks.filter(t => t.status === 'completed').length + 1;
+      if (completedCount >= 5) unlockBadge('five-tasks');
+      if (completedCount >= 10) unlockBadge('ten-tasks');
+      if (completedCount >= 25) unlockBadge('twenty-five');
       showToast('Task completed', {
         action: { label: 'Undo', onClick: () => handleToggleComplete(taskId) },
       });

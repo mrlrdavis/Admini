@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // CaptureTab - Voice/Tap/Notes capture interface for quick captures and notes.
 // ---------------------------------------------------------------------------
 
@@ -13,6 +13,7 @@ import {
 } from '../services/meetingNotesService';
 import { SkeletonCard } from '@admini/ui';
 import { showToast } from './Toast';
+import { unlockBadge } from './BadgesPanel';
 import { getClient } from '../services/getClient';
 
 // ---------------------------------------------------------------------------
@@ -219,6 +220,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
 
     // Optimistic UI update
     setCaptures((prev) => [capture, ...prev]);
+    unlockBadge('first-capture');
     setTaskSuggestionId(capture.id);
     setTimeout(() => setTaskSuggestionId(null), 8000);
     setLastCaptureText(text);
@@ -336,6 +338,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
           attendees,
         });
         setNotes((prev) => [created, ...prev]);
+        unlockBadge('first-note');
       }
       handleCancelNoteEdit();
       // Show task suggestion from note content
