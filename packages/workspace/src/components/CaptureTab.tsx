@@ -95,9 +95,21 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
+    // Optimistic UI update
     setCaptures((prev) => [capture, ...prev]);
     setTranscription('');
     setSelectedWords({});
+
+    // Persist to Supabase if configured
+    if (organizationId && userId) {
+      setSaving(true);
+      saveCapture({ organizationId, userId, text, mode })
+        .then((saved) => {
+          setCaptures((prev) => prev.map((c) => c.id === capture.id ? { ...c, id: saved.id } : c));
+        })
+        .catch(() => { /* keep optimistic entry */ })
+        .finally(() => setSaving(false));
+    }
   }
 
   // -------------------------------------------------------------------------

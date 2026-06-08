@@ -609,11 +609,26 @@ body,
 
 .protected-app {
   position: relative;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
+}
+
+.unified-workspace {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .unified-workspace {
+    flex-direction: column;
+  }
 }
 
 .session-bar {

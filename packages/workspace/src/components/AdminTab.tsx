@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useOrgData } from '../hooks/useOrgData';
 import type { AdminiRole, OrgDetailsForm } from '../types';
 
@@ -184,7 +184,11 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   if (error) {
     return (
       <div className="admin-tab admin-tab--error">
-        <p className="admin-tab__error-message">{error}</p>
+        <div className="admin-tab__setup-notice">
+          <h2>Admin Setup Required</h2>
+          <p>Organization data is not available yet. Complete onboarding or check your database setup.</p>
+          <p className="admin-tab__error-detail">{error}</p>
+        </div>
       </div>
     );
   }

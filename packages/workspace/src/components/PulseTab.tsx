@@ -50,7 +50,7 @@ export function PulseTab({ loading }: PulseTabProps) {
   const dayBlocks: DayBlock[] = [
     {
       period: 'Morning',
-      time: '8:00 - 12:00',
+      time: '8:00 AM - 12:00 PM',
       activities: [
         { label: 'Deep work', type: 'focus' },
         { label: 'Review PRs', type: 'default' },
@@ -58,7 +58,7 @@ export function PulseTab({ loading }: PulseTabProps) {
     },
     {
       period: 'Afternoon',
-      time: '12:00 - 16:00',
+      time: '12:00 PM - 4:00 PM',
       activities: [
         { label: 'Team sync', type: 'meetings' },
         { label: 'Feature dev', type: 'focus' },
@@ -66,7 +66,7 @@ export function PulseTab({ loading }: PulseTabProps) {
     },
     {
       period: 'End of Day',
-      time: '16:00 - 17:00',
+      time: '4:00 PM - 5:00 PM',
       activities: [
         { label: 'Wrap-up', type: 'wrap-up' },
       ],
