@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { showToast } from './Toast';
 
 interface Badge {
   id: string;
@@ -40,6 +41,11 @@ export function unlockBadge(badgeId: string): boolean {
   const badges = loadUnlockedBadges();
   if (badges[badgeId]) return false; // Already unlocked
   saveBadge(badgeId);
+  // Show celebration toast
+  const badge = BADGE_DEFINITIONS.find(b => b.id === badgeId);
+  if (badge) {
+    showToast(badge.emoji + ' Achievement unlocked: ' + badge.label);
+  }
   return true; // Newly unlocked
 }
 
