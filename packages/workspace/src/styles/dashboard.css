@@ -450,3 +450,69 @@
 .badges-panel__info-icon:hover {
   opacity: 1;
 }
+
+/* Quick Actions */
+.dashboard-tab__quick-actions {
+  display: flex;
+  gap: var(--ws-space-sm);
+  margin-bottom: var(--ws-space-lg);
+}
+
+.dashboard-tab__quick-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ws-space-xs);
+  padding: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-card);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  color: var(--ws-color-text);
+  cursor: pointer;
+  transition: all var(--ws-transition-fast);
+}
+
+.dashboard-tab__quick-btn:hover {
+  background: color-mix(in srgb, var(--ws-color-sage) 6%, var(--ws-color-white));
+  border-color: var(--ws-color-sage);
+}
+
+/* Achievement Compact */
+.dashboard-tab__achievement-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-sm);
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-card);
+  margin-bottom: var(--ws-space-lg);
+}
+
+.dashboard-tab__achievement-icon {
+  font-size: 1.25rem;
+}
+
+.dashboard-tab__achievement-progress {
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  color: var(--ws-color-sage-dark);
+  white-space: nowrap;
+}
+
+.dashboard-tab__achievement-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--ws-color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dashboard-tab__achievement-fill {
+  height: 100%;
+  background: var(--ws-color-sage);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}

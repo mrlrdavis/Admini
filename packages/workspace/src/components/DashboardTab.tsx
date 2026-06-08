@@ -12,8 +12,7 @@ import {
   sortByUrgency,
 } from '../services/dashboardService';
 import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
-import { BadgesSection } from './BadgesSection';
-import { BadgesPanel } from './BadgesPanel';
+// BadgesSection and BadgesPanel removed - replaced with compact achievement indicator
 
 // Re-export sortByUrgency for testing and backward compatibility
 export { sortByUrgency } from '../services/dashboardService';
@@ -94,6 +93,8 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAllEvents, setShowAllEvents] = useState(false);
+  const [unlockedCount, setUnlockedCount] = useState(0);
+  const totalBadges = 9; // total badge count
 
   // -------------------------------------------------------------------------
   // Data fetching
@@ -121,6 +122,14 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('admini_badges');
+      const badges = raw ? JSON.parse(raw) : {};
+      setUnlockedCount(Object.keys(badges).length);
+    } catch { /* ignore */ }
+  }, []);
 
   // -------------------------------------------------------------------------
   // Computed data
@@ -241,6 +250,19 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
         <h1>{getTimeGreeting()}, {userName}</h1>
       </section>
 
+      {/* Quick Actions */}
+      <div className="dashboard-tab__quick-actions">
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
+          <span>{'\uD83C\uDFA4'}</span> Voice
+        </button>
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
+          <span>{'\uD83D\uDC46'}</span> Tap
+        </button>
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('tasks')}>
+          <span>{'\u2795'}</span> Task
+        </button>
+      </div>
+
       {/* KPI Cards */}
       <section className="dashboard-tab__kpis">
         <KPICard label="Tasks" value={kpis?.openTasks ?? 0} />
@@ -248,11 +270,14 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
         <KPICard label="Overdue" value={kpis?.overdueTasks ?? 0} />
       </section>
 
-      {/* Badges/Achievements */}
-      <BadgesSection completedCount={kpis?.completedThisWeek ?? 0} />
-
-      {/* Badges Panel - localStorage-based achievements */}
-      <BadgesPanel />
+      {/* Achievement Progress - compact */}
+      <div className="dashboard-tab__achievement-compact">
+        <span className="dashboard-tab__achievement-icon">{'\u2B50'}</span>
+        <span className="dashboard-tab__achievement-progress">Level {Math.floor(unlockedCount / 2) + 1}</span>
+        <div className="dashboard-tab__achievement-bar">
+          <div className="dashboard-tab__achievement-fill" style={{ width: (unlockedCount / totalBadges * 100) + '%' }} />
+        </div>
+      </div>
 
       {/* Priority Queue */}
       <section className="dashboard-tab__priority-queue">
@@ -276,7 +301,7 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
                       Due {new Date(task.dueAt).toLocaleDateString()}
                     </span>
                   )}
-                  <span className="dashboard-tab__task-source" aria-label="source">??</span>
+                  
                 </div>
               </li>
             ))}

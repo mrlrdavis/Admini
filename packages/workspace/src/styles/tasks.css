@@ -735,3 +735,65 @@
   background: var(--ws-color-sage);
   margin-top: 2px;
 }
+
+/* Calendar other-month dimming */
+.tasks-tab__calendar-cell--other-month {
+  opacity: 0.3;
+}
+
+.tasks-tab__calendar-cell--other-month .tasks-tab__calendar-date {
+  color: var(--ws-color-text-muted);
+}
+
+/* Bigger calendar cells */
+.tasks-tab__calendar-cell {
+  min-height: 3.5rem;
+  padding: var(--ws-space-sm);
+}
+
+/* Task preview on hover */
+.tasks-tab__calendar-cell {
+  position: relative;
+}
+
+.tasks-tab__calendar-preview {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2D3436;
+  color: #ffffff;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  z-index: 30;
+  min-width: 120px;
+  max-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tasks-tab__calendar-cell:hover .tasks-tab__calendar-preview,
+.tasks-tab__calendar-cell:focus-within .tasks-tab__calendar-preview {
+  display: flex;
+}
+
+.tasks-tab__calendar-preview-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tasks-tab__calendar-preview-item:last-child {
+  border-bottom: none;
+}
+
+.tasks-tab__calendar-preview-more {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  padding-top: 2px;
+}

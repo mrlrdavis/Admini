@@ -575,11 +575,7 @@ function FirstTimeOnboardingWizard({ userName, schoolName: initialSchoolName = '
         <button type="button" className="bubble-submit" disabled={applying} onClick={handleApply}>
           {applying ? 'Setting up...' : 'Take me to Admini'}
         </button>
-        {step === 4 && (
-          <button type="button" className="forgot-link" onClick={handleApply} disabled={applying}>
-            Not interested yet?
-          </button>
-        )}
+        {step === 4 && <span style={{ fontSize: "13px", color: "rgba(21,18,27,0.56)", fontWeight: 600 }}>Not interested yet?</span>}
       </div>
     </section>
   );

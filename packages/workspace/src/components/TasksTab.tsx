@@ -378,10 +378,19 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
             {calendarDays.map((day, i) => {
               const dayTasks = tasks.filter(t => t.dueAt && new Date(t.dueAt).toDateString() === day.toDateString());
               const isToday = day.toDateString() === new Date().toDateString();
+              const isCurrentMonth = day.getMonth() === calendarMonth.getMonth();
               return (
-                <div key={i} className={'tasks-tab__calendar-cell' + (isToday ? ' tasks-tab__calendar-cell--today' : '') + (dayTasks.length > 0 ? ' tasks-tab__calendar-cell--has-tasks' : '')}>
+                <div key={i} className={'tasks-tab__calendar-cell' + (isToday ? ' tasks-tab__calendar-cell--today' : '') + (dayTasks.length > 0 ? ' tasks-tab__calendar-cell--has-tasks' : '') + (!isCurrentMonth ? ' tasks-tab__calendar-cell--other-month' : '')}>
                   <span className="tasks-tab__calendar-date">{day.getDate()}</span>
                   {dayTasks.length > 0 && <span className="tasks-tab__calendar-dot" />}
+                  {dayTasks.length > 0 && (
+                    <div className="tasks-tab__calendar-preview">
+                      {dayTasks.slice(0, 3).map(t => (
+                        <span key={t.id} className="tasks-tab__calendar-preview-item">{t.title}</span>
+                      ))}
+                      {dayTasks.length > 3 && <span className="tasks-tab__calendar-preview-more">+{dayTasks.length - 3} more</span>}
+                    </div>
+                  )}
                 </div>
               );
             })}
