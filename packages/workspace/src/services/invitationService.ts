@@ -106,6 +106,19 @@ export async function createInvitation(
       .select('id, organization_id, email, role, status, created_at, expires_at')
       .single<DbInvitation>();
     if (error) throw error;
+
+    // Fire-and-forget: send invitation email via API worker
+    try {
+      const apiBase = typeof window !== 'undefined' ? (window as any).__ADMINI_API_BASE__ || '' : '';
+      if (apiBase) {
+        fetch(apiBase + '/api/invitations/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, inviterName: userData.user.email || 'A team member', schoolName: 'your school', role, token: tokenHash }),
+        }).catch(() => {});
+      }
+    } catch { /* best-effort */ }
+
     return mapInvitation(data);
   } catch (err) {
     throw wrapError('Failed to create invitation', err);
