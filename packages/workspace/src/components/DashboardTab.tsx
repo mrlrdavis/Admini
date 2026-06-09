@@ -4,7 +4,7 @@
 // Requirements: 2.1, 2.4, 7.1
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { KPICard, SkeletonCard } from '@admini/ui';
+import { SkeletonCard } from '@admini/ui';
 import {
   getTasks,
   getActivityEvents,
@@ -236,126 +236,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         <h1>{getTimeGreeting()}, {userName}</h1>
       </section>
 
-      {/* Quick Actions */}
-      <div className="dashboard-tab__quick-actions">
-        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
-          <span>{'\uD83C\uDFA4'}</span> Voice
-        </button>
-        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
-          <span>{'\uD83D\uDC46'}</span> Tap
-        </button>
-        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('tasks')}>
-          <span>{'\u2795'}</span> Task
-        </button>
-      </div>
-
-      {/* KPI Cards */}
-      <section className="dashboard-tab__kpis">
-        <KPICard label="Tasks" value={kpis?.openTasks ?? 0} />
-        <KPICard label="Completed" value={kpis?.completedThisWeek ?? 0} />
-        <KPICard label="Overdue" value={kpis?.overdueTasks ?? 0} />
-      </section>
-      {/* Task Recommendations - below KPI cards (Requirements: 3.1, 3.4) */}
-      {userId && organizationId && (
-        <RecommendationsWidget userId={userId} organizationId={organizationId} />
-      )}
-
-      {/* Achievement Progress - compact with explanation */}
-      <div className="dashboard-tab__achievement-compact">
-        <span className="dashboard-tab__achievement-icon">{'\u2B50'}</span>
-        <div className="dashboard-tab__achievement-info">
-          <span className="dashboard-tab__achievement-progress">Level {Math.floor(unlockedCount / 2) + 1}</span>
-          <span className="dashboard-tab__achievement-explainer">
-            {unlockedCount}/{totalBadges} achievements earned - complete tasks and use features to level up
-          </span>
-        </div>
-        <div className="dashboard-tab__achievement-bar">
-          <div className="dashboard-tab__achievement-fill" style={{ width: (unlockedCount / totalBadges * 100) + '%' }} />
-        </div>
-      </div>
-
-      {/* High Priority */}
-      <section className="dashboard-tab__priority-queue">
-        <header className="dashboard-tab__section-header">
-          <h2>High Priority</h2>
-          <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('tasks')}>
-            View all
-          </button>
-        </header>
-        {priorityQueue.filter(t => t.priority === 'urgent' || t.priority === 'high').length === 0 ? (
-          <p className="dashboard-tab__empty">No high priority tasks</p>
-        ) : (
-          <ul className="dashboard-tab__task-list">
-            {priorityQueue.filter(t => t.priority === 'urgent' || t.priority === 'high').slice(0, 5).map((task) => (
-              <li key={task.id} className="dashboard-tab__task-item ws-press-feedback" data-priority={task.priority}>
-                <span className="dashboard-tab__task-title">{task.title}</span>
-                <span className="dashboard-tab__task-priority">{task.priority}</span>
-                <div className="dashboard-tab__task-meta">
-                  {task.dueAt && (
-                    <span className="dashboard-tab__task-due">
-                      Due {new Date(task.dueAt).toLocaleDateString()}
-                    </span>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Due Today */}
-      <section className="dashboard-tab__priority-queue">
-        <header className="dashboard-tab__section-header">
-          <h2>Due Today</h2>
-        </header>
-        {(() => {
-          const today = new Date().toDateString();
-          const dueToday = tasks.filter(t => t.status !== 'completed' && t.dueAt && new Date(t.dueAt).toDateString() === today);
-          if (dueToday.length === 0) return <p className="dashboard-tab__empty">Nothing due today</p>;
-          return (
-            <ul className="dashboard-tab__task-list">
-              {dueToday.map((task) => (
-                <li key={task.id} className="dashboard-tab__task-item ws-press-feedback" data-priority={task.priority}>
-                  <span className="dashboard-tab__task-title">{task.title}</span>
-                  <span className="dashboard-tab__task-priority">{task.priority}</span>
-                </li>
-              ))}
-            </ul>
-          );
-        })()}
-      </section>
-
-      {/* Coming Due */}
-      <section className="dashboard-tab__priority-queue">
-        <header className="dashboard-tab__section-header">
-          <h2>Coming Due</h2>
-        </header>
-        {(() => {
-          const now = new Date();
-          const in3Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
-          const comingDue = tasks.filter(t => {
-            if (t.status === 'completed' || !t.dueAt) return false;
-            const due = new Date(t.dueAt);
-            return due > now && due <= in3Days;
-          });
-          if (comingDue.length === 0) return <p className="dashboard-tab__empty">Nothing coming due soon</p>;
-          return (
-            <ul className="dashboard-tab__task-list">
-              {comingDue.map((task) => (
-                <li key={task.id} className="dashboard-tab__task-item ws-press-feedback" data-priority={task.priority}>
-                  <span className="dashboard-tab__task-title">{task.title}</span>
-                  <span className="dashboard-tab__task-due">
-                    Due {new Date(task.dueAt!).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          );
-        })()}
-      </section>
-
-      {/* Day's Schedule */}
-      <section className="dashboard-tab__day-schedule">
+            <section className="dashboard-tab__day-schedule">
         <header className="dashboard-tab__section-header">
           <h2>Today's Schedule</h2>
           <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('pulse')}>
@@ -396,45 +277,143 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         })()}
       </section>
 
-      {/* Activity Feed */}
+      {/* Three-column: High Priority | Due Today | Coming Due */}
+      <div className="dashboard-tab__three-col">
+
+
+
+
+        {/* High Priority */}
+        <section className="dashboard-tab__col">
+          <h3 className="dashboard-tab__col-title">High Priority</h3>
+          {priorityQueue.filter(t => t.priority === 'urgent' || t.priority === 'high').length === 0 ? (
+            <p className="dashboard-tab__empty">None</p>
+          ) : (
+            <ul className="dashboard-tab__col-list">
+              {priorityQueue.filter(t => t.priority === 'urgent' || t.priority === 'high').slice(0, 5).map((task) => (
+                <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority}>
+                  <span>{task.title}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Due Today */}
+        <section className="dashboard-tab__col">
+          <h3 className="dashboard-tab__col-title">Due Today</h3>
+          {(() => {
+            const today = new Date().toDateString();
+            const dueToday = tasks.filter(t => t.status !== 'completed' && t.dueAt && new Date(t.dueAt).toDateString() === today);
+            if (dueToday.length === 0) return <p className="dashboard-tab__empty">None</p>;
+            return (
+              <ul className="dashboard-tab__col-list">
+                {dueToday.map((task) => (
+                  <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority}>
+                    <span>{task.title}</span>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
+        </section>
+
+        {/* Coming Due */}
+        <section className="dashboard-tab__col">
+          <h3 className="dashboard-tab__col-title">Coming Due</h3>
+          {(() => {
+            const now = new Date();
+            const in3Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
+            const comingDue = tasks.filter(t => {
+              if (t.status === 'completed' || !t.dueAt) return false;
+              const due = new Date(t.dueAt);
+              return due > now && due <= in3Days;
+            });
+            if (comingDue.length === 0) return <p className="dashboard-tab__empty">None</p>;
+            return (
+              <ul className="dashboard-tab__col-list">
+                {comingDue.map((task) => (
+                  <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority}>
+                    <span>{task.title}</span>
+                    <span className="dashboard-tab__col-due">
+                      {new Date(task.dueAt!).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
+        </section>
+      </div>
+
+
+
+      {/* Suggested Tasks */}
+      {userId && organizationId && (
+        <RecommendationsWidget userId={userId} organizationId={organizationId} />
+      )}
+
+      {/* Achievement Progress */}
+      <div className="dashboard-tab__achievement-compact">
+        <span className="dashboard-tab__achievement-icon">{'\u2B50'}</span>
+        <div className="dashboard-tab__achievement-info">
+          <span className="dashboard-tab__achievement-progress">Level {Math.floor(unlockedCount / 2) + 1}</span>
+          <span className="dashboard-tab__achievement-explainer">
+            {unlockedCount}/{totalBadges} achievements earned - complete tasks and use features to level up
+          </span>
+        </div>
+        <div className="dashboard-tab__achievement-bar">
+          <div className="dashboard-tab__achievement-fill" style={{ width: (unlockedCount / totalBadges * 100) + '%' }} />
+        </div>
+      </div>
+
+      {/* Activity Feed - limited */}
       <section className="dashboard-tab__activity-feed">
         <header className="dashboard-tab__section-header">
           <h2>Activity Feed</h2>
-          <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('tasks')}>
-            View all
-          </button>
         </header>
         {sortedEvents.length === 0 && taskActivityFallback.length === 0 ? (
           <p className="dashboard-tab__empty">No recent activity</p>
         ) : sortedEvents.length > 0 ? (
           <ul className="dashboard-tab__event-list">
-            {sortedEvents.map((event) => (
+            {sortedEvents.slice(0, 5).map((event) => (
               <li key={event.id} className="dashboard-tab__event-item">
                 <span className="dashboard-tab__event-action">
-                  {event.action} ({event.entityType})
+                  {formatActivityAction(event)}
                 </span>
                 <span className="dashboard-tab__event-time">
-                  {new Date(event.createdAt).toLocaleString()}
+                  {new Date(event.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
           <ul className="dashboard-tab__event-list">
-            {taskActivityFallback.map((item) => (
+            {taskActivityFallback.slice(0, 5).map((item) => (
               <li key={item.id} className="dashboard-tab__event-item">
                 <span className="dashboard-tab__event-action">{item.action}</span>
                 <span className="dashboard-tab__event-detail">{item.detail}</span>
-                <span className="dashboard-tab__event-time">
-                  {new Date(item.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                </span>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-
+      {/* Quick Actions - bottom stack */}
+      <div className="dashboard-tab__quick-actions dashboard-tab__quick-actions--bottom">
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
+          Record a Capture
+        </button>
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
+          Quick Tap Capture
+        </button>
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('tasks')}>
+          See Task Calendar
+        </button>
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('admin')}>
+          Update Roster
+        </button>
+      </div>
     </div>
   );
 }

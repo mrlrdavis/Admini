@@ -892,3 +892,104 @@
   font-style: italic;
   padding-left: 20px;
 }
+
+/* Calendar Layout with Legend */
+.tasks-tab__calendar-layout {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: var(--ws-space-md);
+}
+
+@media (max-width: 600px) {
+  .tasks-tab__calendar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tasks-tab__calendar-legend {
+  padding: var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  box-shadow: var(--ws-shadow-card);
+}
+
+.tasks-tab__legend-title {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-sm);
+  color: var(--ws-color-text);
+}
+
+.tasks-tab__legend-list {
+  list-style: none;
+  margin: 0 0 var(--ws-space-md);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+}
+
+.tasks-tab__legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.tasks-tab__legend-dot[data-type="task"] { background: var(--ws-color-sage); }
+.tasks-tab__legend-dot[data-type="subtask"] { background: var(--ws-color-sage-light); }
+.tasks-tab__legend-dot[data-type="assigned"] { background: #5B8DEF; }
+.tasks-tab__legend-dot[data-type="priority"] { background: var(--ws-color-priority-high); }
+
+.tasks-tab__legend-empty {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.tasks-tab__legend-overdue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tasks-tab__legend-overdue-btn {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-priority-urgent);
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tasks-tab__legend-overdue-btn:hover {
+  color: var(--ws-color-text);
+}
+
+/* Subtask input small variant */
+.tasks-tab__subtask-input--sm {
+  max-width: 100px;
+  font-size: var(--ws-font-size-xs);
+}
+
+.tasks-tab__subtask-priority {
+  font-size: var(--ws-font-size-xs);
+  padding: 2px 4px;
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-color-white);
+}
+
+.tasks-tab__subtask-row {
+  flex-wrap: wrap;
+}

@@ -20,7 +20,7 @@ export type AppPreferences = AppPreferencesData;
 
 export const DEFAULT_PREFERENCES: AppPreferencesData = {
   theme: 'system',
-  defaultTab: 'capture',
+  defaultTab: 'dashboard',
   compactMode: false,
   taskRecommendationsEnabled: true,
 };

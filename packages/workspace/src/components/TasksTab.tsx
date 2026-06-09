@@ -367,7 +367,36 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
 
       {/* Calendar View */}
       {viewMode === 'calendar' && (
-        <div className="tasks-tab__calendar">
+        <div className="tasks-tab__calendar-layout">
+          {/* Left legend */}
+          <aside className="tasks-tab__calendar-legend">
+            <h3 className="tasks-tab__legend-title">Legend</h3>
+            <ul className="tasks-tab__legend-list">
+              <li><span className="tasks-tab__legend-dot" data-type="task" /> Task</li>
+              <li><span className="tasks-tab__legend-dot" data-type="subtask" /> Subtask</li>
+              <li><span className="tasks-tab__legend-dot" data-type="assigned" /> Assigned</li>
+              <li><span className="tasks-tab__legend-dot" data-type="priority" /> Priority</li>
+            </ul>
+            {/* Overdue tasks */}
+            <h3 className="tasks-tab__legend-title">Overdue</h3>
+            {(() => {
+              const now = new Date();
+              const overdue = tasks.filter(t => t.status !== 'completed' && t.dueAt && new Date(t.dueAt) < now);
+              if (overdue.length === 0) return <p className="tasks-tab__legend-empty">None</p>;
+              return (
+                <ul className="tasks-tab__legend-overdue">
+                  {overdue.slice(0, 6).map(t => (
+                    <li key={t.id}>
+                      <button type="button" className="tasks-tab__legend-overdue-btn" onClick={() => handleEditTask(t)}>
+                        {t.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
+          </aside>
+          <div className="tasks-tab__calendar">
           <div className="tasks-tab__calendar-header">
             <button type="button" onClick={() => setCalendarMonth(m => new Date(m.getFullYear(), m.getMonth() - 1))}>{'\u2190'}</button>
             <span>{calendarMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
@@ -408,6 +437,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                 </div>
               );
             })}
+          </div>
           </div>
         </div>
       )}
@@ -494,8 +524,31 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                     className="tasks-tab__subtask-input"
                     value={st.title}
                     onChange={(e) => setFormSubtasks(prev => prev.map((s, i) => i === idx ? { ...s, title: e.target.value } : s))}
-                    placeholder="Subtask..."
+                    placeholder="Subtask title..."
                   />
+                  <input
+                    type="text"
+                    className="tasks-tab__subtask-input tasks-tab__subtask-input--sm"
+                    value={(st as any).assignee || ''}
+                    onChange={(e) => setFormSubtasks(prev => prev.map((s, i) => i === idx ? { ...s, assignee: e.target.value } : s))}
+                    placeholder="Assignee"
+                  />
+                  <input
+                    type="date"
+                    className="tasks-tab__subtask-input tasks-tab__subtask-input--sm"
+                    value={(st as any).dueAt || ''}
+                    onChange={(e) => setFormSubtasks(prev => prev.map((s, i) => i === idx ? { ...s, dueAt: e.target.value } : s))}
+                  />
+                  <select
+                    className="tasks-tab__subtask-priority"
+                    value={(st as any).priority || 'normal'}
+                    onChange={(e) => setFormSubtasks(prev => prev.map((s, i) => i === idx ? { ...s, priority: e.target.value } : s))}
+                  >
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
                   <button type="button" className="tasks-tab__subtask-remove" onClick={() => setFormSubtasks(prev => prev.filter((_, i) => i !== idx))}>{'\u00D7'}</button>
                 </div>
               ))}

@@ -38,14 +38,7 @@ export function WorkspaceShell({
 }: WorkspaceShellProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('dashboard');
 
-  // Load saved default tab preference on mount
-  useEffect(() => {
-    getAppPreferences().then(prefs => {
-      if (prefs.defaultTab && NATIVE_TABS.has(prefs.defaultTab as WorkspaceTab)) {
-        setActiveTab(prefs.defaultTab as WorkspaceTab);
-      }
-    }).catch(() => {});
-  }, []);
+  // Dashboard is always the landing tab
 
   // Admin/principal can access the admin tab (REQ-16)
   const canAccessAdmin = userRole === 'admin' || userRole === 'principal';
