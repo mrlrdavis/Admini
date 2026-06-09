@@ -1,24 +1,6 @@
-import type { IntegrationCatalogItem, IntegrationProvider, IntegrationStatus } from '@admini/shared';
+import type { IntegrationCatalogItem, IntegrationProvider, IntegrationStatus, IntegrationConnection, AnyIntegrationProvider, DeprecatedIntegrationProvider } from '@admini/shared';
 
 export const integrationCatalog: IntegrationCatalogItem[] = [
-  {
-    provider: 'schoology',
-    name: 'Schoology',
-    category: 'lms',
-    description: 'Courses, sections, assignments, and learning context.',
-    authModes: ['oauth', 'api_key'],
-    scopes: ['courses:read', 'sections:read', 'assignments:read'],
-    persistenceTargets: ['indexeddb', 'supabase', 'worker_secret']
-  },
-  {
-    provider: 'infinite_campus',
-    name: 'Infinite Campus',
-    category: 'sis',
-    description: 'Roster, attendance, schedules, and student information context.',
-    authModes: ['oauth', 'sso', 'api_key'],
-    scopes: ['roster:read', 'attendance:read', 'schedule:read'],
-    persistenceTargets: ['indexeddb', 'supabase', 'worker_secret']
-  },
   {
     provider: 'google_classroom',
     name: 'Google Classroom',
@@ -27,6 +9,24 @@ export const integrationCatalog: IntegrationCatalogItem[] = [
     authModes: ['oauth', 'sso'],
     scopes: ['classroom.courses.readonly', 'classroom.rosters.readonly', 'classroom.coursework.students.readonly'],
     persistenceTargets: ['indexeddb', 'supabase', 'worker_secret']
+  },
+  {
+    provider: 'email',
+    name: 'Email',
+    category: 'productivity',
+    description: 'Read inbox messages and send emails for communication workflows.',
+    authModes: ['oauth'],
+    scopes: ['inbox:read', 'messages:send'],
+    persistenceTargets: ['indexeddb', 'supabase']
+  },
+  {
+    provider: 'calendar',
+    name: 'Calendar',
+    category: 'productivity',
+    description: 'Read and create calendar events for scheduling workflows.',
+    authModes: ['oauth'],
+    scopes: ['events:read', 'events:create'],
+    persistenceTargets: ['indexeddb', 'supabase']
   }
 ];
 
@@ -103,4 +103,46 @@ export function createMockConnector(provider: IntegrationProvider): StudentSyste
 
 export function getConnector(provider: IntegrationProvider): StudentSystemConnector {
   return createMockConnector(provider);
+}
+
+export function isActiveProvider(provider: AnyIntegrationProvider): provider is IntegrationProvider {
+  const activeProviders: IntegrationProvider[] = ['google_classroom', 'email', 'calendar'];
+  return activeProviders.includes(provider as IntegrationProvider);
+}
+
+export function isDeprecatedProvider(provider: AnyIntegrationProvider): provider is DeprecatedIntegrationProvider {
+  const deprecated: DeprecatedIntegrationProvider[] = ['schoology', 'infinite_campus'];
+  return deprecated.includes(provider as DeprecatedIntegrationProvider);
+}
+
+/**
+ * Raw database row shape for integration connections.
+ * The provider field may contain deprecated values from before catalog updates.
+ */
+export type RawIntegrationConnectionRow = {
+  id: string;
+  organization_id: string;
+  provider: string;
+  status: string;
+  last_sync_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * Filters raw database connection rows to only include connections with active providers,
+ * and maps them to the IntegrationConnection shape.
+ */
+export function getActiveConnections(rows: RawIntegrationConnectionRow[]): IntegrationConnection[] {
+  return rows
+    .filter(row => isActiveProvider(row.provider as AnyIntegrationProvider))
+    .map(row => ({
+      id: row.id,
+      organizationId: row.organization_id,
+      provider: row.provider as IntegrationProvider,
+      status: row.status as IntegrationStatus,
+      lastSyncAt: row.last_sync_at ?? undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
 }

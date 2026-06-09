@@ -102,9 +102,9 @@ export function IntegrationCatalog({ onConnected, onBack }: IntegrationCatalogPr
 
 function getProviderIcon(provider: IntegrationProvider): string {
   switch (provider) {
-    case 'google_classroom': return '\uD83C\uDFEB';
-    case 'schoology': return '\uD83D\uDCDA';
-    case 'infinite_campus': return '\uD83C\uDFE2';
-    default: return '\uD83D\uDD17';
+    case 'google_classroom': return '🏫';
+    case 'email': return '✉️';
+    case 'calendar': return '📅';
+    default: return '🔗';
   }
 }

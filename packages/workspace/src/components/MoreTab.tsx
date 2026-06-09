@@ -10,7 +10,6 @@ import { NotificationSettings } from './NotificationSettings';
 import { AppPreferences } from './AppPreferences';
 import { ConnectedIntegrations } from './ConnectedIntegrations';
 import { IntegrationCatalog } from './IntegrationCatalog';
-import { useThemePreference } from '../hooks/useThemePreference';
 import { useCompactMode } from '../hooks/useCompactMode';
 import { useDebouncedSave } from '../hooks/useDebouncedSave';
 
@@ -157,7 +156,6 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
   });
   const [isReturning, setIsReturning] = useState(false);
   const { compactMode, setCompactMode } = useCompactMode();
-  const { themePreference, setThemePreference } = useThemePreference();
   const activeSubView: MoreTabSubView = viewStack[viewStack.length - 1] ?? null;
 
   const [editingField, setEditingField] = useState<'display-name' | 'school' | null>(null);
@@ -771,14 +769,11 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
         </header>
 
         <section className="more-tab__section">
-          <AppPreferences
-            theme={themePreference}
-            onChange={(key, value) => {
-              if (key === 'theme' && typeof value === 'string') {
-                setThemePreference(value as 'light' | 'dark' | 'system');
+          <AppPreferences onChange={(key, value) => {
+              if (key === 'compactMode' && typeof value === 'boolean') {
+                setCompactMode(value);
               }
-            }}
-          />
+            }} />
         </section>
       </div>
     );

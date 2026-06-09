@@ -70,15 +70,15 @@ export default {
           ok: true,
           data: {
             connections: [
-              mockConnection('schoology'),
-              mockConnection('infinite_campus'),
+              mockConnection('email'),
+              mockConnection('calendar'),
               mockConnection('google_classroom')
             ]
           }
         });
       }
 
-      const authorizeMatch = url.pathname.match(/^\/api\/integrations\/(schoology|infinite_campus|google_classroom)\/authorize$/);
+      const authorizeMatch = url.pathname.match(/^\/api\/integrations\/(google_classroom|email|calendar)\/authorize$/);
       if (request.method === 'GET' && authorizeMatch) {
         const provider = authorizeMatch[1] as IntegrationProvider;
         const mode = url.searchParams.get('mode') || 'oauth';
@@ -86,7 +86,7 @@ export default {
         return Response.redirect(`${returnTo}${returnTo.includes('?') ? '&' : '?'}integration=${provider}&mode=${mode}&status=connected`, 302);
       }
 
-      const integrationMatch = url.pathname.match(/^\/api\/integrations\/(schoology|infinite_campus|google_classroom)\/([a-z_]+)$/);
+      const integrationMatch = url.pathname.match(/^\/api\/integrations\/(google_classroom|email|calendar)\/([a-z_]+)$/);
       if (request.method === 'POST' && integrationMatch) {
         const provider = integrationMatch[1] as IntegrationProvider;
         const tool = integrationMatch[2];

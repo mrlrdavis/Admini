@@ -516,3 +516,64 @@
   border-radius: 3px;
   transition: width 0.3s ease;
 }
+/* Day Schedule on Dashboard */
+.dashboard-tab__day-schedule {
+  margin-bottom: var(--ws-space-xl);
+}
+
+.dashboard-tab__schedule-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-sm);
+}
+
+.dashboard-tab__schedule-block {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-sm) var(--ws-space-md);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-md);
+  box-shadow: var(--ws-shadow-card);
+}
+
+.dashboard-tab__schedule-period {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  min-width: 5rem;
+  color: var(--ws-color-text);
+}
+
+.dashboard-tab__schedule-time {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+  min-width: 9rem;
+}
+
+.dashboard-tab__schedule-activities {
+  display: flex;
+  gap: var(--ws-space-xs);
+  flex-wrap: wrap;
+}
+
+.dashboard-tab__schedule-activity {
+  font-size: var(--ws-font-size-xs);
+  padding: 2px 8px;
+  background: color-mix(in srgb, var(--ws-color-sage) 10%, var(--ws-color-white));
+  border-radius: var(--ws-radius-pill);
+  color: var(--ws-color-sage-dark);
+}
+
+/* Achievement explainer */
+.dashboard-tab__achievement-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dashboard-tab__achievement-explainer {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+  line-height: 1.3;
+}

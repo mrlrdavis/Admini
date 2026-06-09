@@ -1,5 +1,4 @@
-﻿import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
-import { useThemePreference } from '@admini/workspace';
+import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 
 const TAB_ICONS: Record<string, string> = {
   capture: '\uD83D\uDCDD',
@@ -15,7 +14,6 @@ const CORE_TAB_IDS = ['capture', 'dashboard', 'tasks', 'observations', 'pulse'];
 const UTILITY_TAB_IDS = ['more', 'admin'];
 
 export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
-  const { resolvedTheme, setThemePreference } = useThemePreference();
   const coreTabs = tabs.filter(t => CORE_TAB_IDS.includes(t.id));
   const utilityTabs = tabs.filter(t => UTILITY_TAB_IDS.includes(t.id));
 
@@ -61,10 +59,6 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: Navi
           </li>
         ))}
       </ul>
-      <button type="button" className="desktop-sidebar__theme-toggle" onClick={() => setThemePreference(resolvedTheme === 'dark' ? 'light' : 'dark')} aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
-        <span className="mode-sun" aria-hidden="true" />
-        <span className="mode-moon" aria-hidden="true" />
-      </button>
       {onSignOut && (
         <button
           type="button"

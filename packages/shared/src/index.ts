@@ -57,9 +57,16 @@ export type CaptureTaskLink = {
 };
 
 export type IntegrationProvider =
-  | 'schoology'
-  | 'infinite_campus'
-  | 'google_classroom';
+  | 'google_classroom'
+  | 'email'
+  | 'calendar';
+
+// Soft-deprecation: providers that may still exist in DB records
+export type DeprecatedIntegrationProvider = 'schoology' | 'infinite_campus';
+
+// Union of all known providers (current + deprecated) for DB queries
+export type AnyIntegrationProvider = IntegrationProvider | DeprecatedIntegrationProvider;
+
 export type IntegrationStatus = 'not_configured' | 'mock' | 'connected' | 'error';
 
 export type IntegrationConnection = {
@@ -147,6 +154,59 @@ export async function listSyncQueueItems(): Promise<SyncQueueItem[]> {
   });
   db.close();
   return items;
+}
+
+
+// ---------------------------------------------------------------------------
+// Meeting Notes
+// ---------------------------------------------------------------------------
+
+export type MeetingNote = {
+  id: string;
+  title: string;
+  body: string;
+  attendees: string[];
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+};
+
+// ---------------------------------------------------------------------------
+// Task Recommendations
+// ---------------------------------------------------------------------------
+
+export type RecommendationSource = 'capture' | 'meeting_note' | 'calendar_event' | 'pulse';
+
+export type Recommendation = {
+  id: string;
+  title: string;
+  description?: string;
+  sourceType: RecommendationSource;
+  sourceId: string;
+  sourceExcerpt: string;
+  confidence: number; // 0.0 - 1.0
+  suggestedPriority: TaskPriority;
+  createdAt: string;
+};
+
+export type RecommendationContext = {
+  userId: string;
+  organizationId: string;
+  recentCaptures: Capture[];
+  recentMeetingNotes: MeetingNote[];
+  existingTaskTitles: string[];
+  dismissedRecommendationIds: string[];
+  maxResults: number;
+};
+
+export type HandledRecommendation = {
+  recommendationId: string;
+  action: 'accepted' | 'dismissed';
+  handledAt: string;
+};
+
+export interface RecommendationProvider {
+  generateRecommendations(context: RecommendationContext): Promise<Recommendation[]>;
 }
 
 export { clearAdminiBrowserState, createIndexedDbStorage } from './browser-storage';

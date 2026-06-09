@@ -797,3 +797,98 @@
   opacity: 0.7;
   padding-top: 2px;
 }
+/* Calendar Task List - multiple tasks per day, all clickable */
+.tasks-tab__calendar-task-list {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  max-height: 60px;
+}
+
+.tasks-tab__calendar-task-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--ws-color-sage) 12%, transparent);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  color: var(--ws-color-text);
+  transition: background var(--ws-transition-fast);
+}
+
+.tasks-tab__calendar-task-btn:hover {
+  background: color-mix(in srgb, var(--ws-color-sage) 24%, transparent);
+}
+
+.tasks-tab__calendar-task-btn[data-priority="urgent"] {
+  background: color-mix(in srgb, var(--ws-color-priority-urgent) 14%, transparent);
+}
+
+.tasks-tab__calendar-task-btn[data-priority="high"] {
+  background: color-mix(in srgb, var(--ws-color-priority-high) 14%, transparent);
+}
+
+.tasks-tab__calendar-task-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tasks-tab__calendar-task-subtasks {
+  font-size: 0.5625rem;
+  color: var(--ws-color-text-muted);
+  white-space: nowrap;
+}
+
+/* Subtask Preview in Task Cards */
+.tasks-tab__subtask-preview {
+  margin-top: var(--ws-space-xs);
+  padding-top: var(--ws-space-xs);
+  border-top: 1px solid var(--ws-color-border);
+}
+
+.tasks-tab__subtask-preview-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tasks-tab__subtask-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text);
+}
+
+.tasks-tab__subtask-preview-item--done {
+  color: var(--ws-color-text-muted);
+  text-decoration: line-through;
+}
+
+.tasks-tab__subtask-check {
+  font-size: 0.7rem;
+  width: 14px;
+  text-align: center;
+}
+
+.tasks-tab__subtask-preview-more {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text-muted);
+  font-style: italic;
+  padding-left: 20px;
+}

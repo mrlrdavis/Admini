@@ -6,20 +6,20 @@ Implement a rule-based task recommendation engine that analyzes user context (ca
 
 ## Tasks
 
-- [ ] 1. Define recommendation types and provider interface
-  - [ ] 1.1 Create recommendation types in packages/shared
+- [x] 1. Define recommendation types and provider interface
+  - [x] 1.1 Create recommendation types in packages/shared
     - Add `Recommendation`, `RecommendationSource`, `RecommendationContext`, `HandledRecommendation` types to `packages/shared/src/index.ts`
     - Add `RecommendationProvider` interface with `generateRecommendations` method
     - Export all new types from the shared package
     - _Requirements: 1.4, 7.2_
-  - [ ] 1.2 Extend AppPreferencesData with taskRecommendationsEnabled field
+  - [x] 1.2 Extend AppPreferencesData with taskRecommendationsEnabled field
     - Add `taskRecommendationsEnabled: boolean` to `AppPreferencesData` interface in `packages/workspace/src/services/appPreferencesStorage.ts`
     - Update `DEFAULT_PREFERENCES` to set `taskRecommendationsEnabled: true`
     - Update the `AppPreferencesData` interface in `packages/workspace/src/components/AppPreferences.tsx`
     - _Requirements: 6.2_
 
-- [ ] 2. Implement the RuleBasedProvider
-  - [ ] 2.1 Create RuleBasedProvider service
+- [x] 2. Implement the RuleBasedProvider
+  - [x] 2.1 Create RuleBasedProvider service
     - Create `packages/workspace/src/services/ruleBasedProvider.ts`
     - Implement pattern matching for action phrases: "need to", "should", "follow up", "reminder", "action item", "todo", "dont forget"
     - Implement title extraction from surrounding sentence context
@@ -33,8 +33,8 @@ Implement a rule-based task recommendation engine that analyzes user context (ca
     - **Property 2: Recommendation Output Validity**
     - **Validates: Requirements 1.3, 1.4**
 
-- [ ] 3. Implement the RecommendationEngine
-  - [ ] 3.1 Create RecommendationEngine service
+- [x] 3. Implement the RecommendationEngine
+  - [x] 3.1 Create RecommendationEngine service
     - Create `packages/workspace/src/services/recommendationEngine.ts`
     - Implement `getRecommendations(userId, orgId)` that builds context and delegates to provider
     - Implement input limiting: 50 most recent captures, 20 most recent meeting notes
@@ -45,24 +45,24 @@ Implement a rule-based task recommendation engine that analyzes user context (ca
     - Implement `refreshRecommendations(userId, orgId)` that bypasses cache
     - Add 5-second timeout for provider calls
     - _Requirements: 1.1, 1.5, 1.6, 2.1, 2.2, 2.3, 7.1, 8.2_
-  - [ ]* 3.2 Write property tests for result count cap
+  - [x] 3.2 Write property tests for result count cap
     - **Property 3: Result Count Cap**
     - **Validates: Requirements 1.5**
-  - [ ]* 3.3 Write property tests for input limiting
+  - [x] 3.3 Write property tests for input limiting
     - **Property 4: Input Limiting**
     - **Validates: Requirements 1.6**
-  - [ ]* 3.4 Write property tests for deduplication exclusion
+  - [x] 3.4 Write property tests for deduplication exclusion
     - **Property 5: Deduplication Exclusion**
     - **Validates: Requirements 2.2**
-  - [ ]* 3.5 Write property tests for dismiss cooldown filtering
+  - [x] 3.5 Write property tests for dismiss cooldown filtering
     - **Property 6: Dismiss Cooldown Filtering**
     - **Validates: Requirements 2.3**
 
-- [ ] 4. Checkpoint - Core engine tests pass
+- [x] 4. Checkpoint - Core engine tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement the RecommendationsWidget UI component
-  - [ ] 5.1 Create RecommendationsWidget component
+- [x] 5. Implement the RecommendationsWidget UI component
+  - [x] 5.1 Create RecommendationsWidget component
     - Create `packages/workspace/src/components/RecommendationsWidget.tsx`
     - Fetch recommendations on mount using RecommendationEngine
     - Check `taskRecommendationsEnabled` preference before rendering
@@ -72,43 +72,43 @@ Implement a rule-based task recommendation engine that analyzes user context (ca
     - Show empty state when no recommendations available
     - Show error state with retry button on fetch failure
     - _Requirements: 3.1, 3.2, 3.3, 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 8.1, 8.3_
-  - [ ]* 5.2 Write property tests for accept creates matching task
+  - [x] 5.2 Write property tests for accept creates matching task
     - **Property 7: Accept Creates Matching Task**
     - **Validates: Requirements 4.1**
-  - [ ]* 5.3 Write unit tests for RecommendationsWidget
+  - [x] 5.3 Write unit tests for RecommendationsWidget
     - Test empty state rendering
     - Test error state with retry
     - Test card rendering with all required fields
     - Test preference-disabled hides widget
     - _Requirements: 3.2, 3.3, 3.4, 4.4, 8.1_
 
-- [ ] 6. Integrate widget into DashboardTab
-  - [ ] 6.1 Add RecommendationsWidget to DashboardTab
+- [x] 6. Integrate widget into DashboardTab
+  - [x] 6.1 Add RecommendationsWidget to DashboardTab
     - Import and render `RecommendationsWidget` in `packages/workspace/src/components/DashboardTab.tsx`
     - Place widget below the KPI cards section
     - Pass `userId` and `organizationId` props
     - Conditionally render based on `taskRecommendationsEnabled` preference
     - _Requirements: 3.1, 3.4_
 
-- [ ] 7. Add Settings toggle to AppPreferences
-  - [ ] 7.1 Add Task Recommendations toggle to AppPreferences component
+- [x] 7. Add Settings toggle to AppPreferences
+  - [x] 7.1 Add Task Recommendations toggle to AppPreferences component
     - Add a toggle switch row in `packages/workspace/src/components/AppPreferences.tsx` following the existing compact mode pattern
     - Wire toggle to `onChange` callback with key `taskRecommendationsEnabled`
     - Use existing `role="switch"` pattern for accessibility
     - _Requirements: 6.1, 6.3, 6.4_
-  - [ ]* 7.2 Write unit tests for the toggle behavior
+  - [x] 7.2 Write unit tests for the toggle behavior
     - Test toggle renders with correct initial state
     - Test toggling persists preference
     - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] 8. Export new components and services from workspace package
-  - [ ] 8.1 Update workspace package exports
+- [x] 8. Export new components and services from workspace package
+  - [x] 8.1 Update workspace package exports
     - Add `RecommendationsWidget` export to `packages/workspace/src/index.ts`
     - Add `recommendationEngine` service export
     - Add `ruleBasedProvider` service export
     - _Requirements: 7.1, 7.3_
 
-- [ ] 9. Final checkpoint - All tests pass and integration complete
+- [x] 9. Final checkpoint - All tests pass and integration complete
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

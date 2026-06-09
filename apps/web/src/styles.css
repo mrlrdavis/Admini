@@ -1119,3 +1119,23 @@ body,
     max-width: 240px;
   }
 }
+
+/* Wizard actions - "Not interested yet?" next to "Take me to Admini" */
+.wizard-actions__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wizard-actions__skip {
+  color: rgba(21, 18, 27, 0.56);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.wizard-actions__skip:hover {
+  color: rgba(21, 18, 27, 0.8);
+}

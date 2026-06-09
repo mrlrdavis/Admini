@@ -3,8 +3,7 @@ import { useState } from 'react';
 // ---------------------------------------------------------------------------
 // AppPreferences - App-level preference controls.
 // Renders theme selection (light/dark/system), default tab selector,
-// and compact mode toggle. Uses local React state until IndexedDB persistence
-// is wired in task 13.3.
+// compact mode toggle, and task recommendations toggle.
 // ---------------------------------------------------------------------------
 
 export type ThemePreference = 'light' | 'dark' | 'system';
@@ -16,6 +15,7 @@ export interface AppPreferencesData {
   theme: ThemePreference;
   defaultTab: string;
   compactMode: boolean;
+  taskRecommendationsEnabled: boolean;
 }
 
 export interface AppPreferencesProps {
@@ -25,6 +25,8 @@ export interface AppPreferencesProps {
   defaultTab?: string;
   /** Initial compact mode state. Defaults to false. */
   compactMode?: boolean;
+  /** Initial task recommendations enabled state. Defaults to true. */
+  taskRecommendationsEnabled?: boolean;
   /** Called when any preference changes. */
   onChange: (key: string, value: string | boolean) => void;
 }
@@ -36,27 +38,16 @@ const TAB_OPTIONS = [
   { value: 'more', label: 'More' },
 ];
 
-const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'System' },
-];
 
 export function AppPreferences({
-  theme: initialTheme = 'system',
   defaultTab: initialDefaultTab = 'dashboard',
   compactMode: initialCompactMode = false,
+  taskRecommendationsEnabled: initialTaskRecommendationsEnabled = true,
   onChange,
 }: AppPreferencesProps) {
-  const [theme, setTheme] = useState<ThemePreference>(initialTheme);
   const [defaultTab, setDefaultTab] = useState<string>(initialDefaultTab);
   const [compactMode, setCompactMode] = useState<boolean>(initialCompactMode);
-
-  function handleThemeChange(value: ThemePreference) {
-    setTheme(value);
-    onChange('theme', value);
-  }
-
+  const [taskRecommendationsEnabled, setTaskRecommendationsEnabled] = useState<boolean>(initialTaskRecommendationsEnabled);
   function handleDefaultTabChange(value: string) {
     setDefaultTab(value);
     onChange('defaultTab', value);
@@ -68,32 +59,14 @@ export function AppPreferences({
     onChange('compactMode', newValue);
   }
 
+  function handleTaskRecommendationsChange() {
+    const newValue = !taskRecommendationsEnabled;
+    setTaskRecommendationsEnabled(newValue);
+    onChange('taskRecommendationsEnabled', newValue);
+  }
+
   return (
     <div className="app-preferences" role="region" aria-label="App preferences">
-      {/* Theme Selection */}
-      <fieldset className="app-preferences__fieldset">
-        <legend className="app-preferences__legend">
-          <span className="app-preferences__title">Theme</span>
-          <span className="app-preferences__description">
-            Choose how the app looks. System matches your device setting.
-          </span>
-        </legend>
-        <div className="app-preferences__theme-group" role="radiogroup" aria-label="Theme selection">
-          {THEME_OPTIONS.map((option) => (
-            <label key={option.value} className="app-preferences__theme-option">
-              <input
-                type="radio"
-                className="app-preferences__radio"
-                name="theme"
-                value={option.value}
-                checked={theme === option.value}
-                onChange={() => handleThemeChange(option.value)}
-              />
-              <span className="app-preferences__theme-label">{option.label}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
 
       {/* Default Tab Selection */}
       <div className="app-preferences__row">
@@ -138,6 +111,29 @@ export function AppPreferences({
           aria-checked={compactMode}
           aria-describedby="app-preferences-compact-mode-desc"
           onClick={handleCompactModeChange}
+        >
+          <span className="app-preferences__toggle-thumb" />
+        </button>
+      </div>
+
+      {/* Task Recommendations Toggle */}
+      <div className="app-preferences__row">
+        <div className="app-preferences__row-text">
+          <label className="app-preferences__title" htmlFor="app-preferences-task-recommendations">
+            Task Recommendations
+          </label>
+          <span className="app-preferences__description" id="app-preferences-task-recommendations-desc">
+            Show AI-generated task suggestions on the Dashboard based on your captures and notes.
+          </span>
+        </div>
+        <button
+          id="app-preferences-task-recommendations"
+          type="button"
+          role="switch"
+          className={`app-preferences__toggle${taskRecommendationsEnabled ? ' app-preferences__toggle--active' : ''}`}
+          aria-checked={taskRecommendationsEnabled}
+          aria-describedby="app-preferences-task-recommendations-desc"
+          onClick={handleTaskRecommendationsChange}
         >
           <span className="app-preferences__toggle-thumb" />
         </button>

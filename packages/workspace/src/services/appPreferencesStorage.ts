@@ -12,6 +12,7 @@ export interface AppPreferencesData {
   theme: 'light' | 'dark' | 'system';
   defaultTab: string;
   compactMode: boolean;
+  taskRecommendationsEnabled: boolean;
 }
 
 /** @deprecated Use AppPreferencesData instead */
@@ -21,6 +22,7 @@ export const DEFAULT_PREFERENCES: AppPreferencesData = {
   theme: 'system',
   defaultTab: 'capture',
   compactMode: false,
+  taskRecommendationsEnabled: true,
 };
 
 const DB_NAME = 'admini-app-prefs';

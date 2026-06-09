@@ -1,5 +1,6 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { IntegrationProvider } from '@admini/shared';
+import { isActiveProvider } from '@admini/integrations';
 import { loadIntegrationStatuses, removeIntegrationStatus } from '../services/integrationStatusStorage';
 import type { IntegrationConnectionStatus } from '../services/integrationStatusStorage';
 
@@ -23,16 +24,16 @@ const AVAILABLE_INTEGRATIONS: IntegrationListItem[] = [
     description: 'Classes, coursework, and classroom learning context',
   },
   {
-    provider: 'schoology',
-    name: 'Schoology',
-    icon: '\uD83D\uDCDA',
-    description: 'Courses, sections, and assignments',
+    provider: 'email',
+    name: 'Email',
+    icon: '\u2709\uFE0F',
+    description: 'Read inbox messages and send emails for communication workflows',
   },
   {
-    provider: 'infinite_campus',
-    name: 'Infinite Campus',
-    icon: '\uD83C\uDFE2',
-    description: 'Roster, attendance, and student information',
+    provider: 'calendar',
+    name: 'Calendar',
+    icon: '\uD83D\uDCC5',
+    description: 'Read and create calendar events for scheduling workflows',
   },
 ];
 
@@ -56,7 +57,7 @@ export function ConnectedIntegrations({ onAddIntegration }: ConnectedIntegration
       try {
         const loaded = await loadIntegrationStatuses();
         if (!cancelled) {
-          setStatuses(loaded);
+          setStatuses(loaded.filter((s) => isActiveProvider(s.provider)));
         }
       } finally {
         if (!cancelled) {
@@ -73,7 +74,7 @@ export function ConnectedIntegrations({ onAddIntegration }: ConnectedIntegration
     setRefreshing(true);
     try {
       const loaded = await loadIntegrationStatuses();
-      setStatuses(loaded);
+      setStatuses(loaded.filter((s) => isActiveProvider(s.provider)));
     } finally {
       setRefreshing(false);
     }

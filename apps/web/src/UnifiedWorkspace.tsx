@@ -4,11 +4,10 @@ import {
   WorkspaceShell,
 } from '@admini/workspace';
 import type { ProfileUpdatePayload } from '@admini/workspace';
-import { InstallButton } from '@admini/pwa';
+import { CustomInstallButton } from './components/CustomInstallButton';
 import type { LayoutMode } from '@admini/ui';
 import { supabase } from './supabase';
 import { NavigationRenderer } from './components/NavigationRenderer';
-import { useThemePreference } from '@admini/workspace';
 
 interface UnifiedWorkspaceProps {
   user: { id: string; email?: string | null; displayName?: string | null; schoolName?: string | null };
@@ -60,8 +59,6 @@ export function UnifiedWorkspace({
 }: UnifiedWorkspaceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const layoutMode = useLayoutMode(containerRef);
-  // Apply theme at workspace level so it doesn't flicker on tab switch
-  useThemePreference();
 
   return (
     <SupabaseClientProvider client={supabase!}>
@@ -87,7 +84,7 @@ export function UnifiedWorkspace({
           )}
         />
       </div>
-      <InstallButton />
+      <CustomInstallButton />
     </SupabaseClientProvider>
   );
 }

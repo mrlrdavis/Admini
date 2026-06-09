@@ -1,4 +1,4 @@
-﻿// Components
+// Components
 export { WorkspaceShell, NATIVE_TABS } from './components/WorkspaceShell';
 export { DashboardTab } from './components/DashboardTab';
 export { AdminTab } from './components/AdminTab';
@@ -23,6 +23,8 @@ export { IframeFallback } from './components/IframeFallback';
 export { ObservationsTab } from './components/ObservationsTab';
 export type { ObservationsTabProps } from './components/ObservationsTab';
 export { BadgesPanel, unlockBadge } from './components/BadgesPanel';
+export { RecommendationsWidget } from './components/RecommendationsWidget';
+export type { RecommendationsWidgetProps } from './components/RecommendationsWidget';
 
 // Hooks
 export { useDebouncedSave } from './hooks/useDebouncedSave';
@@ -54,6 +56,8 @@ export { listMeetingNotes, createMeetingNote, updateMeetingNote, deleteMeetingNo
 export type { MeetingNote } from './services/meetingNotesService';
 export { loadIntegrationStatuses, saveIntegrationStatus, removeIntegrationStatus } from './services/integrationStatusStorage';
 export type { IntegrationConnectionStatus } from './services/integrationStatusStorage';
+export { recommendationEngine } from './services/recommendationEngine';
+export { ruleBasedProvider } from './services/ruleBasedProvider';
 
 // Provider
 export { SupabaseClientProvider, useSupabaseClient } from './providers/SupabaseClientProvider';

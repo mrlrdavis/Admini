@@ -12,6 +12,7 @@ import {
   sortByUrgency,
 } from '../services/dashboardService';
 import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
+import { RecommendationsWidget } from './RecommendationsWidget';
 // BadgesSection and BadgesPanel removed - replaced with compact achievement indicator
 
 // Re-export sortByUrgency for testing and backward compatibility
@@ -23,6 +24,8 @@ export { sortByUrgency } from '../services/dashboardService';
 
 export interface DashboardTabProps {
   userName: string;
+  userId?: string;
+  organizationId?: string;
   onNavigateToTab?: (tabId: string) => void;
   onTabChange?: (tabId: string) => void;
 }
@@ -44,24 +47,7 @@ export function getTimeGreeting(): string {
   return 'Good evening';
 }
 
-/**
- * Computes a human-readable countdown string from now to a target ISO date.
- */
-function formatCountdown(targetIso: string): string {
-  const now = Date.now();
-  const target = new Date(targetIso).getTime();
-  const diffMs = target - now;
 
-  if (diffMs <= 0) return 'Now';
-
-  const minutes = Math.floor(diffMs / 60_000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) return `${days}d ${hours % 24}h`;
-  if (hours > 0) return `${hours}h ${minutes % 60}m`;
-  return `${minutes}m`;
-}
 
 /**
  * Formats an activity event into a human-readable action string.
@@ -86,7 +72,7 @@ function formatActivityAction(event: ActivityEvent): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export function DashboardTab({ userName, onNavigateToTab, onTabChange }: DashboardTabProps) {
+export function DashboardTab({ userName, userId, organizationId, onNavigateToTab, onTabChange }: DashboardTabProps) {
   const [tasks, setTasks] = useState<DashboardTask[]>([]);
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
@@ -269,29 +255,38 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
         <KPICard label="Completed" value={kpis?.completedThisWeek ?? 0} />
         <KPICard label="Overdue" value={kpis?.overdueTasks ?? 0} />
       </section>
+      {/* Task Recommendations - below KPI cards (Requirements: 3.1, 3.4) */}
+      {userId && organizationId && (
+        <RecommendationsWidget userId={userId} organizationId={organizationId} />
+      )}
 
-      {/* Achievement Progress - compact */}
+      {/* Achievement Progress - compact with explanation */}
       <div className="dashboard-tab__achievement-compact">
         <span className="dashboard-tab__achievement-icon">{'\u2B50'}</span>
-        <span className="dashboard-tab__achievement-progress">Level {Math.floor(unlockedCount / 2) + 1}</span>
+        <div className="dashboard-tab__achievement-info">
+          <span className="dashboard-tab__achievement-progress">Level {Math.floor(unlockedCount / 2) + 1}</span>
+          <span className="dashboard-tab__achievement-explainer">
+            {unlockedCount}/{totalBadges} achievements earned - complete tasks and use features to level up
+          </span>
+        </div>
         <div className="dashboard-tab__achievement-bar">
           <div className="dashboard-tab__achievement-fill" style={{ width: (unlockedCount / totalBadges * 100) + '%' }} />
         </div>
       </div>
 
-      {/* Priority Queue */}
+      {/* High Priority */}
       <section className="dashboard-tab__priority-queue">
         <header className="dashboard-tab__section-header">
-          <h2>Priority Queue</h2>
+          <h2>High Priority</h2>
           <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('tasks')}>
             View all
           </button>
         </header>
-        {priorityQueue.length === 0 ? (
-          <p className="dashboard-tab__empty">No open tasks</p>
+        {priorityQueue.filter(t => t.priority === 'urgent' || t.priority === 'high').length === 0 ? (
+          <p className="dashboard-tab__empty">No high priority tasks</p>
         ) : (
           <ul className="dashboard-tab__task-list">
-            {priorityQueue.map((task) => (
+            {priorityQueue.filter(t => t.priority === 'urgent' || t.priority === 'high').slice(0, 5).map((task) => (
               <li key={task.id} className="dashboard-tab__task-item ws-press-feedback" data-priority={task.priority}>
                 <span className="dashboard-tab__task-title">{task.title}</span>
                 <span className="dashboard-tab__task-priority">{task.priority}</span>
@@ -301,12 +296,104 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
                       Due {new Date(task.dueAt).toLocaleDateString()}
                     </span>
                   )}
-                  
                 </div>
               </li>
             ))}
           </ul>
         )}
+      </section>
+
+      {/* Due Today */}
+      <section className="dashboard-tab__priority-queue">
+        <header className="dashboard-tab__section-header">
+          <h2>Due Today</h2>
+        </header>
+        {(() => {
+          const today = new Date().toDateString();
+          const dueToday = tasks.filter(t => t.status !== 'completed' && t.dueAt && new Date(t.dueAt).toDateString() === today);
+          if (dueToday.length === 0) return <p className="dashboard-tab__empty">Nothing due today</p>;
+          return (
+            <ul className="dashboard-tab__task-list">
+              {dueToday.map((task) => (
+                <li key={task.id} className="dashboard-tab__task-item ws-press-feedback" data-priority={task.priority}>
+                  <span className="dashboard-tab__task-title">{task.title}</span>
+                  <span className="dashboard-tab__task-priority">{task.priority}</span>
+                </li>
+              ))}
+            </ul>
+          );
+        })()}
+      </section>
+
+      {/* Coming Due */}
+      <section className="dashboard-tab__priority-queue">
+        <header className="dashboard-tab__section-header">
+          <h2>Coming Due</h2>
+        </header>
+        {(() => {
+          const now = new Date();
+          const in3Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
+          const comingDue = tasks.filter(t => {
+            if (t.status === 'completed' || !t.dueAt) return false;
+            const due = new Date(t.dueAt);
+            return due > now && due <= in3Days;
+          });
+          if (comingDue.length === 0) return <p className="dashboard-tab__empty">Nothing coming due soon</p>;
+          return (
+            <ul className="dashboard-tab__task-list">
+              {comingDue.map((task) => (
+                <li key={task.id} className="dashboard-tab__task-item ws-press-feedback" data-priority={task.priority}>
+                  <span className="dashboard-tab__task-title">{task.title}</span>
+                  <span className="dashboard-tab__task-due">
+                    Due {new Date(task.dueAt!).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          );
+        })()}
+      </section>
+
+      {/* Day's Schedule */}
+      <section className="dashboard-tab__day-schedule">
+        <header className="dashboard-tab__section-header">
+          <h2>Today's Schedule</h2>
+          <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('pulse')}>
+            Edit
+          </button>
+        </header>
+        {(() => {
+          const DAY_STRUCTURE_KEY = 'admini_day_structure';
+          let dayBlocks: { period: string; time: string; activities: { label: string; type: string }[] }[] = [];
+          try {
+            const saved = localStorage.getItem(DAY_STRUCTURE_KEY);
+            if (saved) {
+              dayBlocks = JSON.parse(saved);
+            }
+          } catch {}
+          if (dayBlocks.length === 0) {
+            dayBlocks = [
+              { period: 'Morning', time: '8:00 AM - 12:00 PM', activities: [{ label: 'Deep work', type: 'focus' }] },
+              { period: 'Afternoon', time: '12:00 PM - 4:00 PM', activities: [{ label: 'Team sync', type: 'meetings' }] },
+              { period: 'End of Day', time: '4:00 PM - 5:00 PM', activities: [{ label: 'Wrap-up', type: 'wrap-up' }] },
+            ];
+          }
+          return (
+            <div className="dashboard-tab__schedule-blocks">
+              {dayBlocks.map((block) => (
+                <div key={block.period} className="dashboard-tab__schedule-block">
+                  <span className="dashboard-tab__schedule-period">{block.period}</span>
+                  <span className="dashboard-tab__schedule-time">{block.time}</span>
+                  <div className="dashboard-tab__schedule-activities">
+                    {block.activities.map((a) => (
+                      <span key={a.label} className="dashboard-tab__schedule-activity">{a.label}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </section>
 
       {/* Activity Feed */}
@@ -347,28 +434,7 @@ export function DashboardTab({ userName, onNavigateToTab, onTabChange }: Dashboa
         )}
       </section>
 
-      {/* Pulse Countdown */}
-      <section className="dashboard-tab__pulse-countdown">
-        <header className="dashboard-tab__section-header">
-          <h2>Next Pulse</h2>
-          <button type="button" className="dashboard-tab__section-link" onClick={() => onTabChange?.('pulse')}>
-            View all
-          </button>
-        </header>
-        {kpis?.nextPulseAt ? (
-          <div className="dashboard-tab__countdown-card">
-            <span className="dashboard-tab__countdown-icon" aria-hidden="true">?</span>
-            <div className="dashboard-tab__countdown-info">
-              <span className="dashboard-tab__countdown-label">Next Pulse</span>
-              <span className="dashboard-tab__countdown-value">
-                {formatCountdown(kpis.nextPulseAt)}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <p className="dashboard-tab__empty">No pulse scheduled</p>
-        )}
-      </section>
+
     </div>
   );
 }

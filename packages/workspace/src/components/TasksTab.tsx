@@ -382,14 +382,28 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
               return (
                 <div key={i} className={'tasks-tab__calendar-cell' + (isToday ? ' tasks-tab__calendar-cell--today' : '') + (dayTasks.length > 0 ? ' tasks-tab__calendar-cell--has-tasks' : '') + (!isCurrentMonth ? ' tasks-tab__calendar-cell--other-month' : '')}>
                   <span className="tasks-tab__calendar-date">{day.getDate()}</span>
-                  {dayTasks.length > 0 && <span className="tasks-tab__calendar-dot" />}
                   {dayTasks.length > 0 && (
-                    <div className="tasks-tab__calendar-preview">
-                      {dayTasks.slice(0, 3).map(t => (
-                        <span key={t.id} className="tasks-tab__calendar-preview-item">{t.title}</span>
+                    <ul className="tasks-tab__calendar-task-list">
+                      {dayTasks.map(t => (
+                        <li key={t.id}>
+                          <button
+                            type="button"
+                            className="tasks-tab__calendar-task-btn"
+                            data-priority={t.priority}
+                            onClick={() => handleEditTask(t)}
+                            aria-label={`Open task: ${t.title}`}
+                          >
+                            <span className="tasks-tab__calendar-task-title">{t.title}</span>
+                            {(() => {
+                              const st = loadSubtasks(t.id);
+                              if (st.length === 0) return null;
+                              const done = st.filter(s => s.completed).length;
+                              return <span className="tasks-tab__calendar-task-subtasks">{done}/{st.length}</span>;
+                            })()}
+                          </button>
+                        </li>
                       ))}
-                      {dayTasks.length > 3 && <span className="tasks-tab__calendar-preview-more">+{dayTasks.length - 3} more</span>}
-                    </div>
+                    </ul>
                   )}
                 </div>
               );
@@ -575,7 +589,20 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                     const st = loadSubtasks(task.id);
                     if (st.length === 0) return null;
                     const done = st.filter(s => s.completed).length;
-                    return <span className="tasks-tab__subtask-count">{done}/{st.length} subtasks</span>;
+                    return (
+                      <div className="tasks-tab__subtask-preview">
+                        <span className="tasks-tab__subtask-count">{done}/{st.length} subtasks</span>
+                        <ul className="tasks-tab__subtask-preview-list">
+                          {st.slice(0, 4).map(s => (
+                            <li key={s.id} className={'tasks-tab__subtask-preview-item' + (s.completed ? ' tasks-tab__subtask-preview-item--done' : '')}>
+                              <span className="tasks-tab__subtask-check">{s.completed ? '\u2713' : '\u25CB'}</span>
+                              <span>{s.title}</span>
+                            </li>
+                          ))}
+                          {st.length > 4 && <li className="tasks-tab__subtask-preview-more">+{st.length - 4} more</li>}
+                        </ul>
+                      </div>
+                    );
                   })()}
                 </li>
               ))}

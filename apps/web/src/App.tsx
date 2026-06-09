@@ -17,7 +17,6 @@ import {
 } from './supabase';
 import { AuthScreen } from './AuthScreen';
 import { UnifiedWorkspace } from './UnifiedWorkspace';
-import { InstallButton } from '@admini/pwa';
 import { IntegrationCatalog, organizationService } from '@admini/workspace';
 
 const authStorage = createIndexedDbStorage('auth');
@@ -342,7 +341,6 @@ export function App() {
           }}
         />
       )}
-      <InstallButton />
     </main>
   );
 }
@@ -572,10 +570,12 @@ function FirstTimeOnboardingWizard({ userName, schoolName: initialSchoolName = '
         >
           &larr;
         </button>
-        <button type="button" className="bubble-submit" disabled={applying} onClick={handleApply}>
-          {applying ? 'Setting up...' : 'Take me to Admini'}
-        </button>
-        {step === 4 && <span style={{ fontSize: "13px", color: "rgba(21,18,27,0.56)", fontWeight: 600 }}>Not interested yet?</span>}
+        <div className="wizard-actions__main">
+          {step === 4 && <span className="wizard-actions__skip" onClick={handleApply}>Not interested yet?</span>}
+          <button type="button" className="bubble-submit" disabled={applying} onClick={handleApply}>
+            {applying ? 'Setting up...' : 'Take me to Admini'}
+          </button>
+        </div>
       </div>
     </section>
   );
