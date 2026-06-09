@@ -645,3 +645,11 @@
   justify-content: flex-start;
   font-weight: 500;
 }
+
+/* Simple section header (no flex layout) */
+.dashboard-tab__section-header-simple {
+  font-size: var(--ws-font-size-lg);
+  font-weight: 600;
+  margin: var(--ws-space-lg) 0 var(--ws-space-sm);
+  color: var(--ws-color-text);
+}

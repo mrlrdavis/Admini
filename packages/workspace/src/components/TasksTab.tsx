@@ -256,11 +256,29 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     }
   }
 
+  function handleSubtaskToggleFromCard(taskId: string, subtaskId: string) {
+    const st = loadSubtasks(taskId);
+    const updated = st.map(s => s.id === subtaskId ? { ...s, completed: !s.completed } : s);
+    saveSubtasks(taskId, updated);
+    // Force re-render by updating task's updatedAt
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+  }
+
   async function handleToggleComplete(taskId: string) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
     const newStatus: TaskStatus = task.status === 'completed' ? 'open' : 'completed';
+
+    // Block completion if subtasks aren't all done
+    if (newStatus === 'completed') {
+      const st = loadSubtasks(taskId);
+      const incomplete = st.filter(s => !s.completed);
+      if (incomplete.length > 0) {
+        showToast(`Complete all subtasks first (${incomplete.length} remaining)`);
+        return;
+      }
+    }
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
 
     if (newStatus === 'completed') {
@@ -629,6 +647,13 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                   data-status={task.status}
                 >
                   <div className="tasks-tab__task-header">
+                    <input
+                      type="checkbox"
+                      className="tasks-tab__task-checkbox"
+                      checked={task.status === 'completed'}
+                      onChange={() => handleToggleComplete(task.id)}
+                      aria-label={`Mark "${task.title}" as ${task.status === 'completed' ? 'incomplete' : 'complete'}`}
+                    />
                     <span className="tasks-tab__task-title">{task.title}</span>
                     <span className="tasks-tab__priority-pill">{task.priority}</span>
                     <div className="tasks-tab__task-actions">
@@ -642,9 +667,6 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                       </button>
                       {menuOpenId === task.id && (
                         <div className="tasks-tab__menu-dropdown">
-                          <button type="button" onClick={() => { handleToggleComplete(task.id); setMenuOpenId(null); }}>
-                            {task.status === 'completed' ? 'Mark Incomplete' : 'Mark Complete'}
-                          </button>
                           <button type="button" onClick={() => { handleStatusChange(task.id, 'archived'); setMenuOpenId(null); }}>
                             Mark Blocked
                           </button>
@@ -681,7 +703,13 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                         <ul className="tasks-tab__subtask-preview-list">
                           {st.slice(0, 4).map(s => (
                             <li key={s.id} className={'tasks-tab__subtask-preview-item' + (s.completed ? ' tasks-tab__subtask-preview-item--done' : '')}>
-                              <span className="tasks-tab__subtask-check">{s.completed ? '\u2713' : '\u25CB'}</span>
+                              <input
+                                type="checkbox"
+                                className="tasks-tab__subtask-preview-checkbox"
+                                checked={s.completed}
+                                onChange={() => handleSubtaskToggleFromCard(task.id, s.id)}
+                                aria-label={`${s.completed ? 'Uncheck' : 'Check'} subtask: ${s.title}`}
+                              />
                               <span>{s.title}</span>
                             </li>
                           ))}

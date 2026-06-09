@@ -410,6 +410,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
       </section>
 
       {/* Quick Actions - bottom stack */}
+      <h2 className="dashboard-tab__section-header-simple">Quick Actions</h2>
       <div className="dashboard-tab__quick-actions dashboard-tab__quick-actions--bottom">
         <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
           Record a Capture

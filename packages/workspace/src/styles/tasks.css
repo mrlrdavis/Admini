@@ -1020,3 +1020,22 @@
 .tasks-tab__calendar-task-btn--subtask:hover {
   background: color-mix(in srgb, var(--ws-color-sage-light) 22%, transparent);
 }
+
+/* Task card checkbox */
+.tasks-tab__task-checkbox {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  accent-color: var(--ws-color-sage);
+  cursor: pointer;
+  margin-right: var(--ws-space-sm);
+}
+
+/* Subtask preview checkbox */
+.tasks-tab__subtask-preview-checkbox {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  accent-color: var(--ws-color-sage);
+  cursor: pointer;
+}
