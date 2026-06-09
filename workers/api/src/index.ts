@@ -7,6 +7,8 @@ type WorkerEnv = {
   SENTRY_ENVIRONMENT?: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  RESEND_API_KEY?: string;
+  FROM_EMAIL?: string;
 };
 
 type WorkerContext = ExecutionContext;
@@ -102,6 +104,62 @@ export default {
             data: await connector.lookupAttendance((body.input ?? {}) as { externalStudentId: string; date: string })
           });
         }
+      }
+
+      // Send invitation email
+      if (request.method === 'POST' && url.pathname === '/api/invitations/send-email') {
+        const body = await readJson<{ email: string; inviterName: string; schoolName: string; role: string; token: string }>(request);
+        const inviteUrl = `${url.origin.replace('api.', '')}?invitation_token=${encodeURIComponent(body.token)}`;
+
+        // Use Resend or fallback to Supabase email
+        if (env.RESEND_API_KEY) {
+          const emailRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: env.FROM_EMAIL || 'Admini <noreply@admini.app>',
+              to: [body.email],
+              subject: `${body.inviterName} invited you to join ${body.schoolName} on Admini`,
+              html: `
+                <div style="font-family: system-ui, sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
+                  <h1 style="color: #2D3436; font-size: 24px;">You're invited!</h1>
+                  <p style="color: #636E72; font-size: 16px; line-height: 1.6;">
+                    <strong>${body.inviterName}</strong> has invited you to join
+                    <strong>${body.schoolName}</strong> on Admini as a <strong>${body.role}</strong>.
+                  </p>
+                  <p style="color: #636E72; font-size: 14px;">
+                    Admini helps school administrators manage tasks, observations, and daily operations.
+                  </p>
+                  <a href="${inviteUrl}" style="display: inline-block; margin-top: 16px; padding: 14px 28px; background: #6B8E6B; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                    Accept Invitation
+                  </a>
+                  <p style="margin-top: 24px; color: #999; font-size: 12px;">
+                    This invitation expires in 7 days. If you didn't expect this, you can ignore it.
+                  </p>
+                </div>
+              `,
+            }),
+          });
+
+          if (!emailRes.ok) {
+            const errBody = await emailRes.text();
+            return json({ ok: false, error: { code: 'email_failed', message: 'Email delivery failed: ' + errBody } }, 500);
+          }
+          return json({ ok: true, data: { sent: true, to: body.email } });
+        }
+
+        // No email service configured - return info for manual sending
+        return json({
+          ok: true,
+          data: {
+            sent: false,
+            manualInviteUrl: inviteUrl,
+            message: 'No email service configured. Share this link manually with ' + body.email,
+          }
+        });
       }
 
       return json({ ok: false, error: { code: 'not_found', message: 'Route not found' } }, 404);
