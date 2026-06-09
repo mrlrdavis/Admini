@@ -80,7 +80,16 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [submitting, setSubmitting] = useState(false);
 
   // View mode state
-  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>(() => {
+    try {
+      const saved = localStorage.getItem('admini_tasks_view');
+      if (saved === 'calendar') {
+        localStorage.removeItem('admini_tasks_view');
+        return 'calendar';
+      }
+    } catch {}
+    return 'list';
+  });
   const [calendarMonth, setCalendarMonth] = useState(new Date());
 
   const calendarDays = useMemo(() => {
@@ -713,7 +722,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                               <span>{s.title}</span>
                             </li>
                           ))}
-                          {st.length > 4 && <li className="tasks-tab__subtask-preview-more">+{st.length - 4} more</li>}
+                          {st.length > 4 && <li className="tasks-tab__subtask-preview-more"><button type="button" className="tasks-tab__subtask-expand-btn" onClick={() => handleEditTask(task)}>+{st.length - 4} more</button></li>}
                         </ul>
                       </div>
                     );

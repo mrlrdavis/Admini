@@ -653,3 +653,12 @@
   margin: var(--ws-space-lg) 0 var(--ws-space-sm);
   color: var(--ws-color-text);
 }
+
+.dashboard-tab__col-item--clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dashboard-tab__col-item--clickable:hover {
+  background: color-mix(in srgb, var(--ws-color-sage) 8%, transparent);
+}

@@ -56,3 +56,48 @@
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+.toast__action {
+  border: 1px solid #87a878;
+  background: rgba(135, 168, 120, 0.2);
+  color: #87a878;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: background 0.15s;
+}
+
+.toast__action:hover {
+  background: rgba(135, 168, 120, 0.35);
+}
+
+.toast__dismiss {
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #ffffff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.toast__dismiss:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.tasks-tab__subtask-expand-btn {
+  background: none;
+  border: none;
+  color: var(--ws-color-sage);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}

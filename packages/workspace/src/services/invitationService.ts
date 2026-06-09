@@ -33,8 +33,15 @@ function mapInvitation(row: DbInvitation): OrgInvitation {
 }
 
 function wrapError(message: string, cause: unknown): Error {
-  const err = cause instanceof Error ? cause : new Error(String(cause));
-  return new Error(`${message}: ${err.message}`, { cause: err });
+  let errMsg: string;
+  if (cause instanceof Error) {
+    errMsg = cause.message;
+  } else if (cause && typeof cause === 'object' && 'message' in cause) {
+    errMsg = String((cause as any).message);
+  } else {
+    errMsg = String(cause);
+  }
+  return new Error(`${message}: ${errMsg}`);
 }
 
 // ---------------------------------------------------------------------------

@@ -301,7 +301,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           ) : (
             <ul className="dashboard-tab__col-list">
               {priorityQueue.filter(t => t.priority === 'urgent' || t.priority === 'high').slice(0, 5).map((task) => (
-                <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority}>
+                <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority} onClick={() => onTabChange?.('tasks')} style={{ cursor: 'pointer' }}>
                   <span>{task.title}</span>
                 </li>
               ))}
@@ -319,7 +319,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             return (
               <ul className="dashboard-tab__col-list">
                 {dueToday.map((task) => (
-                  <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority}>
+                  <li key={task.id} className="dashboard-tab__col-item dashboard-tab__col-item--clickable" data-priority={task.priority} onClick={() => onTabChange?.('tasks')}>
                     <span>{task.title}</span>
                   </li>
                 ))}
@@ -343,7 +343,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             return (
               <ul className="dashboard-tab__col-list">
                 {comingDue.map((task) => (
-                  <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority}>
+                  <li key={task.id} className="dashboard-tab__col-item dashboard-tab__col-item--clickable" data-priority={task.priority} onClick={() => onTabChange?.('tasks')}>
                     <span>{task.title}</span>
                     <span className="dashboard-tab__col-due">
                       {parseLocalDate(task.dueAt!).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
@@ -418,7 +418,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('capture')}>
           Quick Tap Capture
         </button>
-        <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('tasks')}>
+        <button type="button" className="dashboard-tab__quick-btn" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}>
           See Task Calendar
         </button>
         <button type="button" className="dashboard-tab__quick-btn" onClick={() => onTabChange?.('admin')}>
