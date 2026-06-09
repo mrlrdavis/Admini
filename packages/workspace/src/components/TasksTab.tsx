@@ -265,6 +265,62 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     }
   }
 
+  async function handleDuplicateTask(taskId: string) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || submitting) return;
+    setSubmitting(true);
+    try {
+      const client = getClient();
+      const insertPayload: Record<string, unknown> = {
+        title: task.title + ' (copy)',
+        description: task.description || null,
+        assigned_to: task.assignedTo || null,
+        due_at: task.dueAt || null,
+        priority: task.priority,
+        status: 'open',
+      };
+      if (userId) insertPayload.created_by = userId;
+      if (organizationId) insertPayload.organization_id = organizationId;
+
+      const { data, error: insertError } = await client
+        .from('tasks')
+        .insert(insertPayload)
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Duplicate subtasks
+      const originalSubtasks = loadSubtasks(taskId);
+      if (originalSubtasks.length > 0) {
+        const duplicatedSubtasks = originalSubtasks.map(s => ({
+          ...s,
+          id: Date.now().toString() + Math.random().toString(36).slice(2),
+          completed: false,
+        }));
+        saveSubtasks(data.id, duplicatedSubtasks);
+      }
+
+      const newTask: Task = {
+        id: data.id,
+        title: data.title,
+        description: data.description ?? undefined,
+        priority: data.priority ?? 'normal',
+        status: data.status ?? 'open',
+        dueAt: data.due_at ?? undefined,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        assignedTo: data.assigned_to ?? undefined,
+      };
+      setTasks(prev => [newTask, ...prev]);
+      showToast('Task duplicated');
+    } catch {
+      showToast('Failed to duplicate task');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   function handleSubtaskToggleFromCard(taskId: string, subtaskId: string) {
     const st = loadSubtasks(taskId);
     const updated = st.map(s => s.id === subtaskId ? { ...s, completed: !s.completed } : s);
@@ -676,6 +732,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                       </button>
                       {menuOpenId === task.id && (
                         <div className="tasks-tab__menu-dropdown">
+                          <button type="button" onClick={() => { handleDuplicateTask(task.id); setMenuOpenId(null); }}>
+                            Duplicate
+                          </button>
                           <button type="button" onClick={() => { handleStatusChange(task.id, 'archived'); setMenuOpenId(null); }}>
                             Mark Blocked
                           </button>
