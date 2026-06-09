@@ -25,6 +25,32 @@ export function IntegrationCatalog({ onConnected, onBack }: IntegrationCatalogPr
     setError(null);
 
     try {
+      // Trigger OAuth for Google-based integrations
+      const scopeMap: Record<string, string[]> = {
+        google_classroom: ['https://www.googleapis.com/auth/classroom.courses.readonly', 'https://www.googleapis.com/auth/classroom.rosters.readonly'],
+        email: ['https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/contacts.readonly'],
+        calendar: ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar.events.readonly'],
+      };
+
+      const scopes = scopeMap[item.provider];
+      if (scopes) {
+        // Use Supabase OAuth with additional scopes
+        const { getClient } = await import('../services/getClient');
+        const client = getClient();
+        const { error: oauthError } = await client.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            scopes: scopes.join(' '),
+            redirectTo: window.location.origin + '?integration_connected=' + item.provider,
+            queryParams: { access_type: 'offline', prompt: 'consent' },
+          },
+        });
+        if (oauthError) throw oauthError;
+        // OAuth redirect will happen - save status after return
+        return;
+      }
+
+      // Fallback for non-OAuth integrations
       const entry: IntegrationConnectionStatus = {
         provider: item.provider,
         status: 'connected',
@@ -32,8 +58,8 @@ export function IntegrationCatalog({ onConnected, onBack }: IntegrationCatalogPr
       };
       await saveIntegrationStatus(entry);
       onConnected?.();
-    } catch {
-      setError('Failed to connect ' + item.name + '. Please try again.');
+    } catch (err) {
+      setError('Failed to connect ' + item.name + '. ' + (err instanceof Error ? err.message : 'Please try again.'));
     } finally {
       setConnecting(null);
     }

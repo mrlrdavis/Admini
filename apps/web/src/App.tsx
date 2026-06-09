@@ -42,6 +42,28 @@ export function App() {
   const [invitationToken, setInvitationToken] = useState<string | null>(null);
   const [invitationError, setInvitationError] = useState<string | null>(null);
 
+  // Handle OAuth callback for integrations
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connectedProvider = params.get('integration_connected');
+    if (connectedProvider) {
+      // Save the integration status
+      import('@admini/workspace').then(({ saveIntegrationStatus }) => {
+        if (saveIntegrationStatus) {
+          saveIntegrationStatus({
+            provider: connectedProvider as any,
+            status: 'connected',
+            connectedAt: new Date().toISOString(),
+          });
+        }
+      }).catch(() => {});
+      // Clean URL
+      params.delete('integration_connected');
+      const nextSearch = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (nextSearch ? '?' + nextSearch : ''));
+    }
+  }, []);
+
   // Parse invitation token from URL on app load so it persists through auth flow
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
