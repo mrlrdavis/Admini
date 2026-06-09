@@ -42,6 +42,16 @@ function loadSubtasks(taskId: string): { id: string; title: string; completed: b
   } catch { return []; }
 }
 
+/**
+ * Parse a date string as a LOCAL date (ignoring timezone).
+ * Handles ISO strings like "2025-06-09T00:00:00.000Z" by extracting just the date portion.
+ */
+function parseLocalDate(dateStr: string): Date {
+  const datePart = dateStr.split('T')[0] ?? dateStr;
+  const [y, m, d] = datePart.split('-').map(Number);
+  return new Date(y!, m! - 1, d!);
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -381,7 +391,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
             <h3 className="tasks-tab__legend-title">Overdue</h3>
             {(() => {
               const now = new Date();
-              const overdue = tasks.filter(t => t.status !== 'completed' && t.dueAt && new Date(t.dueAt) < now);
+              const overdue = tasks.filter(t => t.status !== 'completed' && t.dueAt && parseLocalDate(t.dueAt) < now);
               if (overdue.length === 0) return <p className="tasks-tab__legend-empty">None</p>;
               return (
                 <ul className="tasks-tab__legend-overdue">
@@ -405,13 +415,25 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           <div className="tasks-tab__calendar-grid">
             {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => <span key={d} className="tasks-tab__calendar-day-label">{d}</span>)}
             {calendarDays.map((day, i) => {
-              const dayTasks = tasks.filter(t => t.dueAt && new Date(t.dueAt).toDateString() === day.toDateString());
-              const isToday = day.toDateString() === new Date().toDateString();
+              const dayStr = day.toDateString();
+              const dayTasks = tasks.filter(t => t.dueAt && parseLocalDate(t.dueAt).toDateString() === dayStr);
+              // Collect subtasks with due dates on this day
+              const daySubtasks: { taskId: string; taskTitle: string; subtask: { id: string; title: string; completed: boolean; dueAt?: string; priority?: string; assignee?: string } }[] = [];
+              tasks.forEach(t => {
+                const st = loadSubtasks(t.id);
+                st.forEach(s => {
+                  if ((s as any).dueAt && parseLocalDate((s as any).dueAt).toDateString() === dayStr) {
+                    daySubtasks.push({ taskId: t.id, taskTitle: t.title, subtask: s as any });
+                  }
+                });
+              });
+              const hasItems = dayTasks.length > 0 || daySubtasks.length > 0;
+              const isToday = dayStr === new Date().toDateString();
               const isCurrentMonth = day.getMonth() === calendarMonth.getMonth();
               return (
-                <div key={i} className={'tasks-tab__calendar-cell' + (isToday ? ' tasks-tab__calendar-cell--today' : '') + (dayTasks.length > 0 ? ' tasks-tab__calendar-cell--has-tasks' : '') + (!isCurrentMonth ? ' tasks-tab__calendar-cell--other-month' : '')}>
+                <div key={i} className={'tasks-tab__calendar-cell' + (isToday ? ' tasks-tab__calendar-cell--today' : '') + (hasItems ? ' tasks-tab__calendar-cell--has-tasks' : '') + (!isCurrentMonth ? ' tasks-tab__calendar-cell--other-month' : '')}>
                   <span className="tasks-tab__calendar-date">{day.getDate()}</span>
-                  {dayTasks.length > 0 && (
+                  {hasItems && (
                     <ul className="tasks-tab__calendar-task-list">
                       {dayTasks.map(t => (
                         <li key={t.id}>
@@ -419,16 +441,27 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                             type="button"
                             className="tasks-tab__calendar-task-btn"
                             data-priority={t.priority}
+                            data-item-type="task"
                             onClick={() => handleEditTask(t)}
                             aria-label={`Open task: ${t.title}`}
                           >
+                            <span className="tasks-tab__calendar-priority-dot" data-priority={t.priority} />
                             <span className="tasks-tab__calendar-task-title">{t.title}</span>
-                            {(() => {
-                              const st = loadSubtasks(t.id);
-                              if (st.length === 0) return null;
-                              const done = st.filter(s => s.completed).length;
-                              return <span className="tasks-tab__calendar-task-subtasks">{done}/{st.length}</span>;
-                            })()}
+                          </button>
+                        </li>
+                      ))}
+                      {daySubtasks.map(({ taskId, subtask }) => (
+                        <li key={`st-${subtask.id}`}>
+                          <button
+                            type="button"
+                            className="tasks-tab__calendar-task-btn tasks-tab__calendar-task-btn--subtask"
+                            data-priority={(subtask as any).priority || 'normal'}
+                            data-item-type="subtask"
+                            onClick={() => { const t = tasks.find(x => x.id === taskId); if (t) handleEditTask(t); }}
+                            aria-label={`Subtask: ${subtask.title}`}
+                          >
+                            <span className="tasks-tab__calendar-priority-dot" data-priority={(subtask as any).priority || 'normal'} />
+                            <span className="tasks-tab__calendar-task-title">{subtask.title}</span>
                           </button>
                         </li>
                       ))}

@@ -47,6 +47,16 @@ export function getTimeGreeting(): string {
   return 'Good evening';
 }
 
+/**
+ * Parse a date string as a LOCAL date (ignoring timezone offset).
+ * Prevents the "day before" bug when UTC dates are displayed in local time.
+ */
+function parseLocalDate(dateStr: string): Date {
+  const datePart = dateStr.split('T')[0] ?? dateStr;
+  const [y, m, d] = datePart.split('-').map(Number);
+  return new Date(y!, m! - 1, d!);
+}
+
 
 
 /**
@@ -304,7 +314,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           <h3 className="dashboard-tab__col-title">Due Today</h3>
           {(() => {
             const today = new Date().toDateString();
-            const dueToday = tasks.filter(t => t.status !== 'completed' && t.dueAt && new Date(t.dueAt).toDateString() === today);
+            const dueToday = tasks.filter(t => t.status !== 'completed' && t.dueAt && parseLocalDate(t.dueAt).toDateString() === today);
             if (dueToday.length === 0) return <p className="dashboard-tab__empty">None</p>;
             return (
               <ul className="dashboard-tab__col-list">
@@ -326,7 +336,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             const in3Days = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
             const comingDue = tasks.filter(t => {
               if (t.status === 'completed' || !t.dueAt) return false;
-              const due = new Date(t.dueAt);
+              const due = parseLocalDate(t.dueAt);
               return due > now && due <= in3Days;
             });
             if (comingDue.length === 0) return <p className="dashboard-tab__empty">None</p>;
@@ -336,7 +346,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                   <li key={task.id} className="dashboard-tab__col-item" data-priority={task.priority}>
                     <span>{task.title}</span>
                     <span className="dashboard-tab__col-due">
-                      {new Date(task.dueAt!).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {parseLocalDate(task.dueAt!).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                     </span>
                   </li>
                 ))}

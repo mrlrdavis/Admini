@@ -993,3 +993,30 @@
 .tasks-tab__subtask-row {
   flex-wrap: wrap;
 }
+
+/* Calendar priority dots */
+.tasks-tab__calendar-priority-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ws-color-sage);
+}
+
+.tasks-tab__calendar-priority-dot[data-priority="urgent"] { background: var(--ws-color-priority-urgent); }
+.tasks-tab__calendar-priority-dot[data-priority="high"] { background: var(--ws-color-priority-high); }
+.tasks-tab__calendar-priority-dot[data-priority="normal"] { background: var(--ws-color-sage); }
+.tasks-tab__calendar-priority-dot[data-priority="low"] { background: var(--ws-color-priority-low); }
+
+/* Subtask items in calendar - slightly indented/different style */
+.tasks-tab__calendar-task-btn--subtask {
+  background: color-mix(in srgb, var(--ws-color-sage-light) 10%, transparent);
+  font-style: italic;
+  padding-left: 6px;
+  border-left: 2px solid var(--ws-color-sage-light);
+}
+
+.tasks-tab__calendar-task-btn--subtask:hover {
+  background: color-mix(in srgb, var(--ws-color-sage-light) 22%, transparent);
+}
