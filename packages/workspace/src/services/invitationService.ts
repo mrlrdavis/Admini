@@ -70,6 +70,15 @@ export async function listInvitations(orgId: string): Promise<OrgInvitation[]> {
 /**
  * Create a new invitation for a user to join an organization.
  */
+/**
+ * Generate a unique token hash for invitation links.
+ */
+function generateTokenHash(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function createInvitation(
   orgId: string,
   email: string,
@@ -77,6 +86,13 @@ export async function createInvitation(
 ): Promise<OrgInvitation> {
   const client = getClient();
   try {
+    const { data: userData, error: userError } = await client.auth.getUser();
+    if (userError || !userData?.user) {
+      throw new Error('You must be signed in to send invitations');
+    }
+
+    const tokenHash = generateTokenHash();
+
     const { data, error } = await client
       .from('invitations')
       .insert({
@@ -84,6 +100,8 @@ export async function createInvitation(
         email,
         role,
         status: 'pending' as InvitationStatus,
+        invited_by: userData.user.id,
+        token_hash: tokenHash,
       })
       .select('id, organization_id, email, role, status, created_at, expires_at')
       .single<DbInvitation>();
