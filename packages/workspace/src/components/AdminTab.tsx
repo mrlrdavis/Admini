@@ -183,12 +183,75 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
 
   if (error) {
     return (
-      <div className="admin-tab admin-tab--error">
-        <div className="admin-tab__setup-notice">
-          <h2>Admin Setup Required</h2>
-          <p>Organization data is not available yet. Complete onboarding or check your database setup.</p>
-          <p className="admin-tab__error-detail">{error}</p>
-        </div>
+      <div className="admin-tab">
+        <h1 className="admin-tab__title">Admin</h1>
+
+        {/* Invite Staff */}
+        <section className="admin-tab__section" aria-labelledby="invite-heading">
+          <h2 id="invite-heading" className="admin-tab__section-title">Invite Staff</h2>
+          <p className="admin-tab__section-desc">Send invitations to build your team. Track who has joined and manage permissions.</p>
+          <form className="admin-tab__form admin-tab__invite-form" onSubmit={handleInviteSubmit}>
+            <label className="admin-tab__field">
+              <span className="admin-tab__field-label">Email</span>
+              <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="staff@school.edu" className="admin-tab__input" required />
+            </label>
+            <label className="admin-tab__field">
+              <span className="admin-tab__field-label">Role</span>
+              <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as any)} className="admin-tab__role-select">
+                <option value="admin">Admin</option>
+                <option value="principal">Principal</option>
+                <option value="teacher">Teacher</option>
+                <option value="staff">Staff</option>
+              </select>
+            </label>
+            {inviteError && <p className="admin-tab__error-message" role="alert">{inviteError}</p>}
+            <button type="submit" className="admin-tab__submit" disabled={inviteSaving}>{inviteSaving ? 'Sending...' : 'Send Invitation'}</button>
+          </form>
+        </section>
+
+        {/* Staff Roster */}
+        <section className="admin-tab__section" aria-labelledby="roster-heading">
+          <h2 id="roster-heading" className="admin-tab__section-title">Staff Roster</h2>
+          <p className="admin-tab__section-desc">Team members who have accepted invitations appear here.</p>
+          {members.length === 0 ? (
+            <p className="admin-tab__empty">No team members yet. Invite staff above to get started.</p>
+          ) : (
+            <ul className="admin-tab__member-list">
+              {members.map((member) => (
+                <li key={member.profileId} className="admin-tab__member-item">
+                  <div className="admin-tab__member-info">
+                    <span className="admin-tab__member-name">{member.displayName}</span>
+                    <span className="admin-tab__member-email">{member.email}</span>
+                  </div>
+                  <select className="admin-tab__role-select" value={member.role} onChange={(e) => handleRoleChange(member.profileId, e.target.value as any)} aria-label={'Role for ' + member.displayName}>
+                    <option value="admin">Admin</option>
+                    <option value="principal">Principal</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="staff">Staff</option>
+                  </select>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Pending Invitations */}
+        <section className="admin-tab__section">
+          <h2 className="admin-tab__section-title">Pending Invitations</h2>
+          {invitations.filter(inv => inv.status === 'pending').length === 0 ? (
+            <p className="admin-tab__empty">No pending invitations.</p>
+          ) : (
+            <ul className="admin-tab__invitation-list">
+              {invitations.filter(inv => inv.status === 'pending').map(inv => (
+                <li key={inv.id} className="admin-tab__invitation-item">
+                  <span className="admin-tab__invitation-email">{inv.email}</span>
+                  <span className="admin-tab__invitation-role">{inv.role}</span>
+                  <span className="admin-tab__invitation-status">Sent</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     );
   }
