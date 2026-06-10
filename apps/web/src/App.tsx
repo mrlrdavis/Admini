@@ -46,17 +46,32 @@ export function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const connectedProvider = params.get('integration_connected');
-    // Also check if we just came back from Google OAuth (session will have provider_token)
+    // Check if we just came back from Google OAuth - extract provider_token
     if (supabase) {
+      // provider_token is available right after OAuth callback
       supabase.auth.getSession().then(({ data }) => {
-        if (data.session?.provider_token) {
+        const token = data.session?.provider_token;
+        if (token) {
           import('@admini/workspace').then(mod => {
             if ((mod as any).googleIntegrationService?.storeGoogleToken) {
-              (mod as any).googleIntegrationService.storeGoogleToken(data.session!.provider_token!);
+              (mod as any).googleIntegrationService.storeGoogleToken(token);
             }
           }).catch(() => {});
         }
       });
+      // Also check URL hash for access_token (Supabase implicit flow)
+      const hash = window.location.hash;
+      if (hash.includes('provider_token=')) {
+        const match = hash.match(/provider_token=([^&]+)/);
+        if (match && match[1]) {
+          const token = decodeURIComponent(match[1]);
+          import('@admini/workspace').then(mod => {
+            if ((mod as any).googleIntegrationService?.storeGoogleToken) {
+              (mod as any).googleIntegrationService.storeGoogleToken(token);
+            }
+          }).catch(() => {});
+        }
+      }
     }
     if (connectedProvider) {
       // Save the integration status

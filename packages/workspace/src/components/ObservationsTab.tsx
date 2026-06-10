@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { saveCapture } from '../services/captureService';
 import { showToast } from './Toast';
-import { sendEmail, getGoogleToken } from '../services/googleIntegrationService';
+import { sendEmail } from '../services/googleIntegrationService';
 import { unlockBadge } from './BadgesPanel';
 
 // Types
@@ -254,21 +254,14 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
   }
 
   async function handleShare(obs: Observation) {
-    const text = 'Observation for ' + obs.name + ' (' + obs.category + '): ' + obs.note + ' - ' + obs.observer + ', ' + new Date(obs.createdAt).toLocaleDateString();
-    const token = await getGoogleToken();
-    if (token) {
-      // Gmail connected - prompt for recipient
-      const recipient = prompt('Send observation via email to:');
-      if (recipient) {
-        const subject = 'Observation: ' + obs.name + ' (' + obs.category + ')';
-        const html = '<h2>Classroom Observation</h2><p><strong>Student:</strong> ' + obs.name + '</p><p><strong>Category:</strong> ' + obs.category + '</p>' + (obs.subject ? '<p><strong>Subject:</strong> ' + obs.subject + '</p>' : '') + '<p><strong>Notes:</strong> ' + obs.note + '</p><p><strong>Observer:</strong> ' + obs.observer + '</p><p><em>' + new Date(obs.createdAt).toLocaleDateString() + '</em></p>';
-        const sent = await sendEmail(recipient, subject, html);
-        showToast(sent ? 'Observation shared via email' : 'Failed to send email');
-      }
-    } else if (navigator.share) {
-      navigator.share({ title: 'Observation: ' + obs.name, text }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+    const subject = 'Observation: ' + obs.name + ' (' + obs.category + ')';
+    const html = '<h2>Classroom Observation</h2><p><strong>Student:</strong> ' + obs.name + '</p><p><strong>Category:</strong> ' + obs.category + '</p>' + (obs.subject ? '<p><strong>Subject:</strong> ' + obs.subject + '</p>' : '') + '<p><strong>Notes:</strong> ' + obs.note + '</p><p><strong>Observer:</strong> ' + obs.observer + '</p><p><em>' + new Date(obs.createdAt).toLocaleDateString() + '</em></p>';
+    const recipient = prompt('Send observation via email to:');
+    if (recipient && recipient.includes('@')) {
+      const sent = await sendEmail(recipient, subject, html);
+      showToast(sent ? 'Observation shared via email' : 'Failed to send email');
+    } else if (recipient) {
+      showToast('Please enter a valid email address');
     }
   }
 
