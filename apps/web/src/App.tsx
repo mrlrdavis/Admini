@@ -42,10 +42,22 @@ export function App() {
   const [invitationToken, setInvitationToken] = useState<string | null>(null);
   const [invitationError, setInvitationError] = useState<string | null>(null);
 
-  // Handle OAuth callback for integrations
+  // Handle OAuth callback for integrations - capture provider token
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const connectedProvider = params.get('integration_connected');
+    // Also check if we just came back from Google OAuth (session will have provider_token)
+    if (supabase) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session?.provider_token) {
+          import('@admini/workspace').then(mod => {
+            if ((mod as any).googleIntegrationService?.storeGoogleToken) {
+              (mod as any).googleIntegrationService.storeGoogleToken(data.session!.provider_token!);
+            }
+          }).catch(() => {});
+        }
+      });
+    }
     if (connectedProvider) {
       // Save the integration status
       import('@admini/workspace').then(({ saveIntegrationStatus }) => {
@@ -207,9 +219,17 @@ export function App() {
   useEffect(() => {
     if (!supabase) return;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
+      }
+      // Capture Google provider token whenever it appears
+      if (session?.provider_token) {
+        import('@admini/workspace').then(mod => {
+          if ((mod as any).googleIntegrationService?.storeGoogleToken) {
+            (mod as any).googleIntegrationService.storeGoogleToken(session.provider_token!);
+          }
+        }).catch(() => {});
       }
     });
 

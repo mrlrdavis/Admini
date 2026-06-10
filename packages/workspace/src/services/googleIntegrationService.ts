@@ -11,14 +11,32 @@ import { getClient } from './getClient';
 // Token Management
 // ---------------------------------------------------------------------------
 
+const GOOGLE_TOKEN_KEY = 'admini_google_provider_token';
+
 /**
- * Get the Google OAuth provider token from the current Supabase session.
- * Returns null if not connected or token expired.
+ * Store the Google provider token (called after OAuth callback).
+ */
+export function storeGoogleToken(token: string): void {
+  try { localStorage.setItem(GOOGLE_TOKEN_KEY, token); } catch {}
+}
+
+/**
+ * Get the Google OAuth provider token.
+ * Checks: 1) current session provider_token, 2) localStorage fallback.
+ * Returns null if not connected.
  */
 export async function getGoogleToken(): Promise<string | null> {
   const client = getClient();
   const { data } = await client.auth.getSession();
-  return data.session?.provider_token ?? null;
+  const sessionToken = data.session?.provider_token;
+  if (sessionToken) {
+    storeGoogleToken(sessionToken);
+    return sessionToken;
+  }
+  // Fallback to stored token
+  try {
+    return localStorage.getItem(GOOGLE_TOKEN_KEY);
+  } catch { return null; }
 }
 
 // ---------------------------------------------------------------------------
