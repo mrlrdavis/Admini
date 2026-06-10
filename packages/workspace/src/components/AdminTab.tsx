@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getClassroomCourses, getClassroomStudents, getGoogleToken, type ClassroomCourse, type ClassroomStudent } from '../services/googleIntegrationService';
 import { useOrgData } from '../hooks/useOrgData';
 import type { AdminiRole, OrgDetailsForm } from '../types';
 
@@ -102,6 +103,27 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   const [flagError, setFlagError] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
+  // Google Classroom roster
+  const [classroomCourses, setClassroomCourses] = useState<ClassroomCourse[]>([]);
+  const [classroomStudents, setClassroomStudents] = useState<ClassroomStudent[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [hasClassroom, setHasClassroom] = useState(false);
+
+  useEffect(() => {
+    getGoogleToken().then(token => {
+      if (token) {
+        setHasClassroom(true);
+        getClassroomCourses().then(setClassroomCourses).catch(() => {});
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (selectedCourseId) {
+      getClassroomStudents(selectedCourseId).then(setClassroomStudents).catch(() => {});
+    }
+  }, [selectedCourseId]);
+
   // Separate invitation fetch that works even when org details fail
   const [persistedInvitations, setPersistedInvitations] = useState<typeof invitations>([]);
   useEffect(() => {

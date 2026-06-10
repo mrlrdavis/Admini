@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getClient } from '../services/getClient';
 import { showToast } from './Toast';
+import { sendEmail, getGoogleToken, getContacts, getCalendarEvents, type GmailContact, type CalendarEvent } from '../services/googleIntegrationService';
 import { unlockBadge } from './BadgesPanel';
 
 // ---------------------------------------------------------------------------
@@ -78,6 +79,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [formPriority, setFormPriority] = useState<TaskPriority>('normal');
   const [formSubtasks, setFormSubtasks] = useState<{ id: string; title: string; completed: boolean }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [contactSuggestions, setContactSuggestions] = useState<GmailContact[]>([]);
 
   // View mode state
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>(() => {
@@ -91,6 +93,13 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     return 'list';
   });
   const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
+
+  useEffect(() => {
+    const start = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+    const end = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
+    getCalendarEvents(start, end).then(setCalEvents).catch(() => {});
+  }, [calendarMonth]);
 
   const calendarDays = useMemo(() => {
     const year = calendarMonth.getFullYear();
@@ -209,6 +218,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                   title: data.title,
                   description: data.description ?? undefined,
                   priority: data.priority,
+                  status: data.status ?? t.status,
+                  dueAt: data.due_at ?? undefined,
+                  assignedTo: data.assigned_to ?? undefined,
                   updatedAt: data.updated_at,
                 }
               : t
@@ -254,6 +266,17 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         setTasks(prev => [newTask, ...prev]);
         // Check badges
         unlockBadge('first-task');
+        // Notify assignee if email connected and assignee looks like an email
+        if (formAssignedTo.includes('@')) {
+          getGoogleToken().then(token => {
+            if (token) {
+              const notify = confirm('Notify ' + formAssignedTo + ' about this task?');
+              if (notify) {
+                sendEmail(formAssignedTo, 'New task assigned: ' + formTitle.trim(), '<p>You have been assigned a new task on Admini:</p><h3>' + formTitle.trim() + '</h3>' + (formDescription ? '<p>' + formDescription + '</p>' : '') + (formDueAt ? '<p><strong>Due:</strong> ' + formDueAt + '</p>' : ''));
+              }
+            }
+          });
+        }
       }
 
       resetForm();
@@ -510,7 +533,12 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                   }
                 });
               });
-              const hasItems = dayTasks.length > 0 || daySubtasks.length > 0;
+              // Calendar events for this day
+              const dayCalEvents = calEvents.filter(ev => {
+                const evDate = ev.start ? new Date(ev.start).toDateString() : '';
+                return evDate === dayStr;
+              });
+              const hasItems = dayTasks.length > 0 || daySubtasks.length > 0 || dayCalEvents.length > 0;
               const isToday = dayStr === new Date().toDateString();
               const isCurrentMonth = day.getMonth() === calendarMonth.getMonth();
               return (
@@ -524,7 +552,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                             type="button"
                             className="tasks-tab__calendar-task-btn"
                             data-priority={t.priority}
-                            data-item-type="task"
+                            data-item-type={t.assignedTo ? "assigned" : "task"}
+                            data-overdue={t.dueAt && parseLocalDate(t.dueAt) < new Date() && t.status !== "completed" ? "true" : undefined}
                             onClick={() => handleEditTask(t)}
                             aria-label={`Open task: ${t.title}`}
                           >
@@ -546,6 +575,14 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                             <span className="tasks-tab__calendar-priority-dot" data-priority={(subtask as any).priority || 'normal'} />
                             <span className="tasks-tab__calendar-task-title">{subtask.title}</span>
                           </button>
+                        </li>
+                      ))}
+                      {dayCalEvents.map(ev => (
+                        <li key={"cal-" + ev.id}>
+                          <span className="tasks-tab__calendar-task-btn tasks-tab__calendar-cal-event">
+                            <span className="tasks-tab__calendar-cal-time">{ev.start ? new Date(ev.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}</span>
+                            <span className="tasks-tab__calendar-task-title">{ev.summary}</span>
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -586,14 +623,28 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
 
           <div className="tasks-tab__form-group">
             <label className="tasks-tab__form-label" htmlFor="task-assigned">Assign To</label>
-            <input
-              id="task-assigned"
-              className="tasks-tab__add-input"
-              type="text"
-              placeholder="Name or email"
-              value={formAssignedTo}
-              onChange={e => setFormAssignedTo(e.target.value)}
-            />
+            <div className="tasks-tab__assignee-wrapper">
+              <input
+                id="task-assigned"
+                className="tasks-tab__add-input"
+                type="text"
+                placeholder="Name or email"
+                value={formAssignedTo}
+                onChange={e => { setFormAssignedTo(e.target.value); if (e.target.value.length > 1) { getContacts(e.target.value).then(setContactSuggestions).catch(() => {}); } else { setContactSuggestions([]); } }}
+                autoComplete="off"
+              />
+              {contactSuggestions.length > 0 && (
+                <ul className="tasks-tab__contact-suggestions">
+                  {contactSuggestions.map(c => (
+                    <li key={c.email}>
+                      <button type="button" onClick={() => { setFormAssignedTo(c.email); setContactSuggestions([]); }}>
+                        {c.name ? `${c.name} (${c.email})` : c.email}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
 
           <div className="tasks-tab__form-group">

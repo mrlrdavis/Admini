@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    TasksTab styles
    ========================================================================== */
 
@@ -830,12 +830,21 @@
   background: color-mix(in srgb, var(--ws-color-sage) 24%, transparent);
 }
 
-.tasks-tab__calendar-task-btn[data-priority="urgent"] {
-  background: color-mix(in srgb, var(--ws-color-priority-urgent) 14%, transparent);
+/* Calendar items colored by type, not priority */
+.tasks-tab__calendar-task-btn[data-item-type="task"] {
+  background: color-mix(in srgb, var(--ws-color-sage) 14%, transparent);
 }
 
-.tasks-tab__calendar-task-btn[data-priority="high"] {
-  background: color-mix(in srgb, var(--ws-color-priority-high) 14%, transparent);
+.tasks-tab__calendar-task-btn[data-item-type="subtask"] {
+  background: color-mix(in srgb, var(--ws-color-sage-light) 18%, transparent);
+}
+
+.tasks-tab__calendar-task-btn[data-item-type="assigned"] {
+  background: color-mix(in srgb, #5B8DEF 12%, transparent);
+}
+
+.tasks-tab__calendar-task-btn[data-overdue="true"] {
+  background: color-mix(in srgb, var(--ws-color-priority-urgent) 12%, transparent);
 }
 
 .tasks-tab__calendar-task-title {
@@ -1038,4 +1047,63 @@
   min-width: 14px;
   accent-color: var(--ws-color-sage);
   cursor: pointer;
+}
+
+/* Contact suggestions dropdown */
+.tasks-tab__assignee-wrapper {
+  position: relative;
+}
+
+.tasks-tab__contact-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  background: var(--ws-color-white);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-md);
+  box-shadow: var(--ws-shadow-elevated);
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.tasks-tab__contact-suggestions li button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: var(--ws-font-size-sm);
+  cursor: pointer;
+  color: var(--ws-color-text);
+}
+
+.tasks-tab__contact-suggestions li button:hover {
+  background: var(--ws-color-limestone);
+}
+
+/* Calendar events in task calendar */
+.tasks-tab__calendar-cal-event {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: color-mix(in srgb, #4285F4 12%, transparent);
+  border-left: 2px solid #4285F4;
+  font-size: 0.5625rem;
+  color: var(--ws-color-text);
+}
+
+.tasks-tab__calendar-cal-time {
+  font-weight: 600;
+  color: #4285F4;
+  font-size: 0.5rem;
+  white-space: nowrap;
 }
