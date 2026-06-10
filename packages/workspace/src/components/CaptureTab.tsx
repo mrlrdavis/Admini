@@ -206,14 +206,22 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       text = transcription;
     } else {
       const wordsText = Object.entries(selectedWords)
-        .filter(([, v]) => v.length > 0)
-        .map(([k, v]) => k + ': ' + v.join(', '))
-        .join(' \u00b7 ');
+      // Summarize tap selections into a natural sentence
+      const entries = Object.entries(selectedWords).filter(([, v]) => v.length > 0);
       const freeText = tapFreeText.trim();
-      if (wordsText && freeText) {
-        text = wordsText + ' \u2014 ' + freeText;
+      if (entries.length > 0) {
+        const parts: string[] = [];
+        entries.forEach(([, words]) => {
+          if (words.length === 1) {
+            parts.push(words[0]!);
+          } else {
+            parts.push(words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]);
+          }
+        });
+        text = parts.join('; ');
+        if (freeText) text += '. ' + freeText;
       } else {
-        text = wordsText || freeText;
+        text = freeText;
       }
     }
 
