@@ -109,7 +109,7 @@ export async function createInvitation(
 
     // Fire-and-forget: send invitation email via API worker
     try {
-      const apiBase = typeof window !== 'undefined' ? (window as any).__ADMINI_API_BASE__ || '' : '';
+      const apiBase = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) || '';
       if (apiBase) {
         fetch(apiBase + '/api/invitations/send-email', {
           method: 'POST',
