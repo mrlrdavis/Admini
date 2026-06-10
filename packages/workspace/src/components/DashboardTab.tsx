@@ -13,6 +13,7 @@ import {
 } from '../services/dashboardService';
 import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
 import { RecommendationsWidget } from './RecommendationsWidget';
+import { getTodayCalendarEvents, type CalendarEvent } from '../services/googleIntegrationService';
 // BadgesSection and BadgesPanel removed - replaced with compact achievement indicator
 
 // Re-export sortByUrgency for testing and backward compatibility
@@ -89,6 +90,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAllEvents, setShowAllEvents] = useState(false);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [unlockedCount, setUnlockedCount] = useState(0);
   const totalBadges = 9; // total badge count
 
@@ -118,6 +120,10 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    getTodayCalendarEvents().then(setCalendarEvents).catch(() => {});
+  }, []);
 
   useEffect(() => {
     try {
@@ -286,6 +292,21 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           );
         })()}
       </section>
+
+      {/* Google Calendar Events */}
+      {calendarEvents.length > 0 && (
+        <section className="dashboard-tab__calendar-events">
+          <h3 className="dashboard-tab__cal-title">Calendar</h3>
+          <ul className="dashboard-tab__cal-list">
+            {calendarEvents.map(ev => (
+              <li key={ev.id} className="dashboard-tab__cal-item">
+                <span className="dashboard-tab__cal-time">{ev.start ? new Date(ev.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'All day'}</span>
+                <span className="dashboard-tab__cal-summary">{ev.summary}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Three-column: High Priority | Due Today | Coming Due */}
       <div className="dashboard-tab__three-col">

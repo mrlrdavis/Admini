@@ -662,3 +662,46 @@
 .dashboard-tab__col-item--clickable:hover {
   background: color-mix(in srgb, var(--ws-color-sage) 8%, transparent);
 }
+
+/* Google Calendar Events on Dashboard */
+.dashboard-tab__calendar-events {
+  margin-bottom: var(--ws-space-lg);
+}
+
+.dashboard-tab__cal-title {
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  margin: 0 0 var(--ws-space-sm);
+  color: var(--ws-color-sage-dark);
+}
+
+.dashboard-tab__cal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-tab__cal-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-sm);
+  padding: var(--ws-space-xs) var(--ws-space-sm);
+  background: color-mix(in srgb, #4285F4 8%, var(--ws-color-white));
+  border-left: 3px solid #4285F4;
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+}
+
+.dashboard-tab__cal-time {
+  font-weight: 600;
+  color: #4285F4;
+  min-width: 5rem;
+  font-size: var(--ws-font-size-xs);
+}
+
+.dashboard-tab__cal-summary {
+  color: var(--ws-color-text);
+}

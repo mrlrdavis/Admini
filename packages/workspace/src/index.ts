@@ -79,3 +79,5 @@ export type {
   WorkspaceShellProps,
 } from './types';
 
+
+export * as googleIntegrationService from './services/googleIntegrationService';
