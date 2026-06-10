@@ -76,6 +76,13 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [taskSuggestionId, setTaskSuggestionId] = useState<string | null>(null);
   const [lastCaptureText, setLastCaptureText] = useState<string | null>(null);
   const [showTaskSuggestion, setShowTaskSuggestion] = useState(false);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [taskModalTitle, setTaskModalTitle] = useState('');
+  const [taskModalDesc, setTaskModalDesc] = useState('');
+  const [taskModalDue, setTaskModalDue] = useState('');
+  const [taskModalPriority, setTaskModalPriority] = useState<'low'|'normal'|'high'|'urgent'>('normal');
+  const [taskModalAssignee, setTaskModalAssignee] = useState('');
+  const [taskModalSaving, setTaskModalSaving] = useState(false);
 
   // Meeting Notes state
   const [notes, setNotes] = useState<MeetingNote[]>([]);
@@ -773,6 +780,55 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
             </ul>
           )}
         </section>
+      )}
+
+      {/* Task Creation Modal */}
+      {taskModalOpen && (
+        <div className="capture-tab__task-modal-overlay" onClick={() => setTaskModalOpen(false)}>
+          <div className="capture-tab__task-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="capture-tab__task-modal-title">Create Task from Capture</h2>
+            <div className="capture-tab__task-modal-form">
+              <label>Title<input type="text" value={taskModalTitle} onChange={(e) => setTaskModalTitle(e.target.value)} className="capture-tab__task-modal-input" /></label>
+              <label>Description<textarea value={taskModalDesc} onChange={(e) => setTaskModalDesc(e.target.value)} className="capture-tab__task-modal-textarea" /></label>
+              <label>Due Date<input type="date" value={taskModalDue} onChange={(e) => setTaskModalDue(e.target.value)} className="capture-tab__task-modal-input" /></label>
+              <label>Priority
+                <select value={taskModalPriority} onChange={(e) => setTaskModalPriority(e.target.value as any)} className="capture-tab__task-modal-input">
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </label>
+              <label>Assign To<input type="text" value={taskModalAssignee} onChange={(e) => setTaskModalAssignee(e.target.value)} placeholder="Name or email" className="capture-tab__task-modal-input" /></label>
+            </div>
+            <div className="capture-tab__task-modal-actions">
+              <button type="button" onClick={() => setTaskModalOpen(false)}>Cancel</button>
+              <button type="button" disabled={!taskModalTitle.trim() || taskModalSaving} onClick={async () => {
+                if (!organizationId || !userId) return;
+                setTaskModalSaving(true);
+                try {
+                  const client = getClient();
+                  await client.from("tasks").insert({
+                    organization_id: organizationId,
+                    created_by: userId,
+                    title: taskModalTitle.trim(),
+                    description: taskModalDesc.trim() || null,
+                    due_at: taskModalDue || null,
+                    priority: taskModalPriority,
+                    assigned_to: taskModalAssignee.trim() || null,
+                    status: "open",
+                  });
+                  setTaskModalOpen(false);
+                  showToast("Task created", { action: { label: "View on Calendar", onClick: () => { localStorage.setItem("admini_tasks_view", "calendar"); window.dispatchEvent(new CustomEvent("admini-navigate", { detail: "tasks" })); } } });
+                } catch {
+                  showToast("Failed to create task");
+                } finally {
+                  setTaskModalSaving(false);
+                }
+              }}>{taskModalSaving ? "Creating..." : "Create Task"}</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
