@@ -109,7 +109,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
       setPersistedInvitations(invitations);
     } else if (organizationId) {
       import('../services/invitationService').then(mod => {
-        mod.listInvitations(organizationId).then(setPersistedInvitations).catch(() => {});
+        mod.listInvitations(organizationId).then(list => { if (list.length > 0) setPersistedInvitations(list); }).catch((e) => { /* RLS may block - invitations show after successful org load */ });
       });
     }
   }, [invitations, organizationId]);

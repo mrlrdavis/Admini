@@ -91,8 +91,13 @@ export function useOrgData(orgId: string): UseOrgDataReturn {
       setLoading(true);
       setError(null);
 
+      // Fetch invitations independently so they load even if org details fail
+      listInvitations(orgId).then(list => {
+        if (!cancelled) setInvitations(list);
+      }).catch(() => {});
+
       try {
-        const [details, memberList, inviteList, flags] = await Promise.all([
+        const [details, memberList, , flags] = await Promise.all([
           getOrgDetails(orgId),
           listOrgMembers(orgId),
           listInvitations(orgId),
@@ -103,7 +108,6 @@ export function useOrgData(orgId: string): UseOrgDataReturn {
 
         setOrgDetails(details);
         setMembers(memberList);
-        setInvitations(inviteList);
         setFeatureFlags(flags);
       } catch (err) {
         if (cancelled) return;
