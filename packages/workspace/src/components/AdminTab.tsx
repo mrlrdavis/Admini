@@ -238,11 +238,11 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         {/* Pending Invitations */}
         <section className="admin-tab__section">
           <h2 className="admin-tab__section-title">Pending Invitations</h2>
-          {invitations.filter(inv => inv.status === 'pending').length === 0 ? (
+          {invitations.filter((inv: any) => inv.status === 'pending').length === 0 ? (
             <p className="admin-tab__empty">No pending invitations.</p>
           ) : (
             <ul className="admin-tab__invitation-list">
-              {invitations.filter(inv => inv.status === 'pending').map(inv => (
+              {invitations.filter((inv: any) => inv.status === 'pending').map(inv => (
                 <li key={inv.id} className="admin-tab__invitation-item">
                   <span className="admin-tab__invitation-email">{inv.email}</span>
                   <span className="admin-tab__invitation-role">{inv.role}</span>
