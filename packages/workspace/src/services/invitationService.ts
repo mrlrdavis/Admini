@@ -86,40 +86,40 @@ export async function createInvitation(
 ): Promise<OrgInvitation> {
   const client = getClient();
   try {
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError || !userData?.user) {
-      throw new Error('You must be signed in to send invitations');
-    }
-
-    const tokenHash = generateTokenHash();
-
-    const { data, error } = await client
-      .from('invitations')
-      .insert({
-        organization_id: orgId,
-        email,
-        role,
-        status: 'pending' as InvitationStatus,
-        invited_by: userData.user.id,
-        token_hash: tokenHash,
-      })
-      .select('id, organization_id, email, role, status, created_at, expires_at')
-      .single<DbInvitation>();
+    // Use the security-definer RPC function which bypasses RLS
+    const { data, error } = await client.rpc('create_invitation', {
+      target_organization_id: orgId,
+      invite_email: email,
+      invite_role: role,
+    });
     if (error) throw error;
+
+    const result = Array.isArray(data) ? data[0] : data;
+    const invitationToken = result?.invitation_token || '';
 
     // Fire-and-forget: send invitation email via API worker
     try {
       const apiBase = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) || '';
       if (apiBase) {
+        const { data: userData } = await client.auth.getUser();
+        const inviterName = userData?.user?.user_metadata?.display_name || userData?.user?.email || 'A team member';
         fetch(apiBase + '/api/invitations/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, inviterName: userData.user.email || 'A team member', schoolName: 'your school', role, token: tokenHash }),
+          body: JSON.stringify({ email, inviterName, schoolName: 'your school', role, token: invitationToken }),
         }).catch(() => {});
       }
     } catch { /* best-effort */ }
 
-    return mapInvitation(data);
+    // Return a minimal OrgInvitation from the RPC result
+    return {
+      id: result?.invitation_id || '',
+      email,
+      role,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    };
   } catch (err) {
     throw wrapError('Failed to create invitation', err);
   }
