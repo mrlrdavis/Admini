@@ -1,4 +1,4 @@
-﻿.toast-container {
+.toast-container {
   position: fixed;
   bottom: 80px;
   left: 50%;
@@ -21,6 +21,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   font-size: 0.875rem;
   animation: toast-slide-up 0.25s ease-out;
+  pointer-events: auto;
 }
 
 .toast__text {
