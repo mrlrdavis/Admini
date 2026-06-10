@@ -74,7 +74,25 @@ export default {
         if (tool === 'lookup_attendance') { return json({ ok: true, data: await connector.lookupAttendance((body.input ?? {}) as { externalStudentId: string; date: string }) }); }
       }
 
-            // Send invitation email
+            // General email sending
+      if (request.method === "POST" && url.pathname === "/api/email/send") {
+        const body = await readJson<{ to: string; subject: string; html: string }>(request);
+        if (env.RESEND_API_KEY) {
+          const emailRes = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ from: env.FROM_EMAIL || "Admini <noreply@pdadmini.com>", to: body.to, subject: body.subject, html: body.html }),
+          });
+          if (!emailRes.ok) {
+            const errBody: any = await emailRes.json().catch(() => ({}));
+            return json({ ok: false, error: { code: "email_failed", message: errBody.message || "Failed to send" } }, 500);
+          }
+          return json({ ok: true, data: { sent: true } });
+        }
+        return json({ ok: false, error: { code: "no_email_service", message: "Email service not configured" } }, 500);
+      }
+
+      // Send invitation email
       if (request.method === 'POST' && url.pathname === '/api/invitations/send-email') {
         const body = await readJson<{ email: string; inviterName: string; schoolName: string; role: string; token: string }>(request);
         const inviteUrl = `https://pdadmini.com?invitation_token=${encodeURIComponent(body.token)}`;

@@ -113,11 +113,23 @@ export interface GmailContact {
 }
 
 /**
- * Send an email via Gmail API.
+ * Send an email. Uses Gmail API if Google token available, otherwise falls back to Cloudflare Worker.
  */
 export async function sendEmail(to: string, subject: string, htmlBody: string): Promise<boolean> {
   const token = await getGoogleToken();
-  if (!token) return false;
+  if (!token) {
+    // Fallback: send via Cloudflare Worker / Resend
+    try {
+      const apiBase = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) || '';
+      if (!apiBase) return false;
+      const res = await fetch(apiBase + '/api/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, subject, html: htmlBody }),
+      });
+      return res.ok;
+    } catch { return false; }
+  }
 
   const email = [
     `To: ${to}`,
