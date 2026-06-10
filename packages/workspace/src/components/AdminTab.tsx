@@ -107,12 +107,15 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   useEffect(() => {
     if (invitations.length > 0) {
       setPersistedInvitations(invitations);
-    } else if (organizationId) {
+    }
+    if (organizationId) {
       import('../services/invitationService').then(mod => {
-        mod.listInvitations(organizationId).then(list => { if (list.length > 0) setPersistedInvitations(list); }).catch((e) => { /* RLS may block - invitations show after successful org load */ });
+        mod.listInvitations(organizationId).then(list => {
+          if (list.length > 0) setPersistedInvitations(list);
+        }).catch(() => {});
       });
     }
-  }, [invitations, organizationId]);
+  }, [organizationId]);
 
   // Handlers
   // -------------------------------------------------------------------------
