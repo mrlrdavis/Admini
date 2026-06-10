@@ -703,19 +703,12 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
               type="button"
               className="capture-tab__task-suggestion-btn"
               onClick={() => {
-                if (organizationId && userId) {
-                  const client = getClient();
-                  client.from('tasks').insert({
-                    organization_id: organizationId,
-                    created_by: userId,
-                    title: lastCaptureText.slice(0, 100),
-                    description: lastCaptureText.length > 100 ? lastCaptureText : null,
-                    priority: 'normal',
-                    status: 'open',
-                  }).then(() => {
-                    showToast('Task created from capture', { action: undefined });
-                  });
-                }
+                setTaskModalTitle(lastCaptureText ? lastCaptureText.slice(0, 100) : '');
+                setTaskModalDesc(lastCaptureText && lastCaptureText.length > 100 ? lastCaptureText : '');
+                setTaskModalDue('');
+                setTaskModalPriority('normal');
+                setTaskModalAssignee('');
+                setTaskModalOpen(true);
                 setShowTaskSuggestion(false);
               }}
             >
