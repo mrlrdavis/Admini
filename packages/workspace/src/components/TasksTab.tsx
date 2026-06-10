@@ -266,14 +266,23 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         setTasks(prev => [newTask, ...prev]);
         // Check badges
         unlockBadge('first-task');
-        // Notify assignee if email connected and assignee looks like an email
-        if (formAssignedTo.includes('@')) {
+        // Notify assignee via email if possible
+        if (formAssignedTo.trim()) {
           getGoogleToken().then(token => {
-            if (token) {
-              const notify = confirm('Notify ' + formAssignedTo + ' about this task?');
-              if (notify) {
-                sendEmail(formAssignedTo, 'New task assigned: ' + formTitle.trim(), '<p>You have been assigned a new task on Admini:</p><h3>' + formTitle.trim() + '</h3>' + (formDescription ? '<p>' + formDescription + '</p>' : '') + (formDueAt ? '<p><strong>Due:</strong> ' + formDueAt + '</p>' : ''));
-              }
+            if (!token) return;
+            const assignee = formAssignedTo.trim();
+            if (assignee.includes('@')) {
+              const doNotify = confirm('Notify ' + assignee + ' about this task?');
+              if (doNotify) sendEmail(assignee, 'New task assigned: ' + formTitle.trim(), '<p>You have been assigned a new task:</p><h3>' + formTitle.trim() + '</h3>' + (formDueAt ? '<p>Due: ' + formDueAt + '</p>' : ''));
+            } else {
+              import('../services/getClient').then(({ getClient: gc }) => {
+                gc().from('profiles').select('email').ilike('display_name', '%' + assignee + '%').limit(1).single().then(({ data: profile }) => {
+                  if (profile?.email) {
+                    const doNotify = confirm('Notify ' + profile.email + ' (' + assignee + ')?');
+                    if (doNotify) sendEmail(profile.email, 'New task assigned: ' + formTitle.trim(), '<p>You have been assigned a new task:</p><h3>' + formTitle.trim() + '</h3>' + (formDueAt ? '<p>Due: ' + formDueAt + '</p>' : ''));
+                  }
+                });
+              });
             }
           });
         }
