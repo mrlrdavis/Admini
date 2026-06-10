@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export interface ToastMessage {
   id: string;
@@ -11,7 +11,7 @@ let toastListener: ((msg: ToastMessage) => void) | null = null;
 
 export function showToast(text: string, options?: { action?: { label: string; onClick: () => void }; duration?: number }) {
   const msg: ToastMessage = {
-    id: Date.now().toString(),
+    id: Date.now().toString() + Math.random().toString(36).slice(2),
     text,
     action: options?.action,
     duration: options?.duration ?? 4000,
