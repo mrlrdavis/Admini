@@ -103,10 +103,12 @@ export async function createInvitation(
       if (apiBase) {
         const { data: userData } = await client.auth.getUser();
         const inviterName = userData?.user?.user_metadata?.display_name || userData?.user?.email || 'A team member';
+        const { data: orgData } = await client.from('organizations').select('name').eq('id', orgId).single();
+        const schoolName = orgData?.name || 'your school';
         fetch(apiBase + '/api/invitations/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, inviterName, schoolName: 'your school', role, token: invitationToken }),
+          body: JSON.stringify({ email, inviterName, schoolName, role, token: invitationToken }),
         }).catch(() => {});
       }
     } catch { /* best-effort */ }
