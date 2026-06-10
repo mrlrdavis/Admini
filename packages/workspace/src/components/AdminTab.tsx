@@ -102,6 +102,18 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   const [flagError, setFlagError] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
+  // Separate invitation fetch that works even when org details fail
+  const [persistedInvitations, setPersistedInvitations] = useState<typeof invitations>([]);
+  useEffect(() => {
+    if (invitations.length > 0) {
+      setPersistedInvitations(invitations);
+    } else if (organizationId) {
+      import('../services/invitationService').then(mod => {
+        mod.listInvitations(organizationId).then(setPersistedInvitations).catch(() => {});
+      });
+    }
+  }, [invitations, organizationId]);
+
   // Handlers
   // -------------------------------------------------------------------------
 
@@ -238,7 +250,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         {/* Pending Invitations */}
         <section className="admin-tab__section">
           <h2 className="admin-tab__section-title">Pending Invitations</h2>
-          {invitations.filter((inv: any) => inv.status === 'pending').length === 0 ? (
+          {persistedInvitations.filter((inv: any) => inv.status === 'pending').length === 0 ? (
             <p className="admin-tab__empty">No pending invitations.</p>
           ) : (
             <ul className="admin-tab__invitation-list">
