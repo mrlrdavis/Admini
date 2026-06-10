@@ -13,8 +13,7 @@ export default defineConfig({
       registerType: 'prompt',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: '/offline.html',
-        navigateFallbackDenylist: [/^\/api\//, /[?&](code|error|access_token|refresh_token)=/]
+        // navigateFallback disabled - Netlify handles SPA routing via _redirects
       },
       manifest: {
         name: 'AdminI',
