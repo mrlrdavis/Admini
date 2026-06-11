@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 
 const TAB_ICONS: Record<string, string> = {
@@ -9,6 +9,7 @@ const TAB_ICONS: Record<string, string> = {
   more: '\u2699\uFE0F',
   admin: '\uD83D\uDD27',
   observations: '\uD83D\uDC41',
+  notes: '\uD83D\uDCD3',
 };
 
 export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
