@@ -415,7 +415,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                   }).map(ev => (
                     <div key={ev.id} className="dashboard-tab__sched-event">
                       <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
-                      <span>{ev.summary}</span>
+                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} style={{marginLeft:"auto",background:"none",border:"none",color:"#D63031",cursor:"pointer",fontSize:"0.7rem"}}>×</button> : null}
                     </div>
                   ))}
                 </div>
