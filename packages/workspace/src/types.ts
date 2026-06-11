@@ -1,7 +1,7 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 // Tab identification
-export type WorkspaceTab = 'capture' | 'dashboard' | 'tasks' | 'pulse' | 'more' | 'admin' | 'observations';
+export type WorkspaceTab = 'capture' | 'dashboard' | 'tasks' | 'notes' | 'pulse' | 'more' | 'admin' | 'observations';
 
 // Roles
 export type AdminiRole = 'admin' | 'principal' | 'teacher' | 'staff';

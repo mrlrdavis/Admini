@@ -472,14 +472,14 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
 
       {/* Filters */}
       <div className="tasks-tab__filters">
-        {(['all', 'open', 'in_progress', 'completed'] as const).map(f => (
+        {(['all', 'open', 'in_progress', 'completed', 'archived'] as const).map(f => (
           <button
             key={f}
             type="button"
             className={`tasks-tab__filter-pill${filter === f ? ' tasks-tab__filter-pill--active' : ''}`}
             onClick={() => setFilter(f)}
           >
-            {f === 'all' ? 'All' : f === 'in_progress' ? 'In Progress' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'all' ? 'All' : f === 'in_progress' ? 'In Progress' : f === 'archived' ? 'Blocked' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>

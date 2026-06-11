@@ -19,6 +19,7 @@
 @import './navigation.css';
 @import './observations.css';
 @import './toast.css';
+@import './notes.css';
 
 /* --------------------------------------------------------------------------
    Design Tokens (CSS Custom Properties)
