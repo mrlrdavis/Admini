@@ -92,7 +92,7 @@ export function WorkspaceShell({
       case 'admin': return canAccessAdmin && organizationId ? <AdminTab organizationId={organizationId} userRole={userRole} /> : <div className="admin-tab admin-tab--empty"><p>Complete onboarding to access Admin settings.</p></div>;
       case 'capture': return <CaptureTab userId={user.id} organizationId={organizationId} />;
       case 'tasks': return <TasksTab userId={user.id} organizationId={organizationId} />;
-      case 'notes': return <NotesTab userId={user.id} organizationId={organizationId} />;
+      case 'notes': return <NotesTab userId={user.id} organizationId={organizationId} onTabChange={handleTabChange} />;
       case 'observations': return <ObservationsTab userId={user.id} organizationId={organizationId} userName={userName} userRole={userRole} />;
       case 'pulse': return <PulseTab />;
       case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;

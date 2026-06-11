@@ -1107,3 +1107,27 @@
   font-size: 0.5rem;
   white-space: nowrap;
 }
+
+/* Task card collapse */
+.tasks-tab__collapse-toggle {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: var(--ws-color-text-muted);
+  line-height: 1;
+}
+
+.tasks-tab__task-card--collapsed .tasks-tab__task-description,
+.tasks-tab__task-card--collapsed .tasks-tab__task-meta,
+.tasks-tab__task-card--collapsed .tasks-tab__subtask-preview {
+  display: none;
+}
+
+/* Blocked task style */
+.tasks-tab__task-card[data-status="archived"] {
+  border-left: 4px solid #D63031;
+  background: #FFF8F8;
+  opacity: 0.85;
+}

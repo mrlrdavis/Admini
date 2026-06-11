@@ -70,6 +70,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [collapsedTasks, setCollapsedTasks] = useState<Set<string>>(new Set());
 
   // Form state
   const [formTitle, setFormTitle] = useState('');
