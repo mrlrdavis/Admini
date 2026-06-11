@@ -57,7 +57,16 @@ export interface CaptureTabProps {
 }
 
 export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps) {
-  const [mode, setMode] = useState<CaptureMode>('voice');
+  const [mode, setMode] = useState<CaptureMode>(() => {
+    try {
+      const saved = localStorage.getItem('admini_capture_mode');
+      if (saved === 'tap' || saved === 'notes') {
+        localStorage.removeItem('admini_capture_mode');
+        return saved;
+      }
+    } catch {}
+    return 'voice';
+  });
   const [isRecording, setIsRecording] = useState(false);
   const [transcription, setTranscription] = useState('');
   const [selectedWords, setSelectedWords] = useState<Record<string, string[]>>({});

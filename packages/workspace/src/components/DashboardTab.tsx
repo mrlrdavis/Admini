@@ -281,7 +281,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         <div className="dashboard-tab__quick-actions-bar">
           <span className="dashboard-tab__qa-label">QUICK ACTIONS</span>
           <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('capture')}>Record a Capture</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('capture')}>Quick Tap Capture</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_capture_mode', 'tap'); onTabChange?.('capture'); }}>Quick Tap Capture</button>
           <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}>See Task Calendar</button>
           <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('admin')}>Update Roster</button>
         </div>
