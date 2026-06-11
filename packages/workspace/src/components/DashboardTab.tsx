@@ -92,6 +92,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [showAllEvents, setShowAllEvents] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [dashCalMonth, setDashCalMonth] = useState(new Date());
   const [unlockedCount, setUnlockedCount] = useState(0);
   const totalBadges = 9; // total badge count
 
@@ -371,11 +372,12 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                 const first = new Date(n.getFullYear(), n.getMonth(), 1);
                 const offset = first.getDay();
                 const dim = new Date(n.getFullYear(), n.getMonth()+1, 0).getDate();
+                const todayDate = new Date();
                 const cells: React.ReactNode[] = [];
                 for (let i=0; i<offset; i++) cells.push(<span key={'e'+i} />);
                 for (let d=1; d<=dim; d++) {
                   const dt = new Date(n.getFullYear(), n.getMonth(), d);
-                  const isToday = d === n.getDate();
+                  const isToday = d === todayDate.getDate() && n.getMonth() === todayDate.getMonth() && n.getFullYear() === todayDate.getFullYear();
                   const hasTasks = tasks.some(t => t.dueAt && parseLocalDate(t.dueAt).toDateString() === dt.toDateString());
                   cells.push(<span key={d} className={'dashboard-tab__mini-cal-date' + (isToday ? ' --today' : '') + (hasTasks ? ' --has-tasks' : '')}>{d}</span>);
                 }

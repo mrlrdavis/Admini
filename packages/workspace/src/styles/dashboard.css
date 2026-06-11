@@ -467,3 +467,63 @@
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* Task item with tag */
+.dashboard-tab__card-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-tab__card-item-title {
+  font-size: var(--ws-font-size-sm);
+}
+
+.dashboard-tab__card-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: #FFF3E0;
+  color: #E65100;
+  width: fit-content;
+}
+
+.dashboard-tab__card-tag--blocked {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+.dashboard-tab__card-stale {
+  font-size: 0.6875rem;
+  padding: 2px 8px;
+  background: #FFEBEE;
+  color: #C62828;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Calendar nav */
+.dashboard-tab__mini-cal-nav {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: var(--ws-color-text-muted);
+  border-radius: 4px;
+}
+
+.dashboard-tab__mini-cal-nav:hover {
+  background: var(--ws-color-limestone);
+}
+
+.dashboard-tab__mini-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
