@@ -778,7 +778,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
               {filteredTasks.map(task => (
                 <li
                   key={task.id}
-                  className="tasks-tab__task-card"
+                  className={"tasks-tab__task-card" + (collapsedTasks.has(task.id) ? " tasks-tab__task-card--collapsed" : "")}
                   data-priority={task.priority}
                   data-status={task.status}
                 >
