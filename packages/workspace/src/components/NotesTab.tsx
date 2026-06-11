@@ -52,10 +52,10 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
   }
 
   function handleEdit(note: MeetingNote) {
-    setFormType((note as any).meetingType || MEETING_TYPES[0]);
-    setFormDate(note.date || new Date().toISOString().split('T')[0]);
-    setFormAttendees((note as any).attendees || '');
-    setFormContent(note.content || '');
+    setFormType(note.title?.split(' - ')[0] || MEETING_TYPES[0]);
+    setFormDate(note.createdAt || new Date().toISOString().split('T')[0]);
+    setFormAttendees(note.attendees?.join(', ') || '');
+    setFormContent(note.body || '');
     setEditingNote(note);
     setShowForm(true);
   }
@@ -67,17 +67,15 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
       const payload = {
         organizationId,
         userId,
-        title: formType + ' - ' + new Date(formDate).toLocaleDateString(),
-        content: formContent.trim(),
-        date: formDate,
-        meetingType: formType,
-        attendees: formAttendees,
+        title: formType + ' - ' + (formDate ? new Date(formDate + 'T12:00:00').toLocaleDateString() : new Date().toLocaleDateString()),
+        body: formContent.trim(),
+        attendees: formAttendees ? formAttendees.split(',').map((s: string) => s.trim()) : [],
       };
       if (editingNote) {
-        const updated = await updateMeetingNote(editingNote.id, payload);
+        const updated = await updateMeetingNote(editingNote.id, { title: formType + ' - ' + (formDate ? new Date(formDate + 'T12:00:00').toLocaleDateString() : ''), body: formContent.trim(), attendees: formAttendees ? formAttendees.split(',').map((s: string) => s.trim()) : [] });
         setNotes(prev => prev.map(n => n.id === editingNote.id ? updated : n));
       } else {
-        const created = await createMeetingNote(payload as any);
+        const created = await createMeetingNote({ organizationId: organizationId!, userId: userId!, title: formType + ' - ' + (formDate ? new Date(formDate + 'T12:00:00').toLocaleDateString() : new Date().toLocaleDateString()), body: formContent.trim(), attendees: formAttendees ? formAttendees.split(',').map((s: string) => s.trim()) : [] });
         setNotes(prev => [created, ...prev]);
       }
       setShowForm(false);
@@ -149,18 +147,18 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
               {notes.map(note => (
                 <li key={note.id} className="notes-tab__note-card">
                   <div className="notes-tab__note-header">
-                    <span className="notes-tab__note-type">{(note as any).meetingType || 'Note'}</span>
-                    <span className="notes-tab__note-date">{note.date ? new Date(note.date).toLocaleDateString() : ''}</span>
+                    <span className="notes-tab__note-type">{note.title?.split(' - ')[0] || 'Note'}</span>
+                    <span className="notes-tab__note-date">{note.createdAt ? new Date(note.createdAt).toLocaleDateString() : ''}</span>
                   </div>
-                  {(note as any).attendees && <span className="notes-tab__note-attendees">Attendees: {(note as any).attendees}</span>}
-                  <p className="notes-tab__note-content">{note.content?.slice(0, 200)}{(note.content?.length || 0) > 200 ? '...' : ''}</p>
+                  {note.attendees?.join(', ') && <span className="notes-tab__note-attendees">Attendees: {note.attendees?.join(', ')}</span>}
+                  <p className="notes-tab__note-content">{note.body?.slice(0, 200)}{(note.body?.length || 0) > 200 ? '...' : ''}</p>
                   <div className="notes-tab__note-actions">
                     <button type="button" onClick={() => handleEdit(note)}>Edit</button>
                     <button type="button" onClick={async () => {
                       const apiBase = (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) || "";
                       if (!apiBase) { showToast("AI not configured"); return; }
                       try {
-                        const res = await fetch(apiBase + "/api/ai/task-suggestions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redactedText: note.content || "", tokenCount: (note.content || "").split(" ").length }) });
+                        const res = await fetch(apiBase + "/api/ai/task-suggestions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redactedText: note.body || "", tokenCount: (note.body || "").split(" ").length }) });
                         const result = await res.json() as any;
                         if (result.ok && result.data?.tasks?.length > 0) {
                           showToast("Suggested: " + result.data.tasks[0].title, { action: { label: "Create", onClick: () => onTabChange?.("tasks") } });
