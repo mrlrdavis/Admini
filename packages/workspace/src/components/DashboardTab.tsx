@@ -353,7 +353,6 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
 
           {userId && organizationId && (
             <section className="dashboard-tab__card dashboard-tab__card--suggested">
-              <h2 className="dashboard-tab__card-title">Suggested Tasks</h2>
               <RecommendationsWidget userId={userId} organizationId={organizationId} />
             </section>
           )}
