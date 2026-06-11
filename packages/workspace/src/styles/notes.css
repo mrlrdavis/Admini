@@ -129,3 +129,46 @@
 }
 
 .notes-tab__empty { color: var(--ws-color-text-muted); font-style: italic; }
+/* Notes Editor Toolbar */
+.notes-tab__toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: var(--ws-color-limestone);
+  border: 1px solid var(--ws-color-border);
+  border-bottom: none;
+  border-radius: var(--ws-radius-md) var(--ws-radius-md) 0 0;
+}
+
+.notes-tab__toolbar button {
+  padding: 4px 10px;
+  border: 1px solid var(--ws-color-border);
+  border-radius: 4px;
+  background: var(--ws-color-white);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ws-color-text);
+}
+
+.notes-tab__toolbar button:hover {
+  background: var(--ws-color-sage);
+  color: #fff;
+  border-color: var(--ws-color-sage);
+}
+
+.notes-tab__editor {
+  border-radius: 0 0 var(--ws-radius-md) var(--ws-radius-md) !important;
+  border-top: none !important;
+  min-height: 200px;
+  font-family: monospace;
+  line-height: 1.6;
+}
+
+.notes-tab__field-label {
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  color: var(--ws-color-text-muted);
+  margin-bottom: 4px;
+  display: block;
+}

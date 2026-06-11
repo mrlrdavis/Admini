@@ -440,13 +440,6 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
         >
           Tap
         </button>
-        <button
-          type="button"
-          className={'capture-tab__mode-btn' + (mode === 'notes' ? ' capture-tab__mode-btn--active' : '')}
-          onClick={() => setMode('notes')}
-        >
-          Notes
-        </button>
         <span
           className={'capture-tab__mode-indicator' + (mode === 'tap' ? ' capture-tab__mode-indicator--tap' : mode === 'notes' ? ' capture-tab__mode-indicator--notes' : '')}
           aria-hidden="true"

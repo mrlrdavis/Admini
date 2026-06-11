@@ -126,10 +126,17 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
               <input type="text" value={formAttendees} onChange={e => setFormAttendees(e.target.value)} placeholder="Names, separated by commas" />
             </label>
           </div>
-          <label className="notes-tab__field notes-tab__field--full">
-            <span>Notes</span>
-            <textarea value={formContent} onChange={e => setFormContent(e.target.value)} placeholder="Meeting notes..." rows={8} />
-          </label>
+          <div className="notes-tab__field notes-tab__field--full">
+            <span className="notes-tab__field-label">Notes</span>
+            <div className="notes-tab__toolbar">
+              <button type="button" onClick={() => setFormContent(prev => prev + "**bold**")}>B</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "*italic*")}><em>I</em></button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n- ")}>• List</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n[ ] ")}>? Task</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n---\n")}>—</button>
+            </div>
+            <textarea value={formContent} onChange={e => setFormContent(e.target.value)} placeholder="Meeting notes..." rows={10} className="notes-tab__editor" />
+          </div>
           <div className="notes-tab__form-actions">
             <button type="button" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</button>
             <button type="button" disabled={!formContent.trim() || saving} onClick={handleSave}>{saving ? 'Saving...' : editingNote ? 'Update' : 'Save Note'}</button>
