@@ -1,4 +1,5 @@
 [build]
+# Force fresh build - v2
 command = "npm run build:app"
 publish = "dist/netlify"
 
