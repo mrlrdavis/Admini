@@ -222,7 +222,7 @@
   padding: var(--ws-space-xs) var(--ws-space-md);
   border: none;
   border-radius: var(--ws-radius-sm);
-  background: var(--ws-color-primary);
+  background: var(--ws-color-sage);
   color: var(--ws-color-white);
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
@@ -520,7 +520,7 @@
 }
 
 .more-tab__btn-secondary:hover {
-  background: var(--ws-color-primary);
+  background: var(--ws-color-sage);
   color: var(--ws-color-white);
 }
 
