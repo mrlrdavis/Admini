@@ -90,6 +90,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAllEvents, setShowAllEvents] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [unlockedCount, setUnlockedCount] = useState(0);
   const totalBadges = 9; // total badge count
@@ -283,7 +284,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}>See Task Calendar</button>
           <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('admin')}>Update Roster</button>
         </div>
-        <div className="dashboard-tab__level-badge">
+        <div className="dashboard-tab__level-badge" onClick={() => setShowAchievements(true)} style={{ cursor: "pointer" }}>
           <span className="dashboard-tab__level-num">Level {Math.floor(unlockedCount / 2) + 1}</span>
           <span className="dashboard-tab__level-sub">{unlockedCount}/{totalBadges} badges</span>
         </div>
