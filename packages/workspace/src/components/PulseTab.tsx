@@ -381,7 +381,7 @@ export function PulseTab({ loading }: PulseTabProps) {
           <option value="2">Every 2 hours</option>
           <option value="3">Every 3 hours</option>
           <option value="4">Every 4 hours</option>
-          <option value="0">Disabled</option>
+
         </select>
       </section>
 

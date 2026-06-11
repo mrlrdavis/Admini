@@ -93,6 +93,10 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [showAchievements, setShowAchievements] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [dashCalMonth, setDashCalMonth] = useState(new Date());
+  const [showDashEvent, setShowDashEvent] = useState(false);
+  const [dashEventTitle, setDashEventTitle] = useState('');
+  const [dashEventDate, setDashEventDate] = useState('');
+  const [dashEventTime, setDashEventTime] = useState('');
   const [unlockedCount, setUnlockedCount] = useState(0);
   const totalBadges = 9; // total badge count
 

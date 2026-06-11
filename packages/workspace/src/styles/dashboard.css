@@ -527,3 +527,47 @@
   align-items: center;
   justify-content: space-between;
 }
+
+/* Dashboard Add Event */
+.dashboard-tab__add-event-link {
+  display: block;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--ws-color-sage);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dashboard-tab__event-form {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--ws-color-limestone);
+  border-radius: 8px;
+}
+
+.dashboard-tab__event-input {
+  padding: 5px 8px;
+  border: 1px solid var(--ws-color-border);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  background: #fff;
+}
+
+.dashboard-tab__event-save {
+  padding: 5px 12px;
+  background: var(--ws-color-sage);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-tab__event-save:disabled { opacity: 0.5; }
