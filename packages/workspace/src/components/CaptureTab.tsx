@@ -32,13 +32,19 @@ interface QuickCapture {
 // Word Board Categories
 // ---------------------------------------------------------------------------
 
-const WORD_BOARD_CATEGORIES = {
-  Who: ['Student', 'Teacher', 'Parent', 'Staff', 'Group', 'Class'],
+const DEFAULT_TAP_CATEGORIES: Record<string, string[]> = {
+  Who: ['Student', 'Teacher', 'Parent', 'Staff', 'Class'],
   What: ['Behavior', 'Academic', 'Social', 'Emotional', 'Physical', 'Other'],
   Urgency: ['Low', 'Normal', 'High', 'Urgent'],
-  Domain: ['Classroom', 'Playground', 'Office', 'Hallway', 'Library', 'Gym'],
-  Where: ['Room 101', 'Room 102', 'Main Hall', 'Field', 'Cafeteria', 'Lab'],
-} as const;
+  Where: ['Classroom', 'Hallway', 'Office', 'Cafeteria', 'Library', 'Gym', 'Playground', 'Field'],
+};
+
+function loadTapCategories(): Record<string, string[]> {
+  try { const s = localStorage.getItem('admini_tap_categories'); if (s) return JSON.parse(s); } catch {}
+  return DEFAULT_TAP_CATEGORIES;
+}
+
+const WORD_BOARD_CATEGORIES = loadTapCategories();
 
 // ---------------------------------------------------------------------------
 // Component
