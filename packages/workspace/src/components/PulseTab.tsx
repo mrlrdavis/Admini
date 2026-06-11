@@ -372,6 +372,19 @@ export function PulseTab({ loading }: PulseTabProps) {
         )}
       </section>
 
+      {/* Pulse Cadence */}
+      <section className="pulse-tab__cadence">
+        <h2 className="pulse-tab__section-title">Pulse Cadence</h2>
+        <p className="pulse-tab__cadence-desc">How often should pulse check-ins happen?</p>
+        <select className="pulse-tab__cadence-select" defaultValue="3" onChange={(e) => { localStorage.setItem("admini_pulse_cadence", e.target.value); }}>
+          <option value="1">Every hour</option>
+          <option value="2">Every 2 hours</option>
+          <option value="3">Every 3 hours</option>
+          <option value="4">Every 4 hours</option>
+          <option value="0">Disabled</option>
+        </select>
+      </section>
+
       {/* Notifications Toggle */}
       <section className="pulse-tab__notifications">
         <div className="pulse-tab__notification-row">

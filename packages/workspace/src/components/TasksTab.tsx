@@ -95,11 +95,21 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   });
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [calEvents, setCalEvents] = useState<CalendarEvent[]>([]);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [eventTitle, setEventTitle] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
 
   useEffect(() => {
     const start = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
     const end = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
-    getCalendarEvents(start, end).then(setCalEvents).catch(() => {});
+    getCalendarEvents(start, end).then(googleEvents => {
+      const localEvents: CalendarEvent[] = JSON.parse(localStorage.getItem('admini_local_events') || '[]');
+      setCalEvents([...googleEvents, ...localEvents]);
+    }).catch(() => {
+      const localEvents: CalendarEvent[] = JSON.parse(localStorage.getItem('admini_local_events') || '[]');
+      setCalEvents(localEvents);
+    });
   }, [calendarMonth]);
 
   const calendarDays = useMemo(() => {

@@ -122,7 +122,19 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   }, [fetchData]);
 
   useEffect(() => {
-    getTodayCalendarEvents().then(setCalendarEvents).catch(() => {});
+    getTodayCalendarEvents().then(googleEvents => {
+      const localEvents: CalendarEvent[] = JSON.parse(localStorage.getItem('admini_local_events') || '[]').filter((e: any) => {
+        if (!e.start) return false;
+        return new Date(e.start).toDateString() === new Date().toDateString();
+      });
+      setCalendarEvents([...googleEvents, ...localEvents]);
+    }).catch(() => {
+      const localEvents: CalendarEvent[] = JSON.parse(localStorage.getItem('admini_local_events') || '[]').filter((e: any) => {
+        if (!e.start) return false;
+        return new Date(e.start).toDateString() === new Date().toDateString();
+      });
+      setCalendarEvents(localEvents);
+    });
   }, []);
 
   useEffect(() => {

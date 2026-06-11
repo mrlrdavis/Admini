@@ -1131,3 +1131,53 @@
   background: #FFF8F8;
   opacity: 0.85;
 }
+
+/* Calendar Event Form */
+.tasks-tab__add-event-btn {
+  background: none;
+  border: 1px solid var(--ws-color-sage);
+  color: var(--ws-color-sage-dark);
+  padding: 6px 14px;
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: var(--ws-space-sm);
+}
+
+.tasks-tab__add-event-btn:hover {
+  background: var(--ws-color-sage);
+  color: #fff;
+}
+
+.tasks-tab__event-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--ws-space-md);
+  padding: var(--ws-space-sm);
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-md);
+}
+
+.tasks-tab__event-input {
+  padding: 6px 10px;
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+  background: var(--ws-color-white);
+}
+
+.tasks-tab__event-save {
+  padding: 6px 14px;
+  background: var(--ws-color-sage);
+  color: #fff;
+  border: none;
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tasks-tab__event-save:disabled { opacity: 0.5; cursor: not-allowed; }
