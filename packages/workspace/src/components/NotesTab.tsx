@@ -132,9 +132,9 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
             <div className="notes-tab__toolbar">
               <button type="button" onClick={() => setFormContent(prev => prev + "**bold**")}>B</button>
               <button type="button" onClick={() => setFormContent(prev => prev + "*italic*")}><em>I</em></button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n- ")}>ï List</button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n[ ] ")}>? Task</button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n---\n")}>ó</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n- ")}>‚Ä¢ List</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n[ ] ")}>‚òê Task</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n---\n")}>‚Äï</button>
             </div>
             <textarea value={formContent} onChange={e => setFormContent(e.target.value)} placeholder="Meeting notes..." rows={10} className="notes-tab__editor" />
           </div>
