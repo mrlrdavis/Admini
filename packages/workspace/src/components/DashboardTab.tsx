@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // DashboardTab - Native React implementation of the Dashboard view
 // ---------------------------------------------------------------------------
 // Requirements: 2.1, 2.4, 7.1
@@ -21,7 +21,7 @@ import {
   defaultRegistry,
   formatActivityAction as formatActivityActionShared,
 } from '@admini/shared';
-import { getLocalEvents } from '../services/localEventService';
+import { getLocalEvents, createLocalEvent } from '../services/localEventService';
 import { mergeEvents } from '../services/calendarMerge';
 import { buildActivityFeed } from '../services/activityFeed';
 // BadgesSection and BadgesPanel removed - replaced with compact achievement indicator
@@ -335,7 +335,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
             <button type="button" style={{marginTop:"8px",background:"none",border:"1px solid #6B8E6B",color:"#4A6B4A",padding:"4px 12px",borderRadius:"20px",fontSize:"0.75rem",fontWeight:600,cursor:"pointer"}} onClick={() => setShowDashEvent(!showDashEvent)}>{showDashEvent ? "Cancel" : "+ Add Event"}</button>
-            {showDashEvent && <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"8px",padding:"8px",background:"#F5F3EE",borderRadius:"8px"}}><input type="text" placeholder="Title" value={dashEventTitle} onChange={e=>setDashEventTitle(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><input type="date" value={dashEventDate} onChange={e=>setDashEventDate(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><input type="time" value={dashEventTime} onChange={e=>setDashEventTime(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><button type="button" disabled={!dashEventTitle.trim()||!dashEventDate} style={{padding:"5px 12px",background:"#6B8E6B",color:"#fff",border:"none",borderRadius:"6px",fontSize:"0.75rem",fontWeight:600,cursor:"pointer"}} onClick={()=>{const ev={id:Date.now().toString(),summary:dashEventTitle.trim(),start:dashEventDate+(dashEventTime?"T"+dashEventTime+":00":""),end:""};const s=JSON.parse(localStorage.getItem("admini_local_events")||"[]");s.push(ev);localStorage.setItem("admini_local_events",JSON.stringify(s));setCalendarEvents(p=>[...p,ev]);setDashEventTitle("");setDashEventDate("");setDashEventTime("");setShowDashEvent(false);}}>Save</button></div>}
+            {showDashEvent && <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"8px",padding:"8px",background:"#F5F3EE",borderRadius:"8px"}}><input type="text" placeholder="Title" value={dashEventTitle} onChange={e=>setDashEventTitle(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><input type="date" value={dashEventDate} onChange={e=>setDashEventDate(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><input type="time" value={dashEventTime} onChange={e=>setDashEventTime(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><button type="button" disabled={!dashEventTitle.trim()||!dashEventDate} style={{padding:"5px 12px",background:"#6B8E6B",color:"#fff",border:"none",borderRadius:"6px",fontSize:"0.75rem",fontWeight:600,cursor:"pointer"}} onClick={()=>{const newEvent=createLocalEvent({summary:dashEventTitle.trim(),start:dashEventDate+(dashEventTime?"T"+dashEventTime+":00":""),end:""});setCalendarEvents(p=>[...p,newEvent]);setDashEventTitle("");setDashEventDate("");setDashEventTime("");setShowDashEvent(false);}}>Save</button></div>}
           <section className="dashboard-tab__card dashboard-tab__card--schedule">
             <div className="dashboard-tab__schedule-hdr">
               <h2 className="dashboard-tab__card-title">Today's Schedule</h2>
@@ -360,7 +360,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                   }).map(ev => (
                     <div key={ev.id} className="dashboard-tab__sched-event">
                       <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
-                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} style={{marginLeft:"auto",background:"none",border:"none",color:"#D63031",cursor:"pointer",fontSize:"0.7rem"}}>Ã¯Â¿Â½</button> : null}
+                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} style={{marginLeft:"auto",background:"none",border:"none",color:"#D63031",cursor:"pointer",fontSize:"0.7rem"}}>×</button> : null}
                     </div>
                   ))}
                 </div>
