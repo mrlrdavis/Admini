@@ -14,7 +14,7 @@
 .dashboard-tab__level-num { font-weight:700; font-size:0.875rem; color:#3D5C3D; }
 .dashboard-tab__level-sub { font-size:0.6875rem; color:#6B8E6B; }
 
-.dashboard-tab__columns { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.2fr); gap:20px; padding:20px 24px; align-items:start; max-width:100%; overflow:hidden; }
+.dashboard-tab__columns { display:grid; grid-template-columns:minmax(0, 0.43fr) minmax(0, 1fr); gap:20px; padding:20px 24px; align-items:start; max-width:100%; overflow:hidden; }
 @media (max-width:900px) { .dashboard-tab__columns { grid-template-columns:1fr; } }
 .dashboard-tab__left, .dashboard-tab__right { display:flex; flex-direction:column; gap:16px; }
 
@@ -28,7 +28,7 @@
 .dashboard-tab__section--suggested .dashboard-tab__section-header { background:#F2ECFB; }
 .dashboard-tab__section .dashboard-tab__task-list, .dashboard-tab__section .dashboard-tab__empty { padding:8px 16px; }
 .dashboard-tab__section-icon { font-size:0.8125rem; line-height:1; }
-.dashboard-tab__section-title { font-size:0.625rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:700; margin:0; letter-spacing:0.01em; }
+.dashboard-tab__section-title { font-size:0.5625rem; font-weight:700; margin:0; letter-spacing:0.05em; text-transform:uppercase; }
 .dashboard-tab__section-title--high { color:#C0392B; }
 .dashboard-tab__section-title--due-today { color:#4A6B4A; }
 .dashboard-tab__section-title--coming { color:#D35400; }

@@ -21,7 +21,7 @@ import {
   defaultRegistry,
   formatActivityAction as formatActivityActionShared,
 } from '@admini/shared';
-import { getLocalEvents } from '../services/localEventService';
+import { getLocalEvents, createLocalEvent } from '../services/localEventService';
 import { mergeEvents } from '../services/calendarMerge';
 import { buildActivityFeed } from '../services/activityFeed';
 import { BADGE_DEFINITIONS } from './BadgesPanel';
@@ -418,7 +418,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           <section className="dashboard-tab__card dashboard-tab__card--schedule">
             <div className="dashboard-tab__schedule-hdr">
               <h2 className="dashboard-tab__schedule-title">📅 Today's Schedule <span className="dashboard-tab__schedule-date">— {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
-              <div className="dashboard-tab__schedule-actions"><button type="button" className="dashboard-tab__sync-btn" onClick={handleCalendarSync} disabled={syncing} title="Sync with Google Calendar">{syncing ? 'Syncing…' : '↻ Sync'}</button><button type="button" className="dashboard-tab__edit-link" onClick={() => setScheduleEditing(v => !v)}>{scheduleEditing ? 'Done' : 'Edit'}</button></div>
+              <div className="dashboard-tab__schedule-actions"><button type="button" className="dashboard-tab__sync-btn" onClick={handleCalendarSync} disabled={syncing} title="Sync with Google Calendar">{syncing ? 'Syncing…' : '↻ Sync'}</button><button type="button" className="dashboard-tab__sync-btn" onClick={() => { const summary = prompt('Event for today:'); if (!summary || !summary.trim()) return; const time = prompt('Time (HH:MM, optional):') || ''; const today = new Date().toISOString().split('T')[0]; const start = time ? today + 'T' + time + ':00' : today + 'T09:00:00'; const end = time ? today + 'T' + time + ':00' : today + 'T10:00:00'; const ev = createLocalEvent({ summary: summary.trim(), start, end }); setCalendarEvents(prev => [...prev, ev]); }} title="Add event for today">+ Add</button><button type="button" className="dashboard-tab__edit-link" onClick={() => setScheduleEditing(v => !v)}>{scheduleEditing ? 'Done' : 'Edit'}</button></div>
             </div>
             {lastSync && <div className="dashboard-tab__sync-time">Last synced {(() => { const d = Date.now() - new Date(lastSync).getTime(); const m = Math.floor(d/60000); if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; const h = Math.floor(m/60); if (h < 24) return h + 'h ago'; return new Date(lastSync).toLocaleDateString(); })()}</div>}
             {dayBlocks.map((block, blockIdx) => (
