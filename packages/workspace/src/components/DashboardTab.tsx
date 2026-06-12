@@ -279,10 +279,10 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         <h1 className="dashboard-tab__greeting-text">{getTimeGreeting()}, <strong>{userName}</strong></h1>
         <div className="dashboard-tab__quick-actions-bar">
           <span className="dashboard-tab__qa-label">QUICK ACTIONS</span>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('capture')}> Record a Capture</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_capture_mode', 'tap'); onTabChange?.('capture'); }}> Quick Tap Capture</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}> See Task Calendar</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('admin')}> Update Roster</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('capture')}>🎤 Record a Capture</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_capture_mode', 'tap'); onTabChange?.('capture'); }}>👆 Quick Tap Capture</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}>📅 See Task Calendar</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('admin')}>📋 Update Roster</button>
         </div>
         <div className="dashboard-tab__level-badge" onClick={() => setShowAchievements(true)}>
           <span className="dashboard-tab__level-num">Level {Math.floor(unlockedCount / 2) + 1}</span>
@@ -323,7 +323,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__section dashboard-tab__section--coming-due">
-            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon"></span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--coming">Coming Due</h2></div>
+            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">📅</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--coming">Coming Due</h2></div>
             {comingDueTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing coming due</p> : (
               <ul className="dashboard-tab__task-list">
                 {comingDueTasks.slice(0, 5).map(task => (
@@ -337,7 +337,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__section dashboard-tab__section--blocked">
-            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon"></span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--blocked">Blocked Tasks</h2>{blockedTasks.length > 0 && <span className="dashboard-tab__section-count">{blockedTasks.length}</span>}</div>
+            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">🚫</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--blocked">Blocked Tasks</h2>{blockedTasks.length > 0 && <span className="dashboard-tab__section-count">{blockedTasks.length}</span>}</div>
             {blockedTasks.length === 0 ? <p className="dashboard-tab__empty">No blocked tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {blockedTasks.slice(0, 5).map(task => (
@@ -386,7 +386,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
 
           <section className="dashboard-tab__card dashboard-tab__card--schedule">
             <div className="dashboard-tab__schedule-hdr">
-              <h2 className="dashboard-tab__schedule-title"> Today's Schedule <span className="dashboard-tab__schedule-date">— {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
+              <h2 className="dashboard-tab__schedule-title">📅 Today's Schedule <span className="dashboard-tab__schedule-date">— {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
               <div className="dashboard-tab__schedule-actions"><button type="button" className="dashboard-tab__sync-btn" onClick={handleCalendarSync} disabled={syncing} title="Sync with Google Calendar">{syncing ? 'Syncing…' : '↻ Sync'}</button><button type="button" className="dashboard-tab__edit-link" onClick={() => setScheduleEditing(v => !v)}>{scheduleEditing ? 'Done' : 'Edit'}</button></div>
             </div>
             {lastSync && <div className="dashboard-tab__sync-time">Last synced {(() => { const d = Date.now() - new Date(lastSync).getTime(); const m = Math.floor(d/60000); if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; const h = Math.floor(m/60); if (h < 24) return h + 'h ago'; return new Date(lastSync).toLocaleDateString(); })()}</div>}
