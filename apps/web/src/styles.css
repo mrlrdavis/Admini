@@ -5,6 +5,7 @@ body,
 }
 
 .auth-page {
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
   --auth-font: "Avenir Next", Nunito, Quicksand, "Trebuchet MS", Inter, ui-sans-serif, system-ui, sans-serif;
   --brand-font: "Arial Rounded MT Bold", "Avenir Next Rounded", Nunito, Quicksand, "Trebuchet MS", Inter, ui-sans-serif, system-ui, sans-serif;
   --sage: #87a878;
@@ -19,7 +20,9 @@ body,
   color: #15121b;
   font-family: var(--auth-font);
   min-height: 100%;
-  overflow: hidden;
+  min-height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -920,8 +923,8 @@ body,
 
   .auth-story,
   .auth-conversation {
-    min-height: 50dvh;
-    padding: 28px;
+    min-height: auto;
+    padding: 24px 20px;
   }
 
   .auth-story {

@@ -146,6 +146,10 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(new Set());
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newPriority, setNewPriority] = useState<'low'|'normal'|'high'|'urgent'>('normal');
+  const [newDue, setNewDue] = useState('');
 
   // Calendar event state
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
@@ -263,6 +267,20 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     } catch {
       showToast('Failed to duplicate task');
     }
+  }
+
+  async function handleCreateTask() {
+    if (!newTitle.trim()) return;
+    try {
+      await taskService.create({
+        id: '', title: newTitle.trim(), description: undefined, priority: newPriority,
+        status: 'open', dueAt: newDue || undefined, assignee: undefined,
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), subtasks: [],
+      });
+      setNewTitle(''); setNewPriority('normal'); setNewDue(''); setShowAddForm(false);
+      await loadTaskList();
+      showToast('Task created');
+    } catch { showToast('Failed to create task'); }
   }
 
   async function handleEditTask(taskId: string, updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string }) {
@@ -401,6 +419,22 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       <header className="tasks-tab__header">
         <h1 className="tasks-tab__title">Tasks</h1>
       </header>
+      {/* Add Task */}
+      {showAddForm ? (
+        <div className="tasks-tab__add-form">
+          <input className="tasks-tab__add-input" placeholder="Task title..." value={newTitle} onChange={(e) => setNewTitle(e.target.value)} autoFocus />
+          <div className="tasks-tab__form-actions">
+            <input type="date" className="tasks-tab__add-input" value={newDue} onChange={(e) => setNewDue(e.target.value)} />
+            <select className="tasks-tab__priority-btn" value={newPriority} onChange={(e) => setNewPriority(e.target.value as any)}>
+              <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option>
+            </select>
+            <button type="button" className="tasks-tab__submit-btn" onClick={handleCreateTask} disabled={!newTitle.trim()}>Create</button>
+            <button type="button" className="tasks-tab__cancel-btn" onClick={() => setShowAddForm(false)}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="tasks-tab__fab" onClick={() => setShowAddForm(true)} aria-label="Create new task">+</button>
+      )}
 
       {/* TaskFilterBar sub-component */}
       <TaskFilterBar

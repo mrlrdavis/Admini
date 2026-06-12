@@ -1,4 +1,5 @@
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
+import { useInstallPrompt } from '@admini/pwa';
 
 const TAB_ICONS: Record<string, string> = {
   capture: '\uD83D\uDCDD',
@@ -15,6 +16,7 @@ const CORE_TAB_IDS = ['capture', 'dashboard', 'tasks', 'notes', 'observations', 
 const UTILITY_TAB_IDS = ['more', 'admin'];
 
 export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
+  const { isInstallable, isStandalone, promptInstall } = useInstallPrompt();
   const coreTabs = tabs.filter(t => CORE_TAB_IDS.includes(t.id));
   const utilityTabs = tabs.filter(t => UTILITY_TAB_IDS.includes(t.id));
 
@@ -60,14 +62,29 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut }: Navi
           </li>
         ))}
       </ul>
-      {onSignOut && (
+      {/* Install App button */}
+      {!isStandalone && (
+        <button
+          type="button"
+          className="desktop-sidebar__tab"
+          onClick={async () => {
+            if (isInstallable) { await promptInstall(); }
+            else { window.open('https://pdadmini.com', '_blank'); }
+          }}
+          aria-label="Install application"
+        >
+          <span className="desktop-sidebar__icon" aria-hidden="true">⬇</span>
+          <span className="desktop-sidebar__label">{isInstallable ? 'Install App' : 'Get App'}</span>
+        </button>
+      )}
+            {onSignOut && (
         <button
           type="button"
           className="desktop-sidebar__sign-out"
           onClick={onSignOut}
           aria-label="Sign out"
         >
-          Sign Out
+          ⏻ Sign Out
         </button>
       )}
     </nav>

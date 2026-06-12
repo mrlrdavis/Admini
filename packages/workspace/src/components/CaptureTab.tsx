@@ -508,18 +508,17 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
             )}
           </div>
 
-          {/* AI Suggestion Card */}
+          {/* AI Categorization - active after capture */}
           <div className="capture-tab__ai-suggestion">
             <div className="capture-tab__ai-suggestion-header">
               <svg className="capture-tab__ai-sparkle" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
                 <path d="M8 0l1.5 5.5L16 8l-6.5 2.5L8 16l-1.5-5.5L0 8l6.5-2.5z" fill="currentColor"/>
               </svg>
               <span className="capture-tab__ai-badge">AI</span>
-              <span className="capture-tab__ai-label">Suggestion</span>
-              <span className="capture-tab__coming-soon-badge">Coming Soon</span>
+              <span className="capture-tab__ai-label">Categorization</span>
             </div>
             <p className="capture-tab__ai-text">
-              Start speaking to get AI-powered categorization suggestions.
+              {transcription ? 'Capture complete — tap Create Task below to get AI categorization.' : isRecording ? 'Listening… AI will categorize when you finish.' : 'Record a voice capture to get AI-powered task suggestions.'}
             </p>
           </div>
         </section>

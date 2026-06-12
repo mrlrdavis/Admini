@@ -75,7 +75,7 @@ export function DesktopSidebar({
           onClick={onSignOut}
           aria-label="Sign out"
         >
-          Sign Out
+          ⏻ Sign Out
         </button>
       )}
     </nav>

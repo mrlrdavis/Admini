@@ -14,7 +14,7 @@
 .dashboard-tab__level-num { font-weight:700; font-size:0.875rem; color:#3D5C3D; }
 .dashboard-tab__level-sub { font-size:0.6875rem; color:#6B8E6B; }
 
-.dashboard-tab__columns { display:grid; grid-template-columns:minmax(0, 2fr) minmax(0, 3fr); gap:20px; padding:20px 24px; align-items:start; }
+.dashboard-tab__columns { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.2fr); gap:20px; padding:20px 24px; align-items:start; max-width:100%; overflow:hidden; }
 @media (max-width:900px) { .dashboard-tab__columns { grid-template-columns:1fr; } }
 .dashboard-tab__left, .dashboard-tab__right { display:flex; flex-direction:column; gap:16px; }
 
@@ -143,3 +143,20 @@
 .dashboard-tab__achievement-info span { font-size:0.75rem; color:#636E72; }
 .dashboard-tab__achievement-date { font-size:0.6875rem; color:#E6A817; font-weight:600; }
 .dashboard-tab__achievements-section-title { font-size:0.6875rem; font-weight:700; letter-spacing:0.08em; color:#636E72; margin:0 0 10px; text-transform:uppercase; }
+
+/* Suggested Tasks widget when inside the section card */
+.dashboard-tab__section--suggested .recommendations-widget__header { display:none; }
+.dashboard-tab__section--suggested .recommendations-widget { padding:0; margin:0; border:none; background:none; box-shadow:none; }
+.dashboard-tab__section--suggested .recommendations-widget__list { list-style:none; margin:0; padding:8px 16px; display:flex; flex-direction:column; gap:0; }
+.dashboard-tab__section--suggested .recommendations-widget__card { display:flex; align-items:center; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.05); gap:8px; }
+.dashboard-tab__section--suggested .recommendations-widget__card:last-child { border-bottom:none; }
+.dashboard-tab__section--suggested .recommendations-widget__card-content { flex:1; min-width:0; }
+.dashboard-tab__section--suggested .recommendations-widget__card-title { font-size:0.8125rem; font-weight:500; color:#2D3436; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dashboard-tab__section--suggested .recommendations-widget__card-excerpt { font-size:0.6875rem; color:#636E72; margin:2px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dashboard-tab__section--suggested .recommendations-widget__card-meta { display:none; }
+.dashboard-tab__section--suggested .recommendations-widget__card-actions { display:flex; align-items:center; }
+.dashboard-tab__section--suggested .recommendations-widget__card-actions::after { content:'\203A'; font-size:1.25rem; color:#636E72; margin-left:4px; }
+.dashboard-tab__section--suggested .recommendations-widget__accept-btn, .dashboard-tab__section--suggested .recommendations-widget__dismiss-btn { display:none; }
+.dashboard-tab__section--suggested .recommendations-widget__empty { padding:8px 16px; font-size:0.8125rem; color:#636E72; }
+.dashboard-tab__section--suggested .recommendations-widget__loading { padding:8px 16px; font-size:0.8125rem; color:#636E72; }
+.dashboard-tab__section--suggested .recommendations-widget__error { padding:8px 16px; }
