@@ -74,12 +74,13 @@ export function UnifiedWorkspace({
           onDeleteAccount={onDeleteAccount}
           onResetUserData={onResetUserData}
           onProfileUpdated={onProfileUpdated}
-          renderNavigation={({ activeTab, tabs, onTabChange }) => (
+          renderNavigation={({ activeTab, tabs, onTabChange, onSignOut: navSignOut }) => (
             <NavigationRenderer
               layoutMode={layoutMode}
               activeTab={activeTab}
               tabs={tabs}
               onTabChange={onTabChange}
+              onSignOut={navSignOut}
             />
           )}
         />
