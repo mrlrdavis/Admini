@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    @admini/workspace - Shared styles entry point
    Design Tokens: sage/limestone palette, rounded cards, horizontal-scroll KPIs
    ========================================================================== */
@@ -122,7 +122,6 @@
    -------------------------------------------------------------------------- */
 
 .ws-section-title,
-.dashboard-tab__section-header h2,
 .dashboard-tab__priority-queue > h2,
 .dashboard-tab__activity-feed > h2,
 .dashboard-tab__pulse-countdown > h2,
