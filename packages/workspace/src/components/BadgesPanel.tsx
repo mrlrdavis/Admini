@@ -10,16 +10,23 @@ interface Badge {
   unlockedAt?: string;
 }
 
-const BADGE_DEFINITIONS: Omit<Badge, 'unlocked' | 'unlockedAt'>[] = [
+export const BADGE_DEFINITIONS: Omit<Badge, 'unlocked' | 'unlockedAt'>[] = [
   { id: 'first-task', emoji: '\u2B50', label: 'First Step', description: 'Created your first task' },
   { id: 'five-tasks', emoji: '\uD83C\uDF1F', label: 'Getting Going', description: 'Completed 5 tasks' },
   { id: 'ten-tasks', emoji: '\uD83D\uDD25', label: 'On Fire', description: 'Completed 10 tasks' },
   { id: 'twenty-five', emoji: '\uD83C\uDFC6', label: 'Champion', description: 'Completed 25 tasks' },
+  { id: 'fifty-tasks', emoji: '\uD83D\uDC51', label: 'Centurion', description: 'Completed 50 tasks' },
   { id: 'first-capture', emoji: '\uD83D\uDCF8', label: 'Quick Capture', description: 'Saved your first voice or tap capture' },
+  { id: 'ten-captures', emoji: '\uD83C\uDFA4', label: 'Capture Pro', description: 'Saved 10 captures' },
   { id: 'first-observation', emoji: '\uD83D\uDC41', label: 'Observer', description: 'Completed your first classroom observation' },
+  { id: 'ten-observations', emoji: '\uD83D\uDD0D', label: 'Eagle Eye', description: 'Completed 10 classroom observations' },
   { id: 'first-note', emoji: '\uD83D\uDCDD', label: 'Note Taker', description: 'Created your first meeting note' },
+  { id: 'first-assign', emoji: '\uD83E\uDD1D', label: 'Delegator', description: 'Assigned a task to a team member' },
+  { id: 'first-ai-task', emoji: '\uD83E\uDD16', label: 'AI Assisted', description: 'Created a task using AI' },
   { id: 'streak-3', emoji: '\u26A1', label: '3-Day Streak', description: 'Used AdminI 3 days in a row' },
   { id: 'streak-7', emoji: '\uD83D\uDCAA', label: 'Week Warrior', description: 'Used AdminI 7 days in a row' },
+  { id: 'streak-30', emoji: '\uD83D\uDCC5', label: 'Monthly Master', description: 'Used AdminI 30 days in a row' },
+  { id: 'all-badges', emoji: '\uD83D\uDC8E', label: 'Completionist', description: 'Earned every other achievement' },
 ];
 
 function loadUnlockedBadges(): Record<string, string> {
@@ -45,6 +52,14 @@ export function unlockBadge(badgeId: string): boolean {
   const badge = BADGE_DEFINITIONS.find(b => b.id === badgeId);
   if (badge) {
     showToast(badge.emoji + ' Achievement unlocked: ' + badge.label);
+  }
+  // Check completionist: all badges except 'all-badges' itself are earned
+  if (badgeId !== 'all-badges') {
+    const updated = loadUnlockedBadges();
+    const others = BADGE_DEFINITIONS.filter(b => b.id !== 'all-badges');
+    if (others.every(b => updated[b.id])) {
+      saveBadge('all-badges');
+    }
   }
   return true; // Newly unlocked
 }
@@ -77,6 +92,7 @@ export function BadgesPanel() {
       }
       if (streak >= 3) unlockBadge('streak-3');
       if (streak >= 7) unlockBadge('streak-7');
+      if (streak >= 30) unlockBadge('streak-30');
     } catch {}
 
     const unlocked = loadUnlockedBadges();

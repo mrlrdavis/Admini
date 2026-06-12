@@ -79,6 +79,10 @@ function createTaskServiceAdapter(
         saveSubtasks(data.id, task.subtasks);
       }
 
+      // Award badges
+      unlockBadge('first-task');
+      if (task.assignee) unlockBadge('first-assign');
+
       return {
         ...task,
         id: data.id,
@@ -278,6 +282,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       if (completedCount >= 5) unlockBadge('five-tasks');
       if (completedCount >= 10) unlockBadge('ten-tasks');
       if (completedCount >= 25) unlockBadge('twenty-five');
+      if (completedCount >= 50) unlockBadge('fifty-tasks');
       showToast('Task completed');
     }
 

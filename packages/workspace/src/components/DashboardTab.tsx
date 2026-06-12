@@ -24,7 +24,7 @@ import {
 import { getLocalEvents } from '../services/localEventService';
 import { mergeEvents } from '../services/calendarMerge';
 import { buildActivityFeed } from '../services/activityFeed';
-// BadgesSection and BadgesPanel removed - replaced with compact achievement indicator
+import { BADGE_DEFINITIONS } from './BadgesPanel';
 
 // Re-export sortByUrgency for testing and backward compatibility
 export { sortByUrgency } from '../services/dashboardService';
@@ -78,7 +78,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [dashCalMonth, setDashCalMonth] = useState(new Date());
   const [unlockedCount, setUnlockedCount] = useState(0);
-  const totalBadges = 9; // total badge count
+  const totalBadges = BADGE_DEFINITIONS.length; // total badge count
 
   // -------------------------------------------------------------------------
   // Data fetching
@@ -367,7 +367,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             <ul className="dashboard-tab__feed-list">
               {activityFeedItems.map(ev => (
                 <li key={ev.id} className="dashboard-tab__feed-item">
-                  <span className={"dashboard-tab__feed-icon " + (ev.entityType==='capture'?"dashboard-tab__feed-icon--capture-voice":ev.entityType==='observation'?"dashboard-tab__feed-icon--observation":ev.action==='create'||ev.action==='created'?"dashboard-tab__feed-icon--task-create":"dashboard-tab__feed-icon--task-complete")}>{ev.entityType==='capture'?'\uD83C\uDFA4':ev.entityType==='observation'?'\uD83D\uDC41':'\u2713'}</span>
+                  {(() => { const t = ev.entityType; const a = ev.action; let cls = 'dashboard-tab__feed-icon--default'; let icon = '•'; if (t === 'capture') { cls = 'dashboard-tab__feed-icon--capture-voice'; icon = '🎤'; } else if (t === 'tap_capture') { cls = 'dashboard-tab__feed-icon--capture-tap'; icon = '👆'; } else if (t === 'observation') { cls = 'dashboard-tab__feed-icon--observation'; icon = '👁'; } else if (t === 'note' || t === 'meeting_note') { cls = 'dashboard-tab__feed-icon--note'; icon = '📝'; } else if (t === 'achievement' || t === 'badge') { cls = 'dashboard-tab__feed-icon--achievement'; icon = '🏆'; } else if (t === 'task') { if (a === 'create' || a === 'created') { cls = 'dashboard-tab__feed-icon--task-create'; icon = '➕'; } else if (a === 'complete' || a === 'completed') { cls = 'dashboard-tab__feed-icon--task-complete'; icon = '✓'; } else { cls = 'dashboard-tab__feed-icon--task-create'; icon = '✎'; } } return <span className={'dashboard-tab__feed-icon ' + cls}>{icon}</span>; })()}
                   <div className="dashboard-tab__feed-body">
                     <span className="dashboard-tab__feed-title">{(() => { const t = tasks.find(tk => tk.id === ev.entityId); if (t) return (ev.action === 'create' || ev.action === 'created' ? '' : 'Completed: ') + t.title; if (ev.entityType === 'capture') return 'Voice capture: ' + ev.entityId.substring(0,20); return formatActivityAction(ev); })()}</span>
                     <span className="dashboard-tab__feed-time">{(() => { const diff = Date.now() - new Date(ev.createdAt).getTime(); const mins = Math.floor(diff/60000); if (mins < 60) return mins + ' minutes ago'; const hrs = Math.floor(mins/60); if (hrs < 24) return hrs + ' hours ago'; return new Date(ev.createdAt).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}); })()}</span>
@@ -378,7 +378,52 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
         </div>
       </div>
-      {showAchievements && <div onClick={()=>setShowAchievements(false)} className="dashboard-tab__achievements-overlay"><div onClick={e=>e.stopPropagation()} className="dashboard-tab__achievements-modal"><div className="dashboard-tab__achievements-header"><div><h2 className="dashboard-tab__achievements-title">Achievements</h2><p className="dashboard-tab__achievements-sub">Level {Math.floor(unlockedCount/2)+1} - {unlockedCount} of {totalBadges} earned</p></div><button type="button" onClick={()=>setShowAchievements(false)} className="dashboard-tab__achievements-close">&times;</button></div><div className="dashboard-tab__achievements-bar"><div className="dashboard-tab__achievements-fill" style={{width:(unlockedCount/totalBadges*100)+"%"}} /></div>{(()=>{const b=JSON.parse(localStorage.getItem("admini_badges")||"{}");const defs=[{id:"first-capture",icon:"\uD83C\uDFA4",label:"First Capture",desc:"Record your first voice or tap capture"},{id:"first-task",icon:"\u2705",label:"Task Master",desc:"Create your first task"},{id:"five-tasks",icon:"\uD83C\uDF1F",label:"Getting Going",desc:"Complete 5 tasks"},{id:"ten-tasks",icon:"\uD83D\uDD25",label:"On Fire",desc:"Complete 10 tasks"},{id:"first-observation",icon:"\uD83D\uDC41",label:"Observer",desc:"Complete 10 classroom observations"},{id:"streak-3",icon:"\u26A1",label:"Capture Streak",desc:"Use voice capture 7 days in a row"},{id:"streak-7",icon:"\uD83D\uDCAA",label:"Delegator",desc:"Assign 5 tasks to team members"},{id:"first-note",icon:"\uD83D\uDCC5",label:"Calendar Pro",desc:"Keep your schedule updated for 2 weeks"},{id:"twenty-five",icon:"\u2B50",label:"Peak Admin",desc:"Earn all other achievements"}];const earned=defs.filter(d=>b[d.id]);const locked=defs.filter(d=>!b[d.id]);return(<>{earned.length>0&&<div style={{marginBottom:20}}><h3 style={{fontSize:"0.7rem",fontWeight:700,letterSpacing:"0.08em",color:"#636E72",margin:"0 0 10px"}}>EARNED</h3>{earned.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,marginBottom:8,background:"#FDFCF5",border:"1px solid #F0E9D0"}}><span style={{fontSize:"1.5rem"}}>{d.icon}</span><div style={{flex:1}}><strong>{d.label}</strong><br/><span style={{fontSize:"0.75rem",color:"#636E72"}}>{d.desc}</span></div><span style={{fontSize:"0.7rem",color:"#E6A817",fontWeight:600}}>Earned {new Date(b[d.id]).toLocaleDateString()}</span></div>)}</div>}{locked.length>0&&<div><h3 style={{fontSize:"0.7rem",fontWeight:700,letterSpacing:"0.08em",color:"#636E72",margin:"0 0 10px"}}>LOCKED</h3>{locked.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,marginBottom:8,background:"#F8F8F6",border:"1px solid #EEEDEA",opacity:0.7}}><span style={{fontSize:"1.5rem"}}>{d.icon}</span><div style={{flex:1}}><strong>{d.label}</strong><br/><span style={{fontSize:"0.75rem",color:"#636E72"}}>{d.desc}</span></div></div>)}</div>}</>);})()}</div></div>}
+      {showAchievements && (
+        <div className="dashboard-tab__achievements-overlay" onClick={() => setShowAchievements(false)}>
+          <div className="dashboard-tab__achievements-modal" onClick={e => e.stopPropagation()}>
+            <div className="dashboard-tab__achievements-header">
+              <div>
+                <h2 className="dashboard-tab__achievements-title">Achievements</h2>
+                <p className="dashboard-tab__achievements-sub">Level {Math.floor(unlockedCount / 2) + 1} — {unlockedCount} of {totalBadges} earned</p>
+              </div>
+              <button type="button" className="dashboard-tab__achievements-close" onClick={() => setShowAchievements(false)}>×</button>
+            </div>
+            <div className="dashboard-tab__achievements-bar"><div className="dashboard-tab__achievements-fill" style={{ width: (unlockedCount / totalBadges * 100) + '%' }} /></div>
+            {(() => {
+              const earnedMap = JSON.parse(localStorage.getItem('admini_badges') || '{}') || {};
+              const earned = BADGE_DEFINITIONS.filter(d => earnedMap[d.id]);
+              const locked = BADGE_DEFINITIONS.filter(d => !earnedMap[d.id]);
+              return (
+                <>
+                  {earned.length > 0 && (
+                    <div>
+                      <h3 className="dashboard-tab__achievements-section-title">Earned</h3>
+                      {earned.map(d => (
+                        <div key={d.id} className="dashboard-tab__achievement-row dashboard-tab__achievement-row--earned">
+                          <span className="dashboard-tab__achievement-badge-icon">{d.emoji}</span>
+                          <div className="dashboard-tab__achievement-info"><strong>{d.label}</strong><span>{d.description}</span></div>
+                          <span className="dashboard-tab__achievement-date">Earned {new Date(earnedMap[d.id]).toLocaleDateString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {locked.length > 0 && (
+                    <div>
+                      <h3 className="dashboard-tab__achievements-section-title">Locked</h3>
+                      {locked.map(d => (
+                        <div key={d.id} className="dashboard-tab__achievement-row dashboard-tab__achievement-row--locked">
+                          <span className="dashboard-tab__achievement-badge-icon">{d.emoji}</span>
+                          <div className="dashboard-tab__achievement-info"><strong>{d.label}</strong><span>{d.description}</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
