@@ -58,7 +58,8 @@ export interface DashboardTask {
   dueAt?: string;
   createdAt: string;
   updatedAt: string;
-  assignedTo?: string;
+  assignedTo?: string;
+  category?: string;
 }
 
 export interface DashboardKPIs {

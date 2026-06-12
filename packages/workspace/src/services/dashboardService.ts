@@ -18,6 +18,7 @@ type DbTask = {
   created_at: string;
   updated_at: string;
   assigned_to: string | null;
+  category?: string | null;
 };
 
 /** Raw row shape returned by the sync_events table (activity feed source). */
@@ -71,6 +72,7 @@ export function mapTask(row: DbTask): DashboardTask {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     assignedTo: row.assigned_to ?? undefined,
+    category: row.category ?? undefined,
   };
 }
 
@@ -136,15 +138,24 @@ export function sortByUrgency(a: DashboardTask, b: DashboardTask): number {
 export async function getTasks(): Promise<DashboardTask[]> {
   const client = getClient();
 
+  const baseCols = 'id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at';
   try {
-    const { data, error } = await client
+    // Try with category; if the column is missing (migration not applied), retry without it.
+    let { data, error } = await client
       .from('tasks')
-      .select(
-        'id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at',
-      )
+      .select(baseCols + ', category')
       .neq('status', 'archived')
       .order('created_at', { ascending: false })
       .returns<DbTask[]>();
+
+    if (error && /category/i.test(error.message || '')) {
+      ({ data, error } = await client
+        .from('tasks')
+        .select(baseCols)
+        .neq('status', 'archived')
+        .order('created_at', { ascending: false })
+        .returns<DbTask[]>());
+    }
 
     if (error) {
       throw new DashboardServiceError(error.message, error.code);

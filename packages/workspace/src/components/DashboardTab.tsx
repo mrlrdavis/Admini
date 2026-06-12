@@ -63,6 +63,21 @@ const parseLocalDate = parseLocalDateShared;
 // Local alias for use in this file:
 const formatActivityAction = formatActivityActionShared;
 
+/** Maps a category label to its pill CSS modifier (data-driven, lowercased). */
+function categoryClass(category?: string): string {
+  if (!category) return 'dashboard-tab__category-pill--default';
+  const key = category.toLowerCase();
+  const known = ['compliance','students','academic','hr','finance','comms','operations'];
+  return known.includes(key) ? 'dashboard-tab__category-pill--' + key : 'dashboard-tab__category-pill--default';
+}
+
+/** Computes days since a task was last updated (live, never hardcoded). */
+function computeStaleDays(updatedAt?: string): number {
+  if (!updatedAt) return 0;
+  const diff = Date.now() - new Date(updatedAt).getTime();
+  return Math.max(0, Math.floor(diff / 86400000));
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -300,8 +315,11 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
               <ul className="dashboard-tab__task-list">
                 {highPriorityTasks.slice(0, 5).map(task => (
                   <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
-                    <span>{task.title}</span>
-                    <span className="dashboard-tab__task-due">{task.dueAt && parseLocalDate(task.dueAt).toDateString() === todayStr ? 'Today' : task.dueAt ? parseLocalDate(task.dueAt).toLocaleDateString(undefined, {month:'short',day:'numeric'}) : ''}</span>
+                    <div className="dashboard-tab__task-left">
+                      <span className="dashboard-tab__task-title">{task.title}</span>
+                      {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                    </div>
+                    <span className={'dashboard-tab__task-due' + (task.dueAt && parseLocalDate(task.dueAt).toDateString() === todayStr ? ' dashboard-tab__task-due--today' : '')}>{task.dueAt && parseLocalDate(task.dueAt).toDateString() === todayStr ? 'Today' : task.dueAt ? parseLocalDate(task.dueAt).toLocaleDateString(undefined, {month:'short',day:'numeric'}) : ''}</span>
                   </li>
                 ))}
               </ul>
@@ -314,7 +332,10 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
               <ul className="dashboard-tab__task-list">
                 {dueTodayTasks.map(task => (
                   <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
-                    <span>{task.title}</span>
+                    <div className="dashboard-tab__task-left">
+                      <span className="dashboard-tab__task-title">{task.title}</span>
+                      {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                    </div>
                     <span className="dashboard-tab__task-due">{task.dueAt ? parseLocalDate(task.dueAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : ''}</span>
                   </li>
                 ))}
@@ -328,7 +349,10 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
               <ul className="dashboard-tab__task-list">
                 {comingDueTasks.slice(0, 5).map(task => (
                   <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
-                    <span>{task.title}</span>
+                    <div className="dashboard-tab__task-left">
+                      <span className="dashboard-tab__task-title">{task.title}</span>
+                      {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                    </div>
                     <span className="dashboard-tab__task-due">{parseLocalDate(task.dueAt!).toLocaleDateString(undefined, {month:'short',day:'numeric'})}</span>
                   </li>
                 ))}
@@ -342,8 +366,14 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
               <ul className="dashboard-tab__task-list">
                 {blockedTasks.slice(0, 5).map(task => (
                   <li key={task.id} className="dashboard-tab__task-item dashboard-tab__task-item--blocked" onClick={() => onTabChange?.('tasks')}>
-                    <span>{task.title}</span>
-                    <span className="dashboard-tab__block-reason">{task.description || 'Blocked'}</span>
+                    <div className="dashboard-tab__task-left">
+                      <span className="dashboard-tab__task-title">{task.title}</span>
+                      <div className="dashboard-tab__task-meta">
+                        {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                        <span className="dashboard-tab__block-reason">⚠ {task.description || 'Blocked'}</span>
+                      </div>
+                    </div>
+                    <span className="dashboard-tab__stale-badge">{computeStaleDays(task.updatedAt)}d stale</span>
                   </li>
                 ))}
               </ul>
