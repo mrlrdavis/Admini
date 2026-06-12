@@ -316,3 +316,467 @@
   outline: 2px solid #6B8E6B;
   outline-offset: 1px;
 }
+/* ==========================================================================
+   MOBILE RESPONSIVE STYLES
+   ========================================================================== */
+
+/* Tablet breakpoint (max-width: 768px) */
+@media (max-width: 768px) {
+  .dashboard-tab__topbar {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .dashboard-tab__greeting-text {
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .dashboard-tab__level-badge {
+    margin-left: 0;
+  }
+  
+  .dashboard-tab__columns {
+    padding: 16px;
+    gap: 16px;
+    height: auto;
+  }
+  
+  .dashboard-tab__left,
+  .dashboard-tab__right {
+    height: auto;
+    overflow: visible;
+  }
+  
+  .dashboard-tab__quick-actions-widget {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+  
+  .dashboard-tab__qa-widget-btn {
+    padding: 10px 8px;
+  }
+  
+  .dashboard-tab__qa-widget-icon {
+    font-size: 1.25rem;
+  }
+  
+  .dashboard-tab__schedule-hdr {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .dashboard-tab__schedule-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* Mobile breakpoint (max-width: 600px) */
+@media (max-width: 600px) {
+  .dashboard-tab--two-col {
+    padding: 0;
+  }
+  
+  .dashboard-tab__topbar {
+    padding: 12px 16px;
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .dashboard-tab__greeting-text {
+    font-size: 0.9375rem;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .dashboard-tab__level-badge {
+    margin-left: 0;
+    flex-direction: row;
+    gap: 8px;
+    padding: 6px 12px;
+  }
+  
+  .dashboard-tab__level-icon {
+    font-size: 1rem;
+  }
+  
+  .dashboard-tab__level-num {
+    font-size: 0.8125rem;
+  }
+  
+  .dashboard-tab__level-sub {
+    font-size: 0.625rem;
+  }
+  
+  .dashboard-tab__columns {
+    padding: 12px;
+    gap: 12px;
+    height: auto;
+  }
+  
+  .dashboard-tab__left,
+  .dashboard-tab__right {
+    gap: 12px;
+    height: auto;
+    overflow: visible;
+  }
+  
+  /* Widget toggle */
+  .dashboard-tab__widget-toggle {
+    justify-content: center;
+  }
+  
+  .dashboard-tab__toggle-btn {
+    padding: 8px 20px;
+    font-size: 0.8125rem;
+  }
+  
+  /* Section cards */
+  .dashboard-tab__section {
+    border-radius: 10px;
+  }
+  
+  .dashboard-tab__section-header {
+    padding: 10px 12px;
+  }
+  
+  .dashboard-tab__section-icon {
+    font-size: 0.875rem;
+  }
+  
+  .dashboard-tab__section-title {
+    font-size: 0.6875rem;
+  }
+  
+  .dashboard-tab__section-count {
+    font-size: 0.625rem;
+    padding: 2px 6px;
+  }
+  
+  /* Task items - larger touch targets */
+  .dashboard-tab__task-item {
+    padding: 12px 14px;
+    min-height: 48px;
+  }
+  
+  .dashboard-tab__task-title {
+    font-size: 0.875rem;
+  }
+  
+  .dashboard-tab__task-due {
+    font-size: 0.75rem;
+  }
+  
+  .dashboard-tab__category-pill {
+    font-size: 0.625rem;
+    padding: 2px 8px;
+  }
+  
+  /* Quick Actions + Calendar row - stack vertically */
+  .dashboard-tab__qa-cal-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  /* Quick Actions Widget */
+  .dashboard-tab__card--quick-actions {
+    order: -1;
+  }
+  
+  .dashboard-tab__quick-actions-widget {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+  
+  .dashboard-tab__qa-widget-btn {
+    padding: 12px 8px;
+    min-height: 70px;
+  }
+  
+  .dashboard-tab__qa-widget-icon {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-tab__qa-widget-label {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+  }
+  
+  /* Mini Calendar */
+  .dashboard-tab__card--calendar {
+    padding: 12px;
+  }
+  
+  .dashboard-tab__mini-cal-header {
+    margin-bottom: 10px;
+  }
+  
+  .dashboard-tab__mini-cal-month {
+    font-size: 0.8125rem;
+  }
+  
+  .dashboard-tab__mini-cal-nav {
+    padding: 6px 10px;
+    font-size: 1.25rem;
+  }
+  
+  .dashboard-tab__mini-cal-grid {
+    gap: 1px;
+  }
+  
+  .dashboard-tab__mini-cal-dow {
+    font-size: 0.625rem;
+    padding: 4px 2px;
+  }
+  
+  .dashboard-tab__mini-cal-date {
+    font-size: 0.75rem;
+    padding: 4px 2px;
+    min-height: 32px;
+  }
+  
+  /* Schedule + Activity row - stack vertically */
+  .dashboard-tab__schedule-activity-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  /* Schedule card */
+  .dashboard-tab__card--schedule {
+    padding: 12px;
+    max-height: none;
+  }
+  
+  .dashboard-tab__schedule-hdr {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .dashboard-tab__schedule-title {
+    font-size: 0.8125rem;
+    flex-wrap: wrap;
+  }
+  
+  .dashboard-tab__schedule-date {
+    font-size: 0.75rem;
+  }
+  
+  .dashboard-tab__schedule-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .dashboard-tab__sync-btn {
+    padding: 6px 12px;
+    font-size: 0.6875rem;
+  }
+  
+  .dashboard-tab__edit-link {
+    font-size: 0.75rem;
+  }
+  
+  .dashboard-tab__sched-period {
+    font-size: 0.75rem;
+    gap: 6px;
+  }
+  
+  .dashboard-tab__sched-chip {
+    font-size: 0.625rem;
+    padding: 4px 8px;
+  }
+  
+  .dashboard-tab__sched-event {
+    padding: 8px 0 8px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .dashboard-tab__sched-check {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Activity feed */
+  .dashboard-tab__card--activity {
+    padding: 12px;
+  }
+  
+  .dashboard-tab__feed-header {
+    font-size: 0.8125rem;
+    margin-bottom: 10px;
+  }
+  
+  .dashboard-tab__feed-list {
+    gap: 12px;
+    max-height: 300px;
+  }
+  
+  .dashboard-tab__feed-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  
+  .dashboard-tab__feed-title {
+    font-size: 0.75rem;
+  }
+  
+  .dashboard-tab__feed-time {
+    font-size: 0.625rem;
+  }
+  
+  /* Achievements modal */
+  .dashboard-tab__achievements-overlay {
+    padding-top: 20px;
+    align-items: flex-start;
+  }
+  
+  .dashboard-tab__achievements-modal {
+    width: 95vw;
+    max-height: 90vh;
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .dashboard-tab__achievements-title {
+    font-size: 1.125rem;
+  }
+  
+  .dashboard-tab__achievement-row {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .dashboard-tab__achievement-badge-icon {
+    font-size: 1.25rem;
+    width: 36px;
+    height: 36px;
+  }
+  
+  /* Empty state */
+  .dashboard-tab__empty {
+    font-size: 0.75rem;
+    padding: 8px 12px;
+  }
+  
+  /* Error state */
+  .dashboard-tab__error-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 14px;
+  }
+  
+  .dashboard-tab__retry-btn {
+    width: 100%;
+    padding: 10px 16px;
+  }
+}
+
+/* Small mobile breakpoint (max-width: 400px) */
+@media (max-width: 400px) {
+  .dashboard-tab__topbar {
+    padding: 10px 12px;
+  }
+  
+  .dashboard-tab__greeting-text {
+    font-size: 0.875rem;
+  }
+  
+  .dashboard-tab__columns {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .dashboard-tab__quick-actions-widget {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 8px;
+  }
+  
+  .dashboard-tab__qa-widget-btn {
+    padding: 10px 6px;
+    min-height: 65px;
+  }
+  
+  .dashboard-tab__qa-widget-icon {
+    font-size: 1.25rem;
+  }
+  
+  .dashboard-tab__qa-widget-label {
+    font-size: 0.625rem;
+  }
+  
+  .dashboard-tab__mini-cal-date {
+    font-size: 0.6875rem;
+    min-height: 28px;
+  }
+  
+  .dashboard-tab__task-item {
+    padding: 10px 12px;
+  }
+  
+  .dashboard-tab__task-title {
+    font-size: 0.8125rem;
+  }
+}
+
+/* ==========================================================================
+   PENCILS DOWN PRODUCT BADGE
+   ========================================================================== */
+
+.pencils-down-badge {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #E8E5DE;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 0.75rem;
+  color: #636E72;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.pencils-down-badge__icon {
+  font-size: 1rem;
+}
+
+.pencils-down-badge__text {
+  font-weight: 600;
+  color: #4A6B4A;
+}
+
+.pencils-down-badge__link {
+  color: #6B8E6B;
+  text-decoration: none;
+}
+
+.pencils-down-badge__link:hover {
+  text-decoration: underline;
+}
+
+/* Mobile: center the badge */
+@media (max-width: 600px) {
+  .pencils-down-badge {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12px;
+  }
+}
