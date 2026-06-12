@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Functional Integrity Check",
+  "description": "When a UI file (component, view, or logic file) is edited, remind the agent to enforce functional integrity: no hardcoded business data, fully data-driven components rendering from props/state, dynamic list rendering, business logic kept out of UI, computed metrics, functional navigation, structural responsive behavior, and proper loading/empty/error handling — so visual parity is never achieved by bypassing architecture.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.tsx",
+      "*.jsx",
+      "*.ts",
+      "*.js",
+      "*.vue",
+      "*.svelte"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Functional Integrity Check — the Figma defines what the app should look like, not how it should work. Prioritize correctness, reusability, and maintainability. Visual fidelity must NEVER be achieved by hardcoding values that should come from application state, APIs, or business logic.\n\nVerify the edited file against the following before considering the work complete:\n\n1. No hardcoded business data: User/org names, task counts, calendar events, due dates, achievement levels, notification counts, dashboard statistics, profile info, role names, email addresses, AI suggestions, and meeting summaries must load from state or service layers — never embedded literals.\n\n2. Components must be data-driven: Render from props/state, not literals. Prefer <TaskCard title={task.title} /> over <TaskCard title=\"Submit Budget\" />. The UI stays identical while supporting any valid data.\n\n3. No layout by hardcoded positioning: Avoid fixed pixel offsets, inappropriate absolute positioning, manually aligned coordinates, spacer divs, or empty placeholder elements. Layout must come from proper flex/grid container relationships.\n\n4. Lists render dynamically: Iterate over data with mapped collections. Never manually create N static cards, notifications, widgets, or roster entries.\n\n5. No placeholder production logic: Remove \"John Doe\", \"Task 1\", \"Lorem Ipsum\", fake statistics, and random percentages from production code.\n\n6. State is the source of truth: Selected tab, active organization, expanded sections, completion progress, filters, search queries, and notification badges derive from application state. No duplicate or disconnected state.\n\n7. Business logic out of UI: Priority calculation, suggested-task generation, achievement logic, permission checks, and organization access belong in dedicated services or hooks — components display data, they don't compute domain rules.\n\n8. Dashboard metrics computed: Overdue/due-today/upcoming/completed/captures/observations counts derive from live data, never hardcoded to match Figma.\n\n9. Navigation must be functional: Buttons navigate correctly, update state, respect permissions, and preserve routing. Visual appearance alone is insufficient.\n\n10. Responsive behavior is structural: Use shared components, responsive containers, adaptive grids, and breakpoint-based styling — not separate hardcoded desktop/mobile layouts.\n\n11. AI/suggested content: Load asynchronously and handle empty, loading, and failure states; allow editing before persistence. Never embed static suggestions.\n\nAcceptance: A feature is complete only if it visually matches Figma AND renders entirely from dynamic data, survives different/empty/large datasets, updates correctly on state changes, and requires no hardcoded business values. Confirm components render from mocked API responses and handle loading/empty/error states. If achieving visual parity requires hardcoding business data or bypassing architecture, reject and redesign the implementation."
+  }
+}

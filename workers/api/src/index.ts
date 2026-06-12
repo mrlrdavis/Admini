@@ -9,6 +9,7 @@ type WorkerEnv = {
   SUPABASE_SERVICE_ROLE_KEY?: string;
   RESEND_API_KEY?: string;
   FROM_EMAIL?: string;
+  OPENAI_API_KEY?: string;
 };
 
 type WorkerContext = ExecutionContext;
@@ -48,6 +49,16 @@ export default {
         const body = await readJson<{ redactedText: string; tokenCount: number }>(request);
         const task = { id: createClientId('task'), title: body.redactedText.slice(0, 72) || 'Review captured note', description: 'Generated from redacted capture text.', priority: body.tokenCount > 0 ? 'high' : 'normal', status: 'open', createdAt: nowIso(), updatedAt: nowIso() };
         return json({ ok: true, data: { tasks: [task] } });
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/ai/generate-task') {
+        const body = await readJson<{ content: string; source?: string }>(request);
+        const content = (body.content || '').trim();
+        if (!content) {
+          return json({ ok: false, error: { code: 'empty_content', message: 'Content is required' } }, 400);
+        }
+        const suggestion = await generateTaskSuggestion(content, body.source || 'capture', env);
+        return Response.json(suggestion, { status: 200, headers: corsHeaders });
       }
 
       if (request.method === 'GET' && url.pathname === '/api/integrations/status') {
@@ -121,6 +132,53 @@ export default {
     }
   }
 };
+
+async function generateTaskSuggestion(content: string, source: string, env: WorkerEnv) {
+  // Try OpenAI if a key is configured
+  if (env.OPENAI_API_KEY) {
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + env.OPENAI_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: 'You are an assistant that converts school-admin notes, captures, and observations into a single actionable task. Respond ONLY with JSON: {"title":string,"description":string,"priority":"low"|"normal"|"high"|"urgent"}.' },
+            { role: 'user', content: 'Source: ' + source + '\n\nContent:\n' + content }
+          ],
+          temperature: 0.3,
+          response_format: { type: 'json_object' }
+        })
+      });
+      if (res.ok) {
+        const data: any = await res.json();
+        const raw = data.choices?.[0]?.message?.content;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed.title === 'string' && parsed.title.trim()) {
+            return { title: parsed.title.trim(), description: parsed.description || content, priority: parsed.priority || 'normal', source, confidence: 0.9 };
+          }
+        }
+      }
+    } catch { /* fall through to heuristic */ }
+  }
+  // Heuristic fallback (no LLM key required)
+  return heuristicTask(content, source);
+}
+
+function heuristicTask(content: string, source: string) {
+  const firstSentence = (content.split(/[.!?\n]/)[0] || content).trim();
+  let title = firstSentence.length > 72 ? firstSentence.slice(0, 69) + '...' : firstSentence;
+  if (!title) title = 'Follow up on ' + source;
+  const lower = content.toLowerCase();
+  let priority = 'normal';
+  if (/urgent|asap|immediately|emergency|critical/.test(lower)) priority = 'urgent';
+  else if (/important|high priority|deadline|due|overdue/.test(lower)) priority = 'high';
+  else if (/whenever|low priority|someday|eventually/.test(lower)) priority = 'low';
+  // Capitalize as an action item
+  const actionTitle = /^(call|email|review|schedule|follow|send|prepare|update|submit|complete|check|meet|contact)/i.test(title) ? title : 'Follow up: ' + title;
+  return { title: actionTitle, description: content, priority, source, confidence: 0.5 };
+}
 
 function mockConnection(provider: IntegrationProvider) {
   return { id: `integration_${provider}`, organizationId: 'org_from_auth', provider, status: 'mock' as const, createdAt: nowIso(), updatedAt: nowIso() };
