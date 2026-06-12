@@ -3,14 +3,17 @@
    -------------------------------------------------------------------------- */
 
 .desktop-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 180px;
-  min-width: 180px;
   height: 100dvh;
   background: #fff;
   border-right: 1px solid #E8E5DE;
   display: flex;
   flex-direction: column;
   padding: 20px 0;
+  z-index: 100;
 }
 
 .desktop-sidebar__brand {
