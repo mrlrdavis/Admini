@@ -503,6 +503,22 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
             ))}
             <button type="button" className="tasks-tab__subtask-add" onClick={() => setNewSubtasks(s => [...s, {title:'',assignee:'',dueAt:''}])}>+ Add subtask</button>
           </div>
+          <div className="tasks-tab__file-upload">
+            <label className="tasks-tab__file-upload-btn">
+              📎 Attach Files
+              <input type="file" multiple style={{display:'none'}} onChange={(e) => { if (e.target.files) setNewFiles(prev => [...prev, ...Array.from(e.target.files!)]); }} />
+            </label>
+            {newFiles.length > 0 && (
+              <ul className="tasks-tab__file-list">
+                {newFiles.map((f, i) => (
+                  <li key={i} className="tasks-tab__file-item">
+                    <span>{f.name}</span>
+                    <button type="button" onClick={() => setNewFiles(prev => prev.filter((_, j) => j !== i))} aria-label={'Remove ' + f.name}>×</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="tasks-tab__form-actions">
             <button type="button" className="tasks-tab__cancel-btn" onClick={() => setShowAddForm(false)}>Cancel</button>
             <button type="button" className="tasks-tab__submit-btn" onClick={handleCreateTask} disabled={!newTitle.trim()}>Create Task</button>
