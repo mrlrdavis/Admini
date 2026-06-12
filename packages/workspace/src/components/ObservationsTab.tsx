@@ -277,7 +277,7 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
             {roster.length > 0 ? roster.filter(r => r.type === 'student').length + ' students, ' + roster.filter(r => r.type === 'staff').length + ' staff' : 'No roster available'}
           </span>
         </div>
-        {roster.length === 0 && <p className="observations-tab__roster-hint">Upload your roster from the Admin tab or connect Google Classroom to populate students and staff here.</p>}
+        {roster.length === 0 && <p className="observations-tab__roster-hint">Upload your roster from School settings or connect Google Classroom to populate students and staff here.</p>}
       </section>
 
       {/* Observee Type Toggle */}
