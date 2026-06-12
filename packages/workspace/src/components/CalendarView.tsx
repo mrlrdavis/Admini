@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 // ---------------------------------------------------------------------------
 // CalendarView - Monthly grid with tasks and events overlaid
 // ---------------------------------------------------------------------------
@@ -18,6 +19,7 @@ export interface CalendarViewProps {
   mergedEvents: MergedEvent[];
   tasks: DashboardTask[];
   onAddEvent: (date: string, time?: string) => void;
+  overdueSlot?: ReactNode;
 }
 
 // ---------------------------------------------------------------------------
@@ -51,7 +53,7 @@ function extractDatePart(isoStr: string): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export function CalendarView({ mergedEvents, tasks, onAddEvent }: CalendarViewProps) {
+export function CalendarView({ mergedEvents, tasks, onAddEvent, overdueSlot }: CalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
 
   const year = currentMonth.getFullYear();
@@ -122,6 +124,7 @@ export function CalendarView({ mergedEvents, tasks, onAddEvent }: CalendarViewPr
             Priority
           </li>
         </ul>
+        {overdueSlot && <div className="calendar-view__legend-overdue">{overdueSlot}</div>}
       </aside>
 
       {/* Main calendar area */}

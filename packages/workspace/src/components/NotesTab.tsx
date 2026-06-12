@@ -5,7 +5,8 @@
 import { useState, useEffect } from 'react';
 import { listMeetingNotes, createMeetingNote, updateMeetingNote, deleteMeetingNote, type MeetingNote } from '../services/meetingNotesService';
 import { showToast } from './Toast';
-import { generateTaskFromContent, generateTasksFromContent, isMultipleResult, AITaskServiceError } from '../services/aiTaskService';
+import { generateTasksFromContent, isMultipleResult, AITaskServiceError } from '../services/aiTaskService';
+import { getClient } from '../services/getClient';
 import type { AISuggestedTask } from '../services/aiTaskService';
 
 const MEETING_TYPES = [
@@ -36,6 +37,8 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
   const [formAttendees, setFormAttendees] = useState('');
   const [formContent, setFormContent] = useState('');
   const [saving, setSaving] = useState(false);
+  const [taskModal, setTaskModal] = useState<null | { tasks: { title: string; description: string; priority: string; assignee: string; selected: boolean }[] }>(null);
+  const [creatingTasks, setCreatingTasks] = useState(false);
 
   useEffect(() => {
     if (organizationId) {
@@ -103,6 +106,43 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
 
   if (loading) return <div className="notes-tab notes-tab--loading"><p>Loading notes...</p></div>;
 
+
+  async function openTaskModalFromNote(note: MeetingNote) {
+    showToast('Analyzing note for tasks...');
+    try {
+      const result = await generateTasksFromContent(note.body || '', 'note');
+      const list = isMultipleResult(result) ? result.tasks : [result];
+      setTaskModal({ tasks: list.map(t => ({ title: t.title, description: t.description || '', priority: t.priority || 'normal', assignee: '', selected: true })) });
+    } catch (err) {
+      const msg = err instanceof AITaskServiceError ? err.message : 'Could not analyze note';
+      // Fallback: open modal with a single manual task seeded from the note
+      setTaskModal({ tasks: [{ title: (note.body || note.title || '').slice(0, 80), description: note.body || '', priority: 'normal', assignee: '', selected: true }] });
+      showToast(msg + ' — review manually');
+    }
+  }
+
+  async function createSelectedTasks() {
+    if (!taskModal) return;
+    const selected = taskModal.tasks.filter(t => t.selected && t.title.trim());
+    if (selected.length === 0) { setTaskModal(null); return; }
+    setCreatingTasks(true);
+    try {
+      const client = getClient();
+      for (const t of selected) {
+        const payload: Record<string, unknown> = { title: t.title.trim(), description: t.description || null, priority: t.priority, status: 'open', assigned_to: t.assignee.trim() || null };
+        if (userId) payload.created_by = userId;
+        if (organizationId) payload.organization_id = organizationId;
+        await client.from('tasks').insert(payload);
+      }
+      showToast(selected.length + (selected.length === 1 ? ' task created' : ' tasks created'), { action: { label: 'View tasks', onClick: () => onTabChange?.('tasks') } });
+      setTaskModal(null);
+    } catch {
+      showToast('Failed to create tasks');
+    } finally {
+      setCreatingTasks(false);
+    }
+  }
+
   return (
     <div className="notes-tab">
       <header className="notes-tab__header">
@@ -163,31 +203,7 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
                   <p className="notes-tab__note-content">{note.body?.slice(0, 200)}{(note.body?.length || 0) > 200 ? '...' : ''}</p>
                   <div className="notes-tab__note-actions">
                     <button type="button" onClick={() => handleEdit(note)}>Edit</button>
-                    <button type="button" onClick={async () => {
-                      showToast("Analyzing note for tasks...");
-                      try {
-                        const result = await generateTasksFromContent(note.body || "", "note");
-                        if (isMultipleResult(result)) {
-                          const titles = result.tasks.map((t: AISuggestedTask) => t.title).join(", ");
-                          showToast(result.tasks.length + " tasks found: " + titles.substring(0, 80), {
-                            action: { label: "Create All (" + result.tasks.length + ")", onClick: () => {
-                              result.tasks.forEach((t: AISuggestedTask) => {
-                                showToast("Creating: " + t.title);
-                              });
-                              onTabChange?.("tasks");
-                            }}
-                          });
-                        } else {
-                          showToast("Suggested: " + result.title, { action: { label: "Create", onClick: () => onTabChange?.("tasks") } });
-                        }
-                      } catch (err) {
-                        if (err instanceof AITaskServiceError) {
-                          showToast(err.message, { action: { label: "Create manually", onClick: () => onTabChange?.("tasks") } });
-                        } else {
-                          showToast("Failed to generate suggestions");
-                        }
-                      }
-                    }}>Create Task from Note</button>
+                    <button type="button" onClick={() => openTaskModalFromNote(note)}>Create Task from Note</button>
                     <button type="button" onClick={() => handleDelete(note.id)}>Delete</button>
                   </div>
                   <span className="notes-tab__note-timestamp">Created {new Date(note.createdAt || '').toLocaleString()}</span>
@@ -201,6 +217,35 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
       {/* FAB */}
       {!showForm && (
         <button type="button" className="notes-tab__fab" onClick={() => { resetForm(); setShowForm(true); }} aria-label="New Note">+</button>
+      )}
+      {taskModal && (
+        <div className="notes-tab__modal-overlay" onClick={() => setTaskModal(null)}>
+          <div className="notes-tab__modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="notes-tab__modal-title">Review suggested tasks</h2>
+            <p className="notes-tab__modal-sub">{taskModal.tasks.length} found. Edit, deselect, or create.</p>
+            <div className="notes-tab__modal-list">
+              {taskModal.tasks.map((t, idx) => (
+                <div key={idx} className="notes-tab__modal-task">
+                  <input type="checkbox" checked={t.selected} onChange={(e) => setTaskModal(m => m && ({ tasks: m.tasks.map((x, i) => i === idx ? { ...x, selected: e.target.checked } : x) }))} />
+                  <div className="notes-tab__modal-fields">
+                    <input className="notes-tab__modal-input" value={t.title} placeholder="Task title" onChange={(e) => setTaskModal(m => m && ({ tasks: m.tasks.map((x, i) => i === idx ? { ...x, title: e.target.value } : x) }))} />
+                    <textarea className="notes-tab__modal-textarea" value={t.description} placeholder="Description" onChange={(e) => setTaskModal(m => m && ({ tasks: m.tasks.map((x, i) => i === idx ? { ...x, description: e.target.value } : x) }))} />
+                    <div className="notes-tab__modal-row">
+                      <select value={t.priority} onChange={(e) => setTaskModal(m => m && ({ tasks: m.tasks.map((x, i) => i === idx ? { ...x, priority: e.target.value } : x) }))}>
+                        <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option>
+                      </select>
+                      <input className="notes-tab__modal-input" value={t.assignee} placeholder="Assignee" onChange={(e) => setTaskModal(m => m && ({ tasks: m.tasks.map((x, i) => i === idx ? { ...x, assignee: e.target.value } : x) }))} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="notes-tab__modal-actions">
+              <button type="button" className="notes-tab__modal-cancel" onClick={() => setTaskModal(null)}>Cancel</button>
+              <button type="button" className="notes-tab__modal-create" onClick={createSelectedTasks} disabled={creatingTasks}>{creatingTasks ? 'Creating...' : 'Create tasks'}</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

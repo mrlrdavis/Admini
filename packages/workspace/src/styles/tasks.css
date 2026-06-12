@@ -193,21 +193,22 @@
 
 /* FAB */
 .tasks-tab__fab {
-  position: sticky;
+  position: fixed;
   bottom: 20px;
-  float: inline-end;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #6B8E6B;
+  color: #fff;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  border: none;
-  background: var(--ws-color-sage);
-  color: var(--ws-color-white);
-  box-shadow: var(--ws-shadow-elevated);
-  cursor: pointer;
-  transition:  var(--ws-transition-fast), box-shadow 0.15s ease;
 }
 
 .tasks-tab__fab:hover,
@@ -903,11 +904,7 @@
 }
 
 /* Calendar Layout with Legend */
-.tasks-tab__calendar-layout {
-  display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: var(--ws-space-md);
-}
+.tasks-tab__calendar-layout { display: block; width: 100%; }
 
 @media (max-width: 600px) {
   .tasks-tab__calendar-layout {
@@ -1181,3 +1178,6 @@
 }
 
 .tasks-tab__event-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.tasks-tab__form-row { display: flex; gap: 8px; }
+.tasks-tab__form-row .tasks-tab__add-input { flex: 1; }

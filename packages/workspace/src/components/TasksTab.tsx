@@ -150,6 +150,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState<'low'|'normal'|'high'|'urgent'>('normal');
   const [newDue, setNewDue] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newAssignee, setNewAssignee] = useState('');
+  const [newSubtasks, setNewSubtasks] = useState<string[]>([]);
 
   // Calendar event state
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
@@ -282,11 +285,12 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     if (!newTitle.trim()) return;
     try {
       await taskService.create({
-        id: '', title: newTitle.trim(), description: undefined, priority: newPriority,
-        status: 'open', dueAt: newDue || undefined, assignee: undefined,
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), subtasks: [],
+        id: '', title: newTitle.trim(), description: newDescription.trim() || undefined, priority: newPriority,
+        status: 'open', dueAt: newDue || undefined, assignee: newAssignee.trim() || undefined,
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+        subtasks: newSubtasks.filter(s => s.trim()).map(s => ({ id: crypto.randomUUID(), title: s.trim(), completed: false })),
       });
-      setNewTitle(''); setNewPriority('normal'); setNewDue(''); setShowAddForm(false);
+      setNewTitle(''); setNewPriority('normal'); setNewDue(''); setNewDescription(''); setNewAssignee(''); setNewSubtasks([]); setShowAddForm(false);
       await loadTaskList();
       showToast('Task created');
     } catch { showToast('Failed to create task'); }
@@ -429,19 +433,33 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         <h1 className="tasks-tab__title">Tasks</h1>
       </header>
       {/* Add Task */}
-      {showAddForm ? (
+      {showAddForm && (
         <div className="tasks-tab__add-form">
           <input className="tasks-tab__add-input" placeholder="Task title..." value={newTitle} onChange={(e) => setNewTitle(e.target.value)} autoFocus />
-          <div className="tasks-tab__form-actions">
+          <textarea className="tasks-tab__add-textarea" placeholder="Description (optional)" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} />
+          <div className="tasks-tab__form-row">
             <input type="date" className="tasks-tab__add-input" value={newDue} onChange={(e) => setNewDue(e.target.value)} />
             <select className="tasks-tab__priority-btn" value={newPriority} onChange={(e) => setNewPriority(e.target.value as any)}>
               <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option>
             </select>
-            <button type="button" className="tasks-tab__submit-btn" onClick={handleCreateTask} disabled={!newTitle.trim()}>Create</button>
+          </div>
+          <input className="tasks-tab__add-input" placeholder="Assignee (email or name)" value={newAssignee} onChange={(e) => setNewAssignee(e.target.value)} />
+          <div className="tasks-tab__subtasks-list">
+            {newSubtasks.map((st, i) => (
+              <div key={i} className="tasks-tab__subtask-row">
+                <input className="tasks-tab__subtask-input" placeholder="Subtask" value={st} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? e.target.value : x))} />
+                <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_, j) => j !== i))}>×</button>
+              </div>
+            ))}
+            <button type="button" className="tasks-tab__subtask-add" onClick={() => setNewSubtasks(s => [...s, ''])}>+ Add subtask</button>
+          </div>
+          <div className="tasks-tab__form-actions">
             <button type="button" className="tasks-tab__cancel-btn" onClick={() => setShowAddForm(false)}>Cancel</button>
+            <button type="button" className="tasks-tab__submit-btn" onClick={handleCreateTask} disabled={!newTitle.trim()}>Create Task</button>
           </div>
         </div>
-      ) : (
+      )}
+      {!showAddForm && (
         <button type="button" className="tasks-tab__fab" onClick={() => setShowAddForm(true)} aria-label="Create new task">+</button>
       )}
 
@@ -460,9 +478,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
             mergedEvents={mergedEvents}
             tasks={filteredTasks}
             onAddEvent={handleAddEvent}
+            overdueSlot={<OverdueList tasks={overdueTasks} />}
           />
-          {/* Overdue sidebar */}
-          <OverdueList tasks={overdueTasks} />
         </div>
       )}
 

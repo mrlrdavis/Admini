@@ -13,7 +13,7 @@
 /* Left legend */
 .calendar-view__legend {
   flex-shrink: 0;
-  width: 140px;
+  width: 200px;
   padding: var(--ws-space-md);
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #d4d0c8);
@@ -70,7 +70,7 @@
 }
 
 /* Main calendar */
-.calendar-view__main {
+.calendar-view__main { flex: 1; min-width: 0;
   flex: 1;
   min-width: 0;
 }
@@ -242,3 +242,6 @@
     min-height: 60px;
   }
 }
+
+.calendar-view__legend-overdue { margin-top: 16px; padding-top: 16px; border-top: 1px solid #E8E5DE; }
+.calendar-view__legend-overdue .overdue-list { padding: 0; background: none; border: none; box-shadow: none; }
