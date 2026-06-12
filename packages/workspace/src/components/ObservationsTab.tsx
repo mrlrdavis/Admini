@@ -86,30 +86,7 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
     localStorage.setItem('admini_observations_v2', JSON.stringify(obs));
   }
 
-  function handleRosterUpload(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const lines = text.split('\n').filter(l => l.trim());
-      const header = lines[0]?.toLowerCase() || '';
-      const hasType = header.includes('type') || header.includes('role');
-      
-      const entries = lines.slice(1).map(l => {
-        const cols = l.split(',').map(c => c.trim());
-        const entryName = cols[0] || '';
-        const type = hasType && cols[1]?.toLowerCase().includes('staff') ? 'staff' as const : 'student' as const;
-        const grade = cols[2]?.trim() || undefined;
-        return { name: entryName, type, grade };
-      }).filter(e => e.name);
 
-      setRoster(entries);
-      localStorage.setItem('admini_roster_full', JSON.stringify(entries));
-      // Also save simple roster for backward compat
-      localStorage.setItem('admini_roster', JSON.stringify(entries.filter(e => e.type === 'student').map(e => e.name)));
-      showToast('Roster uploaded: ' + entries.length + ' entries (' + entries.filter(e => e.type === 'staff').length + ' staff, ' + entries.filter(e => e.type === 'student').length + ' students)');
-    };
-    reader.readAsText(file);
-  }
 
   function resetForm() {
     setName('');
@@ -293,18 +270,14 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
         <p className="observations-tab__subtitle">Classroom and staff observations</p>
       </header>
 
-      {/* Roster Upload */}
+      {/* Roster (managed in Admin tab) */}
       <section className="observations-tab__roster">
         <div className="observations-tab__roster-header">
           <span className="observations-tab__roster-count">
-            {roster.length > 0 ? roster.filter(r => r.type === 'student').length + ' students, ' + roster.filter(r => r.type === 'staff').length + ' staff' : 'No roster uploaded'}
+            {roster.length > 0 ? roster.filter(r => r.type === 'student').length + ' students, ' + roster.filter(r => r.type === 'staff').length + ' staff' : 'No roster available'}
           </span>
-          <label className="observations-tab__upload-btn">
-            Upload Roster (CSV)
-            <input type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleRosterUpload(f); }} />
-          </label>
         </div>
-        <p className="observations-tab__roster-hint">CSV format: Name, Type (student/staff), Grade (optional)</p>
+        {roster.length === 0 && <p className="observations-tab__roster-hint">Upload your roster from the Admin tab or connect Google Classroom to populate students and staff here.</p>}
       </section>
 
       {/* Observee Type Toggle */}

@@ -20,6 +20,7 @@ import { getCalendarEvents } from '../services/googleIntegrationService';
 import { getClient } from '../services/getClient';
 import { showToast } from './Toast';
 import { unlockBadge } from './BadgesPanel';
+import { notifyAssignee } from '../services/notificationService';
 import { TaskFilterBar, type FilterType } from './TaskFilterBar';
 import { TaskCard } from './TaskCard';
 import { CalendarView } from './CalendarView';
@@ -81,7 +82,11 @@ function createTaskServiceAdapter(
 
       // Award badges
       unlockBadge('first-task');
-      if (task.assignee) unlockBadge('first-assign');
+      if (task.assignee) {
+        unlockBadge('first-assign');
+        // Best-effort assignee notification with real task title
+        notifyAssignee(data.id, task.assignee, 'created', task.title).catch(() => {});
+      }
 
       return {
         ...task,

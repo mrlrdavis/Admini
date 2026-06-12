@@ -56,6 +56,7 @@ export async function notifyAssignee(
   taskId: string,
   assigneeId: string,
   action: NotificationAction,
+  taskTitle?: string,
 ): Promise<void> {
   if (!taskId || !assigneeId) {
     throw new NotificationServiceError(
@@ -71,6 +72,8 @@ export async function notifyAssignee(
     timestamp: new Date().toISOString(),
   };
 
+  const payloadWithTitle = { ...payload, taskTitle };
+
   const apiBase = getApiBase();
 
   // Try Cloudflare Worker endpoint first
@@ -79,7 +82,7 @@ export async function notifyAssignee(
       const response = await fetch(`${apiBase}/api/notifications/task-assigned`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payloadWithTitle),
       });
 
       if (response.ok) {
@@ -99,7 +102,9 @@ export async function notifyAssignee(
       recipient_id: assigneeId,
       type: 'task_assignment',
       title: action === 'created' ? 'New task assigned' : 'Task updated',
-      body: `A task has been ${action} and assigned to you.`,
+      body: taskTitle
+        ? `"${taskTitle}" has been ${action} and assigned to you.`
+        : `A task has been ${action} and assigned to you.`,
       metadata: { task_id: taskId, action },
       read: false,
       created_at: payload.timestamp,

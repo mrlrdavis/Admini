@@ -31,12 +31,7 @@ export interface AppPreferencesProps {
   onChange: (key: string, value: string | boolean) => void;
 }
 
-const TAB_OPTIONS = [
-  { value: 'dashboard', label: 'Dashboard' },
-  { value: 'capture', label: 'Capture' },
-  { value: 'tasks', label: 'Tasks' },
-  { value: 'more', label: 'More' },
-];
+
 
 
 export function AppPreferences({
@@ -67,54 +62,6 @@ export function AppPreferences({
 
   return (
     <div className="app-preferences" role="region" aria-label="App preferences">
-
-      {/* Default Tab Selection */}
-      <div className="app-preferences__row">
-        <div className="app-preferences__row-text">
-          <label className="app-preferences__title" htmlFor="app-preferences-default-tab">
-            Default Tab
-          </label>
-          <span className="app-preferences__description" id="app-preferences-default-tab-desc">
-            The tab shown when you open the app.
-          </span>
-        </div>
-        <select
-          id="app-preferences-default-tab"
-          className="app-preferences__select"
-          value={defaultTab}
-          onChange={(e) => handleDefaultTabChange(e.target.value)}
-          aria-describedby="app-preferences-default-tab-desc"
-        >
-          {TAB_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Compact Mode Toggle */}
-      <div className="app-preferences__row">
-        <div className="app-preferences__row-text">
-          <label className="app-preferences__title" htmlFor="app-preferences-compact-mode">
-            Compact Mode
-          </label>
-          <span className="app-preferences__description" id="app-preferences-compact-mode-desc">
-            Reduce spacing and padding for a denser layout.
-          </span>
-        </div>
-        <button
-          id="app-preferences-compact-mode"
-          type="button"
-          role="switch"
-          className={`app-preferences__toggle${compactMode ? ' app-preferences__toggle--active' : ''}`}
-          aria-checked={compactMode}
-          aria-describedby="app-preferences-compact-mode-desc"
-          onClick={handleCompactModeChange}
-        >
-          <span className="app-preferences__toggle-thumb" />
-        </button>
-      </div>
 
       {/* Task Recommendations Toggle */}
       <div className="app-preferences__row">
