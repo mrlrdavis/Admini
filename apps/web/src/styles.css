@@ -1142,3 +1142,40 @@ body,
 .wizard-actions__skip:hover {
   color: rgba(21, 18, 27, 0.8);
 }
+
+/* PWA Update Banner */
+.pwa-update-banner {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #2D3436;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  font-size: 0.875rem;
+}
+.pwa-update-message { flex: 1; }
+.pwa-update-reload {
+  padding: 6px 14px;
+  background: #6B8E6B;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+.pwa-update-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
