@@ -305,3 +305,25 @@
   margin: 12px 20px;
   margin-top: auto;
 }
+
+/* Collapse + profile menu */
+.desktop-sidebar__top { display:flex; align-items:center; justify-content:space-between; padding:0 20px 16px; }
+.desktop-sidebar__collapse-btn { background:none; border:none; color:#9CA3AF; cursor:pointer; font-size:1rem; padding:4px; border-radius:6px; }
+.desktop-sidebar__collapse-btn:hover { background:#F5F3EE; color:#2D3436; }
+.desktop-sidebar--collapsed { width:64px; }
+.desktop-sidebar--collapsed .desktop-sidebar__tab { justify-content:center; padding:10px 0; }
+.desktop-sidebar--collapsed .desktop-sidebar__top { justify-content:center; padding:0 0 16px; }
+
+.desktop-sidebar__profile { margin-top:auto; position:relative; padding:12px; border-top:1px solid #E8E5DE; }
+.desktop-sidebar__avatar-btn { display:flex; align-items:center; gap:10px; width:100%; background:none; border:none; cursor:pointer; padding:6px; border-radius:8px; text-align:left; }
+.desktop-sidebar__avatar-btn:hover { background:#F5F3EE; }
+.desktop-sidebar__avatar { width:32px; height:32px; border-radius:50%; background:#6B8E6B; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.875rem; flex-shrink:0; }
+.desktop-sidebar__avatar-text { display:flex; flex-direction:column; min-width:0; }
+.desktop-sidebar__avatar-name { font-size:0.8125rem; font-weight:600; color:#2D3436; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.desktop-sidebar__avatar-sub { font-size:0.6875rem; color:#636E72; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.desktop-sidebar__menu { position:absolute; bottom:calc(100% - 4px); left:12px; right:12px; background:#fff; border:1px solid #E8E5DE; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); padding:6px; z-index:120; }
+.desktop-sidebar__menu-item { display:flex; align-items:center; gap:10px; width:100%; background:none; border:none; cursor:pointer; padding:9px 10px; border-radius:8px; font-size:0.8125rem; color:#2D3436; text-align:left; }
+.desktop-sidebar__menu-item:hover { background:#F5F3EE; }
+.desktop-sidebar__menu-icon { font-size:0.9375rem; width:18px; text-align:center; }
+.desktop-sidebar__menu-item--logout { color:#C62828; border-top:1px solid #F0EEE9; margin-top:4px; padding-top:11px; }
