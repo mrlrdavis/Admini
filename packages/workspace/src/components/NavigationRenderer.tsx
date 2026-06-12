@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // NavigationRenderer - Responsive navigation switch with tab state machine
 // ---------------------------------------------------------------------------
 // Renders DesktopSidebar above 900px, MobileTabBar at/below 900px.
@@ -37,7 +37,7 @@ export const DEFAULT_TABS: DesktopSidebarTabItem[] = [
   { id: 'tasks', label: 'Tasks', icon: '✓' },
   { id: 'notes', label: 'Notes', icon: '📒' },
   { id: 'observations', label: 'Observations', icon: '👁', requiredRoles: ['admin', 'principal'] },
-  { id: 'pulse', label: 'Pulse', icon: '💓' },
+  { id: 'pulse', label: 'Pulse', icon: '❤️' },
   { id: 'more', label: 'Settings', icon: '⚙' },
   { id: 'admin', label: 'Admin', icon: '🔧', requiredRoles: ['admin', 'principal'] },
 ];
