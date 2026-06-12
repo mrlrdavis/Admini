@@ -5,6 +5,7 @@ publish = "dist/netlify"
 
 [build.environment]
 NODE_VERSION = "20"
+VITE_CLOUDFLARE_API_BASE_URL = "https://admini-api.ladariusdvs99.workers.dev"
 
 # Legacy path redirects (processed in order, before SPA fallback)
 [[redirects]]
