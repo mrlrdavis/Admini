@@ -28,7 +28,7 @@
 .dashboard-tab__section--suggested .dashboard-tab__section-header { background:#F2ECFB; }
 .dashboard-tab__section .dashboard-tab__task-list, .dashboard-tab__section .dashboard-tab__empty { padding:8px 16px; }
 .dashboard-tab__section-icon { font-size:0.8125rem; line-height:1; }
-.dashboard-tab__section-title { font-size:0.75rem; font-weight:700; margin:0; letter-spacing:0.01em; }
+.dashboard-tab__section-title { font-size:0.6875rem; font-weight:700; margin:0; letter-spacing:0.01em; }
 .dashboard-tab__section-title--high { color:#C0392B; }
 .dashboard-tab__section-title--due-today { color:#4A6B4A; }
 .dashboard-tab__section-title--coming { color:#D35400; }
@@ -151,8 +151,8 @@
 .dashboard-tab__section--suggested .recommendations-widget__card { display:flex; align-items:center; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.05); gap:8px; }
 .dashboard-tab__section--suggested .recommendations-widget__card:last-child { border-bottom:none; }
 .dashboard-tab__section--suggested .recommendations-widget__card-content { flex:1; min-width:0; }
-.dashboard-tab__section--suggested .recommendations-widget__card-title { font-size:0.8125rem; font-weight:500; color:#2D3436; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dashboard-tab__section--suggested .recommendations-widget__card-excerpt { font-size:0.6875rem; color:#636E72; margin:2px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dashboard-tab__section--suggested .recommendations-widget__card-title { font-size:0.75rem; font-weight:500; color:#2D3436; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dashboard-tab__section--suggested .recommendations-widget__card-excerpt { font-size:0.625rem; color:#636E72; margin:2px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dashboard-tab__section--suggested .recommendations-widget__card-meta { display:none; }
 .dashboard-tab__section--suggested .recommendations-widget__card-actions { display:flex; align-items:center; }
 .dashboard-tab__section--suggested .recommendations-widget__card-actions::after { content:'\203A'; font-size:1.25rem; color:#636E72; margin-left:4px; }

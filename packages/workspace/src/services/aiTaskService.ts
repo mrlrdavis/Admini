@@ -25,6 +25,49 @@ export interface AISuggestedTask {
 // Errors
 // ---------------------------------------------------------------------------
 
+export interface AISuggestedTaskSet {
+  tasks: AISuggestedTask[];
+  multiple: true;
+}
+
+export type AITaskResult = AISuggestedTask | AISuggestedTaskSet;
+
+export function isMultipleResult(r: AITaskResult): r is AISuggestedTaskSet {
+  return 'multiple' in r && r.multiple === true;
+}
+
+export async function generateTasksFromContent(
+  content: string,
+  source: TaskSource,
+): Promise<AITaskResult> {
+  const apiBase = getApiBase();
+  if (!apiBase) throw new AITaskServiceError('AI service is not configured.', 'NOT_CONFIGURED');
+  if (!content.trim()) throw new AITaskServiceError('Content cannot be empty.', 'EMPTY_CONTENT');
+  try {
+    const response = await fetchWithTimeout(
+      `${apiBase}${AI_ENDPOINT_PATH}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content, source }) },
+      AI_TASK_TIMEOUT_MS,
+    );
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => '');
+      throw new AITaskServiceError(`AI service error (HTTP ${response.status}). ${errBody}`, 'API_ERROR');
+    }
+    const data = await response.json();
+    if (data && data.multiple && Array.isArray(data.tasks)) {
+      return { tasks: data.tasks.map((t: any) => ({ title: t.title || '', description: t.description || '', priority: t.priority, source, confidence: t.confidence || 0.8 })), multiple: true };
+    }
+    if (data && typeof data.title === 'string' && data.title.trim()) {
+      return { title: data.title, description: data.description || '', priority: data.priority, source, confidence: data.confidence || 0.5 };
+    }
+    throw new AITaskServiceError('Invalid AI response.', 'INVALID_RESPONSE');
+  } catch (err) {
+    if (err instanceof AITaskServiceError) throw err;
+    if (err instanceof DOMException && err.name === 'AbortError') throw new AITaskServiceError('AI timed out.', 'TIMEOUT');
+    throw new AITaskServiceError(err instanceof Error ? err.message : 'Failed.', 'UNKNOWN');
+  }
+}
+
 export class AITaskServiceError extends Error {
   public readonly code: string;
 

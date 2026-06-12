@@ -134,7 +134,7 @@ export default {
 };
 
 async function generateTaskSuggestion(content: string, source: string, env: WorkerEnv) {
-  // Try OpenAI if a key is configured
+  // Try OpenAI for multi-task extraction
   if (env.OPENAI_API_KEY) {
     try {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -143,7 +143,7 @@ async function generateTaskSuggestion(content: string, source: string, env: Work
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [
-            { role: 'system', content: 'You are an assistant that converts school-admin notes, captures, and observations into a single actionable task. Respond ONLY with JSON: {"title":string,"description":string,"priority":"low"|"normal"|"high"|"urgent"}.' },
+            { role: 'system', content: 'You are an assistant for school administrators. Extract ALL actionable tasks from the content. Return JSON: {"tasks":[{"title":string,"description":string,"priority":"low"|"normal"|"high"|"urgent"}]}. If only one task, return an array with one item. Be specific with titles.' },
             { role: 'user', content: 'Source: ' + source + '\n\nContent:\n' + content }
           ],
           temperature: 0.3,
@@ -155,18 +155,45 @@ async function generateTaskSuggestion(content: string, source: string, env: Work
         const raw = data.choices?.[0]?.message?.content;
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed.title === 'string' && parsed.title.trim()) {
-            return { title: parsed.title.trim(), description: parsed.description || content, priority: parsed.priority || 'normal', source, confidence: 0.9 };
+          if (parsed && Array.isArray(parsed.tasks) && parsed.tasks.length > 0) {
+            const tasks = parsed.tasks.map((t: any) => ({
+              title: (t.title || '').trim(),
+              description: t.description || '',
+              priority: t.priority || 'normal',
+              source,
+              confidence: 0.9
+            })).filter((t: any) => t.title);
+            if (tasks.length === 1) return tasks[0];
+            return { tasks, multiple: true };
           }
         }
       }
     } catch { /* fall through to heuristic */ }
   }
-  // Heuristic fallback (no LLM key required)
-  return heuristicTask(content, source);
+  // Heuristic fallback: try to extract multiple tasks from bullet points/sentences
+  return heuristicMultiTask(content, source);
 }
 
+function heuristicMultiTask(content: string, source: string) {
+  // Split on newlines, bullets, or numbered lists to find multiple items
+  const lines = content.split(/\n/).map(l => l.replace(/^[-*\d.\[\]\s]+/, '').trim()).filter(l => l.length > 10);
+  if (lines.length > 1) {
+    const tasks = lines.slice(0, 5).map(line => heuristicTask(line, source));
+    if (tasks.length > 1) return { tasks, multiple: true };
+  }
+  return heuristicTask(content, source);
+}
 function heuristicTask(content: string, source: string) {
+  // Check for multiple action items (lines starting with - , * , numbers, or action verbs)
+  const lines = content.split(/\n/).map(l => l.trim()).filter(l => l.length > 5);
+  const actionLines = lines.filter(l => /^[-*�\d]|^(call|email|review|schedule|follow|send|prepare|update|submit|complete|check|meet|contact|remind|approve|cancel)/i.test(l));
+  if (actionLines.length > 1) {
+    const tasks = actionLines.slice(0, 5).map(line => {
+      const clean = line.replace(/^[-*�\d.)+\s]+/, '').trim();
+      return { title: clean.length > 72 ? clean.slice(0, 69) + '...' : clean, description: clean, priority: 'normal', source, confidence: 0.4 };
+    });
+    return { tasks };
+  }
   const firstSentence = (content.split(/[.!?\n]/)[0] || content).trim();
   let title = firstSentence.length > 72 ? firstSentence.slice(0, 69) + '...' : firstSentence;
   if (!title) title = 'Follow up on ' + source;

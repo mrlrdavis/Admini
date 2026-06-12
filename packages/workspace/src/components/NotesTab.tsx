@@ -5,7 +5,8 @@
 import { useState, useEffect } from 'react';
 import { listMeetingNotes, createMeetingNote, updateMeetingNote, deleteMeetingNote, type MeetingNote } from '../services/meetingNotesService';
 import { showToast } from './Toast';
-import { generateTaskFromContent, AITaskServiceError } from '../services/aiTaskService';
+import { generateTaskFromContent, generateTasksFromContent, isMultipleResult, AITaskServiceError } from '../services/aiTaskService';
+import type { AISuggestedTask } from '../services/aiTaskService';
 
 const MEETING_TYPES = [
   'Observation Pre-Conference',
@@ -163,15 +164,27 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
                   <div className="notes-tab__note-actions">
                     <button type="button" onClick={() => handleEdit(note)}>Edit</button>
                     <button type="button" onClick={async () => {
-                      showToast("Generating task from note...");
+                      showToast("Analyzing note for tasks...");
                       try {
-                        const suggestion = await generateTaskFromContent(note.body || "", "note");
-                        showToast("Suggested: " + suggestion.title, { action: { label: "Create", onClick: () => onTabChange?.("tasks") } });
+                        const result = await generateTasksFromContent(note.body || "", "note");
+                        if (isMultipleResult(result)) {
+                          const titles = result.tasks.map((t: AISuggestedTask) => t.title).join(", ");
+                          showToast(result.tasks.length + " tasks found: " + titles.substring(0, 80), {
+                            action: { label: "Create All (" + result.tasks.length + ")", onClick: () => {
+                              result.tasks.forEach((t: AISuggestedTask) => {
+                                showToast("Creating: " + t.title);
+                              });
+                              onTabChange?.("tasks");
+                            }}
+                          });
+                        } else {
+                          showToast("Suggested: " + result.title, { action: { label: "Create", onClick: () => onTabChange?.("tasks") } });
+                        }
                       } catch (err) {
                         if (err instanceof AITaskServiceError) {
                           showToast(err.message, { action: { label: "Create manually", onClick: () => onTabChange?.("tasks") } });
                         } else {
-                          showToast("Failed to analyze note");
+                          showToast("Failed to generate suggestions");
                         }
                       }
                     }}>Create Task from Note</button>
