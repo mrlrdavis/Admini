@@ -152,8 +152,7 @@ export async function getTasks(): Promise<DashboardTask[]> {
       ({ data, error } = await client
         .from('tasks')
         .select(baseCols)
-        .neq('status', 'archived')
-        .order('created_at', { ascending: false })
+                .order('created_at', { ascending: false })
         .returns<DbTask[]>());
     }
 
