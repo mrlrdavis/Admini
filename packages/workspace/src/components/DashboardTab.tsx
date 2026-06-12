@@ -97,6 +97,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [scheduleEditing, setScheduleEditing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [widgetView, setWidgetView] = useState<'progress' | 'type'>('progress');
 
   useEffect(() => {
     try {
@@ -148,7 +149,6 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
     }
   }
   const totalBadges = BADGE_DEFINITIONS.length; // total badge count
-
   // -------------------------------------------------------------------------
   // Data fetching
   // -------------------------------------------------------------------------
@@ -286,20 +286,23 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
     const due = parseLocalDate(t.dueAt);
     return due > nowDate && due <= in7Days;
   });
+  const inProgressTasks = tasks.filter(t => t.status === 'in-progress');
+  const completedTasks = tasks.filter(t => t.status === 'completed');
+  const normalPriorityTasks = tasks.filter(t => t.status === 'open' && (!t.priority || t.priority === 'normal'));
+  const lowPriorityTasks = tasks.filter(t => t.status === 'open' && t.priority === 'low');
 
+  /** Navigate to tasks tab with a filter preset */
+  function navigateWithFilter(filter: { type: string; value: string }) {
+    localStorage.setItem('admini_tasks_filter', JSON.stringify(filter));
+    onTabChange?.('tasks');
+  }
   return (
     <div className="dashboard-tab dashboard-tab--two-col">
       {/* Top Bar */}
       <header className="dashboard-tab__topbar">
         <h1 className="dashboard-tab__greeting-text">{getTimeGreeting()}, <strong>{userName}</strong></h1>
-        <div className="dashboard-tab__quick-actions-bar">
-          <span className="dashboard-tab__qa-label">QUICK ACTIONS</span>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('capture')}>🎤 Record a Capture</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_capture_mode', 'tap'); onTabChange?.('capture'); }}>👆 Quick Tap Capture</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}>📅 See Task Calendar</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('admin')}>📋 Update Roster</button>
-        </div>
         <div className="dashboard-tab__level-badge" onClick={() => setShowAchievements(true)}>
+          <span className="dashboard-tab__level-icon">🏆</span>
           <span className="dashboard-tab__level-num">Level {Math.floor(unlockedCount / 2) + 1}</span>
           <span className="dashboard-tab__level-sub">{unlockedCount}/{totalBadges} badges</span>
         </div>
@@ -309,214 +312,99 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
       <div className="dashboard-tab__columns">
         {/* LEFT: Task sections */}
         <div className="dashboard-tab__left">
-          <section className="dashboard-tab__section dashboard-tab__section--high-priority">
-            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">⚠</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--high">High Priority</h2></div>
-            {highPriorityTasks.length === 0 ? <p className="dashboard-tab__empty">No high priority tasks</p> : (
-              <ul className="dashboard-tab__task-list">
-                {highPriorityTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
-                    <div className="dashboard-tab__task-left">
-                      <span className="dashboard-tab__task-title">{task.title}</span>
-                      {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
-                    </div>
-                    <span className={'dashboard-tab__task-due' + (task.dueAt && parseLocalDate(task.dueAt).toDateString() === todayStr ? ' dashboard-tab__task-due--today' : '')}>{task.dueAt && parseLocalDate(task.dueAt).toDateString() === todayStr ? 'Today' : task.dueAt ? parseLocalDate(task.dueAt).toLocaleDateString(undefined, {month:'short',day:'numeric'}) : ''}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="dashboard-tab__section dashboard-tab__section--due-today">
-            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">⏱</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--due-today">Due Today</h2></div>
-            {dueTodayTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing due today</p> : (
-              <ul className="dashboard-tab__task-list">
-                {dueTodayTasks.map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
-                    <div className="dashboard-tab__task-left">
-                      <span className="dashboard-tab__task-title">{task.title}</span>
-                      {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
-                    </div>
-                    <span className="dashboard-tab__task-due">{task.dueAt ? parseLocalDate(task.dueAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : ''}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="dashboard-tab__section dashboard-tab__section--coming-due">
-            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">📅</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--coming">Coming Due</h2></div>
-            {comingDueTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing coming due</p> : (
-              <ul className="dashboard-tab__task-list">
-                {comingDueTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
-                    <div className="dashboard-tab__task-left">
-                      <span className="dashboard-tab__task-title">{task.title}</span>
-                      {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
-                    </div>
-                    <span className="dashboard-tab__task-due">{parseLocalDate(task.dueAt!).toLocaleDateString(undefined, {month:'short',day:'numeric'})}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="dashboard-tab__section dashboard-tab__section--blocked">
-            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">🚫</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--blocked">Blocked Tasks</h2>{blockedTasks.length > 0 && <span className="dashboard-tab__section-count">{blockedTasks.length}</span>}</div>
-            {blockedTasks.length === 0 ? <p className="dashboard-tab__empty">No blocked tasks</p> : (
-              <ul className="dashboard-tab__task-list">
-                {blockedTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item dashboard-tab__task-item--blocked" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
-                    <div className="dashboard-tab__task-left">
-                      <span className="dashboard-tab__task-title">{task.title}</span>
-                      <div className="dashboard-tab__task-meta">
-                        {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
-                        <span className="dashboard-tab__block-reason">⚠ {task.description || 'Blocked'}</span>
-                      </div>
-                    </div>
-                    <span className="dashboard-tab__stale-badge">{computeStaleDays(task.updatedAt)}d stale</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {userId && organizationId && (
-            <section className="dashboard-tab__section dashboard-tab__section--suggested">
-              <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">✨</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--suggested">Suggested Tasks</h2></div>
-              <RecommendationsWidget userId={userId} organizationId={organizationId} />
-            </section>
-          )}
-        </div>
-
-        {/* RIGHT: Calendar + Schedule + Activity */}
-        <div className="dashboard-tab__right">
-          <section className="dashboard-tab__card dashboard-tab__card--calendar">
-            <div className="dashboard-tab__mini-cal-header"><button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()-1,1))} aria-label="Previous month">‹</button>
-              <span className="dashboard-tab__mini-cal-month">{dashCalMonth.toLocaleDateString(undefined, {month:'long',year:'numeric'})}</span><button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()+1,1))} aria-label="Next month">›</button>
-            </div>
-            <div className="dashboard-tab__mini-cal-grid">
-              {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <span key={d} className="dashboard-tab__mini-cal-dow">{d}</span>)}
-              {(() => {
-                const n = dashCalMonth;
-                const first = new Date(n.getFullYear(), n.getMonth(), 1);
-                const offset = first.getDay();
-                const dim = new Date(n.getFullYear(), n.getMonth()+1, 0).getDate();
-                const todayDate = new Date();
-                const cells: React.ReactNode[] = [];
-                for (let i=0; i<offset; i++) cells.push(<span key={'e'+i} />);
-                for (let d=1; d<=dim; d++) {
-                  const dt = new Date(n.getFullYear(), n.getMonth(), d);
-                  const isToday = d === todayDate.getDate() && n.getMonth() === todayDate.getMonth() && n.getFullYear() === todayDate.getFullYear();
-                  const hasTasks = tasks.some(t => t.dueAt && parseLocalDate(t.dueAt).toDateString() === dt.toDateString());
-                  cells.push(<span key={d} className={'dashboard-tab__mini-cal-date' + (isToday ? ' --today' : '') + (hasTasks ? ' --has-tasks' : '')}>{d}</span>);
-                }
-                return cells;
-              })()}
-            </div>
-          </section>
-
-          <section className="dashboard-tab__card dashboard-tab__card--schedule">
-            <div className="dashboard-tab__schedule-hdr">
-              <h2 className="dashboard-tab__schedule-title">📅 Today's Schedule <span className="dashboard-tab__schedule-date">— {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
-              <div className="dashboard-tab__schedule-actions"><button type="button" className="dashboard-tab__sync-btn" onClick={handleCalendarSync} disabled={syncing} title="Sync with Google Calendar">{syncing ? 'Syncing…' : '↻ Sync'}</button><button type="button" className="dashboard-tab__sync-btn" onClick={() => { const summary = prompt('Event for today:'); if (!summary || !summary.trim()) return; const time = prompt('Time (HH:MM, optional):') || ''; const today = new Date().toISOString().split('T')[0]; const start = time ? today + 'T' + time + ':00' : today + 'T09:00:00'; const end = time ? today + 'T' + time + ':00' : today + 'T10:00:00'; const ev = createLocalEvent({ summary: summary.trim(), start, end }); setCalendarEvents(prev => [...prev, ev]); }} title="Add event for today">+ Add</button><button type="button" className="dashboard-tab__edit-link" onClick={() => setScheduleEditing(v => !v)}>{scheduleEditing ? 'Done' : 'Edit'}</button></div>
-            </div>
-            {lastSync && <div className="dashboard-tab__sync-time">Last synced {(() => { const d = Date.now() - new Date(lastSync).getTime(); const m = Math.floor(d/60000); if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; const h = Math.floor(m/60); if (h < 24) return h + 'h ago'; return new Date(lastSync).toLocaleDateString(); })()}</div>}
-            {dayBlocks.map((block, blockIdx) => (
-              <div key={block.period} className="dashboard-tab__sched-block">
-                <div className="dashboard-tab__sched-period">
-                  <span className="dashboard-tab__sched-period-name">{block.period}</span>
-                  <span className="dashboard-tab__sched-period-time">{block.time}</span>
-                  {block.activities.map((a, actIdx) => (
-                    <span key={actIdx} className="dashboard-tab__sched-chip">
-                      {scheduleEditing ? (
-                        <>
-                          <span onClick={() => renameActivity(blockIdx, actIdx)} style={{cursor:'pointer'}}>{a.label}</span>
-                          <button type="button" className="dashboard-tab__sched-chip-edit" onClick={() => removeActivity(blockIdx, actIdx)} aria-label={'Remove ' + a.label}>×</button>
-                        </>
-                      ) : a.label}
-                    </span>
-                  ))}
-                  {scheduleEditing && <button type="button" className="dashboard-tab__sched-add" onClick={() => addActivity(blockIdx)}>+ activity</button>}
-                </div>
-                {calendarEvents.filter(ev => {
-                  if(!ev.start) return false;
-                  const h = new Date(ev.start).getHours();
-                  if(block.period==='Morning') return h>=8&&h<12;
-                  if(block.period==='Afternoon') return h>=12&&h<16;
-                  return h>=16;
-                }).map(ev => (
-                  <div key={ev.id} className="dashboard-tab__sched-event"><span className="dashboard-tab__sched-check" />
-                    <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
-                    <span className="dashboard-tab__sched-event-title">{ev.summary}</span>
-                    {ev.id && !ev.id.startsWith('google') ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem('admini_local_events')||'[]');const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem('admini_local_events',JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} className="dashboard-tab__sched-event-delete">×</button> : null}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </section>
-
-          <section className="dashboard-tab__card dashboard-tab__card--activity">
-            <h2 className="dashboard-tab__feed-header">✨ Activity Feed</h2>
-            <ul className="dashboard-tab__feed-list">
-              {activityFeedItems.map(ev => (
-                <li key={ev.id} className="dashboard-tab__feed-item">
-                  {(() => { const t = ev.entityType; const a = ev.action; let cls = 'dashboard-tab__feed-icon--default'; let icon = '•'; if (t === 'capture') { cls = 'dashboard-tab__feed-icon--capture-voice'; icon = '🎤'; } else if (t === 'tap_capture') { cls = 'dashboard-tab__feed-icon--capture-tap'; icon = '👆'; } else if (t === 'observation') { cls = 'dashboard-tab__feed-icon--observation'; icon = '👁'; } else if (t === 'note' || t === 'meeting_note') { cls = 'dashboard-tab__feed-icon--note'; icon = '📝'; } else if (t === 'achievement' || t === 'badge') { cls = 'dashboard-tab__feed-icon--achievement'; icon = '🏆'; } else if (t === 'task') { if (a === 'create' || a === 'created') { cls = 'dashboard-tab__feed-icon--task-create'; icon = '➕'; } else if (a === 'complete' || a === 'completed') { cls = 'dashboard-tab__feed-icon--task-complete'; icon = '✓'; } else { cls = 'dashboard-tab__feed-icon--task-create'; icon = '✎'; } } return <span className={'dashboard-tab__feed-icon ' + cls}>{icon}</span>; })()}
-                  <div className="dashboard-tab__feed-body">
-                    <span className="dashboard-tab__feed-title">{(() => { const t = tasks.find(tk => tk.id === ev.entityId); if (t) return (ev.action === 'create' || ev.action === 'created' ? '' : 'Completed: ') + t.title; if (ev.entityType === 'capture') return 'Voice capture: ' + ev.entityId.substring(0,20); return formatActivityAction(ev); })()}</span>
-                    <span className="dashboard-tab__feed-time">{(() => { const diff = Date.now() - new Date(ev.createdAt).getTime(); const mins = Math.floor(diff/60000); if (mins < 60) return mins + ' minutes ago'; const hrs = Math.floor(mins/60); if (hrs < 24) return hrs + ' hours ago'; return new Date(ev.createdAt).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}); })()}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
-      </div>
-      {showAchievements && (
-        <div className="dashboard-tab__achievements-overlay" onClick={() => setShowAchievements(false)}>
-          <div className="dashboard-tab__achievements-modal" onClick={e => e.stopPropagation()}>
-            <div className="dashboard-tab__achievements-header">
-              <div>
-                <h2 className="dashboard-tab__achievements-title">Achievements</h2>
-                <p className="dashboard-tab__achievements-sub">Level {Math.floor(unlockedCount / 2) + 1} — {unlockedCount} of {totalBadges} earned</p>
-              </div>
-              <button type="button" className="dashboard-tab__achievements-close" onClick={() => setShowAchievements(false)}>×</button>
-            </div>
-            <div className="dashboard-tab__achievements-bar"><div className="dashboard-tab__achievements-fill" style={{ width: (unlockedCount / totalBadges * 100) + '%' }} /></div>
-            {(() => {
-              const earnedMap = JSON.parse(localStorage.getItem('admini_badges') || '{}') || {};
-              const earned = BADGE_DEFINITIONS.filter(d => earnedMap[d.id]);
-              const locked = BADGE_DEFINITIONS.filter(d => !earnedMap[d.id]);
-              return (
-                <>
-                  {earned.length > 0 && (
-                    <div>
-                      <h3 className="dashboard-tab__achievements-section-title">Earned</h3>
-                      {earned.map(d => (
-                        <div key={d.id} className="dashboard-tab__achievement-row dashboard-tab__achievement-row--earned">
-                          <span className="dashboard-tab__achievement-badge-icon">{d.emoji}</span>
-                          <div className="dashboard-tab__achievement-info"><strong>{d.label}</strong><span>{d.description}</span></div>
-                          <span className="dashboard-tab__achievement-date">Earned {new Date(earnedMap[d.id]).toLocaleDateString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {locked.length > 0 && (
-                    <div>
-                      <h3 className="dashboard-tab__achievements-section-title">Locked</h3>
-                      {locked.map(d => (
-                        <div key={d.id} className="dashboard-tab__achievement-row dashboard-tab__achievement-row--locked">
-                          <span className="dashboard-tab__achievement-badge-icon">{d.emoji}</span>
-                          <div className="dashboard-tab__achievement-info"><strong>{d.label}</strong><span>{d.description}</span></div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              );
-            })()}
+          {/* Progress/Type Toggle */}
+          <div className="dashboard-tab__widget-toggle">
+            <button type="button" className={'dashboard-tab__toggle-btn' + (widgetView === 'progress' ? ' dashboard-tab__toggle-btn--active' : '')} onClick={() => setWidgetView('progress')}>Progress</button>
+            <button type="button" className={'dashboard-tab__toggle-btn' + (widgetView === 'type' ? ' dashboard-tab__toggle-btn--active' : '')} onClick={() => setWidgetView('type')}>Type</button>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+
+          {widgetView === 'progress' && (
+            <>
+              <section className="dashboard-tab__section dashboard-tab__section--due-today">
+                <div className="dashboard-tab__section-header" onClick={() => navigateWithFilter({type: 'progress', value: 'due'})}><span className="dashboard-tab__section-icon">⏱</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--due-today">Due Today</h2><span className="dashboard-tab__section-count">{dueTodayTasks.length}</span></div>
+                {dueTodayTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing due today</p> : (
+                  <ul className="dashboard-tab__task-list">
+                    {dueTodayTasks.map(task => (
+                      <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
+                        <div className="dashboard-tab__task-left">
+                          <span className="dashboard-tab__task-title">{task.title}</span>
+                          {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                        </div>
+                        <span className="dashboard-tab__task-due">{task.dueAt ? parseLocalDate(task.dueAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : ''}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="dashboard-tab__section dashboard-tab__section--coming-due">
+                <div className="dashboard-tab__section-header" onClick={() => navigateWithFilter({type: 'progress', value: 'coming-due'})}><span className="dashboard-tab__section-icon">📅</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--coming">Coming Due</h2><span className="dashboard-tab__section-count">{comingDueTasks.length}</span></div>
+                {comingDueTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing coming due</p> : (
+                  <ul className="dashboard-tab__task-list">
+                    {comingDueTasks.slice(0, 5).map(task => (
+                      <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
+                        <div className="dashboard-tab__task-left">
+                          <span className="dashboard-tab__task-title">{task.title}</span>
+                          {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                        </div>
+                        <span className="dashboard-tab__task-due">{parseLocalDate(task.dueAt!).toLocaleDateString(undefined, {month:'short',day:'numeric'})}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="dashboard-tab__section dashboard-tab__section--in-progress">
+                <div className="dashboard-tab__section-header" onClick={() => navigateWithFilter({type: 'progress', value: 'in-progress'})}><span className="dashboard-tab__section-icon">⏳</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--in-progress">In Progress</h2><span className="dashboard-tab__section-count">{inProgressTasks.length}</span></div>
+                {inProgressTasks.length === 0 ? <p className="dashboard-tab__empty">No tasks in progress</p> : (
+                  <ul className="dashboard-tab__task-list">
+                    {inProgressTasks.slice(0, 5).map(task => (
+                      <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
+                        <div className="dashboard-tab__task-left">
+                          <span className="dashboard-tab__task-title">{task.title}</span>
+                          {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                        </div>
+                        <span className="dashboard-tab__task-due">{task.dueAt ? parseLocalDate(task.dueAt).toLocaleDateString(undefined, {month:'short',day:'numeric'}) : ''}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="dashboard-tab__section dashboard-tab__section--blocked">
+                <div className="dashboard-tab__section-header" onClick={() => navigateWithFilter({type: 'progress', value: 'blocked'})}><span className="dashboard-tab__section-icon">🚫</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--blocked">Blocked Tasks</h2><span className="dashboard-tab__section-count">{blockedTasks.length}</span></div>
+                {blockedTasks.length === 0 ? <p className="dashboard-tab__empty">No blocked tasks</p> : (
+                  <ul className="dashboard-tab__task-list">
+                    {blockedTasks.slice(0, 5).map(task => (
+                      <li key={task.id} className="dashboard-tab__task-item dashboard-tab__task-item--blocked" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
+                        <div className="dashboard-tab__task-left">
+                          <span className="dashboard-tab__task-title">{task.title}</span>
+                          <div className="dashboard-tab__task-meta">
+                            {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                            <span className="dashboard-tab__block-reason">⚠ {task.description || 'Blocked'}</span>
+                          </div>
+                        </div>
+                        <span className="dashboard-tab__stale-badge">{computeStaleDays(task.updatedAt)}d stale</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="dashboard-tab__section dashboard-tab__section--completed">
+                <div className="dashboard-tab__section-header" onClick={() => navigateWithFilter({type: 'progress', value: 'completed'})}><span className="dashboard-tab__section-icon">✓</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--completed">Completed</h2><span className="dashboard-tab__section-count">{completedTasks.length}</span></div>
+                {completedTasks.length === 0 ? <p className="dashboard-tab__empty">No completed tasks</p> : (
+                  <ul className="dashboard-tab__task-list">
+                    {completedTasks.slice(0, 5).map(task => (
+                      <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
+                        <div className="dashboard-tab__task-left">
+                          <span className="dashboard-tab__task-title">{task.title}</span>
+                          {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </>
+          )}
