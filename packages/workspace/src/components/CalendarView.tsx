@@ -187,15 +187,25 @@ export function CalendarView({ mergedEvents, tasks, onAddEvent, overdueSlot }: C
                 <span className="calendar-view__cell-date">{day.getDate()}</span>
                 {(dayTasks.length > 0 || dayEvents.length > 0) && (
                   <div className="calendar-view__cell-items">
-                    {dayTasks.slice(0, 3).map(task => (
-                      <span
-                        key={task.id}
-                        className="calendar-view__cell-item calendar-view__cell-item--task"
-                        title={task.title}
-                      >
-                        {task.title}
-                      </span>
-                    ))}
+                    {dayTasks.slice(0, 3).map(task => {
+                      const hasSubtasks = !!localStorage.getItem('admini_subtasks_' + task.id);
+                      const isAssigned = !!task.assignedTo;
+                      const isHighPriority = task.priority === 'high' || task.priority === 'urgent';
+                      return (
+                        <span
+                          key={task.id}
+                          className="calendar-view__cell-item calendar-view__cell-item--task"
+                          title={task.title + (task.assignedTo ? ' \u2014 ' + task.assignedTo : '') + (isHighPriority ? ' [' + task.priority + ']' : '')}
+                        >
+                          <span className="calendar-view__cell-item-dots">
+                            {hasSubtasks && <span className="calendar-view__dot calendar-view__dot--subtask" title="Has subtasks" />}
+                            {isAssigned && <span className="calendar-view__dot calendar-view__dot--assigned" title={'Assigned to ' + task.assignedTo} />}
+                            {isHighPriority && <span className="calendar-view__dot calendar-view__dot--priority" title={task.priority} />}
+                          </span>
+                          <span className="calendar-view__cell-item-text">{task.title}</span>
+                        </span>
+                      );
+                    })}
                     {dayEvents.slice(0, 2).map(event => (
                       <span
                         key={event.id}

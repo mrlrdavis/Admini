@@ -83,6 +83,7 @@ export function TaskCard({
   const [eDue, setEDue] = useState(task.dueAt ? (task.dueAt.split('T')[0] || '') : '');
   const [ePriority, setEPriority] = useState(task.priority);
   const [eAssignee, setEAssignee] = useState(task.assignee || '');
+  const [blockReason, setBlockReason] = useState(task.blockReason || '');
 
   function saveEdit() {
     onEdit?.({ title: eTitle.trim(), description: eDesc.trim(), dueAt: eDue || undefined, priority: ePriority, assignee: eAssignee.trim() || undefined });
@@ -218,7 +219,9 @@ export function TaskCard({
                 <option value="open">Open</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
+                <option value="archived">Blocked</option>
               </select>
+              {task.status === 'archived' && <input className="task-card__edit-input" placeholder="Block reason..." value={blockReason} onChange={(e) => setBlockReason(e.target.value)} onBlur={() => onEdit?.({ description: blockReason })} style={{marginTop:'6px',width:'100%'}} />}
             </div>
           )}
         </div>

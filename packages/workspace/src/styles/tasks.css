@@ -1181,3 +1181,8 @@
 
 .tasks-tab__form-row { display: flex; gap: 8px; }
 .tasks-tab__form-row .tasks-tab__add-input { flex: 1; }
+
+/* Constrain date inputs */
+.tasks-tab__add-input[type="date"] { max-width: 160px; }
+.tasks-tab__form-row .tasks-tab__add-input[type="date"] { max-width: 160px; }
+.task-card__edit-input[type="date"] { max-width: 160px; }

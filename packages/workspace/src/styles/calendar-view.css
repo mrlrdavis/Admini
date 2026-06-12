@@ -245,3 +245,12 @@
 
 .calendar-view__legend-overdue { margin-top: 16px; padding-top: 16px; border-top: 1px solid #E8E5DE; }
 .calendar-view__legend-overdue .overdue-list { padding: 0; background: none; border: none; box-shadow: none; }
+
+/* Task bar indicator dots */
+.calendar-view__cell-item--task { display:flex; align-items:center; gap:3px; }
+.calendar-view__cell-item-dots { display:flex; gap:2px; flex-shrink:0; }
+.calendar-view__dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.calendar-view__dot--subtask { background:#E6C84D; }
+.calendar-view__dot--assigned { background:#E8A838; }
+.calendar-view__dot--priority { background:#D63031; }
+.calendar-view__cell-item-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

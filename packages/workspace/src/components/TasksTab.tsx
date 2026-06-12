@@ -152,7 +152,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [newDue, setNewDue] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newAssignee, setNewAssignee] = useState('');
-  const [newSubtasks, setNewSubtasks] = useState<string[]>([]);
+  const [newSubtasks, setNewSubtasks] = useState<{title:string;assignee:string;dueAt:string}[]>([]);
 
   // Calendar event state
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
@@ -288,7 +288,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         id: '', title: newTitle.trim(), description: newDescription.trim() || undefined, priority: newPriority,
         status: 'open', dueAt: newDue || undefined, assignee: newAssignee.trim() || undefined,
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-        subtasks: newSubtasks.filter(s => s.trim()).map(s => ({ id: crypto.randomUUID(), title: s.trim(), completed: false })),
+        subtasks: newSubtasks.filter(s => s.title.trim()).map(s => ({ id: crypto.randomUUID(), title: s.title.trim(), assignee: s.assignee.trim() || undefined, dueAt: s.dueAt || undefined, completed: false })),
       });
       setNewTitle(''); setNewPriority('normal'); setNewDue(''); setNewDescription(''); setNewAssignee(''); setNewSubtasks([]); setShowAddForm(false);
       await loadTaskList();
@@ -386,6 +386,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   function handleAddEvent(date: string, time?: string) {
     const summary = prompt('Event name:');
     if (!summary) return;
+    const desc = prompt('Description (optional):') || '';
+    const endTime = prompt('End time (HH:MM, optional):') || '';
     const start = time ? `${date}T${time}` : `${date}T09:00:00`;
     const end = time ? `${date}T${time}` : `${date}T10:00:00`;
     createLocalEvent({ summary, start, end });
@@ -447,11 +449,13 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           <div className="tasks-tab__subtasks-list">
             {newSubtasks.map((st, i) => (
               <div key={i} className="tasks-tab__subtask-row">
-                <input className="tasks-tab__subtask-input" placeholder="Subtask" value={st} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? e.target.value : x))} />
-                <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_, j) => j !== i))}>×</button>
+                <input className="tasks-tab__subtask-input" placeholder="Subtask title" value={st.title} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, title: e.target.value} : x))} />
+                <input className="tasks-tab__subtask-input" placeholder="Assignee" value={st.assignee} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, assignee: e.target.value} : x))} style={{maxWidth:120}} />
+                <input type="date" className="tasks-tab__subtask-input" value={st.dueAt} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, dueAt: e.target.value} : x))} style={{maxWidth:130}} />
+                <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_x, j) => j !== i))}>×</button>
               </div>
             ))}
-            <button type="button" className="tasks-tab__subtask-add" onClick={() => setNewSubtasks(s => [...s, ''])}>+ Add subtask</button>
+            <button type="button" className="tasks-tab__subtask-add" onClick={() => setNewSubtasks(s => [...s, {title:'',assignee:'',dueAt:''}])}>+ Add subtask</button>
           </div>
           <div className="tasks-tab__form-actions">
             <button type="button" className="tasks-tab__cancel-btn" onClick={() => setShowAddForm(false)}>Cancel</button>
