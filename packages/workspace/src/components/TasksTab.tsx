@@ -166,6 +166,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [newAssignee, setNewAssignee] = useState('');
   const [newSubtasks, setNewSubtasks] = useState<{title:string;assignee:string;dueAt:string}[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [showImport, setShowImport] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
 
   // Calendar event state
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
@@ -470,6 +472,35 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     );
   }
 
+  async function handleImportTasks() {
+    if (!importFile) return;
+    showToast('Importing tasks...');
+    try {
+      const text = await importFile.text();
+      const lines = text.split('\n').filter(l => l.trim());
+      let imported = 0;
+      for (const line of lines) {
+        const parts = line.split(',');
+        const title = parts[0]?.trim();
+        if (title) {
+          await taskService.create({
+            id: '', title, description: parts[1]?.trim() || undefined,
+            priority: (parts[2]?.trim() as any) || 'normal', status: 'open',
+            dueAt: parts[3]?.trim() || undefined, assignee: parts[4]?.trim() || undefined,
+            createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), subtasks: []
+          });
+          imported++;
+        }
+      }
+      showToast(imported + ' task(s) imported');
+      setShowImport(false);
+      setImportFile(null);
+      await loadTaskList();
+    } catch {
+      showToast('Failed to import tasks');
+    }
+  }
+
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
@@ -479,7 +510,21 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       {/* Header */}
       <header className="tasks-tab__header">
         <h1 className="tasks-tab__title">Tasks</h1>
+        <button type="button" className="tasks-tab__import-btn" onClick={() => setShowImport(v => !v)}>
+          📥 Import Tasks
+        </button>
       </header>
+
+      {showImport && (
+        <div className="tasks-tab__import-section">
+          <p>Upload a CSV file with columns: title, description, priority, due date, assignee</p>
+          <input type="file" accept=".txt,.csv" onChange={(e) => setImportFile(e.target.files?.[0] || null)} />
+          <div className="tasks-tab__import-actions">
+            <button type="button" onClick={handleImportTasks} disabled={!importFile}>Import</button>
+            <button type="button" onClick={() => { setShowImport(false); setImportFile(null); }}>Cancel</button>
+          </div>
+        </div>
+      )}
       {/* Add Task */}
       {showAddForm && (
         <div className="tasks-tab__add-form">
@@ -498,7 +543,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                 <input className="tasks-tab__subtask-input" placeholder="Subtask title" value={st.title} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, title: e.target.value} : x))} />
                 <input className="tasks-tab__subtask-input" placeholder="Assignee" value={st.assignee} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, assignee: e.target.value} : x))} style={{maxWidth:120}} />
                 <input type="date" className="tasks-tab__subtask-input" value={st.dueAt} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, dueAt: e.target.value} : x))} style={{maxWidth:130}} />
-                <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_x, j) => j !== i))}>Ã—</button>
+                <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_x, j) => j !== i))}>X</button>
               </div>
             ))}
             <button type="button" className="tasks-tab__subtask-add" onClick={() => setNewSubtasks(s => [...s, {title:'',assignee:'',dueAt:''}])}>+ Add subtask</button>

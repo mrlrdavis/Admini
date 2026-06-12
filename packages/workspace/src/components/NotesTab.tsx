@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // NotesTab - Meeting notes with structured fields
 // ---------------------------------------------------------------------------
 
@@ -40,6 +40,10 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [taskModal, setTaskModal] = useState<null | { tasks: { title: string; description: string; priority: string; assignee: string; selected: boolean }[] }>(null);
   const [creatingTasks, setCreatingTasks] = useState(false);
+
+  // Import state
+  const [showImport, setShowImport] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (organizationId) {
@@ -105,6 +109,37 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
     }
   }
 
+  async function handleImportNotes() {
+    if (!importFile || !organizationId || !userId) return;
+    showToast('Importing notes...');
+    try {
+      const text = await importFile.text();
+      const lines = text.split('\n').filter(l => l.trim());
+      let imported = 0;
+      for (const line of lines) {
+        const body = line.trim();
+        if (body) {
+          await createMeetingNote({
+            organizationId,
+            userId,
+            title: 'Imported Note - ' + new Date().toLocaleDateString(),
+            body,
+            attendees: []
+          });
+          imported++;
+        }
+      }
+      showToast(imported + ' note(s) imported');
+      setShowImport(false);
+      setImportFile(null);
+      // Refresh notes list
+      const updated = await listMeetingNotes(organizationId);
+      setNotes(updated);
+    } catch {
+      showToast('Failed to import notes');
+    }
+  }
+
   if (loading) return <div className="notes-tab notes-tab--loading"><p>Loading notes...</p></div>;
 
 
@@ -118,7 +153,7 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
       const msg = err instanceof AITaskServiceError ? err.message : 'Could not analyze note';
       // Fallback: open modal with a single manual task seeded from the note
       setTaskModal({ tasks: [{ title: (note.body || note.title || '').slice(0, 80), description: note.body || '', priority: 'normal', assignee: '', selected: true }] });
-      showToast(msg + ' â€” review manually');
+      showToast(msg + ' - review manually');
     }
   }
 
@@ -148,7 +183,21 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
     <div className="notes-tab">
       <header className="notes-tab__header">
         <h1 className="notes-tab__title">Notes</h1>
+        <button type="button" className="notes-tab__import-btn" onClick={() => setShowImport(v => !v)}>
+          Import Notes
+        </button>
       </header>
+
+      {showImport && (
+        <div className="notes-tab__import-section">
+          <p>Upload a .txt or .csv file with one note per line</p>
+          <input type="file" accept=".txt,.csv" onChange={(e) => setImportFile(e.target.files?.[0] || null)} />
+          <div className="notes-tab__import-actions">
+            <button type="button" onClick={handleImportNotes} disabled={!importFile}>Import</button>
+            <button type="button" onClick={() => { setShowImport(false); setImportFile(null); }}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       {/* Note Form */}
       {showForm && (
@@ -174,14 +223,14 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
             <div className="notes-tab__toolbar">
               <button type="button" onClick={() => setFormContent(prev => prev + "**bold**")}>B</button>
               <button type="button" onClick={() => setFormContent(prev => prev + "*italic*")}><em>I</em></button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n- ")}>â€¢ List</button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n[ ] ")}>â˜ Task</button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n---\n")}>â€•</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n- ")}>List</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n[ ] ")}>Task</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n---\n")}>Line</button>
             </div>
             <textarea value={formContent} onChange={e => setFormContent(e.target.value)} placeholder="Meeting notes..." rows={10} className="notes-tab__editor" />
             <div className="notes-tab__file-upload">
               <label className="notes-tab__file-upload-btn">
-                📎 Attach Files
+                Attach Files
                 <input type="file" multiple style={{display:'none'}} onChange={(e) => { if (e.target.files) setAttachedFiles(prev => [...prev, ...Array.from(e.target.files!)]); }} />
               </label>
               {attachedFiles.length > 0 && (
@@ -189,7 +238,7 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
                   {attachedFiles.map((f, i) => (
                     <li key={i} className="notes-tab__file-item">
                       <span>{f.name}</span>
-                      <button type="button" onClick={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))} aria-label={'Remove ' + f.name}>×</button>
+                      <button type="button" onClick={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))} aria-label={'Remove ' + f.name}>X</button>
                     </li>
                   ))}
                 </ul>

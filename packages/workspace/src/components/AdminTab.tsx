@@ -451,6 +451,59 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
             </ul>
           )}
         </section>
+
+        {/* Roster Upload Section - also shown in error state */}
+        <section className="admin-tab__section" aria-labelledby="roster-upload-error-heading">
+          <h2 id="roster-upload-error-heading" className="admin-tab__section-title">
+            Roster Upload
+          </h2>
+          <p className="admin-tab__section-desc">
+            Upload a CSV or XLSX file to bulk-add members. Required columns: name, email, role.
+          </p>
+          {rosterState === 'idle' && (
+            <label className="admin-tab__field">
+              <span className="admin-tab__field-label">Select roster file</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.xlsx"
+                onChange={handleRosterFileChange}
+                className="admin-tab__input"
+              />
+              <span className="admin-tab__hint">Accepted formats: .csv, .xlsx</span>
+            </label>
+          )}
+          {rosterState === 'validating' && <p className="admin-tab__loading-indicator">Validating roster file...</p>}
+          {rosterState === 'previewing' && (
+            <div className="admin-tab__roster-preview">
+              <h3 className="admin-tab__subsection-title">Preview ({rosterPreview.length} valid rows)</h3>
+              <ul className="admin-tab__roster-list">
+                {rosterPreview.slice(0, 5).map((row) => (
+                  <li key={row.rowIndex} className="admin-tab__roster-item">
+                    <span>{row.name}</span> - <span>{row.email}</span> - <span>{row.role}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="admin-tab__roster-actions">
+                <button type="button" className="admin-tab__submit" onClick={handleRosterConfirm}>Confirm Import</button>
+                <button type="button" className="admin-tab__cancel-btn" onClick={handleRosterCancel}>Cancel</button>
+              </div>
+            </div>
+          )}
+          {rosterState === 'submitting' && <p className="admin-tab__loading-indicator">Importing members...</p>}
+          {rosterState === 'success' && rosterResult && (
+            <div className="admin-tab__roster-result">
+              <p className="admin-tab__success-message">Successfully added {rosterResult.added} member(s).</p>
+              <button type="button" className="admin-tab__submit" onClick={handleRosterCancel}>Upload Another</button>
+            </div>
+          )}
+          {rosterState === 'error' && (
+            <div className="admin-tab__roster-error">
+              <p className="admin-tab__error-message">{rosterError}</p>
+              <button type="button" className="admin-tab__submit" onClick={handleRosterCancel}>Try Again</button>
+            </div>
+          )}
+        </section>
       </div>
     );
   }

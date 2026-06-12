@@ -780,3 +780,114 @@
     bottom: 12px;
   }
 }
+
+/* Import Button Styles for Notes and Tasks tabs */
+.notes-tab__import-btn,
+.tasks-tab__import-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid #6B8E6B;
+  border-radius: 8px;
+  background: #fff;
+  color: #4A6B4A;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.notes-tab__import-btn:hover,
+.tasks-tab__import-btn:hover {
+  background: #6B8E6B;
+  color: #fff;
+}
+
+.notes-tab__import-section,
+.tasks-tab__import-section {
+  background: #F5F3EE;
+  border: 1px solid #E8E5DE;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.notes-tab__import-section p,
+.tasks-tab__import-section p {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  color: #636E72;
+}
+
+.notes-tab__import-section input[type="file"],
+.tasks-tab__import-section input[type="file"] {
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+}
+
+.notes-tab__import-actions,
+.tasks-tab__import-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.notes-tab__import-actions button,
+.tasks-tab__import-actions button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notes-tab__import-actions button:first-child,
+.tasks-tab__import-actions button:first-child {
+  background: #6B8E6B;
+  color: #fff;
+  border: none;
+}
+
+.notes-tab__import-actions button:first-child:disabled,
+.tasks-tab__import-actions button:first-child:disabled {
+  background: #C8DFC8;
+  cursor: not-allowed;
+}
+
+.notes-tab__import-actions button:last-child,
+.tasks-tab__import-actions button:last-child {
+  background: #fff;
+  color: #636E72;
+  border: 1px solid #E8E5DE;
+}
+
+.notes-tab__import-actions button:last-child:hover,
+.tasks-tab__import-actions button:last-child:hover {
+  background: #F5F3EE;
+}
+
+/* Header layout for import button */
+.notes-tab__header,
+.tasks-tab__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .notes-tab__header,
+  .tasks-tab__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .notes-tab__import-btn,
+  .tasks-tab__import-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
