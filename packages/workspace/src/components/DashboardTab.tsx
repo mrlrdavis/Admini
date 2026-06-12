@@ -314,7 +314,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             {highPriorityTasks.length === 0 ? <p className="dashboard-tab__empty">No high priority tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {highPriorityTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
                     <div className="dashboard-tab__task-left">
                       <span className="dashboard-tab__task-title">{task.title}</span>
                       {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
@@ -331,7 +331,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             {dueTodayTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing due today</p> : (
               <ul className="dashboard-tab__task-list">
                 {dueTodayTasks.map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
                     <div className="dashboard-tab__task-left">
                       <span className="dashboard-tab__task-title">{task.title}</span>
                       {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
@@ -348,7 +348,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             {comingDueTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing coming due</p> : (
               <ul className="dashboard-tab__task-list">
                 {comingDueTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
                     <div className="dashboard-tab__task-left">
                       <span className="dashboard-tab__task-title">{task.title}</span>
                       {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
@@ -365,7 +365,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             {blockedTasks.length === 0 ? <p className="dashboard-tab__empty">No blocked tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {blockedTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__task-item dashboard-tab__task-item--blocked" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item dashboard-tab__task-item--blocked" onClick={() => { localStorage.setItem('admini_expand_task', task.id); onTabChange?.('tasks'); }}>
                     <div className="dashboard-tab__task-left">
                       <span className="dashboard-tab__task-title">{task.title}</span>
                       <div className="dashboard-tab__task-meta">

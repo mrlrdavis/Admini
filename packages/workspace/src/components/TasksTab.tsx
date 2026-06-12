@@ -181,6 +181,15 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     loadTaskList();
   }, [loadTaskList]);
 
+  // Auto-expand a specific task when navigated from dashboard
+  useEffect(() => {
+    const target = localStorage.getItem('admini_expand_task');
+    if (target) {
+      localStorage.removeItem('admini_expand_task');
+      setExpandedTaskIds(new Set([target]));
+    }
+  }, []);
+
   // -------------------------------------------------------------------------
   // Load and merge calendar events
   // -------------------------------------------------------------------------

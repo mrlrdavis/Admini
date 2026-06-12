@@ -527,8 +527,8 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
       {/* Tap Mode */}
       {mode === 'tap' && (() => {
         const dynamicCategories = roster.length > 0
-          ? { ...WORD_BOARD_CATEGORIES, Students: roster.slice(0, 12) }
-          : WORD_BOARD_CATEGORIES;
+          ? { ...tapCategories, Students: roster.slice(0, 12) }
+          : tapCategories;
         return (
         <section className="capture-tab__tap-mode">
           <div className="capture-tab__tap-header">
