@@ -14,6 +14,16 @@ import {
 import type { DashboardTask, ActivityEvent, DashboardKPIs } from '../types';
 import { RecommendationsWidget } from './RecommendationsWidget';
 import { getTodayCalendarEvents, type CalendarEvent } from '../services/googleIntegrationService';
+import {
+  parseLocalDate as parseLocalDateShared,
+  getTimeGreeting as getTimeGreetingShared,
+  filterTodayEvents,
+  defaultRegistry,
+  formatActivityAction as formatActivityActionShared,
+} from '@admini/shared';
+import { getLocalEvents } from '../services/localEventService';
+import { mergeEvents } from '../services/calendarMerge';
+import { buildActivityFeed } from '../services/activityFeed';
 // BadgesSection and BadgesPanel removed - replaced with compact achievement indicator
 
 // Re-export sortByUrgency for testing and backward compatibility
@@ -37,47 +47,21 @@ export interface DashboardTabProps {
 
 /**
  * Returns a time-appropriate greeting based on the current hour.
- * 5-11: Good morning
- * 12-17: Good afternoon
- * 18-4: Good evening
+ * Delegates to @admini/shared. Kept exported for backward compatibility.
  */
 export function getTimeGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour <= 11) return 'Good morning';
-  if (hour >= 12 && hour <= 17) return 'Good afternoon';
-  return 'Good evening';
+  return getTimeGreetingShared();
 }
 
-/**
- * Parse a date string as a LOCAL date (ignoring timezone offset).
- * Prevents the "day before" bug when UTC dates are displayed in local time.
- */
-function parseLocalDate(dateStr: string): Date {
-  const datePart = dateStr.split('T')[0] ?? dateStr;
-  const [y, m, d] = datePart.split('-').map(Number);
-  return new Date(y!, m! - 1, d!);
-}
+// parseLocalDate is now imported from @admini/shared (as parseLocalDateShared).
+// Local alias for use in this file:
+const parseLocalDate = parseLocalDateShared;
 
 
 
-/**
- * Formats an activity event into a human-readable action string.
- */
-function formatActivityAction(event: ActivityEvent): string {
-  const entityLabel = event.entityType === 'capture' ? 'capture'
-    : event.entityType === 'task' ? 'task'
-    : event.entityType === 'integration' ? 'integration'
-    : event.entityType === 'invitation' ? 'invitation'
-    : event.entityType;
-
-  const actionLabel = event.action === 'create' ? 'Created'
-    : event.action === 'update' ? 'Updated'
-    : event.action === 'delete' ? 'Deleted'
-    : event.action === 'accept' ? 'Accepted'
-    : event.action;
-
-  return `${actionLabel} a ${entityLabel}`;
-}
+// formatActivityAction is now imported from @admini/shared (as formatActivityActionShared).
+// Local alias for use in this file:
+const formatActivityAction = formatActivityActionShared;
 
 // ---------------------------------------------------------------------------
 // Component
@@ -128,18 +112,16 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   }, [fetchData]);
 
   useEffect(() => {
+    const localEvents = getLocalEvents();
     getTodayCalendarEvents().then(googleEvents => {
-      const localEvents: CalendarEvent[] = JSON.parse(localStorage.getItem('admini_local_events') || '[]').filter((e: any) => {
-        if (!e.start) return false;
-        return new Date(e.start).toDateString() === new Date().toDateString();
-      });
-      setCalendarEvents([...googleEvents, ...localEvents]);
+      const merged = mergeEvents(googleEvents, localEvents);
+      const todayEvents = filterTodayEvents(merged);
+      setCalendarEvents(todayEvents as CalendarEvent[]);
     }).catch(() => {
-      const localEvents: CalendarEvent[] = JSON.parse(localStorage.getItem('admini_local_events') || '[]').filter((e: any) => {
-        if (!e.start) return false;
-        return new Date(e.start).toDateString() === new Date().toDateString();
-      });
-      setCalendarEvents(localEvents);
+      // Google fetch failed - degrade gracefully with local events only
+      const merged = mergeEvents([], localEvents);
+      const todayEvents = filterTodayEvents(merged);
+      setCalendarEvents(todayEvents as CalendarEvent[]);
     });
   }, []);
 
@@ -167,38 +149,12 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
     [events],
   );
 
-  /** Generate activity items from tasks (assigned tasks, completed tasks) */
-  const taskActivity = useMemo(() => {
-    return tasks
-      .filter(t => t.assignedTo || t.status === 'completed')
-      .slice(0, 10)
-      .map(t => ({
-        id: 'task-' + t.id,
-        action: t.status === 'completed' ? 'completed' : 'assigned',
-        entityType: 'task',
-        entityId: t.id,
-        createdAt: t.updatedAt || t.createdAt,
-        detail: t.status === 'completed'
-          ? `"${t.title}" was completed`
-          : `"${t.title}" assigned to ${t.assignedTo}`,
-      }));
-  }, [tasks]);
 
-  /** Combined activity: real events + task-derived activity, sorted reverse-chronologically */
-  const allActivity = useMemo(() => {
-    return [
-      ...sortedEvents.map(e => ({
-        id: e.id,
-        detail: `${formatActivityAction(e)}`,
-        createdAt: e.createdAt,
-      })),
-      ...taskActivity.map(a => ({
-        id: a.id,
-        detail: a.detail,
-        createdAt: a.createdAt,
-      })),
-    ].sort((a, b) => b.createdAt > a.createdAt ? 1 : -1).slice(0, 10);
-  }, [sortedEvents, taskActivity]);
+  /** Activity feed built using buildActivityFeed from the activityFeed service. */
+  const activityFeedItems = useMemo(
+    () => buildActivityFeed(events, tasks),
+    [events, tasks],
+  );
 
   /** Events to display: first 3 by default, up to 20 when expanded. */
   const visibleEvents = useMemo(
@@ -208,21 +164,10 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
 
   // Suppress unused variable warnings - kept for backward compatibility
   void visibleEvents;
-  void allActivity;
   void onNavigateToTab;
-
-  /** Generate activity items from tasks when no sync_events exist */
-  const taskActivityFallback = useMemo(() => {
-    if (sortedEvents.length > 0) return [];
-    return tasks
-      .slice(0, 5)
-      .map((t) => ({
-        id: t.id,
-        action: t.assignedTo ? `Task assigned to ${t.assignedTo}` : `Task created`,
-        detail: t.title,
-        time: t.createdAt,
-      }));
-  }, [tasks, sortedEvents]);
+  void defaultRegistry;
+  void dashCalMonth;
+  void kpis;
 
   // -------------------------------------------------------------------------
   // Loading state
@@ -415,7 +360,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                   }).map(ev => (
                     <div key={ev.id} className="dashboard-tab__sched-event">
                       <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
-                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} style={{marginLeft:"auto",background:"none",border:"none",color:"#D63031",cursor:"pointer",fontSize:"0.7rem"}}>�</button> : null}
+                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} style={{marginLeft:"auto",background:"none",border:"none",color:"#D63031",cursor:"pointer",fontSize:"0.7rem"}}>Ã¯Â¿Â½</button> : null}
                     </div>
                   ))}
                 </div>
@@ -426,20 +371,12 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           <section className="dashboard-tab__card dashboard-tab__card--activity">
             <h2 className="dashboard-tab__card-title">Activity Feed</h2>
             <ul className="dashboard-tab__feed-list">
-              {sortedEvents.length > 0 ? sortedEvents.slice(0,7).map(ev => (
+              {activityFeedItems.map(ev => (
                 <li key={ev.id} className="dashboard-tab__feed-item">
                   <span className="dashboard-tab__feed-icon">{ev.action==='create'?'\u2713':'\u25CF'}</span>
                   <div className="dashboard-tab__feed-body">
                     <span>{formatActivityAction(ev)}</span>
                     <span className="dashboard-tab__feed-time">{new Date(ev.createdAt).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>
-                  </div>
-                </li>
-              )) : taskActivityFallback.slice(0,7).map(item => (
-                <li key={item.id} className="dashboard-tab__feed-item">
-                  <span className="dashboard-tab__feed-icon">{'\u2713'}</span>
-                  <div className="dashboard-tab__feed-body">
-                    <span>{item.action}: {item.detail}</span>
-                    <span className="dashboard-tab__feed-time">{new Date(item.time).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span>
                   </div>
                 </li>
               ))}

@@ -3,9 +3,14 @@
  * 
  * Uses the Google OAuth provider_token from Supabase session to call
  * Google Calendar, Gmail, and Classroom APIs directly from the client.
+ * 
+ * Integrates with the merged event pipeline (calendarMerge.ts) to provide
+ * unified views of Google Calendar + local events across Dashboard,
+ * Tasks Calendar, and Mini Calendar.
  */
 
 import { getClient } from './getClient';
+import { mergeEvents, type LocalEvent, type MergedEvent } from './calendarMerge';
 
 // ---------------------------------------------------------------------------
 // Token Management
@@ -48,11 +53,13 @@ export interface CalendarEvent {
   summary: string;
   start: string;
   end: string;
+  source?: 'google' | 'local';
   location?: string;
 }
 
 /**
  * Fetch today's calendar events from Google Calendar.
+ * Returns empty array on any failure (graceful degradation).
  */
 export async function getTodayCalendarEvents(): Promise<CalendarEvent[]> {
   const token = await getGoogleToken();
@@ -81,6 +88,7 @@ export async function getTodayCalendarEvents(): Promise<CalendarEvent[]> {
 
 /**
  * Fetch calendar events for a date range.
+ * Returns empty array on any failure (graceful degradation).
  */
 export async function getCalendarEvents(startDate: Date, endDate: Date): Promise<CalendarEvent[]> {
   const token = await getGoogleToken();
@@ -102,6 +110,41 @@ export async function getCalendarEvents(startDate: Date, endDate: Date): Promise
     }));
   } catch { return []; }
 }
+
+// ---------------------------------------------------------------------------
+// Merged Event Pipeline
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch today's Google Calendar events and merge them with local events.
+ * Implements the merged event pipeline for Dashboard Today's Schedule.
+ * 
+ * On Google Calendar API failure, gracefully degrades to local events only
+ * (Requirements 13.1, 13.2, 13.3).
+ */
+export async function getTodayMergedEvents(localEvents: LocalEvent[]): Promise<MergedEvent[]> {
+  const googleEvents = await getTodayCalendarEvents();
+  return mergeEvents(googleEvents, localEvents);
+}
+
+/**
+ * Fetch Google Calendar events for a date range and merge with local events.
+ * Used by Tasks Calendar View and Mini Calendar.
+ * 
+ * On Google Calendar API failure, gracefully degrades to local events only
+ * (Requirements 13.1, 13.2, 13.3).
+ */
+export async function getMergedCalendarEvents(
+  startDate: Date,
+  endDate: Date,
+  localEvents: LocalEvent[],
+): Promise<MergedEvent[]> {
+  const googleEvents = await getCalendarEvents(startDate, endDate);
+  return mergeEvents(googleEvents, localEvents);
+}
+
+// Re-export merge types for convenience
+export type { LocalEvent, MergedEvent };
 
 // ---------------------------------------------------------------------------
 // Gmail API

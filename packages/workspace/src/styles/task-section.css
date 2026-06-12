@@ -1,0 +1,128 @@
+/* --------------------------------------------------------------------------
+   TaskSection - Dashboard task cards with category tags
+   --------------------------------------------------------------------------
+   Uses design tokens from @admini/ui/styles.css
+   Requirements: 1.2, 1.5, 1.6, 1.7
+   -------------------------------------------------------------------------- */
+
+.task-section {
+  margin-bottom: var(--space-lg, 24px);
+}
+
+.task-section__title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text, #2c3e2d);
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.task-section__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-section__card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d4d0c8);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: box-shadow 150ms ease;
+}
+
+.task-section__card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.task-section__card--blocked {
+  border-left: 3px solid var(--color-category-red, #D63031);
+}
+
+.task-section__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.task-section__task-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text, #2c3e2d);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-section__scheduled-time {
+  font-weight: 400;
+  color: var(--color-text-muted, #5a6b5c);
+  font-size: 0.8125rem;
+}
+
+.task-section__category-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.task-section__block-reason {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-category-red, #D63031);
+  font-style: italic;
+}
+
+.task-section__stale-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--color-category-red, #D63031);
+}
+
+.task-section__progress {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #5a6b5c);
+}
+
+.task-section__actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.task-section__action-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border, #d4d0c8);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #5a6b5c);
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.task-section__action-btn:hover {
+  background: var(--color-sage, #6B8E6B);
+  color: #ffffff;
+  border-color: var(--color-sage, #6B8E6B);
+}
+
+.task-section__action-btn:focus-visible {
+  outline: 2px solid var(--color-sage, #6B8E6B);
+  outline-offset: 2px;
+}

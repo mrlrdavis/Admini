@@ -1,0 +1,207 @@
+/* --------------------------------------------------------------------------
+   AchievementsModal - Overlay showing earned/locked badges with progress bar
+   --------------------------------------------------------------------------
+   Uses design tokens from @admini/ui/styles.css
+   Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
+   -------------------------------------------------------------------------- */
+
+/* Backdrop */
+.achievements-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 60px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.achievements-modal__backdrop--opening,
+.achievements-modal__backdrop--open {
+  opacity: 1;
+}
+
+.achievements-modal__backdrop--closing {
+  opacity: 0;
+}
+
+/* Modal container */
+.achievements-modal {
+  background: var(--color-surface, #ffffff);
+  border-radius: 16px;
+  width: min(480px, 92vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  transform: translateY(-10px);
+  opacity: 0;
+  transition: transform 150ms ease, opacity 150ms ease;
+  outline: none;
+}
+
+.achievements-modal--opening,
+.achievements-modal--open {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.achievements-modal--closing {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+/* Header */
+.achievements-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.achievements-modal__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text, #1a1a1a);
+}
+
+.achievements-modal__subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #5a6b5c);
+  margin: 2px 0 0;
+}
+
+.achievements-modal__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-muted, #5a6b5c);
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 150ms ease;
+}
+
+.achievements-modal__close:hover {
+  background: var(--color-bg, #F5F3EE);
+}
+
+.achievements-modal__close:focus-visible {
+  outline: 2px solid var(--color-sage, #6B8E6B);
+  outline-offset: 2px;
+}
+
+/* Progress bar */
+.achievements-modal__progress {
+  margin-bottom: 20px;
+}
+
+.achievements-modal__progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #5a6b5c);
+  margin-bottom: 6px;
+}
+
+.achievements-modal__progress-fraction {
+  color: #E6A817;
+  font-weight: 700;
+}
+
+.achievements-modal__progress-bar {
+  height: 8px;
+  background: #E8E5DE;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.achievements-modal__progress-fill {
+  height: 100%;
+  background: #E6A817;
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+
+/* Badge sections */
+.achievements-modal__section {
+  margin-bottom: 20px;
+}
+
+.achievements-modal__section-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted, #5a6b5c);
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.achievements-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Badge rows */
+.achievements-modal__badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+.achievements-modal__badge--earned {
+  background: #FDFCF5;
+  border: 1px solid #F0E9D0;
+}
+
+.achievements-modal__badge--locked {
+  background: #F8F8F6;
+  border: 1px solid #EEEDEA;
+  opacity: 0.7;
+}
+
+.achievements-modal__badge-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg, #F5F3EE);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.achievements-modal__badge-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.achievements-modal__badge-name {
+  font-size: 0.875rem;
+  color: var(--color-text, #1a1a1a);
+}
+
+.achievements-modal__badge-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #5a6b5c);
+}
+
+.achievements-modal__badge-date {
+  font-size: 0.6875rem;
+  color: #E6A817;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

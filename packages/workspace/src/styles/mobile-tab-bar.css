@@ -1,0 +1,94 @@
+﻿/* --------------------------------------------------------------------------
+   MobileTabBar - Fixed bottom navigation for mobile viewports
+   --------------------------------------------------------------------------
+   Uses design tokens from @admini/ui/styles.css
+   Visible only at/below 900px viewport width (CSS media query).
+   Requirements: 1.4, 4.4
+   -------------------------------------------------------------------------- */
+
+.mobile-tab-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--color-surface, #ffffff);
+  border-top: 1px solid var(--color-border, #d4d0c8);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: stretch;
+  justify-content: space-around;
+}
+
+/* Show tab bar only on mobile viewports (<=900px) */
+@media (max-width: 900px) {
+  .mobile-tab-bar {
+    display: flex;
+  }
+}
+
+.mobile-tab-bar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  padding: 8px 4px 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted, #5a6b5c);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--transition-fast, 150ms ease);
+  min-height: 48px;
+}
+
+.mobile-tab-bar__item:hover {
+  color: var(--color-text, #2c3e2d);
+}
+
+.mobile-tab-bar__item--active {
+  color: var(--color-sage, #6B8E6B);
+}
+
+.mobile-tab-bar__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  width: 24px;
+  height: 24px;
+  transition: transform var(--transition-fast, 150ms ease);
+}
+
+.mobile-tab-bar__item--active .mobile-tab-bar__icon {
+  transform: scale(1.1);
+}
+
+.mobile-tab-bar__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  font-weight: 500;
+}
+
+.mobile-tab-bar__item--active .mobile-tab-bar__label {
+  font-weight: 600;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-tab-bar__item,
+  .mobile-tab-bar__icon {
+    transition-duration: 0ms !important;
+  }
+
+  .mobile-tab-bar__item--active .mobile-tab-bar__icon {
+    transform: none;
+  }
+}

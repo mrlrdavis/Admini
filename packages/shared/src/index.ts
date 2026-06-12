@@ -1,4 +1,4 @@
-export type AdminiRole = 'admin' | 'principal' | 'teacher' | 'staff';
+﻿export type AdminiRole = 'admin' | 'principal' | 'teacher' | 'staff';
 export type AppSurface = 'desktop' | 'mobile';
 export type RetentionKind = 'captures' | 'tasks' | 'observations';
 
@@ -212,3 +212,20 @@ export interface RecommendationProvider {
 export { clearAdminiBrowserState, createIndexedDbStorage } from './browser-storage';
 export { mapSupabaseError, withFriendlyError } from './supabase-errors';
 export type { SupabaseErrorLike } from './supabase-errors';
+
+export { parseLocalDate, isLocalDate, filterTodayEvents } from './dateUtils';
+export type { CalendarEvent } from './types';
+
+export {
+  getCategoryStyle,
+  getAllCategories,
+  createRegistry,
+  defaultCategoryConfigs,
+  defaultRegistry,
+} from './categoryRegistry';
+export type { CategoryConfig, CategoryRegistry } from './categoryRegistry';
+
+export { getTimeGreeting, getTimeGreetingForHour } from './greetingUtils';
+
+export { formatActivityAction } from './activityUtils';
+export type { ActivityEvent } from './types';

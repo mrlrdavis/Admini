@@ -15,6 +15,7 @@ import { SkeletonCard } from '@admini/ui';
 import { showToast } from './Toast';
 import { unlockBadge } from './BadgesPanel';
 import { getClient } from '../services/getClient';
+import { generateTaskFromContent, AITaskServiceError } from '../services/aiTaskService';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -98,6 +99,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [taskModalPriority, setTaskModalPriority] = useState<'low'|'normal'|'high'|'urgent'>('normal');
   const [taskModalAssignee, setTaskModalAssignee] = useState('');
   const [taskModalSaving, setTaskModalSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Meeting Notes state
   const [notes, setNotes] = useState<MeetingNote[]>([]);
@@ -710,14 +712,37 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
             <button
               type="button"
               className="capture-tab__task-suggestion-btn"
-              onClick={() => {
-                setTaskModalTitle(lastCaptureText ? lastCaptureText.slice(0, 100) : '');
-                setTaskModalDesc(lastCaptureText && lastCaptureText.length > 100 ? lastCaptureText : '');
-                setTaskModalDue('');
-                setTaskModalPriority('normal');
-                setTaskModalAssignee('');
-                setTaskModalOpen(true);
+              onClick={async () => {
                 setShowTaskSuggestion(false);
+                setAiLoading(true);
+                setTaskModalOpen(true);
+                try {
+                  const suggestion = await generateTaskFromContent(lastCaptureText || '', 'capture');
+                  setTaskModalTitle(suggestion.title);
+                  setTaskModalDesc(suggestion.description);
+                  setTaskModalDue(suggestion.dueDate || '');
+                  setTaskModalPriority(suggestion.priority || 'normal');
+                  setTaskModalAssignee(suggestion.assignee || '');
+                } catch (err) {
+                  if (err instanceof AITaskServiceError) {
+                    showToast(err.message, { action: { label: 'Create manually', onClick: () => {
+                      setTaskModalTitle(lastCaptureText ? lastCaptureText.slice(0, 100) : '');
+                      setTaskModalDesc(lastCaptureText && lastCaptureText.length > 100 ? lastCaptureText : '');
+                      setTaskModalDue('');
+                      setTaskModalPriority('normal');
+                      setTaskModalAssignee('');
+                    }}});
+                  } else {
+                    showToast('Failed to generate task suggestions');
+                  }
+                  setTaskModalTitle(lastCaptureText ? lastCaptureText.slice(0, 100) : '');
+                  setTaskModalDesc(lastCaptureText && lastCaptureText.length > 100 ? lastCaptureText : '');
+                  setTaskModalDue('');
+                  setTaskModalPriority('normal');
+                  setTaskModalAssignee('');
+                } finally {
+                  setAiLoading(false);
+                }
               }}
             >
               Create Task
@@ -796,6 +821,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
         <div className="capture-tab__task-modal-overlay" onClick={() => setTaskModalOpen(false)}>
           <div className="capture-tab__task-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="capture-tab__task-modal-title">Create Task from Capture</h2>
+            {aiLoading && <p className="capture-tab__task-modal-loading">Generating AI suggestions...</p>}
             <div className="capture-tab__task-modal-form">
               <label>Title<input type="text" value={taskModalTitle} onChange={(e) => setTaskModalTitle(e.target.value)} className="capture-tab__task-modal-input" /></label>
               <label>Description<textarea value={taskModalDesc} onChange={(e) => setTaskModalDesc(e.target.value)} className="capture-tab__task-modal-textarea" /></label>
@@ -830,7 +856,7 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
                   setTaskModalOpen(false);
                   showToast("Task created", { action: { label: "View on Calendar", onClick: () => { localStorage.setItem("admini_tasks_view", "calendar"); window.dispatchEvent(new CustomEvent("admini-navigate", { detail: "tasks" })); } } });
                 } catch {
-                  showToast("Failed to create task");
+                  showToast("Failed to create task", { action: { label: "Retry", onClick: () => { /* re-trigger save with preserved fields */ document.querySelector<HTMLButtonElement>(".capture-tab__task-modal-actions button:last-child")?.click(); } } });
                 } finally {
                   setTaskModalSaving(false);
                 }

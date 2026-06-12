@@ -30,14 +30,20 @@
   color-scheme: light;
 
   /* Sage/Limestone Color Palette */
-  --color-sage: #87a878;
-  --color-sage-deep: #54745c;
+  --color-sage: #6B8E6B;
+  --color-sage-deep: #4A6B4A;
   --color-sage-soft: #b5ccab;
   --color-limestone: #c8c2b4;
   --color-limestone-light: #e8e4dc;
 
+  /* Category Colors */
+  --color-category-orange: #E8A838;
+  --color-category-yellow: #E6C84D;
+  --color-category-green: #7BAF7B;
+  --color-category-red: #D63031;
+
   /* Semantic Colors */
-  --color-bg: #f9f8f6;
+  --color-bg: #F5F3EE;
   --color-surface: #ffffff;
   --color-surface-muted: #f3f1ec;
   --color-text: #2c3e2d;

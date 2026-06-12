@@ -1,0 +1,36 @@
+﻿/* --------------------------------------------------------------------------
+   QuickActionsBar - Pill-shaped shortcut buttons
+   --------------------------------------------------------------------------
+   Uses design tokens from @admini/ui/styles.css
+   Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
+   -------------------------------------------------------------------------- */
+
+.quick-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quick-actions-bar__pill {
+  padding: 6px 14px;
+  border: 1.5px solid var(--color-sage, #6B8E6B);
+  border-radius: 9999px;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-sage-deep, #4A6B4A);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.quick-actions-bar__pill:hover {
+  background: var(--color-sage, #6B8E6B);
+  color: #ffffff;
+}
+
+.quick-actions-bar__pill:focus-visible {
+  outline: 2px solid var(--color-sage, #6B8E6B);
+  outline-offset: 2px;
+}

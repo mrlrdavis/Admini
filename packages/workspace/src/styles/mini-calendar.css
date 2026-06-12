@@ -1,0 +1,110 @@
+﻿/* ==========================================================================
+   MiniCalendar - Compact month grid widget
+   Requirements: 5.1, 5.2, 5.3, 5.4
+   ========================================================================== */
+
+.mini-calendar {
+  background: var(--ws-color-white, #ffffff);
+  border-radius: var(--ws-radius-card, 12px);
+  border: 1px solid var(--ws-color-border, #e8e5de);
+  padding: var(--ws-space-md, 16px);
+}
+
+/* Header: month label + nav arrows */
+.mini-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mini-calendar__month-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ws-color-text, #2d3436);
+}
+
+.mini-calendar__nav {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: var(--ws-color-text-muted, #636e72);
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.mini-calendar__nav:hover {
+  background: var(--ws-color-limestone, #f5f3ee);
+}
+
+.mini-calendar__nav:focus-visible {
+  outline: 2px solid var(--ws-color-sage, #6b8e6b);
+  outline-offset: 2px;
+}
+
+/* Grid: 7-column layout */
+.mini-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+/* Day-of-week headers */
+.mini-calendar__dow {
+  font-weight: 600;
+  color: var(--ws-color-text-muted, #636e72);
+  padding: 4px 0;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Day cells */
+.mini-calendar__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 auto;
+  border-radius: 50%;
+  position: relative;
+  color: var(--ws-color-text, #2d3436);
+  font-size: 0.75rem;
+}
+
+/* Muted days from surrounding months */
+.mini-calendar__day--muted {
+  color: var(--ws-color-text-muted, #636e72);
+  opacity: 0.4;
+}
+
+/* Today: Sage Green filled circle */
+.mini-calendar__day--today {
+  background: var(--ws-color-sage, #6b8e6b);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Task-day dot indicator */
+.mini-calendar__day--has-tasks::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ws-color-sage, #6b8e6b);
+}
+
+/* When today also has tasks, the dot should contrast against the green bg */
+.mini-calendar__day--today.mini-calendar__day--has-tasks::after {
+  background: #ffffff;
+}

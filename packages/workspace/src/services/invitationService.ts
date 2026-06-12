@@ -1,5 +1,11 @@
-import { getClient } from './getClient';
+﻿import { getClient } from './getClient';
 import type { AdminiRole, OrgInvitation } from '../types';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const MAX_SEND_RETRIES = 3;
 
 // ---------------------------------------------------------------------------
 // Internal Types
@@ -16,6 +22,22 @@ type DbInvitation = {
   created_at: string;
   expires_at: string;
 };
+
+// ---------------------------------------------------------------------------
+// Errors
+// ---------------------------------------------------------------------------
+
+export class InvitationServiceError extends Error {
+  public readonly code: string;
+  public readonly retryable: boolean;
+
+  constructor(message: string, code = 'INVITATION_ERROR', retryable = false) {
+    super(message);
+    this.name = 'InvitationServiceError';
+    this.code = code;
+    this.retryable = retryable;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -44,6 +66,14 @@ function wrapError(message: string, cause: unknown): Error {
   return new Error(`${message}: ${errMsg}`);
 }
 
+function getApiBase(): string {
+  return (
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) ||
+    ''
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Service Functions
 // ---------------------------------------------------------------------------
@@ -68,17 +98,135 @@ export async function listInvitations(orgId: string): Promise<OrgInvitation[]> {
 }
 
 /**
- * Create a new invitation for a user to join an organization.
+ * Get only the pending invitations for an organization.
  */
-/**
- * Generate a unique token hash for invitation links.
- */
-function generateTokenHash(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+export async function getPendingInvitations(organizationId: string): Promise<OrgInvitation[]> {
+  const client = getClient();
+  try {
+    const { data, error } = await client
+      .from('invitations')
+      .select('id, organization_id, email, role, status, created_at, expires_at')
+      .eq('organization_id', organizationId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .returns<DbInvitation[]>();
+    if (error) throw error;
+    return (data ?? []).map(mapInvitation);
+  } catch (err) {
+    throw wrapError('Failed to fetch pending invitations', err);
+  }
 }
 
+/**
+ * Send an invitation email via Cloudflare Worker (Resend API).
+ * Retries up to MAX_SEND_RETRIES times before throwing a "Contact support" error.
+ *
+ * Staff Invitation Lifecycle:
+ *  1. Creates the invitation record in Supabase
+ *  2. Sends email via Cloudflare Worker endpoint
+ *  3. Retries on transient failure (max 3 attempts)
+ */
+export async function sendInvitation(
+  email: string,
+  role: AdminiRole,
+  message?: string,
+): Promise<OrgInvitation> {
+  const client = getClient();
+
+  // Resolve current user + org context
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new InvitationServiceError('Authentication required to send invitations.', 'AUTH_REQUIRED');
+  }
+
+  // Get the user's organization from memberships
+  const { data: membership, error: memberError } = await client
+    .from('organization_memberships')
+    .select('organization_id')
+    .eq('profile_id', userData.user.id)
+    .single();
+  if (memberError || !membership) {
+    throw new InvitationServiceError('Could not determine organization.', 'NO_ORG');
+  }
+  const orgId = membership.organization_id;
+
+  // Create the invitation record via RPC
+  const { data, error } = await client.rpc('create_invitation', {
+    target_organization_id: orgId,
+    invite_email: email,
+    invite_role: role,
+  });
+  if (error) {
+    throw new InvitationServiceError(
+      `Failed to create invitation: ${error.message}`,
+      'CREATE_FAILED',
+    );
+  }
+
+  const result = Array.isArray(data) ? data[0] : data;
+  const invitationToken = result?.invitation_token || '';
+
+  // Resolve display names for the email
+  const inviterName =
+    userData.user.user_metadata?.display_name || userData.user.email || 'A team member';
+  const { data: orgData } = await client
+    .from('organizations')
+    .select('name')
+    .eq('id', orgId)
+    .single();
+  const schoolName = orgData?.name || 'your school';
+
+  // Send the email via Cloudflare Worker with retry logic
+  const apiBase = getApiBase();
+  if (apiBase) {
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= MAX_SEND_RETRIES; attempt++) {
+      try {
+        const response = await fetch(`${apiBase}/api/invitations/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            inviterName,
+            schoolName,
+            role,
+            token: invitationToken,
+            message,
+          }),
+        });
+        if (response.ok) {
+          break; // success
+        }
+        lastError = new Error(`Email API returned ${response.status}: ${response.statusText}`);
+      } catch (err) {
+        lastError = err;
+      }
+
+      // If we've exhausted retries, throw contact-support error
+      if (attempt === MAX_SEND_RETRIES) {
+        throw new InvitationServiceError(
+          'Unable to send invitation email after multiple attempts. Please contact support.',
+          'EMAIL_SEND_EXHAUSTED',
+          false,
+        );
+      }
+    }
+  }
+
+  return {
+    id: result?.invitation_id || '',
+    email,
+    role,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  };
+}
+
+/**
+ * Create a new invitation for a user to join an organization.
+ * (Legacy function - retained for backward compatibility. Prefer sendInvitation.)
+ */
 export async function createInvitation(
   orgId: string,
   email: string,
@@ -86,7 +234,6 @@ export async function createInvitation(
 ): Promise<OrgInvitation> {
   const client = getClient();
   try {
-    // Use the security-definer RPC function which bypasses RLS
     const { data, error } = await client.rpc('create_invitation', {
       target_organization_id: orgId,
       invite_email: email,
@@ -99,21 +246,35 @@ export async function createInvitation(
 
     // Fire-and-forget: send invitation email via API worker
     try {
-      const apiBase = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) || '';
+      const apiBase = getApiBase();
       if (apiBase) {
         const { data: userData } = await client.auth.getUser();
-        const inviterName = userData?.user?.user_metadata?.display_name || userData?.user?.email || 'A team member';
-        const { data: orgData } = await client.from('organizations').select('name').eq('id', orgId).single();
+        const inviterName =
+          userData?.user?.user_metadata?.display_name ||
+          userData?.user?.email ||
+          'A team member';
+        const { data: orgData } = await client
+          .from('organizations')
+          .select('name')
+          .eq('id', orgId)
+          .single();
         const schoolName = orgData?.name || 'your school';
         fetch(apiBase + '/api/invitations/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, inviterName, schoolName, role, token: invitationToken }),
+          body: JSON.stringify({
+            email,
+            inviterName,
+            schoolName,
+            role,
+            token: invitationToken,
+          }),
         }).catch(() => {});
       }
-    } catch { /* best-effort */ }
+    } catch {
+      /* best-effort */
+    }
 
-    // Return a minimal OrgInvitation from the RPC result
     return {
       id: result?.invitation_id || '',
       email,
@@ -130,17 +291,14 @@ export async function createInvitation(
 /**
  * Revoke a pending invitation by setting its status to 'revoked'.
  */
-export async function revokeInvitation(invitationId: string): Promise<OrgInvitation> {
+export async function revokeInvitation(invitationId: string): Promise<void> {
   const client = getClient();
   try {
-    const { data, error } = await client
+    const { error } = await client
       .from('invitations')
       .update({ status: 'revoked' as InvitationStatus })
-      .eq('id', invitationId)
-      .select('id, organization_id, email, role, status, created_at, expires_at')
-      .single<DbInvitation>();
+      .eq('id', invitationId);
     if (error) throw error;
-    return mapInvitation(data);
   } catch (err) {
     throw wrapError('Failed to revoke invitation', err);
   }

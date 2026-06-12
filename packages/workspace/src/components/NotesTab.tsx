@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { listMeetingNotes, createMeetingNote, updateMeetingNote, deleteMeetingNote, type MeetingNote } from '../services/meetingNotesService';
 import { showToast } from './Toast';
+import { generateTaskFromContent, AITaskServiceError } from '../services/aiTaskService';
 
 const MEETING_TYPES = [
   'Observation Pre-Conference',
@@ -162,15 +163,17 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
                   <div className="notes-tab__note-actions">
                     <button type="button" onClick={() => handleEdit(note)}>Edit</button>
                     <button type="button" onClick={async () => {
-                      const apiBase = (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) || "";
-                      if (!apiBase) { showToast("AI not configured"); return; }
+                      showToast("Generating task from note...");
                       try {
-                        const res = await fetch(apiBase + "/api/ai/task-suggestions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redactedText: note.body || "", tokenCount: (note.body || "").split(" ").length }) });
-                        const result = await res.json() as any;
-                        if (result.ok && result.data?.tasks?.length > 0) {
-                          showToast("Suggested: " + result.data.tasks[0].title, { action: { label: "Create", onClick: () => onTabChange?.("tasks") } });
-                        } else { showToast("No tasks identified"); }
-                      } catch { showToast("Failed to analyze note"); }
+                        const suggestion = await generateTaskFromContent(note.body || "", "note");
+                        showToast("Suggested: " + suggestion.title, { action: { label: "Create", onClick: () => onTabChange?.("tasks") } });
+                      } catch (err) {
+                        if (err instanceof AITaskServiceError) {
+                          showToast(err.message, { action: { label: "Create manually", onClick: () => onTabChange?.("tasks") } });
+                        } else {
+                          showToast("Failed to analyze note");
+                        }
+                      }
                     }}>Create Task from Note</button>
                     <button type="button" onClick={() => handleDelete(note.id)}>Delete</button>
                   </div>

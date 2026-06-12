@@ -1,0 +1,87 @@
+/* --------------------------------------------------------------------------
+   OverdueList - List of overdue tasks
+   --------------------------------------------------------------------------
+   Uses design tokens from @admini/ui/styles.css
+   Requirements: 9.3
+   -------------------------------------------------------------------------- */
+
+.overdue-list {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d4d0c8);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.overdue-list__title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-category-red, #D63031);
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.overdue-list__title-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.overdue-list__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-category-red, #D63031);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.overdue-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overdue-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 3px solid var(--color-category-red, #D63031);
+  background: rgba(214, 48, 49, 0.04);
+}
+
+.overdue-list__item-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text, #2c3e2d);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overdue-list__item-due {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-category-red, #D63031);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.overdue-list__empty {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #5a6b5c);
+  font-style: italic;
+  margin: 0;
+}

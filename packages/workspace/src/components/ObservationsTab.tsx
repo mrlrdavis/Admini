@@ -3,6 +3,7 @@ import { saveCapture } from '../services/captureService';
 import { showToast } from './Toast';
 import { sendEmail } from '../services/googleIntegrationService';
 import { unlockBadge } from './BadgesPanel';
+import { generateTaskFromContent, AITaskServiceError } from '../services/aiTaskService';
 
 // Types
 interface Observation {
@@ -463,6 +464,20 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
                   <button type="button" onClick={() => handleEdit(obs)}>Edit</button>
                   <button type="button" onClick={() => handleShare(obs)}>Share</button>
                   <button type="button" onClick={() => handleDownload(obs)}>Download</button>
+                  <button type="button" onClick={async () => {
+                    showToast("Generating task from observation...");
+                    try {
+                      const obsContent = `[${obs.observeeType}] ${obs.name} (${obs.category}): ${obs.note}`;
+                      const suggestion = await generateTaskFromContent(obsContent, 'observation');
+                      showToast("Suggested task: " + suggestion.title, { action: { label: "View", onClick: () => {} } });
+                    } catch (err) {
+                      if (err instanceof AITaskServiceError) {
+                        showToast(err.message, { action: { label: "Create manually", onClick: () => {} } });
+                      } else {
+                        showToast("Failed to generate task from observation");
+                      }
+                    }
+                  }}>Create Task</button>
                   <button type="button" className="observations-tab__delete-btn" onClick={() => handleDelete(obs.id)}>Delete</button>
                 </div>
               </li>

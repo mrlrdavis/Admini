@@ -1,10 +1,16 @@
-// Components
+﻿// Components
+export { MobileTabBar, filterTabsByRole as filterMobileTabsByRole } from './components/MobileTabBar';
+export type { MobileTabBarProps, MobileTabBarTabItem } from './components/MobileTabBar';
+export { DesktopSidebar, filterTabsByRole } from './components/DesktopSidebar';
+export type { DesktopSidebarProps, DesktopSidebarTabItem } from './components/DesktopSidebar';
+export { NavigationRenderer, useIsDesktop, DEFAULT_TABS } from './components/NavigationRenderer';
+export type { NavigationRendererProps } from './components/NavigationRenderer';
 export { WorkspaceShell, NATIVE_TABS } from './components/WorkspaceShell';
 export { DashboardTab } from './components/DashboardTab';
 export { AdminTab } from './components/AdminTab';
 export { CaptureTab } from './components/CaptureTab';
 export { TasksTab } from './components/TasksTab';
-export { ToastContainer, showToast } from './components/Toast';
+export { ToastContainer, showToast, toastManager } from './components/Toast';
 export type { ToastMessage } from './components/Toast';
 export { PulseTab } from './components/PulseTab';
 export { MoreTab } from './components/MoreTab';
@@ -81,3 +87,4 @@ export type {
 
 
 export * as googleIntegrationService from './services/googleIntegrationService';
+

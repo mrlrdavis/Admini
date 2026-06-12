@@ -1,6 +1,6 @@
 ﻿import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ToastContainer, showToast } from './Toast';
+import { ToastContainer, showToast, toastManager } from './Toast';
 
 describe('ToastContainer', () => {
   beforeEach(() => {
@@ -8,6 +8,7 @@ describe('ToastContainer', () => {
   });
 
   afterEach(() => {
+    toastManager.reset();
     vi.useRealTimers();
   });
 
@@ -86,7 +87,7 @@ describe('ToastContainer', () => {
     expect(screen.queryByText('Dismissable')).toBeNull();
   });
 
-  it('displays multiple toasts simultaneously', () => {
+  it('deduplicates toasts - only the most recent toast is visible', () => {
     render(<ToastContainer />);
 
     act(() => {
@@ -94,7 +95,8 @@ describe('ToastContainer', () => {
       showToast('Second');
     });
 
-    expect(screen.getByText('First')).toBeDefined();
+    // Deduplication: only the latest toast is shown
+    expect(screen.queryByText('First')).toBeNull();
     expect(screen.getByText('Second')).toBeDefined();
   });
 

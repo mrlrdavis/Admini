@@ -1,0 +1,42 @@
+/* --------------------------------------------------------------------------
+   LevelBadge - Clickable badge element in Dashboard top bar
+   --------------------------------------------------------------------------
+   Uses design tokens from @admini/ui/styles.css
+   Requirements: 3.1
+   -------------------------------------------------------------------------- */
+
+.level-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  background: color-mix(in srgb, var(--color-sage, #6B8E6B) 8%, var(--color-surface, #ffffff));
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid color-mix(in srgb, var(--color-sage, #6B8E6B) 20%, transparent);
+  cursor: pointer;
+  transition: background var(--transition-fast, 150ms ease),
+              border-color var(--transition-fast, 150ms ease);
+}
+
+.level-badge:hover {
+  background: color-mix(in srgb, var(--color-sage, #6B8E6B) 14%, var(--color-surface, #ffffff));
+  border-color: color-mix(in srgb, var(--color-sage, #6B8E6B) 35%, transparent);
+}
+
+.level-badge:focus-visible {
+  outline: 2px solid var(--color-sage, #6B8E6B);
+  outline-offset: 2px;
+}
+
+.level-badge__level {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--color-sage-deep, #4A6B4A);
+  line-height: 1.2;
+}
+
+.level-badge__count {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted, #5a6b5c);
+  line-height: 1.2;
+}

@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    @admini/workspace - Shared styles entry point
    Design Tokens: sage/limestone palette, rounded cards, horizontal-scroll KPIs
    ========================================================================== */
@@ -17,6 +17,7 @@
 @import './profile-settings.css';
 @import './compact-mode.css';
 @import './navigation.css';
+@import './mobile-tab-bar.css';
 @import './observations.css';
 @import './toast.css';
 @import './notes.css';

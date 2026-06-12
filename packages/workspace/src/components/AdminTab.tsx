@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { getClassroomCourses, getClassroomStudents, getGoogleToken, type ClassroomCourse, type ClassroomStudent } from '../services/googleIntegrationService';
+import { sendInvitation, getPendingInvitations, revokeInvitation as revokeInvitationSvc } from '../services/invitationService';
+import { parseRosterFile, validateRosterRows, bulkAddMembers, type RosterRow, type RowError, type BulkAddResult } from '../services/rosterUploadService';
 import { useOrgData } from '../hooks/useOrgData';
-import type { AdminiRole, OrgDetailsForm } from '../types';
+import type { AdminiRole, OrgDetailsForm, OrgInvitation } from '../types';
 
 // ---------------------------------------------------------------------------
 // AdminTab
 // ---------------------------------------------------------------------------
-// Organization Management tab: school details, members, invitations, feature flags.
+// Organization Management tab: school details, members, invitations, roster upload, feature flags.
 // Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 8.5, 8.6
 
 export interface AdminTabProps {
@@ -14,6 +16,12 @@ export interface AdminTabProps {
   /** Current user's role - used for client-side access gating (REQ-16). */
   userRole: string;
 }
+
+// ---------------------------------------------------------------------------
+// Form State Machine
+// ---------------------------------------------------------------------------
+type InviteFormState = 'idle' | 'validating' | 'submitting' | 'success' | 'error';
+type RosterUploadState = 'idle' | 'validating' | 'previewing' | 'submitting' | 'success' | 'error';
 
 /**
  * Determines if an error represents a 403 authorization error.
@@ -56,6 +64,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     updateOrgDetails,
     updateMemberRole,
     createInvitation,
+    revokeInvitation,
     toggleFeatureFlag,
   } = useOrgData(organizationId);
 
@@ -83,12 +92,22 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   }, [orgDetails]);
 
   // -------------------------------------------------------------------------
-  // Invitation Form State
+  // Invitation Form State (state machine: idle -> validating -> submitting -> success/error)
   // -------------------------------------------------------------------------
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<AdminiRole>('staff');
-  const [inviteSaving, setInviteSaving] = useState(false);
+  const [inviteFormState, setInviteFormState] = useState<InviteFormState>('idle');
   const [inviteError, setInviteError] = useState<string | null>(null);
+
+  // -------------------------------------------------------------------------
+  // Roster Upload State (state machine: idle -> validating -> previewing -> submitting -> success/error)
+  // -------------------------------------------------------------------------
+  const [rosterState, setRosterState] = useState<RosterUploadState>('idle');
+  const [rosterPreview, setRosterPreview] = useState<RosterRow[]>([]);
+  const [rosterErrors, setRosterErrors] = useState<RowError[]>([]);
+  const [rosterResult, setRosterResult] = useState<BulkAddResult | null>(null);
+  const [rosterError, setRosterError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // -------------------------------------------------------------------------
   // Member Role Change State
@@ -104,6 +123,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
 
   // -------------------------------------------------------------------------
   // Google Classroom roster
+  // -------------------------------------------------------------------------
   const [classroomCourses, setClassroomCourses] = useState<ClassroomCourse[]>([]);
   const [classroomStudents, setClassroomStudents] = useState<ClassroomStudent[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -124,21 +144,29 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     }
   }, [selectedCourseId]);
 
-  // Separate invitation fetch that works even when org details fail
-  const [persistedInvitations, setPersistedInvitations] = useState<typeof invitations>([]);
+  // -------------------------------------------------------------------------
+  // Pending invitations - fetch directly from invitationService
+  // -------------------------------------------------------------------------
+  const [pendingInvitations, setPendingInvitations] = useState<OrgInvitation[]>([]);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+
   useEffect(() => {
-    if (invitations.length > 0) {
-      setPersistedInvitations(invitations);
-    }
     if (organizationId) {
-      import('../services/invitationService').then(mod => {
-        mod.listInvitations(organizationId).then(list => {
-          if (list.length > 0) setPersistedInvitations(list);
-        }).catch(() => {});
-      });
+      getPendingInvitations(organizationId)
+        .then(setPendingInvitations)
+        .catch(() => {});
     }
   }, [organizationId]);
 
+  // Sync from hook invitations as well
+  useEffect(() => {
+    const pending = invitations.filter(inv => inv.status === 'pending');
+    if (pending.length > 0) {
+      setPendingInvitations(pending);
+    }
+  }, [invitations]);
+
+  // -------------------------------------------------------------------------
   // Handlers
   // -------------------------------------------------------------------------
 
@@ -159,25 +187,145 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     }
   }
 
+  /**
+   * Invitation form handler using sendInvitation with built-in retry (max 3).
+   * State machine: idle -> validating -> submitting -> success/error
+   */
   async function handleInviteSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
     if (!canManageInvitations) return;
 
-    setInviteSaving(true);
+    // Transition: idle -> validating
+    setInviteFormState('validating');
     setInviteError(null);
 
+    // Basic client-side validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteEmail.trim())) {
+      setInviteFormState('error');
+      setInviteError('Please enter a valid email address.');
+      return;
+    }
+
+    // Transition: validating -> submitting
+    setInviteFormState('submitting');
+
     try {
-      await createInvitation(inviteEmail.trim(), inviteRole);
-      // Clear form on success
+      // sendInvitation has built-in retry logic (max 3 attempts)
+      const newInvite = await sendInvitation(inviteEmail.trim(), inviteRole);
+      // Transition: submitting -> success
+      setInviteFormState('success');
       setInviteEmail('');
       setInviteRole('staff');
+      // Update pending invitations list
+      setPendingInvitations(prev => [newInvite, ...prev]);
+      // Reset to idle after brief success display
+      setTimeout(() => setInviteFormState('idle'), 2000);
     } catch (err) {
-      // Preserve form state on failure (Req 6.3)
+      // Transition: submitting -> error (preserves form state per Req 6.3)
+      setInviteFormState('error');
+      setInviteError(getErrorMessage(err));
+    }
+  }
+
+  /**
+   * Revoke a pending invitation.
+   */
+  async function handleRevokeInvitation(invitationId: string) {
+    setRevokingId(invitationId);
+    try {
+      await revokeInvitationSvc(invitationId);
+      setPendingInvitations(prev => prev.filter(inv => inv.id !== invitationId));
+    } catch (err) {
       setInviteError(getErrorMessage(err));
     } finally {
-      setInviteSaving(false);
+      setRevokingId(null);
     }
+  }
+
+  /**
+   * Roster upload pipeline: validate -> parse -> preview -> persist
+   * State machine: idle -> validating -> previewing -> submitting -> success/error
+   */
+  async function handleRosterFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Transition: idle -> validating
+    setRosterState('validating');
+    setRosterErrors([]);
+    setRosterError(null);
+    setRosterResult(null);
+
+    try {
+      // Step 1: Parse the file
+      const parseResult = await parseRosterFile(file);
+
+      if (parseResult.errors.length > 0 && parseResult.rows.length === 0) {
+        setRosterState('error');
+        setRosterErrors(parseResult.errors);
+        setRosterError('All rows contain errors. Please fix and re-upload.');
+        return;
+      }
+
+      // Step 2: Validate for duplicates
+      const validation = validateRosterRows(parseResult.rows);
+
+      if (validation.errors.length > 0) {
+        setRosterErrors([...parseResult.errors, ...validation.errors]);
+      }
+
+      if (validation.valid.length === 0) {
+        setRosterState('error');
+        setRosterError('No valid rows to import after validation.');
+        return;
+      }
+
+      // Transition: validating -> previewing
+      setRosterPreview(validation.valid);
+      setRosterState('previewing');
+    } catch (err) {
+      setRosterState('error');
+      setRosterError(getErrorMessage(err));
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+
+  /**
+   * Confirm roster upload - persist validated rows.
+   */
+  async function handleRosterConfirm() {
+    if (rosterPreview.length === 0) return;
+
+    // Transition: previewing -> submitting
+    setRosterState('submitting');
+
+    try {
+      const result = await bulkAddMembers(organizationId, rosterPreview);
+      setRosterResult(result);
+      // Transition: submitting -> success
+      setRosterState('success');
+      setRosterPreview([]);
+    } catch (err) {
+      setRosterState('error');
+      setRosterError(getErrorMessage(err));
+    }
+  }
+
+  /**
+   * Cancel roster upload preview.
+   */
+  function handleRosterCancel() {
+    setRosterState('idle');
+    setRosterPreview([]);
+    setRosterErrors([]);
+    setRosterError(null);
+    setRosterResult(null);
   }
 
   async function handleRoleChange(profileId: string, newRole: AdminiRole) {
@@ -234,7 +382,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
             </label>
             <label className="admin-tab__field">
               <span className="admin-tab__field-label">Role</span>
-              <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as any)} className="admin-tab__role-select">
+              <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as AdminiRole)} className="admin-tab__role-select">
                 <option value="admin">Admin</option>
                 <option value="principal">Principal</option>
                 <option value="teacher">Teacher</option>
@@ -242,7 +390,10 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               </select>
             </label>
             {inviteError && <p className="admin-tab__error-message" role="alert">{inviteError}</p>}
-            <button type="submit" className="admin-tab__submit" disabled={inviteSaving}>{inviteSaving ? 'Sending...' : 'Send Invitation'}</button>
+            {inviteFormState === 'success' && <p className="admin-tab__success-message" role="status">Invitation sent successfully!</p>}
+            <button type="submit" className="admin-tab__submit" disabled={inviteFormState === 'submitting' || inviteFormState === 'validating'}>
+              {inviteFormState === 'submitting' ? 'Sending...' : inviteFormState === 'validating' ? 'Validating...' : 'Send Invitation'}
+            </button>
           </form>
         </section>
 
@@ -260,7 +411,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                     <span className="admin-tab__member-name">{member.displayName}</span>
                     <span className="admin-tab__member-email">{member.email}</span>
                   </div>
-                  <select className="admin-tab__role-select" value={member.role} onChange={(e) => handleRoleChange(member.profileId, e.target.value as any)} aria-label={'Role for ' + member.displayName}>
+                  <select className="admin-tab__role-select" value={member.role} onChange={(e) => handleRoleChange(member.profileId, e.target.value as AdminiRole)} aria-label={'Role for ' + member.displayName}>
                     <option value="admin">Admin</option>
                     <option value="principal">Principal</option>
                     <option value="teacher">Teacher</option>
@@ -275,15 +426,26 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         {/* Pending Invitations */}
         <section className="admin-tab__section">
           <h2 className="admin-tab__section-title">Pending Invitations</h2>
-          {persistedInvitations.filter((inv: any) => inv.status === 'pending').length === 0 ? (
+          {pendingInvitations.length === 0 ? (
             <p className="admin-tab__empty">No pending invitations.</p>
           ) : (
             <ul className="admin-tab__invitation-list">
-              {invitations.filter((inv: any) => inv.status === 'pending').map(inv => (
+              {pendingInvitations.map(inv => (
                 <li key={inv.id} className="admin-tab__invitation-item">
                   <span className="admin-tab__invitation-email">{inv.email}</span>
                   <span className="admin-tab__invitation-role">{inv.role}</span>
                   <span className="admin-tab__invitation-status">Sent</span>
+                  {canManageInvitations && (
+                    <button
+                      type="button"
+                      className="admin-tab__revoke-btn"
+                      disabled={revokingId === inv.id}
+                      onClick={() => handleRevokeInvitation(inv.id)}
+                      aria-label={`Revoke invitation for ${inv.email}`}
+                    >
+                      {revokingId === inv.id ? 'Revoking...' : 'Revoke'}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -427,6 +589,126 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
       </section>
 
+      {/* Roster Upload Section */}
+      <section className="admin-tab__section" aria-labelledby="roster-upload-heading">
+        <h2 id="roster-upload-heading" className="admin-tab__section-title">
+          Roster Upload
+        </h2>
+        <p className="admin-tab__section-desc">
+          Upload a CSV or XLSX file to bulk-add members. Required columns: name, email, role.
+        </p>
+
+        {rosterState === 'idle' && (
+          <label className="admin-tab__field">
+            <span className="admin-tab__field-label">Select roster file</span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.xlsx"
+              onChange={handleRosterFileChange}
+              className="admin-tab__input"
+              aria-describedby="roster-format-hint"
+            />
+            <span id="roster-format-hint" className="admin-tab__hint">
+              Accepted formats: .csv, .xlsx (max 5MB)
+            </span>
+          </label>
+        )}
+
+        {rosterState === 'validating' && (
+          <p className="admin-tab__loading-indicator">Validating roster file...</p>
+        )}
+
+        {rosterState === 'previewing' && (
+          <div className="admin-tab__roster-preview">
+            <h3 className="admin-tab__subsection-title">
+              Preview ({rosterPreview.length} valid {rosterPreview.length === 1 ? 'row' : 'rows'})
+            </h3>
+            {rosterErrors.length > 0 && (
+              <p className="admin-tab__warning-message" role="alert">
+                {rosterErrors.length} row(s) had errors and will be skipped.
+              </p>
+            )}
+            <ul className="admin-tab__roster-list">
+              {rosterPreview.slice(0, 10).map((row) => (
+                <li key={row.rowIndex} className="admin-tab__roster-item">
+                  <span>{row.name}</span>
+                  <span>{row.email}</span>
+                  <span>{row.role}</span>
+                </li>
+              ))}
+              {rosterPreview.length > 10 && (
+                <li className="admin-tab__roster-item admin-tab__roster-item--more">
+                  ...and {rosterPreview.length - 10} more
+                </li>
+              )}
+            </ul>
+            <div className="admin-tab__roster-actions">
+              <button
+                type="button"
+                className="admin-tab__submit"
+                onClick={handleRosterConfirm}
+              >
+                Confirm Import
+              </button>
+              <button
+                type="button"
+                className="admin-tab__cancel-btn"
+                onClick={handleRosterCancel}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {rosterState === 'submitting' && (
+          <p className="admin-tab__loading-indicator">Importing members...</p>
+        )}
+
+        {rosterState === 'success' && rosterResult && (
+          <div className="admin-tab__roster-result">
+            <p className="admin-tab__success-message" role="status">
+              Successfully added {rosterResult.added} member(s).
+            </p>
+            {rosterResult.failed.length > 0 && (
+              <p className="admin-tab__warning-message" role="alert">
+                {rosterResult.failed.length} row(s) failed to import.
+              </p>
+            )}
+            <button
+              type="button"
+              className="admin-tab__submit"
+              onClick={handleRosterCancel}
+            >
+              Upload Another
+            </button>
+          </div>
+        )}
+
+        {rosterState === 'error' && (
+          <div className="admin-tab__roster-error">
+            <p className="admin-tab__error-message" role="alert">
+              {rosterError}
+            </p>
+            {rosterErrors.length > 0 && (
+              <ul className="admin-tab__error-list">
+                {rosterErrors.slice(0, 5).map((err, idx) => (
+                  <li key={idx}>Row {err.rowIndex}: {err.field} - {err.message}</li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              className="admin-tab__submit"
+              onClick={handleRosterCancel}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+      </section>
+
       {/* Invitations Section - restricted to admin/principal (REQ-16) */}
       <section className="admin-tab__section" aria-labelledby="invitations-heading">
         <h2 id="invitations-heading" className="admin-tab__section-title">
@@ -445,6 +727,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   placeholder="user@example.com"
                   className="admin-tab__input"
                   required
+                  disabled={inviteFormState === 'submitting'}
                 />
               </label>
 
@@ -454,6 +737,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as AdminiRole)}
                   className="admin-tab__role-select"
+                  disabled={inviteFormState === 'submitting'}
                 >
                   <option value="admin">Admin</option>
                   <option value="principal">Principal</option>
@@ -467,34 +751,46 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   {inviteError}
                 </p>
               )}
+              {inviteFormState === 'success' && (
+                <p className="admin-tab__success-message" role="status">
+                  Invitation sent successfully!
+                </p>
+              )}
 
               <button
                 type="submit"
                 className="admin-tab__submit"
-                disabled={inviteSaving}
+                disabled={inviteFormState === 'submitting' || inviteFormState === 'validating'}
               >
-                {inviteSaving ? 'Sending...' : 'Send Invitation'}
+                {inviteFormState === 'submitting' ? 'Sending...' : inviteFormState === 'validating' ? 'Validating...' : 'Send Invitation'}
               </button>
             </form>
 
-            {/* Pending Invitations List */}
-            {invitations.filter((inv) => inv.status === 'pending').length > 0 && (
+            {/* Pending Invitations List with Revoke */}
+            {pendingInvitations.length > 0 && (
               <>
                 <h3 className="admin-tab__subsection-title">Pending Invitations</h3>
                 <ul className="admin-tab__invitation-list">
-                  {invitations
-                    .filter((inv) => inv.status === 'pending')
-                    .map((inv) => (
-                      <li key={inv.id} className="admin-tab__invitation-item">
-                        <span className="admin-tab__invitation-email">
-                          {inv.email}
-                        </span>
-                        <span className="admin-tab__invitation-role">{inv.role}</span>
-                        <span className="admin-tab__invitation-status">
-                          {inv.status}
-                        </span>
-                      </li>
-                    ))}
+                  {pendingInvitations.map((inv) => (
+                    <li key={inv.id} className="admin-tab__invitation-item">
+                      <span className="admin-tab__invitation-email">
+                        {inv.email}
+                      </span>
+                      <span className="admin-tab__invitation-role">{inv.role}</span>
+                      <span className="admin-tab__invitation-status">
+                        {inv.status}
+                      </span>
+                      <button
+                        type="button"
+                        className="admin-tab__revoke-btn"
+                        disabled={revokingId === inv.id}
+                        onClick={() => handleRevokeInvitation(inv.id)}
+                        aria-label={`Revoke invitation for ${inv.email}`}
+                      >
+                        {revokingId === inv.id ? 'Revoking...' : 'Revoke'}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               </>
             )}
@@ -552,7 +848,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           Send an invitation email to add staff to your school's AdminI workspace.
         </p>
         <a
-          href="mailto:ladariusdvs99@gmail.com?subject=AdminI%20Team%20Invitation%20Request&body=I%27d%20like%20to%20invite%20the%20following%20people%20to%20my%20AdminI%20workspace%3A%0A%0AName%3A%20%0AEmail%3A%20%0ARole%20(admin%2C%20principal%2C%20teacher%2C%20staff)%3A%20%0A%0ASchool%3A%20%0A"
+          href="mailto:ladariusdvs99@gmail.com?subject=AdminI%20Team%20Invitation%20Request&body=I%27d%20like%20to%20invite%20the%20following%20people%20to%20my%20AdminI%20workspace%3A%0A%0AName%3A%20%0AEmail%3A%20%0ARole%20(admin%2C%20principal%2C%20teacher%2C%20staff)%3A%20%0A%0ASchool%3A%20"
           className="admin-tab__invite-btn"
         >
           Invite via Email

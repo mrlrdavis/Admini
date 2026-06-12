@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 
 import {
   getOrgDetails,
@@ -175,9 +175,11 @@ export function useOrgData(orgId: string): UseOrgDataReturn {
    */
   const revokeInvitation = useCallback(
     async (invitationId: string): Promise<void> => {
-      const revoked = await revokeInvitationSvc(invitationId);
+      await revokeInvitationSvc(invitationId);
       setInvitations((prev) =>
-        prev.map((inv) => (inv.id === invitationId ? revoked : inv)),
+        prev.map((inv) =>
+          inv.id === invitationId ? { ...inv, status: 'revoked' as const } : inv,
+        ),
       );
     },
     [],
