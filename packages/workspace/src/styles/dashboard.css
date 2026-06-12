@@ -32,7 +32,7 @@
 .dashboard-tab__section--coming-due .dashboard-tab__section-header { background:#FFF0E6; }
 .dashboard-tab__section--blocked .dashboard-tab__section-header { background:#FCE8E8; }
 .dashboard-tab__section--suggested .dashboard-tab__section-header { background:#F2ECFB; }
-.dashboard-tab__section .dashboard-tab__task-list, .dashboard-tab__section .dashboard-tab__empty { padding:8px 16px; }
+.dashboard-tab__section .dashboard-tab__task-list, .dashboard-tab__section .dashboard-tab__empty { padding:8px 0; }
 .dashboard-tab__section-icon { font-size:0.75rem; line-height:1; }
 .dashboard-tab__section-title { font-size:0.75rem; font-weight:600; margin:0; letter-spacing:0.05em; text-transform:uppercase; }
 .dashboard-tab__section-title--high { color:#C0392B; }
@@ -44,7 +44,7 @@
 
 /* Task Items */
 .dashboard-tab__task-list { list-style:none; margin:0; padding:0; }
-.dashboard-tab__task-item { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.05); cursor:pointer; gap:8px; }
+.dashboard-tab__task-item { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid rgba(0,0,0,0.05); cursor:pointer; gap:8px; }
 .dashboard-tab__task-item:last-child { border-bottom:none; }
 .dashboard-tab__section--high-priority .dashboard-tab__task-item:hover { background:#FFF3E0; opacity:1; }
 .dashboard-tab__section--due-today .dashboard-tab__task-item:hover { background:#EAF3EA; opacity:1; }
@@ -230,3 +230,7 @@
 .dashboard-tab__section--normal .dashboard-tab__task-item:hover { background:#F5F3EE; opacity:1; }
 /* Low hover */
 .dashboard-tab__section--low .dashboard-tab__task-item:hover { background:#F5F3EE; opacity:1; }
+/* Quick Actions + Calendar side-by-side */
+.dashboard-tab__qa-cal-row { display:flex; gap:16px; }
+.dashboard-tab__qa-cal-row > * { flex:1; min-width:0; }
+@media (max-width:900px) { .dashboard-tab__qa-cal-row { flex-direction:column; } }
