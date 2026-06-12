@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Local Event Service
  *
  * CRUD operations for locally-created calendar events (not from Google Calendar).
@@ -114,7 +114,8 @@ export function update(
   const events = readEvents();
   const index = events.findIndex((e) => e.id === id);
   if (index === -1) return null;
-  const updated: LocalEvent = { ...events[index], ...updates };
+  const existing = events[index]!;
+  const updated: LocalEvent = { ...existing, ...updates };
   events[index] = updated;
   writeEvents(events);
   return updated;
