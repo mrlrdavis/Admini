@@ -3,10 +3,10 @@
    ========================================================================== */
 
 .more-tab {
-  padding: calc(env(safe-area-inset-top, 0px) + var(--ws-space-lg))
-           calc(env(safe-area-inset-right, 0px) + var(--ws-space-lg))
-           calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-lg))
-           calc(env(safe-area-inset-left, 0px) + var(--ws-space-lg));
+  padding: calc(env(safe-area-inset-top, 0px) + 20px)
+           calc(env(safe-area-inset-right, 0px) + 20px)
+           calc(env(safe-area-inset-bottom, 0px) + 20px)
+           calc(env(safe-area-inset-left, 0px) + 20px);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
   box-sizing: border-box;
@@ -18,7 +18,7 @@
 
 /* Header */
 .more-tab__header {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .more-tab__title {
@@ -30,7 +30,7 @@
 
 /* Sections */
 .more-tab__section {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .more-tab__section-title {
@@ -38,8 +38,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--ws-color-text-muted);
-  margin: 0 0 var(--ws-space-md);
+  color: var(--ws-color-text);
+  margin: 0 0 12px;
 }
 
 /* List items */
@@ -54,7 +54,7 @@
 }
 
 .more-tab__list-item {
-  border-bottom: 1px solid var(--ws-color-border);
+  border-bottom: 1px solid #E8E5DE;
 }
 
 .more-tab__list-item:last-child {
@@ -66,14 +66,14 @@
   align-items: center;
   gap: var(--ws-space-md);
   width: 100%;
-  padding: var(--ws-space-md) var(--ws-space-lg);
+  padding: var(--ws-space-md) 20px;
   border: none;
   background: transparent;
   font-size: var(--ws-font-size-base);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   text-align: left;
   box-sizing: border-box;
 }
@@ -109,19 +109,19 @@
   width: 100%;
   padding: var(--ws-space-md);
   background: transparent;
-  border: 1px solid var(--ws-color-error);
+  border: 1px solid #D63031;
   border-radius: var(--ws-radius-card);
   color: var(--ws-color-error);
   font-size: var(--ws-font-size-base);
   font-weight: 500;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   box-sizing: border-box;
 }
 
 .more-tab__sign-out-btn:hover {
-  background: var(--ws-color-error);
+  background: #D63031;
   color: var(--ws-color-white);
 }
 
@@ -137,8 +137,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: var(--ws-space-md) var(--ws-space-lg);
-  border-bottom: 1px solid var(--ws-color-border);
+  padding: var(--ws-space-md) 20px;
+  border-bottom: 1px solid #E8E5DE;
   gap: var(--ws-space-sm);
   box-sizing: border-box;
   max-width: 100%;
@@ -160,7 +160,7 @@
 
 .more-tab__profile-label {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-weight: 500;
 }
 
@@ -178,13 +178,13 @@
 
 .more-tab__profile-input {
   width: 100%;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-base);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
-  background: var(--ws-color-white, #ffffff);
+  background: var(--ws-color-white);
   box-sizing: border-box;
   /* Ensure input scrolls into view above virtual keyboard on mobile */
   scroll-margin-bottom: 40vh;
@@ -203,13 +203,13 @@
 }
 
 .more-tab__btn-cancel {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
   font-size: var(--ws-font-size-sm);
   font-family: var(--ws-font-body);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
 }
 
@@ -219,7 +219,7 @@
 }
 
 .more-tab__btn-save {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: none;
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-sage);
@@ -228,7 +228,7 @@
   font-weight: 500;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: opacity var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   min-width: 5rem;
 }
 
@@ -241,12 +241,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--ws-space-xs);
-  margin-top: var(--ws-space-xs);
+  margin-top: 4px;
 }
 
 .more-tab__error-container .more-tab__btn-secondary {
   align-self: flex-start;
-  margin-top: var(--ws-space-xs);
+  margin-top: 4px;
 }
 
 .more-tab__save-error {
@@ -256,7 +256,7 @@
 }
 
 .more-tab__edit-btn {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
@@ -275,7 +275,7 @@
 
 .more-tab__admin-only-notice {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-style: italic;
 }
 
@@ -308,10 +308,10 @@
 /* Forward navigation: sub-view slides in from the right */
 .more-tab--sub-view {
   animation: slide-in-right 0.25s ease-out;
-  padding-top: calc(env(safe-area-inset-top, 0px) + var(--ws-space-lg));
-  padding-right: calc(env(safe-area-inset-right, 0px) + var(--ws-space-lg));
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-lg));
-  padding-left: calc(env(safe-area-inset-left, 0px) + var(--ws-space-lg));
+  padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+  padding-right: calc(env(safe-area-inset-right, 0px) + 20px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+  padding-left: calc(env(safe-area-inset-left, 0px) + 20px);
 }
 
 /* Back navigation: main menu slides in from the left */
@@ -332,24 +332,24 @@
    ========================================================================== */
 
 .more-tab__danger-zone {
-  border: 1px solid var(--ws-color-error);
+  border: 1px solid #D63031;
   border-radius: var(--ws-radius-card);
   padding: var(--ws-space-lg);
-  background: color-mix(in srgb, var(--ws-color-error) 5%, transparent);
+  background: color-mix(in srgb, #D63031 5%, transparent);
   box-sizing: border-box;
 }
 
 .more-tab__danger-description {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
-  margin: 0 0 var(--ws-space-md);
+  color: var(--ws-color-text);
+  margin: 0 0 12px;
   line-height: 1.5;
 }
 
 .more-tab__danger-btn {
   width: 100%;
   padding: var(--ws-space-md);
-  background: var(--ws-color-error);
+  background: #D63031;
   border: none;
   border-radius: var(--ws-radius-card);
   color: var(--ws-color-white);
@@ -357,7 +357,7 @@
   font-weight: 600;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: opacity var(--ws-transition-fast), background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast), background 0.15s ease;
   box-sizing: border-box;
 }
 
@@ -378,19 +378,19 @@
   width: 100%;
   padding: var(--ws-space-md);
   background: transparent;
-  border: 1px solid var(--ws-color-error);
+  border: 1px solid #D63031;
   border-radius: var(--ws-radius-card);
   color: var(--ws-color-error);
   font-size: var(--ws-font-size-base);
   font-weight: 500;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   box-sizing: border-box;
 }
 
 .more-tab__delete-account-btn:hover {
-  background: var(--ws-color-error);
+  background: #D63031;
   color: var(--ws-color-white);
 }
 
@@ -414,10 +414,10 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: calc(env(safe-area-inset-top, 0px) + var(--ws-space-lg))
-           calc(env(safe-area-inset-right, 0px) + var(--ws-space-lg))
-           calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-lg))
-           calc(env(safe-area-inset-left, 0px) + var(--ws-space-lg));
+  padding: calc(env(safe-area-inset-top, 0px) + 20px)
+           calc(env(safe-area-inset-right, 0px) + 20px)
+           calc(env(safe-area-inset-bottom, 0px) + 20px)
+           calc(env(safe-area-inset-left, 0px) + 20px);
 }
 
 .more-tab__confirm-dialog {
@@ -434,14 +434,14 @@
   font-family: var(--ws-font-display);
   font-size: var(--ws-font-size-lg);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-md);
+  margin: 0 0 12px;
   color: var(--ws-color-text);
 }
 
 .more-tab__confirm-message {
   font-size: var(--ws-font-size-base);
-  color: var(--ws-color-text-muted);
-  margin: 0 0 var(--ws-space-xl);
+  color: var(--ws-color-text);
+  margin: 0 0 32px;
   line-height: 1.5;
   overflow-wrap: break-word;
 }
@@ -454,16 +454,16 @@
 }
 
 .more-tab__confirm-delete-btn {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border: none;
   border-radius: var(--ws-radius-sm);
-  background: var(--ws-color-error);
+  background: #D63031;
   color: var(--ws-color-white);
   font-size: var(--ws-font-size-sm);
   font-weight: 600;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: opacity var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .more-tab__confirm-delete-btn:hover {
@@ -478,7 +478,7 @@
 /* Placeholder note styling */
 .more-tab__placeholder-note {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-style: italic;
   margin: 0;
   padding: var(--ws-space-md);
@@ -499,7 +499,7 @@
 
 .more-tab__account-action-description {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   margin: 0;
   line-height: 1.5;
 }
@@ -515,7 +515,7 @@
   font-weight: 500;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   box-sizing: border-box;
 }
 
@@ -531,7 +531,7 @@
 
 .more-tab__oauth-notice {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-style: italic;
   margin: 0;
   padding: var(--ws-space-md);
@@ -564,23 +564,23 @@
 .more-tab__password-label {
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .more-tab__password-actions {
   display: flex;
   gap: var(--ws-space-sm);
   justify-content: flex-end;
-  margin-top: var(--ws-space-sm);
+  margin-top: 8px;
   flex-wrap: wrap;
 }
 
 .more-tab__password-success {
   margin: 0;
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-success, #16a34a);
-  background: color-mix(in srgb, var(--ws-color-success, #16a34a) 10%, transparent);
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  color: #00B894;
+  background: color-mix(in srgb, #00B894 10%, transparent);
+  padding: var(--ws-space-sm) 12px;
   border-radius: var(--ws-radius-sm);
   font-weight: 500;
 }
@@ -592,14 +592,14 @@
 
 @media (max-width: 374px) {
   .more-tab {
-    padding: calc(env(safe-area-inset-top, 0px) + var(--ws-space-md))
-             calc(env(safe-area-inset-right, 0px) + var(--ws-space-md))
-             calc(env(safe-area-inset-bottom, 0px) + var(--ws-space-md))
-             calc(env(safe-area-inset-left, 0px) + var(--ws-space-md));
+    padding: calc(env(safe-area-inset-top, 0px) + 12px)
+             calc(env(safe-area-inset-right, 0px) + 12px)
+             calc(env(safe-area-inset-bottom, 0px) + 12px)
+             calc(env(safe-area-inset-left, 0px) + 12px);
   }
 
   .more-tab__link-btn {
-    padding: var(--ws-space-md) var(--ws-space-md);
+    padding: var(--ws-space-md) 12px;
   }
 
   .more-tab__profile-row {
@@ -609,7 +609,7 @@
 
   .more-tab__confirm-dialog {
     padding: var(--ws-space-lg);
-    max-width: calc(100vw - 2 * var(--ws-space-md));
+    max-width: calc(100vw - 2 * 12px);
   }
 
   .more-tab__confirm-actions {
@@ -670,14 +670,14 @@
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
   color: var(--ws-color-text);
   font-size: var(--ws-font-size-sm);
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .more-tab__back-btn:hover {
@@ -695,14 +695,14 @@
 .more-tab__help-title {
   font-size: var(--ws-font-size-xl);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-lg);
+  margin: 0 0 20px;
   color: var(--ws-color-text);
 }
 
 .more-tab__help-section {
   margin-bottom: var(--ws-space-lg);
-  padding-bottom: var(--ws-space-lg);
-  border-bottom: 1px solid var(--ws-color-border);
+  padding-bottom: 20px;
+  border-bottom: 1px solid #E8E5DE;
 }
 
 .more-tab__help-section:last-child {
@@ -711,15 +711,15 @@
 
 .more-tab__help-section h3 {
   font-size: var(--ws-font-size-lg);
-  margin: 0 0 var(--ws-space-sm);
+  margin: 0 0 8px;
   color: var(--ws-color-text);
 }
 
 .more-tab__help-section p {
   font-size: var(--ws-font-size-base);
   line-height: 1.6;
-  color: var(--ws-color-text-muted);
-  margin: 0 0 var(--ws-space-sm);
+  color: var(--ws-color-text);
+  margin: 0 0 8px;
 }
 
 .more-tab__help-section p:last-child {
@@ -727,7 +727,7 @@
 }
 
 .more-tab__help-section a {
-  color: var(--ws-color-sage-dark);
+  color: var(--ws-color-sage);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

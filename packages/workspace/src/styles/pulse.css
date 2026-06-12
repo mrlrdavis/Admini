@@ -17,12 +17,12 @@
   font-family: var(--ws-font-display);
   font-size: var(--ws-font-size-xl);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-xs);
+  margin: 0 0 4px;
 }
 
 .pulse-tab__subtitle {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   margin: 0;
 }
 
@@ -31,7 +31,7 @@
   display: flex;
   gap: var(--ws-space-md);
   overflow-x: auto;
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .pulse-tab__stat-card {
@@ -57,22 +57,22 @@
 
 .pulse-tab__stat-label {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: var(--ws-space-xs);
+  margin-top: 4px;
 }
 
 /* Section titles */
 .pulse-tab__section-title {
   font-size: var(--ws-font-size-lg);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-md);
+  margin: 0 0 12px;
 }
 
 /* Timeline */
 .pulse-tab__timeline-section {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .pulse-tab__timeline {
@@ -82,8 +82,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--ws-space-sm);
-  padding-left: var(--ws-space-lg);
-  border-left: 2px solid var(--ws-color-border);
+  padding-left: 20px;
+  border-left: 2px solid #E8E5DE;
 }
 
 .pulse-tab__checkpoint {
@@ -91,35 +91,35 @@
   align-items: center;
   gap: var(--ws-space-sm);
   position: relative;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   background: var(--ws-color-white);
   border-radius: var(--ws-radius-md);
 }
 
 .pulse-tab__checkpoint-dot {
   position: absolute;
-  left: calc(-1 * var(--ws-space-lg) - 0.375rem);
+  left: calc(-1 * 20px - 0.375rem);
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 50%;
-  background: var(--ws-color-border);
+  background: #E8E5DE;
 }
 
 .pulse-tab__checkpoint--responded .pulse-tab__checkpoint-dot {
-  background: var(--ws-color-success);
+  background: #00B894;
 }
 
 .pulse-tab__checkpoint--skipped .pulse-tab__checkpoint-dot {
-  background: var(--ws-color-error);
+  background: #D63031;
 }
 
 .pulse-tab__checkpoint--upcoming .pulse-tab__checkpoint-dot {
-  background: var(--ws-color-sage-light);
+  background: var(--ws-color-sage);
 }
 
 .pulse-tab__checkpoint-time {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   min-width: 3rem;
 }
 
@@ -131,12 +131,12 @@
 .pulse-tab__checkpoint-status {
   font-size: var(--ws-font-size-xs);
   text-transform: capitalize;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 /* Day Structure */
 .pulse-tab__day-structure {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .pulse-tab__day-card {
@@ -151,8 +151,8 @@
   display: flex;
   align-items: center;
   gap: var(--ws-space-md);
-  padding: var(--ws-space-md) var(--ws-space-lg);
-  border-bottom: 1px solid var(--ws-color-border);
+  padding: var(--ws-space-md) 20px;
+  border-bottom: 1px solid #E8E5DE;
 }
 
 .pulse-tab__day-row::before {
@@ -164,7 +164,7 @@
   width: 4px;
   height: 70%;
   border-radius: var(--ws-radius-pill);
-  background: linear-gradient(180deg, var(--ws-color-sage-light), var(--ws-color-sage-dark));
+  background: linear-gradient(180deg, #6B8E6B, #6B8E6B);
 }
 
 .pulse-tab__day-row:last-child {
@@ -179,7 +179,7 @@
 
 .pulse-tab__day-time {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   min-width: 5.5rem;
 }
 
@@ -189,36 +189,36 @@
   gap: var(--ws-space-xs);
   align-items: center;
   flex-wrap: wrap;
-  padding-right: var(--ws-space-md);
+  padding-right: 12px;
 }
 
 .pulse-tab__activity-block {
   display: inline-flex;
   align-items: center;
   gap: var(--ws-space-xs);
-  padding: 2px var(--ws-space-sm);
+  padding: 2px 8px;
   font-size: var(--ws-font-size-xs);
-  background: color-mix(in srgb, var(--ws-color-sage) 10%, transparent);
-  color: var(--ws-color-sage-dark);
+  background: color-mix(in srgb, #6B8E6B 10%, transparent);
+  color: var(--ws-color-sage);
   border-radius: var(--ws-radius-sm);
   white-space: nowrap;
 }
 
 .pulse-tab__activity-block--focus {
-  background: color-mix(in srgb, var(--ws-color-sage) 15%, transparent);
+  background: color-mix(in srgb, #6B8E6B 15%, transparent);
 }
 
 .pulse-tab__activity-block--meetings {
-  background: color-mix(in srgb, var(--ws-color-sage-light) 25%, transparent);
+  background: color-mix(in srgb, #6B8E6B 25%, transparent);
 }
 
 .pulse-tab__activity-block--wrap-up {
-  background: color-mix(in srgb, var(--ws-color-sage-dark) 10%, transparent);
+  background: color-mix(in srgb, #6B8E6B 10%, transparent);
 }
 
 /* Notifications Toggle */
 .pulse-tab__notifications {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .pulse-tab__notification-row {
@@ -244,7 +244,7 @@
 
 .pulse-tab__notification-desc {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 /* Toggle switch */
@@ -265,9 +265,9 @@
 .pulse-tab__toggle-track {
   position: absolute;
   inset: 0;
-  background: var(--ws-color-border);
+  background: #E8E5DE;
   border-radius: var(--ws-radius-pill);
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   cursor: pointer;
 }
 
@@ -280,7 +280,7 @@
   height: 1.25rem;
   background: var(--ws-color-white);
   border-radius: 50%;
-  transition: transform var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .pulse-tab__toggle-input:checked + .pulse-tab__toggle-track {
@@ -294,31 +294,31 @@
 /* Empty states */
 .pulse-tab__empty-state {
   text-align: center;
-  padding: var(--ws-space-xl) var(--ws-space-lg);
+  padding: var(--ws-space-xl) 20px;
 }
 
 .pulse-tab__empty-title {
   font-size: var(--ws-font-size-base);
   font-weight: 500;
-  margin: 0 0 var(--ws-space-sm);
+  margin: 0 0 8px;
 }
 
 .pulse-tab__empty-desc {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   margin: 0;
 }
 /* Day Structure Edit Mode */
 .pulse-tab__day-edit-btn {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
-  color: var(--ws-color-sage-dark);
+  color: var(--ws-color-sage);
   font-size: var(--ws-font-size-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .pulse-tab__day-edit-btn:hover {
@@ -340,7 +340,7 @@
   flex-direction: column;
   gap: var(--ws-space-sm);
   padding: var(--ws-space-sm);
-  border-bottom: 1px solid var(--ws-color-border);
+  border-bottom: 1px solid #E8E5DE;
 }
 
 .pulse-tab__day-edit-row:last-child {
@@ -354,11 +354,11 @@
 }
 
 .pulse-tab__day-edit-input {
-  padding: var(--ws-space-xs) var(--ws-space-sm);
+  padding: var(--ws-space-xs) 8px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-sm);
-  background: var(--ws-color-white, #fff);
+  background: var(--ws-color-white);
   color: var(--ws-color-text);
   width: 100%;
   max-width: 120px;
@@ -374,8 +374,8 @@
 .pulse-tab__day-edit-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px var(--ws-space-sm);
+  gap: var(--ws-space-xs);
+  padding: 2px 8px;
   background: var(--ws-color-limestone);
   border-radius: var(--ws-radius-pill);
   font-size: var(--ws-font-size-xs);
@@ -392,8 +392,8 @@
 }
 
 .pulse-tab__day-edit-add {
-  padding: 2px var(--ws-space-sm);
-  border: 1px dashed var(--ws-color-border);
+  padding: 2px 8px;
+  border: 1px dashed #E8E5DE;
   border-radius: var(--ws-radius-pill);
   background: transparent;
   font-size: var(--ws-font-size-xs);
@@ -408,7 +408,7 @@
 }
 
 .pulse-tab__day-save-btn {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border: none;
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-sage);
@@ -418,17 +418,17 @@
 }
 
 .pulse-tab__day-cancel-btn {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
 }
 
 .pulse-tab__day-add-period {
-  padding: var(--ws-space-sm) var(--ws-space-md);
-  border: 1px dashed var(--ws-color-sage);
+  padding: var(--ws-space-sm) 12px;
+  border: 1px dashed #6B8E6B;
   border-radius: var(--ws-radius-sm);
   background: transparent;
   color: var(--ws-color-sage);

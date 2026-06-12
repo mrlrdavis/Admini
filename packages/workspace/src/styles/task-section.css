@@ -21,14 +21,14 @@
 .task-section__list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--ws-space-sm);
 }
 
 .task-section__card {
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #d4d0c8);
   border-radius: 10px;
-  padding: 12px 16px;
+  padding: var(--ws-space-md) 16px;
   transition: box-shadow 150ms ease;
 }
 
@@ -44,7 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--ws-space-sm);
 }
 
 .task-section__task-title {
@@ -61,14 +61,14 @@
 .task-section__scheduled-time {
   font-weight: 400;
   color: var(--color-text-muted, #5a6b5c);
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
 }
 
 .task-section__category-tag {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 9999px;
-  font-size: 0.6875rem;
+  font-size: var(--ws-font-size-xs);
   font-weight: 600;
   color: #ffffff;
   white-space: nowrap;
@@ -77,7 +77,7 @@
 
 .task-section__block-reason {
   margin: 6px 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   color: var(--color-category-red, #D63031);
   font-style: italic;
 }
@@ -87,7 +87,7 @@
   margin-top: 4px;
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.6875rem;
+  font-size: var(--ws-font-size-xs);
   font-weight: 700;
   color: #ffffff;
   background: var(--color-category-red, #D63031);
@@ -101,12 +101,12 @@
 
 .task-section__actions {
   display: flex;
-  gap: 4px;
+  gap: var(--ws-space-xs);
   margin-top: 8px;
 }
 
 .task-section__action-btn {
-  padding: 4px 8px;
+  padding: var(--ws-space-xs) 8px;
   border: 1px solid var(--color-border, #d4d0c8);
   border-radius: 4px;
   background: transparent;

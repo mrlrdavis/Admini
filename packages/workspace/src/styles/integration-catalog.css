@@ -60,7 +60,7 @@
   display: flex;
   gap: 0.75rem;
   padding: 0.875rem 1rem;
-  transition: border-color 0.15s ease;
+  transition:  var(--ws-transition-fast);
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -84,7 +84,7 @@
 }
 
 .integration-catalog__name {
-  font-size: 0.9375rem;
+  font-size: var(--ws-font-size-base);
   font-weight: 600;
   overflow-wrap: break-word;
   word-break: break-word;
@@ -92,7 +92,7 @@
 
 .integration-catalog__card-description {
   color: var(--color-text-secondary, #6b7280);
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -100,22 +100,22 @@
 
 .integration-catalog__category {
   color: var(--color-text-tertiary, #9ca3af);
-  font-size: 0.6875rem;
+  font-size: var(--ws-font-size-xs);
   font-weight: 500;
   letter-spacing: 0.04em;
 }
 
 .integration-catalog__connect-btn {
-  background: var(--ws-color-white, #ffffff);
-  color: var(--ws-color-text, #2D3436);
+  background: var(--ws-color-white);
+  color: var(--ws-color-text);
   border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 0.5rem;
   cursor: pointer;
   flex-shrink: 0;
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   font-weight: 500;
   padding: 0.5rem 1rem;
-  transition: background 0.15s ease, opacity 0.15s ease;
+  transition:  var(--ws-transition-fast), opacity 0.15s ease;
   box-sizing: border-box;
 }
 

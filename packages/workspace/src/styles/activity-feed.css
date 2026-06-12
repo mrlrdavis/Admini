@@ -6,22 +6,22 @@
    -------------------------------------------------------------------------- */
 
 .activity-feed {
-  background: var(--ws-color-white, #ffffff);
-  border-radius: var(--ws-radius-card, 12px);
-  padding: var(--ws-space-md, 16px) var(--ws-space-lg, 24px);
-  border: 1px solid var(--ws-color-border, #e8e5de);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  padding: var(--ws-space-md) 20px;
+  border: 1px solid var(--ws-color-border);
 }
 
 .activity-feed__title {
-  font-size: var(--ws-font-size-sm, 0.875rem);
+  font-size: var(--ws-font-size-sm);
   font-weight: 700;
-  margin: 0 0 var(--ws-space-sm, 8px);
-  color: var(--ws-color-text, #1a1a1a);
+  margin: 0 0 8px;
+  color: var(--ws-color-text);
 }
 
 .activity-feed__empty {
-  font-size: var(--ws-font-size-sm, 0.875rem);
-  color: var(--ws-color-text-muted, #6b7280);
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
   margin: 0;
 }
 
@@ -67,8 +67,8 @@
 
 /* Neutral fallback for other actions */
 .activity-feed__icon--default {
-  background: color-mix(in srgb, var(--ws-color-text-muted, #6b7280) 12%, transparent);
-  color: var(--ws-color-text-muted, #6b7280);
+  background: color-mix(in srgb, #2D3436 12%, transparent);
+  color: var(--ws-color-text);
 }
 
 .activity-feed__body {
@@ -78,11 +78,11 @@
 }
 
 .activity-feed__action {
-  font-size: var(--ws-font-size-sm, 0.875rem);
-  color: var(--ws-color-text, #1a1a1a);
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-text);
 }
 
 .activity-feed__time {
-  font-size: var(--ws-font-size-xs, 0.75rem);
-  color: var(--ws-color-text-muted, #6b7280);
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text);
 }

@@ -1,12 +1,14 @@
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 
 const TAB_ICONS: Record<string, string> = {
-  capture: '\uD83D\uDCDD',
-  dashboard: '\uD83D\uDCCA',
-  tasks: '\u2705',
-  pulse: '\uD83D\uDC93',
-  more: '\u2699\uFE0F',
-  admin: '\uD83D\uDD27',
+  capture: '\uD83C\uDFA4',
+  dashboard: '\u25A6',
+  tasks: '\u2610',
+  notes: '\uD83D\uDCDD',
+  observations: '\uD83D\uDC41',
+  pulse: '\u2661',
+  more: '\u2699',
+  admin: '\u25CB',
 }
 
 export function DesktopSidebar({ activeTab, tabs, onTabChange }: NavigationAdapterProps) {

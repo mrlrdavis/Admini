@@ -8,7 +8,7 @@
 .quick-actions-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ws-space-sm);
   flex-wrap: wrap;
 }
 
@@ -17,8 +17,8 @@
   border: 1.5px solid var(--color-sage, #6B8E6B);
   border-radius: 9999px;
   background: var(--color-surface, #ffffff);
-  color: var(--color-sage-deep, #4A6B4A);
-  font-size: 0.8125rem;
+  color: var(--color-sage-deep, var(--ws-color-sage-dark));
+  font-size: var(--ws-font-size-sm);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;

@@ -70,7 +70,7 @@
 }
 
 .achievements-modal__subtitle {
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   color: var(--color-text-muted, #5a6b5c);
   margin: 2px 0 0;
 }
@@ -82,7 +82,7 @@
   cursor: pointer;
   color: var(--color-text-muted, #5a6b5c);
   line-height: 1;
-  padding: 4px;
+  padding: var(--ws-space-xs);
   border-radius: 4px;
   transition: background 150ms ease;
 }
@@ -98,13 +98,13 @@
 
 /* Progress bar */
 .achievements-modal__progress {
-  margin-bottom: 20px;
+  margin-bottom: var(--ws-space-lg);
 }
 
 .achievements-modal__progress-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   color: var(--color-text-muted, #5a6b5c);
   margin-bottom: 6px;
 }
@@ -130,11 +130,11 @@
 
 /* Badge sections */
 .achievements-modal__section {
-  margin-bottom: 20px;
+  margin-bottom: var(--ws-space-lg);
 }
 
 .achievements-modal__section-title {
-  font-size: 0.6875rem;
+  font-size: var(--ws-font-size-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--color-text-muted, #5a6b5c);
@@ -145,16 +145,16 @@
 .achievements-modal__list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--ws-space-sm);
 }
 
 /* Badge rows */
 .achievements-modal__badge {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-md) 16px;
+  border-radius: var(--ws-radius-card);
 }
 
 .achievements-modal__badge--earned {
@@ -199,7 +199,7 @@
 }
 
 .achievements-modal__badge-date {
-  font-size: 0.6875rem;
+  font-size: var(--ws-font-size-xs);
   color: #E6A817;
   font-weight: 600;
   white-space: nowrap;

@@ -3,14 +3,14 @@
    -------------------------------------------------------------------------- */
 
 .desktop-sidebar {
-  width: 220px;
-  min-width: 220px;
+  width: 180px;
+  min-width: 180px;
   height: 100dvh;
-  background: var(--ws-color-white, #ffffff);
-  border-right: 1px solid var(--ws-color-border, #DFE6E9);
+  background: #fff;
+  border-right: 1px solid #E8E5DE;
   display: flex;
   flex-direction: column;
-  padding: var(--ws-space-lg, 1.5rem) 0;
+  padding: 20px 0;
 }
 
 .desktop-sidebar__brand {
@@ -18,8 +18,8 @@
   font-size: 1.5rem;
   font-weight: 900;
   letter-spacing: -0.04em;
-  color: var(--ws-color-sage-dark, #4A6B4A);
-  padding: 0 var(--ws-space-lg, 1.5rem) var(--ws-space-lg, 1.5rem);
+  color: #6B8E6B;
+  padding: 0 20px 20px;
 }
 
 .desktop-sidebar__tabs {
@@ -28,7 +28,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ws-space-xs);
 }
 
 .desktop-sidebar__tab {
@@ -36,11 +36,11 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 12px var(--ws-space-lg, 1.5rem);
+  padding: 12px 20px;
   border: none;
   background: transparent;
-  color: var(--ws-color-text-muted, #636E72);
-  font-size: 0.9375rem;
+  color: #2D3436;
+  font-size: var(--ws-font-size-base);
   font-weight: 500;
   cursor: pointer;
   border-radius: 0;
@@ -49,15 +49,14 @@
 }
 
 .desktop-sidebar__tab:hover {
-  background: var(--ws-color-limestone, #F5F3EE);
-  color: var(--ws-color-text, #2D3436);
+  background: #F5F3EE;
+  color: #2D3436;
 }
 
 .desktop-sidebar__tab--active {
-  background: var(--ws-color-limestone, #F5F3EE);
-  color: var(--ws-color-sage-dark, #4A6B4A);
+  background: #6B8E6B;
+  color: #fff;
   font-weight: 600;
-  border-left: 3px solid var(--ws-color-sage, #6B8E6B);
 }
 
 .desktop-sidebar__icon {
@@ -83,9 +82,9 @@
   z-index: 200;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  border: 1px solid var(--ws-color-border, #DFE6E9);
-  background: var(--ws-color-white, #ffffff);
+  border-radius: var(--ws-radius-card);
+  border: 1px solid #E8E5DE;
+  background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
@@ -95,7 +94,7 @@
 }
 
 .mobile-nav-trigger:hover {
-  background: var(--ws-color-limestone, #F5F3EE);
+  background: #F5F3EE;
 }
 
 .mobile-nav-trigger__icon {
@@ -109,7 +108,7 @@
 .mobile-nav-trigger__icon span {
   display: block;
   height: 2px;
-  background: var(--ws-color-text, #2D3436);
+  background: #2D3436;
   border-radius: 2px;
   transition: transform 200ms ease, opacity 200ms ease;
 }
@@ -152,12 +151,12 @@
   left: 0;
   bottom: 0;
   width: min(280px, 80vw);
-  background: var(--ws-color-white, #ffffff);
+  background: #fff;
   transform: translateX(-100%);
   transition: transform 250ms ease;
   display: flex;
   flex-direction: column;
-  padding: 68px 0 var(--ws-space-xl, 2rem);
+  padding: 68px 0 32px;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
 }
 
@@ -170,8 +169,8 @@
   font-size: 1.5rem;
   font-weight: 900;
   letter-spacing: -0.04em;
-  color: var(--ws-color-sage-dark, #4A6B4A);
-  padding: 0 var(--ws-space-lg, 1.5rem) var(--ws-space-lg, 1.5rem);
+  color: #6B8E6B;
+  padding: 0 20px 20px;
 }
 
 .mobile-nav-drawer__tabs {
@@ -180,7 +179,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ws-space-xs);
 }
 
 .mobile-nav-drawer__tab {
@@ -188,10 +187,10 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 14px var(--ws-space-lg, 1.5rem);
+  padding: 14px 20px;
   border: none;
   background: transparent;
-  color: var(--ws-color-text-muted, #636E72);
+  color: #2D3436;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -200,15 +199,14 @@
 }
 
 .mobile-nav-drawer__tab:hover {
-  background: var(--ws-color-limestone, #F5F3EE);
-  color: var(--ws-color-text, #2D3436);
+  background: #F5F3EE;
+  color: #2D3436;
 }
 
 .mobile-nav-drawer__tab--active {
-  background: var(--ws-color-limestone, #F5F3EE);
-  color: var(--ws-color-sage-dark, #4A6B4A);
+  background: #6B8E6B;
+  color: #fff;
   font-weight: 600;
-  border-left: 3px solid var(--ws-color-sage, #6B8E6B);
 }
 /* Clear space for the fixed hamburger trigger on mobile */
 @media (max-width: 768px) {
@@ -231,11 +229,11 @@
 .desktop-sidebar__sign-out,
 .mobile-nav-drawer__sign-out {
   margin-top: auto;
-  padding: 12px var(--ws-space-lg, 1.5rem);
+  padding: 12px 20px;
   border: none;
   background: transparent;
-  color: var(--ws-color-text-muted, #636E72);
-  font-size: 0.9375rem;
+  color: #2D3436;
+  font-size: var(--ws-font-size-base);
   font-weight: 500;
   cursor: pointer;
   text-align: left;
@@ -244,7 +242,7 @@
 
 .desktop-sidebar__sign-out:hover,
 .mobile-nav-drawer__sign-out:hover {
-  color: var(--ws-color-error, #D63031);
+  color: #D63031;
   background: rgba(214, 48, 49, 0.06);
 }
 /* Theme toggle in sidebar - matches front porch sun/moon style */
@@ -252,13 +250,13 @@
   align-items: center;
   background: rgba(255, 255, 255, 0.68);
   border: 1.5px solid rgba(17, 17, 17, 0.72);
-  border-radius: 999px;
+  border-radius: var(--ws-radius-pill);
   cursor: pointer;
   display: inline-flex;
   gap: 5px;
   height: 34px;
   justify-content: center;
-  margin: var(--ws-space-md, 1rem) var(--ws-space-lg, 1.5rem);
+  margin: 12px 20px;
   padding: 0 9px;
   transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
   width: 58px;
@@ -277,19 +275,19 @@
 
 .desktop-sidebar__theme-toggle .mode-sun {
   background: #e6c76a;
-  border-radius: 999px;
+  border-radius: var(--ws-radius-pill);
   box-shadow: 0 0 0 3px rgba(230, 199, 106, 0.2);
 }
 
 .desktop-sidebar__theme-toggle .mode-moon {
   background: #556052;
-  border-radius: 999px;
+  border-radius: var(--ws-radius-pill);
   position: relative;
 }
 
 .desktop-sidebar__theme-toggle .mode-moon::after {
   background: rgba(255, 255, 255, 0.86);
-  border-radius: 999px;
+  border-radius: var(--ws-radius-pill);
   content: '';
   height: 12px;
   position: absolute;
@@ -300,6 +298,6 @@
 /* Divider above utility tabs in sidebar */
 .desktop-sidebar__divider {
   height: 1px;
-  background: var(--ws-color-border, #DFE6E9);
-  margin: var(--ws-space-md, 1rem) var(--ws-space-lg, 1.5rem);
+  background: #E8E5DE;
+  margin: 12px 20px;
 }

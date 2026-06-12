@@ -34,7 +34,7 @@
   justify-content: space-between;
   gap: var(--ws-space-md);
   padding: var(--ws-space-md) 0;
-  border-bottom: 1px solid var(--ws-color-border);
+  border-bottom: 1px solid #E8E5DE;
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -61,7 +61,7 @@
 
 .app-preferences__description {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   display: block;
   overflow-wrap: break-word;
   word-break: break-word;
@@ -103,14 +103,14 @@
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-sm);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
   background: var(--ws-color-white);
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
@@ -126,7 +126,7 @@
 }
 
 .app-preferences__radio:focus-visible + .app-preferences__theme-label {
-  outline: 2px solid var(--ws-color-sage);
+  outline: 2px solid #6B8E6B;
   outline-offset: 2px;
 }
 
@@ -134,7 +134,7 @@
 .app-preferences__select {
   min-width: 44px;
   min-height: 44px;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-base);
@@ -149,7 +149,7 @@
 }
 
 .app-preferences__select:focus-visible {
-  outline: 2px solid var(--ws-color-sage);
+  outline: 2px solid #6B8E6B;
   outline-offset: 2px;
 }
 
@@ -180,8 +180,8 @@
   width: 48px;
   height: 28px;
   border-radius: var(--ws-radius-pill);
-  background: var(--ws-color-border);
-  transition: background var(--ws-transition-fast);
+  background: #E8E5DE;
+  transition:  var(--ws-transition-fast);
 }
 
 .app-preferences__toggle--active::before {
@@ -197,7 +197,7 @@
   background: var(--ws-color-white);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transform: translateX(-10px);
-  transition: transform var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .app-preferences__toggle--active .app-preferences__toggle-thumb {
@@ -205,7 +205,7 @@
 }
 
 .app-preferences__toggle:focus-visible {
-  outline: 2px solid var(--ws-color-sage);
+  outline: 2px solid #6B8E6B;
   outline-offset: 2px;
   border-radius: var(--ws-radius-pill);
 }

@@ -44,11 +44,11 @@
   display: flex;
   align-items: center;
   gap: var(--ws-space-md);
-  padding: var(--ws-space-md) var(--ws-space-lg);
+  padding: var(--ws-space-md) 20px;
   background: var(--ws-color-white);
   border-radius: var(--ws-radius-card);
   box-shadow: var(--ws-shadow-card);
-  transition: box-shadow var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -87,7 +87,7 @@
 
 .connected-integrations__description {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -97,20 +97,20 @@
 .connected-integrations__status {
   font-size: var(--ws-font-size-xs);
   font-weight: 500;
-  padding: var(--ws-space-xs) var(--ws-space-sm);
+  padding: var(--ws-space-xs) 8px;
   border-radius: var(--ws-radius-pill);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .connected-integrations__status--connected {
-  background: color-mix(in srgb, var(--ws-color-success) 15%, transparent);
-  color: var(--ws-color-success);
+  background: color-mix(in srgb, #00B894 15%, transparent);
+  color: #00B894;
 }
 
 .connected-integrations__status--disconnected {
   background: var(--ws-color-limestone);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 /* Add Integration button */
@@ -121,15 +121,15 @@
   gap: var(--ws-space-sm);
   width: 100%;
   padding: var(--ws-space-md);
-  border: 2px dashed var(--ws-color-border);
+  border: 2px dashed #E8E5DE;
   border-radius: var(--ws-radius-card);
   background: transparent;
   font-size: var(--ws-font-size-base);
   font-family: var(--ws-font-body);
   font-weight: 500;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
-  transition: border-color var(--ws-transition-fast), color var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast), color 0.15s ease;
   box-sizing: border-box;
 }
 
@@ -145,24 +145,24 @@
   justify-content: center;
   gap: var(--ws-space-xs);
   align-self: flex-end;
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-white);
   font-size: var(--ws-font-size-sm);
   font-family: var(--ws-font-body);
   font-weight: 500;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
   min-height: 44px;
   min-width: 44px;
-  transition: border-color var(--ws-transition-fast), color var(--ws-transition-fast), background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast), color 0.15s ease, background 0.15s ease;
 }
 
 .connected-integrations__refresh-btn:hover:not(:disabled) {
   border-color: var(--ws-color-sage);
   color: var(--ws-color-sage);
-  background: color-mix(in srgb, var(--ws-color-sage) 5%, transparent);
+  background: color-mix(in srgb, #6B8E6B 5%, transparent);
 }
 
 .connected-integrations__refresh-btn:disabled {
@@ -199,8 +199,8 @@
 
 /* Disconnect button */
 .connected-integrations__disconnect-btn {
-  padding: var(--ws-space-xs) var(--ws-space-sm);
-  border: 1px solid var(--ws-color-error);
+  padding: var(--ws-space-xs) 8px;
+  border: 1px solid #D63031;
   border-radius: var(--ws-radius-sm);
   background: transparent;
   font-size: var(--ws-font-size-xs);
@@ -210,11 +210,11 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background var(--ws-transition-fast), color var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast), color 0.15s ease;
 }
 
 .connected-integrations__disconnect-btn:hover {
-  background: var(--ws-color-error);
+  background: #D63031;
   color: var(--ws-color-white);
 }
 
@@ -222,7 +222,7 @@
 .connected-integrations__success {
   font-size: var(--ws-font-size-xs);
   font-weight: 500;
-  color: var(--ws-color-success);
+  color: #00B894;
   white-space: nowrap;
   flex-shrink: 0;
   animation: disconnect-fade-in 0.2s ease-out;
@@ -262,14 +262,14 @@
   font-family: var(--ws-font-display);
   font-size: var(--ws-font-size-lg);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-md);
+  margin: 0 0 12px;
   color: var(--ws-color-text);
 }
 
 .connected-integrations__confirm-message {
   font-size: var(--ws-font-size-base);
-  color: var(--ws-color-text-muted);
-  margin: 0 0 var(--ws-space-xl);
+  color: var(--ws-color-text);
+  margin: 0 0 32px;
   line-height: 1.5;
   overflow-wrap: break-word;
 }
@@ -282,13 +282,13 @@
 }
 
 .connected-integrations__btn-cancel {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
   font-size: var(--ws-font-size-sm);
   font-family: var(--ws-font-body);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
 }
 
@@ -298,16 +298,16 @@
 }
 
 .connected-integrations__btn-disconnect {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border: none;
   border-radius: var(--ws-radius-sm);
-  background: var(--ws-color-error);
+  background: #D63031;
   color: var(--ws-color-white);
   font-size: var(--ws-font-size-sm);
   font-weight: 600;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: opacity var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .connected-integrations__btn-disconnect:hover {
@@ -337,7 +337,7 @@
 
   .connected-integrations__confirm-dialog {
     padding: var(--ws-space-lg);
-    max-width: calc(100vw - 2 * var(--ws-space-md));
+    max-width: calc(100vw - 2 * 12px);
   }
 
   .connected-integrations__confirm-actions {

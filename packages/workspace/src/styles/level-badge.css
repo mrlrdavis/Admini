@@ -9,7 +9,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 14px;
+  padding: var(--ws-space-sm) 14px;
   background: color-mix(in srgb, var(--color-sage, #6B8E6B) 8%, var(--color-surface, #ffffff));
   border-radius: var(--radius-md, 8px);
   border: 1px solid color-mix(in srgb, var(--color-sage, #6B8E6B) 20%, transparent);
@@ -31,12 +31,12 @@
 .level-badge__level {
   font-weight: 700;
   font-size: 0.875rem;
-  color: var(--color-sage-deep, #4A6B4A);
+  color: var(--color-sage-deep, var(--ws-color-sage-dark));
   line-height: 1.2;
 }
 
 .level-badge__count {
-  font-size: 0.6875rem;
+  font-size: var(--ws-font-size-xs);
   color: var(--color-text-muted, #5a6b5c);
   line-height: 1.2;
 }

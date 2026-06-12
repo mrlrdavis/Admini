@@ -19,7 +19,7 @@
 
 .tasks-tab__error-banner {
   background: var(--ws-color-limestone);
-  border: 1px solid var(--ws-color-error);
+  border: 1px solid #D63031;
   border-radius: var(--ws-radius-card);
   padding: var(--ws-space-lg);
   text-align: center;
@@ -27,18 +27,18 @@
 
 .tasks-tab__retry-btn {
   margin-top: var(--ws-space-md);
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   background: var(--ws-color-sage);
   color: var(--ws-color-white);
   border: none;
   border-radius: var(--ws-radius-pill);
   font-size: var(--ws-font-size-sm);
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__retry-btn:hover {
-  background: var(--ws-color-sage-dark);
+  background: var(--ws-color-sage);
 }
 
 /* Header */
@@ -58,20 +58,20 @@
   display: flex;
   gap: var(--ws-space-sm);
   overflow-x: auto;
-  padding-bottom: var(--ws-space-sm);
+  padding-bottom: 8px;
   margin-bottom: var(--ws-space-lg);
 }
 
 .tasks-tab__filter-pill {
   flex: 0 0 auto;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-pill);
   background: var(--ws-color-white);
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__filter-pill--active {
@@ -82,7 +82,7 @@
 
 /* Task List */
 .tasks-tab__list-section {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .tasks-tab__task-list {
@@ -99,20 +99,20 @@
   border-radius: var(--ws-radius-card);
   padding: var(--ws-space-md);
   box-shadow: var(--ws-shadow-card);
-  border-left: 3px solid var(--ws-color-sage);
-  transition: box-shadow var(--ws-transition-fast);
+  border-left: 3px solid #6B8E6B;
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__task-card[data-priority="urgent"] {
-  border-left-color: var(--ws-color-priority-urgent);
+  border-left-color: var(--ws-color-error);
 }
 
 .tasks-tab__task-card[data-priority="high"] {
-  border-left-color: var(--ws-color-priority-high);
+  border-left-color: #E17055;
 }
 
 .tasks-tab__task-card[data-priority="low"] {
-  border-left-color: var(--ws-color-priority-low);
+  border-left-color: var(--ws-color-text-muted);
 }
 
 .tasks-tab__task-header {
@@ -120,7 +120,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--ws-space-sm);
-  margin-bottom: var(--ws-space-sm);
+  margin-bottom: 8px;
 }
 
 .tasks-tab__task-title {
@@ -133,10 +133,10 @@
   font-size: var(--ws-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: var(--ws-space-xs) var(--ws-space-sm);
+  padding: var(--ws-space-xs) 8px;
   border-radius: var(--ws-radius-pill);
   background: var(--ws-color-limestone);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .tasks-tab__task-meta {
@@ -147,13 +147,13 @@
 
 .tasks-tab__due-date {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .tasks-tab__status {
   font-size: var(--ws-font-size-xs);
   text-transform: capitalize;
-  padding: var(--ws-space-xs) var(--ws-space-sm);
+  padding: var(--ws-space-xs) 8px;
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-limestone);
 }
@@ -163,29 +163,29 @@
 }
 
 .tasks-tab__status--in_progress {
-  color: var(--ws-color-warning);
+  color: #FDCB6E;
 }
 
 .tasks-tab__status--completed {
-  color: var(--ws-color-success);
+  color: #00B894;
 }
 
 /* Empty state */
 .tasks-tab__empty-state {
   text-align: center;
-  padding: var(--ws-space-2xl) var(--ws-space-lg);
+  padding: var(--ws-space-2xl) 20px;
 }
 
 .tasks-tab__empty-title {
   font-size: var(--ws-font-size-lg);
   font-weight: 600;
   color: var(--ws-color-text);
-  margin: 0 0 var(--ws-space-sm);
+  margin: 0 0 8px;
 }
 
 .tasks-tab__empty-desc {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   margin: 0;
   max-width: 24ch;
   margin-inline: auto;
@@ -194,7 +194,7 @@
 /* FAB */
 .tasks-tab__fab {
   position: sticky;
-  bottom: var(--ws-space-lg);
+  bottom: 20px;
   float: inline-end;
   display: flex;
   align-items: center;
@@ -203,11 +203,11 @@
   height: 3.5rem;
   border-radius: 50%;
   border: none;
-  background: var(--ws-color-sage-dark);
+  background: var(--ws-color-sage);
   color: var(--ws-color-white);
   box-shadow: var(--ws-shadow-elevated);
   cursor: pointer;
-  transition: transform var(--ws-transition-fast), box-shadow var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast), box-shadow 0.15s ease;
 }
 
 .tasks-tab__fab:hover,
@@ -220,7 +220,7 @@
 
 .tasks-tab__add-input {
   flex: 1;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-base);
@@ -256,11 +256,11 @@
 .tasks-tab__form-label {
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .tasks-tab__add-textarea {
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-base);
@@ -283,14 +283,14 @@
 }
 
 .tasks-tab__priority-btn {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-pill);
   background: var(--ws-color-white);
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__priority-btn:hover {
@@ -305,45 +305,45 @@
 }
 
 .tasks-tab__priority-btn--active[data-priority="urgent"] {
-  background: var(--ws-color-priority-urgent);
-  border-color: var(--ws-color-priority-urgent);
+  background: #D63031;
+  border-color: var(--ws-color-error);
 }
 
 .tasks-tab__priority-btn--active[data-priority="high"] {
-  background: var(--ws-color-priority-high);
-  border-color: var(--ws-color-priority-high);
+  background: #E17055;
+  border-color: #E17055;
 }
 
 .tasks-tab__priority-btn--active[data-priority="low"] {
-  background: var(--ws-color-priority-low);
-  border-color: var(--ws-color-priority-low);
+  background: #636E72;
+  border-color: var(--ws-color-text-muted);
 }
 
 .tasks-tab__form-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--ws-space-sm);
-  margin-top: var(--ws-space-sm);
+  margin-top: 8px;
 }
 
 .tasks-tab__cancel-btn {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-white);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-size: var(--ws-font-size-sm);
   cursor: pointer;
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__cancel-btn:hover {
-  border-color: var(--ws-color-text-muted);
+  border-color: var(--ws-color-text);
   color: var(--ws-color-text);
 }
 
 .tasks-tab__submit-btn {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border: none;
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-sage);
@@ -351,11 +351,11 @@
   font-size: var(--ws-font-size-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__submit-btn:hover {
-  background: var(--ws-color-sage-dark);
+  background: var(--ws-color-sage);
 }
 
 .tasks-tab__submit-btn:disabled {
@@ -366,7 +366,7 @@
 /* Assigned-to display in task card */
 .tasks-tab__assigned-to {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-sage-dark);
+  color: var(--ws-color-sage);
   font-weight: 500;
 }
 
@@ -376,7 +376,7 @@
   height: 22px;
   min-width: 22px;
   border-radius: 50%;
-  border: 2px solid var(--ws-color-border);
+  border: 2px solid #E8E5DE;
   background: transparent;
   cursor: pointer;
   display: flex;
@@ -384,7 +384,7 @@
   justify-content: center;
   font-size: 12px;
   color: var(--ws-color-white);
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__checkbox--checked {
@@ -408,11 +408,11 @@
 .tasks-tab__expand-btn {
   background: none;
   border: none;
-  color: var(--ws-color-sage-dark);
+  color: var(--ws-color-sage);
   font-size: var(--ws-font-size-xs);
   cursor: pointer;
   padding: 0;
-  margin-top: var(--ws-space-xs);
+  margin-top: 4px;
   font-weight: 500;
 }
 
@@ -423,8 +423,8 @@
 /* Task description */
 .tasks-tab__task-description {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
-  margin: var(--ws-space-xs) 0 0;
+  color: var(--ws-color-text);
+  margin: 4px 0 0;
   line-height: 1.4;
 }
 
@@ -434,14 +434,14 @@
   border: none;
   cursor: pointer;
   font-size: 14px;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   padding: 2px 6px;
   border-radius: var(--ws-radius-sm);
-  transition: color var(--ws-transition-fast), background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast), background 0.15s ease;
 }
 
 .tasks-tab__edit-btn:hover {
-  color: var(--ws-color-sage-dark);
+  color: var(--ws-color-sage);
   background: var(--ws-color-limestone);
 }
 
@@ -462,8 +462,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ws-color-text-muted);
-  transition: background var(--ws-transition-fast);
+  color: var(--ws-color-text);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__menu-btn:hover {
@@ -476,7 +476,7 @@
   right: 0;
   z-index: 50;
   min-width: 160px;
-  background: var(--ws-color-white, #fff);
+  background: var(--ws-color-white);
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-md);
   box-shadow: var(--ws-shadow-elevated);
@@ -486,14 +486,14 @@
 }
 
 .tasks-tab__menu-dropdown button {
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: none;
   background: transparent;
   text-align: left;
   font-size: var(--ws-font-size-sm);
   color: var(--ws-color-text);
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__menu-dropdown button:hover {
@@ -520,14 +520,14 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-size: 1.25rem;
   cursor: pointer;
   border-radius: var(--ws-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__menu-trigger:hover {
@@ -550,14 +550,14 @@
 }
 
 .tasks-tab__menu-dropdown button {
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: none;
   background: transparent;
   text-align: left;
   font-size: var(--ws-font-size-sm);
   color: var(--ws-color-text);
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__menu-dropdown button:hover {
@@ -566,15 +566,15 @@
 
 /* Delete button in form */
 .tasks-tab__delete-btn {
-  padding: var(--ws-space-sm) var(--ws-space-lg);
-  border: 1px solid var(--ws-color-error);
+  padding: var(--ws-space-sm) 20px;
+  border: 1px solid #D63031;
   border-radius: var(--ws-radius-sm);
   background: transparent;
   color: var(--ws-color-error);
   font-size: var(--ws-font-size-sm);
   cursor: pointer;
   margin-right: auto;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__delete-btn:hover {
@@ -602,11 +602,11 @@
 
 .tasks-tab__subtask-input {
   flex: 1;
-  padding: var(--ws-space-xs) var(--ws-space-sm);
+  padding: var(--ws-space-xs) 8px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-sm);
-  background: var(--ws-color-white, #fff);
+  background: var(--ws-color-white);
   color: var(--ws-color-text);
 }
 
@@ -620,8 +620,8 @@
 }
 
 .tasks-tab__subtask-add {
-  padding: var(--ws-space-xs) var(--ws-space-sm);
-  border: 1px dashed var(--ws-color-sage);
+  padding: var(--ws-space-xs) 8px;
+  border: 1px dashed #6B8E6B;
   border-radius: var(--ws-radius-sm);
   background: transparent;
   color: var(--ws-color-sage);
@@ -632,7 +632,7 @@
 
 .tasks-tab__subtask-count {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-sage-dark);
+  color: var(--ws-color-sage);
   font-weight: 500;
 }
 
@@ -648,14 +648,14 @@
 }
 
 .tasks-tab__view-btn {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: none;
   border-radius: var(--ws-radius-pill);
   background: transparent;
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
-  transition: all var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__view-btn--active {
@@ -666,7 +666,7 @@
 
 /* Calendar */
 .tasks-tab__calendar {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
 }
 
 .tasks-tab__calendar-header {
@@ -682,7 +682,7 @@
   font-size: 1.25rem;
   cursor: pointer;
   color: var(--ws-color-text);
-  padding: var(--ws-space-xs) var(--ws-space-sm);
+  padding: var(--ws-space-xs) 8px;
 }
 
 .tasks-tab__calendar-header span {
@@ -699,7 +699,7 @@
 .tasks-tab__calendar-day-label {
   text-align: center;
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   padding: var(--ws-space-xs);
   font-weight: 600;
 }
@@ -709,18 +709,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--ws-space-sm) var(--ws-space-xs);
+  padding: var(--ws-space-sm) 4px;
   border-radius: var(--ws-radius-sm);
   min-height: 2.5rem;
 }
 
 .tasks-tab__calendar-cell--today {
-  background: color-mix(in srgb, var(--ws-color-sage) 12%, transparent);
+  background: color-mix(in srgb, #6B8E6B 12%, transparent);
 }
 
 .tasks-tab__calendar-cell--has-tasks .tasks-tab__calendar-date {
   font-weight: 600;
-  color: var(--ws-color-sage-dark);
+  color: var(--ws-color-sage);
 }
 
 .tasks-tab__calendar-date {
@@ -742,7 +742,7 @@
 }
 
 .tasks-tab__calendar-cell--other-month .tasks-tab__calendar-date {
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 /* Bigger calendar cells */
@@ -764,15 +764,15 @@
   transform: translateX(-50%);
   background: #2D3436;
   color: #ffffff;
-  padding: 8px;
-  border-radius: 8px;
+  padding: var(--ws-space-sm);
+  border-radius: var(--ws-radius-md);
   font-size: 0.7rem;
   z-index: 30;
   min-width: 120px;
   max-width: 180px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ws-space-xs);
 }
 
 .tasks-tab__calendar-cell:hover .tasks-tab__calendar-preview,
@@ -812,31 +812,31 @@
 .tasks-tab__calendar-task-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--ws-space-xs);
   width: 100%;
   padding: 2px 4px;
   border: none;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--ws-color-sage) 12%, transparent);
+  background: color-mix(in srgb, #6B8E6B 12%, transparent);
   cursor: pointer;
   text-align: left;
   font-size: 0.625rem;
   line-height: 1.2;
   color: var(--ws-color-text);
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .tasks-tab__calendar-task-btn:hover {
-  background: color-mix(in srgb, var(--ws-color-sage) 24%, transparent);
+  background: color-mix(in srgb, #6B8E6B 24%, transparent);
 }
 
 /* Calendar items colored by type, not priority */
 .tasks-tab__calendar-task-btn[data-item-type="task"] {
-  background: color-mix(in srgb, var(--ws-color-sage) 14%, transparent);
+  background: color-mix(in srgb, #6B8E6B 14%, transparent);
 }
 
 .tasks-tab__calendar-task-btn[data-item-type="subtask"] {
-  background: color-mix(in srgb, var(--ws-color-sage-light) 18%, transparent);
+  background: color-mix(in srgb, #6B8E6B 18%, transparent);
 }
 
 .tasks-tab__calendar-task-btn[data-item-type="assigned"] {
@@ -844,7 +844,7 @@
 }
 
 .tasks-tab__calendar-task-btn[data-overdue="true"] {
-  background: color-mix(in srgb, var(--ws-color-priority-urgent) 12%, transparent);
+  background: color-mix(in srgb, #D63031 12%, transparent);
 }
 
 .tasks-tab__calendar-task-title {
@@ -856,15 +856,15 @@
 
 .tasks-tab__calendar-task-subtasks {
   font-size: 0.5625rem;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   white-space: nowrap;
 }
 
 /* Subtask Preview in Task Cards */
 .tasks-tab__subtask-preview {
-  margin-top: var(--ws-space-xs);
-  padding-top: var(--ws-space-xs);
-  border-top: 1px solid var(--ws-color-border);
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #E8E5DE;
 }
 
 .tasks-tab__subtask-preview-list {
@@ -885,7 +885,7 @@
 }
 
 .tasks-tab__subtask-preview-item--done {
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   text-decoration: line-through;
 }
 
@@ -897,7 +897,7 @@
 
 .tasks-tab__subtask-preview-more {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-style: italic;
   padding-left: 20px;
 }
@@ -925,19 +925,19 @@
 .tasks-tab__legend-title {
   font-size: var(--ws-font-size-sm);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-sm);
+  margin: 0 0 8px;
   color: var(--ws-color-text);
 }
 
 .tasks-tab__legend-list {
   list-style: none;
-  margin: 0 0 var(--ws-space-md);
+  margin: 0 0 12px;
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .tasks-tab__legend-dot {
@@ -949,13 +949,13 @@
 }
 
 .tasks-tab__legend-dot[data-type="task"] { background: var(--ws-color-sage); }
-.tasks-tab__legend-dot[data-type="subtask"] { background: var(--ws-color-sage-light); }
+.tasks-tab__legend-dot[data-type="subtask"] { background: var(--ws-color-sage); }
 .tasks-tab__legend-dot[data-type="assigned"] { background: #5B8DEF; }
-.tasks-tab__legend-dot[data-type="priority"] { background: var(--ws-color-priority-high); }
+.tasks-tab__legend-dot[data-type="priority"] { background: #E17055; }
 
 .tasks-tab__legend-empty {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-style: italic;
   margin: 0;
 }
@@ -966,15 +966,15 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ws-space-xs);
 }
 
 .tasks-tab__legend-overdue-btn {
   background: none;
   border: none;
-  padding: 4px 0;
+  padding: var(--ws-space-xs) 0;
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-priority-urgent);
+  color: var(--ws-color-error);
   cursor: pointer;
   text-align: left;
   text-decoration: underline;
@@ -1013,21 +1013,21 @@
   background: var(--ws-color-sage);
 }
 
-.tasks-tab__calendar-priority-dot[data-priority="urgent"] { background: var(--ws-color-priority-urgent); }
-.tasks-tab__calendar-priority-dot[data-priority="high"] { background: var(--ws-color-priority-high); }
+.tasks-tab__calendar-priority-dot[data-priority="urgent"] { background: #D63031; }
+.tasks-tab__calendar-priority-dot[data-priority="high"] { background: #E17055; }
 .tasks-tab__calendar-priority-dot[data-priority="normal"] { background: var(--ws-color-sage); }
-.tasks-tab__calendar-priority-dot[data-priority="low"] { background: var(--ws-color-priority-low); }
+.tasks-tab__calendar-priority-dot[data-priority="low"] { background: #636E72; }
 
 /* Subtask items in calendar - slightly indented/different style */
 .tasks-tab__calendar-task-btn--subtask {
-  background: color-mix(in srgb, var(--ws-color-sage-light) 10%, transparent);
+  background: color-mix(in srgb, #6B8E6B 10%, transparent);
   font-style: italic;
   padding-left: 6px;
-  border-left: 2px solid var(--ws-color-sage-light);
+  border-left: 2px solid #6B8E6B;
 }
 
 .tasks-tab__calendar-task-btn--subtask:hover {
-  background: color-mix(in srgb, var(--ws-color-sage-light) 22%, transparent);
+  background: color-mix(in srgb, #6B8E6B 22%, transparent);
 }
 
 /* Task card checkbox */
@@ -1037,7 +1037,7 @@
   min-width: 20px;
   accent-color: var(--ws-color-sage);
   cursor: pointer;
-  margin-right: var(--ws-space-sm);
+  margin-right: 8px;
 }
 
 /* Subtask preview checkbox */
@@ -1074,7 +1074,7 @@
 .tasks-tab__contact-suggestions li button {
   display: block;
   width: 100%;
-  padding: 8px 12px;
+  padding: var(--ws-space-sm) 12px;
   border: none;
   background: none;
   text-align: left;
@@ -1115,7 +1115,7 @@
   padding: 0 4px;
   font-size: 0.75rem;
   cursor: pointer;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   line-height: 1;
 }
 
@@ -1135,24 +1135,24 @@
 /* Calendar Event Form */
 .tasks-tab__add-event-btn {
   background: none;
-  border: 1px solid var(--ws-color-sage);
-  color: var(--ws-color-sage-dark);
+  border: 1px solid #6B8E6B;
+  color: var(--ws-color-sage);
   padding: 6px 14px;
   border-radius: var(--ws-radius-pill);
   font-size: var(--ws-font-size-xs);
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: var(--ws-space-sm);
+  margin-bottom: 8px;
 }
 
 .tasks-tab__add-event-btn:hover {
   background: var(--ws-color-sage);
-  color: #fff;
+  color: var(--ws-color-white);
 }
 
 .tasks-tab__event-form {
   display: flex;
-  gap: 8px;
+  gap: var(--ws-space-sm);
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: var(--ws-space-md);
@@ -1172,7 +1172,7 @@
 .tasks-tab__event-save {
   padding: 6px 14px;
   background: var(--ws-color-sage);
-  color: #fff;
+  color: var(--ws-color-white);
   border: none;
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-sm);

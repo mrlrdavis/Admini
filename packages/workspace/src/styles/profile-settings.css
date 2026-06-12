@@ -17,8 +17,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: var(--ws-space-md) var(--ws-space-lg);
-  border-bottom: 1px solid var(--ws-color-border);
+  padding: var(--ws-space-md) 20px;
+  border-bottom: 1px solid #E8E5DE;
   gap: var(--ws-space-sm);
   box-sizing: border-box;
   max-width: 100%;
@@ -40,7 +40,7 @@
 
 .profile-settings__label {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-weight: 500;
 }
 
@@ -59,15 +59,15 @@
 
 .profile-settings__input {
   width: 100%;
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-base);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
-  background: var(--ws-color-white, #ffffff);
+  background: var(--ws-color-white);
   box-sizing: border-box;
-  transition: border-color var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   /* Ensure input scrolls into view above virtual keyboard on mobile */
   scroll-margin-bottom: 40vh;
 }
@@ -75,7 +75,7 @@
 .profile-settings__input:focus {
   outline: none;
   border-color: var(--ws-color-sage);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ws-color-sage) 20%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, #6B8E6B 20%, transparent);
 }
 
 .profile-settings__input:disabled {
@@ -92,16 +92,16 @@
 }
 
 .profile-settings__btn-cancel {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
   font-size: var(--ws-font-size-sm);
   font-family: var(--ws-font-body);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   cursor: pointer;
   min-height: 36px;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .profile-settings__btn-cancel:hover {
@@ -114,7 +114,7 @@
 }
 
 .profile-settings__btn-save {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: none;
   border-radius: var(--ws-radius-sm);
   background: var(--ws-color-sage);
@@ -123,7 +123,7 @@
   font-weight: 500;
   font-family: var(--ws-font-body);
   cursor: pointer;
-  transition: opacity var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
   min-width: 5rem;
   min-height: 36px;
 }
@@ -139,7 +139,7 @@
 
 /* Edit button */
 .profile-settings__edit-btn {
-  padding: var(--ws-space-xs) var(--ws-space-md);
+  padding: var(--ws-space-xs) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   background: transparent;
@@ -150,7 +150,7 @@
   white-space: nowrap;
   flex-shrink: 0;
   min-height: 36px;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .profile-settings__edit-btn:hover {
@@ -165,7 +165,7 @@
 /* Admin only notice */
 .profile-settings__admin-notice {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-style: italic;
 }
 
@@ -192,9 +192,9 @@
   gap: var(--ws-space-xs);
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
-  color: var(--ws-color-success);
-  background: color-mix(in srgb, var(--ws-color-success) 10%, transparent);
-  padding: 2px var(--ws-space-sm);
+  color: #00B894;
+  background: color-mix(in srgb, #00B894 10%, transparent);
+  padding: 2px 8px;
   border-radius: var(--ws-radius-pill);
   animation: profile-success-fade-in 0.2s ease-out;
   white-space: nowrap;
@@ -220,15 +220,15 @@
   display: flex;
   align-items: center;
   gap: var(--ws-space-sm);
-  padding: var(--ws-space-sm) var(--ws-space-md);
-  background: color-mix(in srgb, var(--ws-color-success) 12%, var(--ws-color-white));
-  border: 1px solid color-mix(in srgb, var(--ws-color-success) 30%, transparent);
+  padding: var(--ws-space-sm) 12px;
+  background: color-mix(in srgb, #00B894 12%, #fff);
+  border: 1px solid color-mix(in srgb, #00B894 30%, transparent);
   border-radius: var(--ws-radius-md);
   margin-bottom: var(--ws-space-md);
   animation: profile-toast-slide-in 0.25s ease-out;
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
-  color: var(--ws-color-success);
+  color: #00B894;
   box-sizing: border-box;
 }
 

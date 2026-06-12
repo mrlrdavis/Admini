@@ -26,16 +26,16 @@
 .notes-tab__field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ws-space-xs);
   font-size: var(--ws-font-size-xs);
   font-weight: 600;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .notes-tab__field select,
 .notes-tab__field input,
 .notes-tab__field textarea {
-  padding: 8px 10px;
+  padding: var(--ws-space-sm) 10px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-md);
   font-size: var(--ws-font-size-sm);
@@ -54,7 +54,7 @@
 }
 
 .notes-tab__form-actions button {
-  padding: 8px 20px;
+  padding: var(--ws-space-sm) 20px;
   border-radius: var(--ws-radius-md);
   font-weight: 600;
   font-size: var(--ws-font-size-sm);
@@ -65,7 +65,7 @@
 
 .notes-tab__form-actions button:last-child {
   background: var(--ws-color-sage);
-  color: #fff;
+  color: var(--ws-color-white);
   border-color: var(--ws-color-sage);
 }
 
@@ -82,7 +82,7 @@
   background: var(--ws-color-white);
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-card);
-  padding: var(--ws-space-md) var(--ws-space-lg);
+  padding: var(--ws-space-md) 20px;
 }
 
 .notes-tab__note-header {
@@ -91,22 +91,22 @@
   margin-bottom: 4px;
 }
 
-.notes-tab__note-type { font-weight: 600; font-size: var(--ws-font-size-sm); color: var(--ws-color-sage-dark); }
-.notes-tab__note-date { font-size: var(--ws-font-size-xs); color: var(--ws-color-text-muted); }
-.notes-tab__note-attendees { font-size: var(--ws-font-size-xs); color: var(--ws-color-text-muted); display: block; margin-bottom: 4px; }
+.notes-tab__note-type { font-weight: 600; font-size: var(--ws-font-size-sm); color: var(--ws-color-sage); }
+.notes-tab__note-date { font-size: var(--ws-font-size-xs); color: var(--ws-color-text); }
+.notes-tab__note-attendees { font-size: var(--ws-font-size-xs); color: var(--ws-color-text); display: block; margin-bottom: 4px; }
 .notes-tab__note-content { font-size: var(--ws-font-size-sm); margin: 8px 0; color: var(--ws-color-text); line-height: 1.5; }
-.notes-tab__note-timestamp { font-size: var(--ws-font-size-xs); color: var(--ws-color-text-muted); }
+.notes-tab__note-timestamp { font-size: var(--ws-font-size-xs); color: var(--ws-color-text); }
 
 .notes-tab__note-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--ws-space-sm);
   margin-top: 8px;
 }
 
 .notes-tab__note-actions button {
   background: none;
   border: 1px solid var(--ws-color-border);
-  padding: 4px 12px;
+  padding: var(--ws-space-xs) 12px;
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-xs);
   cursor: pointer;
@@ -114,13 +114,13 @@
 
 .notes-tab__fab {
   position: fixed;
-  bottom: calc(var(--ws-tab-bar-height, 56px) + 20px);
+  bottom: calc(0px + 20px);
   right: 20px;
   width: 52px;
   height: 52px;
   border-radius: 50%;
   background: var(--ws-color-sage);
-  color: #fff;
+  color: var(--ws-color-white);
   font-size: 1.5rem;
   border: none;
   cursor: pointer;
@@ -128,37 +128,37 @@
   z-index: 50;
 }
 
-.notes-tab__empty { color: var(--ws-color-text-muted); font-style: italic; }
+.notes-tab__empty { color: var(--ws-color-text); font-style: italic; }
 /* Notes Editor Toolbar */
 .notes-tab__toolbar {
   display: flex;
-  gap: 4px;
+  gap: var(--ws-space-xs);
   padding: 6px;
   background: var(--ws-color-limestone);
   border: 1px solid var(--ws-color-border);
   border-bottom: none;
-  border-radius: var(--ws-radius-md) var(--ws-radius-md) 0 0;
+  border-radius: var(--ws-radius-md) 8px 0 0;
 }
 
 .notes-tab__toolbar button {
-  padding: 4px 10px;
+  padding: var(--ws-space-xs) 10px;
   border: 1px solid var(--ws-color-border);
   border-radius: 4px;
   background: var(--ws-color-white);
   cursor: pointer;
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   font-weight: 600;
   color: var(--ws-color-text);
 }
 
 .notes-tab__toolbar button:hover {
   background: var(--ws-color-sage);
-  color: #fff;
+  color: var(--ws-color-white);
   border-color: var(--ws-color-sage);
 }
 
 .notes-tab__editor {
-  border-radius: 0 0 var(--ws-radius-md) var(--ws-radius-md) !important;
+  border-radius: 0 0 8px 8px !important;
   border-top: none !important;
   min-height: 200px;
   font-family: monospace;
@@ -168,7 +168,7 @@
 .notes-tab__field-label {
   font-size: var(--ws-font-size-xs);
   font-weight: 600;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   margin-bottom: 4px;
   display: block;
 }

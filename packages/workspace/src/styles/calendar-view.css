@@ -14,7 +14,7 @@
 .calendar-view__legend {
   flex-shrink: 0;
   width: 140px;
-  padding: 12px;
+  padding: var(--ws-space-md);
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #d4d0c8);
   border-radius: 10px;
@@ -35,13 +35,13 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--ws-space-sm);
 }
 
 .calendar-view__legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ws-space-sm);
   font-size: 0.75rem;
   color: var(--color-text, #2c3e2d);
 }
@@ -80,7 +80,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--ws-space-md);
 }
 
 .calendar-view__month-label {
@@ -92,7 +92,7 @@
 .calendar-view__nav-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ws-space-sm);
 }
 
 .calendar-view__nav-btn {
@@ -100,9 +100,9 @@
   border: 1px solid var(--color-border, #d4d0c8);
   font-size: 1rem;
   cursor: pointer;
-  padding: 4px 10px;
+  padding: var(--ws-space-xs) 10px;
   color: var(--color-text, #2c3e2d);
-  border-radius: 6px;
+  border-radius: var(--ws-radius-sm);
   line-height: 1;
   transition: background 0.15s;
 }
@@ -119,10 +119,10 @@
 .calendar-view__add-event-btn {
   padding: 6px 12px;
   border: 1.5px solid var(--color-sage, #6B8E6B);
-  border-radius: 8px;
+  border-radius: var(--ws-radius-md);
   background: var(--color-surface, #ffffff);
-  color: var(--color-sage-deep, #4A6B4A);
-  font-size: 0.8125rem;
+  color: var(--color-sage-deep, var(--ws-color-sage-dark));
+  font-size: var(--ws-font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 150ms ease, color 150ms ease;
@@ -149,8 +149,8 @@
 }
 
 .calendar-view__dow {
-  padding: 8px 4px;
-  font-size: 0.6875rem;
+  padding: var(--ws-space-sm) 4px;
+  font-size: var(--ws-font-size-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -162,7 +162,7 @@
 
 .calendar-view__cell {
   min-height: 80px;
-  padding: 4px 6px;
+  padding: var(--ws-space-xs) 6px;
   border-right: 1px solid var(--color-border, #d4d0c8);
   border-bottom: 1px solid var(--color-border, #d4d0c8);
   position: relative;
@@ -183,7 +183,7 @@
 
 .calendar-view__cell-date {
   display: block;
-  font-size: 0.6875rem;
+  font-size: var(--ws-font-size-xs);
   font-weight: 600;
   color: var(--color-text-muted, #5a6b5c);
   margin-bottom: 4px;
@@ -235,7 +235,7 @@
   .calendar-view__legend-list {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: var(--ws-space-md);
   }
 
   .calendar-view__cell {

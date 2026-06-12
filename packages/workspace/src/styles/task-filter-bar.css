@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--ws-space-md);
   flex-wrap: wrap;
   margin-bottom: var(--space-md, 16px);
 }
@@ -28,7 +28,7 @@
   border-radius: 9999px;
   background: var(--color-surface, #ffffff);
   color: var(--color-text-muted, #5a6b5c);
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -37,7 +37,7 @@
 
 .task-filter-bar__pill:hover {
   border-color: var(--color-sage, #6B8E6B);
-  color: var(--color-sage-deep, #4A6B4A);
+  color: var(--color-sage-deep, var(--ws-color-sage-dark));
 }
 
 .task-filter-bar__pill--active {
@@ -47,8 +47,8 @@
 }
 
 .task-filter-bar__pill--active:hover {
-  background: var(--color-sage-deep, #4A6B4A);
-  border-color: var(--color-sage-deep, #4A6B4A);
+  background: var(--color-sage-deep, var(--ws-color-sage-dark));
+  border-color: var(--color-sage-deep, var(--ws-color-sage-dark));
   color: #ffffff;
 }
 
@@ -64,10 +64,10 @@
   gap: 6px;
   padding: 6px 12px;
   border: 1.5px solid var(--color-border, #d4d0c8);
-  border-radius: 8px;
+  border-radius: var(--ws-radius-md);
   background: var(--color-surface, #ffffff);
   color: var(--color-text, #2c3e2d);
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 150ms ease, border-color 150ms ease;
@@ -89,5 +89,5 @@
 }
 
 .task-filter-bar__view-label {
-  font-size: 0.8125rem;
+  font-size: var(--ws-font-size-sm);
 }

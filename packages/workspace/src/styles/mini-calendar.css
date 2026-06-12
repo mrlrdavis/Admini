@@ -4,10 +4,10 @@
    ========================================================================== */
 
 .mini-calendar {
-  background: var(--ws-color-white, #ffffff);
-  border-radius: var(--ws-radius-card, 12px);
-  border: 1px solid var(--ws-color-border, #e8e5de);
-  padding: var(--ws-space-md, 16px);
+  background: var(--ws-color-white);
+  border-radius: var(--ws-radius-card);
+  border: 1px solid var(--ws-color-border);
+  padding: var(--ws-space-md);
 }
 
 /* Header: month label + nav arrows */
@@ -15,13 +15,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--ws-space-md);
 }
 
 .mini-calendar__month-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--ws-color-text, #2d3436);
+  color: var(--ws-color-text);
 }
 
 .mini-calendar__nav {
@@ -29,19 +29,19 @@
   border: none;
   font-size: 1.25rem;
   cursor: pointer;
-  padding: 4px 8px;
-  color: var(--ws-color-text-muted, #636e72);
+  padding: var(--ws-space-xs) 8px;
+  color: var(--ws-color-text);
   border-radius: 4px;
   line-height: 1;
   transition: background 0.15s;
 }
 
 .mini-calendar__nav:hover {
-  background: var(--ws-color-limestone, #f5f3ee);
+  background: var(--ws-color-limestone);
 }
 
 .mini-calendar__nav:focus-visible {
-  outline: 2px solid var(--ws-color-sage, #6b8e6b);
+  outline: 2px solid #6B8E6B;
   outline-offset: 2px;
 }
 
@@ -57,9 +57,9 @@
 /* Day-of-week headers */
 .mini-calendar__dow {
   font-weight: 600;
-  color: var(--ws-color-text-muted, #636e72);
-  padding: 4px 0;
-  font-size: 0.6875rem;
+  color: var(--ws-color-text);
+  padding: var(--ws-space-xs) 0;
+  font-size: var(--ws-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -74,19 +74,19 @@
   margin: 0 auto;
   border-radius: 50%;
   position: relative;
-  color: var(--ws-color-text, #2d3436);
+  color: var(--ws-color-text);
   font-size: 0.75rem;
 }
 
 /* Muted days from surrounding months */
 .mini-calendar__day--muted {
-  color: var(--ws-color-text-muted, #636e72);
+  color: var(--ws-color-text);
   opacity: 0.4;
 }
 
 /* Today: Sage Green filled circle */
 .mini-calendar__day--today {
-  background: var(--ws-color-sage, #6b8e6b);
+  background: var(--ws-color-sage);
   color: #ffffff;
   font-weight: 700;
 }
@@ -101,7 +101,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--ws-color-sage, #6b8e6b);
+  background: var(--ws-color-sage);
 }
 
 /* When today also has tasks, the dot should contrast against the green bg */

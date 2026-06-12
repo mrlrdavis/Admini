@@ -36,7 +36,7 @@
   --ws-color-white: #FFFFFF;
   --ws-color-text: #2D3436;
   --ws-color-text-muted: #636E72;
-  --ws-color-border: #DFE6E9;
+  --ws-color-border: #E8E5DE;
   --ws-color-error: #D63031;
   --ws-color-success: #00B894;
   --ws-color-warning: #FDCB6E;
@@ -93,23 +93,9 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  background: linear-gradient(
-    180deg,
-    var(--ws-color-limestone) 0%,
-    #ffffff 40%,
-    #ffffff 100%
-  );
-  padding: var(--ws-space-lg);
-  padding-bottom: calc(var(--ws-tab-bar-height) + env(safe-area-inset-bottom, 0px) + var(--ws-space-xl));
-}
-
-/* --------------------------------------------------------------------------
-   Utility Classes
-   -------------------------------------------------------------------------- */
-
-.ws-press-feedback {
-  transition: transform 100ms ease, box-shadow 100ms ease;
-  -webkit-tap-highlight-color: transparent;
+  background: var(--ws-color-limestone);
+  padding: 0;
+  margin-left: 180px;
 }
 .ws-press-feedback:active {
   transform: scale(0.99);
@@ -200,7 +186,7 @@
 .workspace-shell__content input,
 .workspace-shell__content textarea,
 .workspace-shell__content select {
-  background-color: var(--ws-color-white, #ffffff);
+  background-color: var(--ws-color-white);
 }
 /* --------------------------------------------------------------------------
    Mobile Viewport Overflow Prevention
@@ -208,8 +194,8 @@
 
 @media (max-width: 768px) {
   .workspace-shell__content {
-    padding-left: var(--ws-space-md);
-    padding-right: var(--ws-space-md);
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .dashboard-tab,
@@ -238,7 +224,7 @@
 /* Toast System */
 .toast-container {
   position: fixed;
-  bottom: calc(var(--ws-tab-bar-height, 56px) + var(--ws-space-lg, 1.5rem));
+  bottom: calc(0px + 20px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -253,7 +239,7 @@
   display: flex;
   align-items: center;
   gap: var(--ws-space-md);
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   border-radius: var(--ws-radius-pill);
   font-size: var(--ws-font-size-sm);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -284,7 +270,7 @@
   border: none;
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  padding: 4px 12px;
+  padding: var(--ws-space-xs) 12px;
   border-radius: var(--ws-radius-pill);
   font-size: var(--ws-font-size-xs);
   font-weight: 600;

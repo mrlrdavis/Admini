@@ -34,7 +34,7 @@
   justify-content: center;
   gap: 2px;
   flex: 1;
-  padding: 8px 4px 6px;
+  padding: var(--ws-space-sm) 4px 6px;
   border: none;
   background: transparent;
   color: var(--color-text-muted, #5a6b5c);

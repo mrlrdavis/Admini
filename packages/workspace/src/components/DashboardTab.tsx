@@ -21,7 +21,7 @@ import {
   defaultRegistry,
   formatActivityAction as formatActivityActionShared,
 } from '@admini/shared';
-import { getLocalEvents, createLocalEvent } from '../services/localEventService';
+import { getLocalEvents } from '../services/localEventService';
 import { mergeEvents } from '../services/calendarMerge';
 import { buildActivityFeed } from '../services/activityFeed';
 // BadgesSection and BadgesPanel removed - replaced with compact achievement indicator
@@ -77,10 +77,6 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [showAchievements, setShowAchievements] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [dashCalMonth, setDashCalMonth] = useState(new Date());
-  const [showDashEvent, setShowDashEvent] = useState(false);
-  const [dashEventTitle, setDashEventTitle] = useState('');
-  const [dashEventDate, setDashEventDate] = useState('');
-  const [dashEventTime, setDashEventTime] = useState('');
   const [unlockedCount, setUnlockedCount] = useState(0);
   const totalBadges = 9; // total badge count
 
@@ -229,12 +225,12 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         <h1 className="dashboard-tab__greeting-text">{getTimeGreeting()}, <strong>{userName}</strong></h1>
         <div className="dashboard-tab__quick-actions-bar">
           <span className="dashboard-tab__qa-label">QUICK ACTIONS</span>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('capture')}>Record a Capture</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_capture_mode', 'tap'); onTabChange?.('capture'); }}>Quick Tap Capture</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}>See Task Calendar</button>
-          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('admin')}>Update Roster</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('capture')}> Record a Capture</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_capture_mode', 'tap'); onTabChange?.('capture'); }}> Quick Tap Capture</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}> See Task Calendar</button>
+          <button type="button" className="dashboard-tab__qa-pill" onClick={() => onTabChange?.('admin')}> Update Roster</button>
         </div>
-        <div className="dashboard-tab__level-badge" onClick={() => setShowAchievements(true)} style={{ cursor: "pointer" }}>
+        <div className="dashboard-tab__level-badge" onClick={() => setShowAchievements(true)}>
           <span className="dashboard-tab__level-num">Level {Math.floor(unlockedCount / 2) + 1}</span>
           <span className="dashboard-tab__level-sub">{unlockedCount}/{totalBadges} badges</span>
         </div>
@@ -244,56 +240,56 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
       <div className="dashboard-tab__columns">
         {/* LEFT: Task sections */}
         <div className="dashboard-tab__left">
-          <section className="dashboard-tab__card dashboard-tab__card--high">
-            <h2 className="dashboard-tab__card-title">High Priority</h2>
+          <section className="dashboard-tab__section dashboard-tab__section--high-priority">
+            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">⚠</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--high">High Priority</h2></div>
             {highPriorityTasks.length === 0 ? <p className="dashboard-tab__empty">No high priority tasks</p> : (
-              <ul className="dashboard-tab__card-list">
+              <ul className="dashboard-tab__task-list">
                 {highPriorityTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__card-item" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
                     <span>{task.title}</span>
-                    <span className="dashboard-tab__card-due">{task.dueAt && parseLocalDate(task.dueAt).toDateString() === todayStr ? 'Today' : task.dueAt ? parseLocalDate(task.dueAt).toLocaleDateString(undefined, {month:'short',day:'numeric'}) : ''}</span>
+                    <span className="dashboard-tab__task-due">{task.dueAt && parseLocalDate(task.dueAt).toDateString() === todayStr ? 'Today' : task.dueAt ? parseLocalDate(task.dueAt).toLocaleDateString(undefined, {month:'short',day:'numeric'}) : ''}</span>
                   </li>
                 ))}
               </ul>
             )}
           </section>
 
-          <section className="dashboard-tab__card dashboard-tab__card--due-today">
-            <h2 className="dashboard-tab__card-title">Due Today</h2>
+          <section className="dashboard-tab__section dashboard-tab__section--due-today">
+            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">⏱</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--due-today">Due Today</h2></div>
             {dueTodayTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing due today</p> : (
-              <ul className="dashboard-tab__card-list">
+              <ul className="dashboard-tab__task-list">
                 {dueTodayTasks.map(task => (
-                  <li key={task.id} className="dashboard-tab__card-item" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
                     <span>{task.title}</span>
-                    <span className="dashboard-tab__card-due">{task.dueAt ? parseLocalDate(task.dueAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : ''}</span>
+                    <span className="dashboard-tab__task-due">{task.dueAt ? parseLocalDate(task.dueAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : ''}</span>
                   </li>
                 ))}
               </ul>
             )}
           </section>
 
-          <section className="dashboard-tab__card dashboard-tab__card--coming">
-            <h2 className="dashboard-tab__card-title">Coming Due</h2>
+          <section className="dashboard-tab__section dashboard-tab__section--coming-due">
+            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon"></span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--coming">Coming Due</h2></div>
             {comingDueTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing coming due</p> : (
-              <ul className="dashboard-tab__card-list">
+              <ul className="dashboard-tab__task-list">
                 {comingDueTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__card-item" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item" onClick={() => onTabChange?.('tasks')}>
                     <span>{task.title}</span>
-                    <span className="dashboard-tab__card-due">{parseLocalDate(task.dueAt!).toLocaleDateString(undefined, {month:'short',day:'numeric'})}</span>
+                    <span className="dashboard-tab__task-due">{parseLocalDate(task.dueAt!).toLocaleDateString(undefined, {month:'short',day:'numeric'})}</span>
                   </li>
                 ))}
               </ul>
             )}
           </section>
 
-          <section className="dashboard-tab__card dashboard-tab__card--blocked">
-            <h2 className="dashboard-tab__card-title">Blocked Tasks {blockedTasks.length > 0 && <span className="dashboard-tab__blocked-badge">{blockedTasks.length}</span>}</h2>
+          <section className="dashboard-tab__section dashboard-tab__section--blocked">
+            <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon"></span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--blocked">Blocked Tasks</h2>{blockedTasks.length > 0 && <span className="dashboard-tab__section-count">{blockedTasks.length}</span>}</div>
             {blockedTasks.length === 0 ? <p className="dashboard-tab__empty">No blocked tasks</p> : (
-              <ul className="dashboard-tab__card-list">
+              <ul className="dashboard-tab__task-list">
                 {blockedTasks.slice(0, 5).map(task => (
-                  <li key={task.id} className="dashboard-tab__card-item dashboard-tab__card-item--blocked" onClick={() => onTabChange?.('tasks')}>
+                  <li key={task.id} className="dashboard-tab__task-item dashboard-tab__task-item--blocked" onClick={() => onTabChange?.('tasks')}>
                     <span>{task.title}</span>
-                    <span className="dashboard-tab__card-blocked-reason">{task.description || 'Blocked'}</span>
+                    <span className="dashboard-tab__block-reason">{task.description || 'Blocked'}</span>
                   </li>
                 ))}
               </ul>
@@ -301,7 +297,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           {userId && organizationId && (
-            <section className="dashboard-tab__card dashboard-tab__card--suggested">
+            <section className="dashboard-tab__section dashboard-tab__section--suggested">
               <RecommendationsWidget userId={userId} organizationId={organizationId} />
             </section>
           )}
@@ -310,13 +306,13 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         {/* RIGHT: Calendar + Schedule + Activity */}
         <div className="dashboard-tab__right">
           <section className="dashboard-tab__card dashboard-tab__card--calendar">
-            <div className="dashboard-tab__mini-cal-header">
-              <span>{new Date().toLocaleDateString(undefined, {month:'long',year:'numeric'})}</span>
+            <div className="dashboard-tab__mini-cal-header"><button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()-1,1))} aria-label="Previous month">‹</button>
+              <span className="dashboard-tab__mini-cal-month">{dashCalMonth.toLocaleDateString(undefined, {month:'long',year:'numeric'})}</span><button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()+1,1))} aria-label="Next month">›</button>
             </div>
             <div className="dashboard-tab__mini-cal-grid">
               {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <span key={d} className="dashboard-tab__mini-cal-dow">{d}</span>)}
               {(() => {
-                const n = new Date();
+                const n = dashCalMonth;
                 const first = new Date(n.getFullYear(), n.getMonth(), 1);
                 const offset = first.getDay();
                 const dim = new Date(n.getFullYear(), n.getMonth()+1, 0).getDate();
@@ -334,11 +330,9 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             </div>
           </section>
 
-            <button type="button" style={{marginTop:"8px",background:"none",border:"1px solid #6B8E6B",color:"#4A6B4A",padding:"4px 12px",borderRadius:"20px",fontSize:"0.75rem",fontWeight:600,cursor:"pointer"}} onClick={() => setShowDashEvent(!showDashEvent)}>{showDashEvent ? "Cancel" : "+ Add Event"}</button>
-            {showDashEvent && <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"8px",padding:"8px",background:"#F5F3EE",borderRadius:"8px"}}><input type="text" placeholder="Title" value={dashEventTitle} onChange={e=>setDashEventTitle(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><input type="date" value={dashEventDate} onChange={e=>setDashEventDate(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><input type="time" value={dashEventTime} onChange={e=>setDashEventTime(e.target.value)} style={{padding:"5px 8px",border:"1px solid #DFE6E9",borderRadius:"6px",fontSize:"0.75rem"}}/><button type="button" disabled={!dashEventTitle.trim()||!dashEventDate} style={{padding:"5px 12px",background:"#6B8E6B",color:"#fff",border:"none",borderRadius:"6px",fontSize:"0.75rem",fontWeight:600,cursor:"pointer"}} onClick={()=>{const newEvent=createLocalEvent({summary:dashEventTitle.trim(),start:dashEventDate+(dashEventTime?"T"+dashEventTime+":00":""),end:""});setCalendarEvents(p=>[...p,newEvent]);setDashEventTitle("");setDashEventDate("");setDashEventTime("");setShowDashEvent(false);}}>Save</button></div>}
           <section className="dashboard-tab__card dashboard-tab__card--schedule">
             <div className="dashboard-tab__schedule-hdr">
-              <h2 className="dashboard-tab__card-title">Today's Schedule</h2>
+              <h2 className="dashboard-tab__schedule-title"> Today's Schedule <span className="dashboard-tab__schedule-date">— {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
               <button type="button" className="dashboard-tab__edit-link" onClick={() => onTabChange?.('pulse')}>Edit</button>
             </div>
             {(() => {
@@ -358,9 +352,9 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                     if(block.period==='Afternoon') return h>=12&&h<16;
                     return h>=16;
                   }).map(ev => (
-                    <div key={ev.id} className="dashboard-tab__sched-event">
+                    <div key={ev.id} className="dashboard-tab__sched-event"><span className="dashboard-tab__sched-check" />
                       <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
-                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} style={{marginLeft:"auto",background:"none",border:"none",color:"#D63031",cursor:"pointer",fontSize:"0.7rem"}}>×</button> : null}
+                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} className="dashboard-tab__sched-event-delete">×</button> : null}
                     </div>
                   ))}
                 </div>
@@ -369,14 +363,14 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__card dashboard-tab__card--activity">
-            <h2 className="dashboard-tab__card-title">Activity Feed</h2>
+            <h2 className="dashboard-tab__feed-header">✨ Activity Feed</h2>
             <ul className="dashboard-tab__feed-list">
               {activityFeedItems.map(ev => (
                 <li key={ev.id} className="dashboard-tab__feed-item">
-                  <span className="dashboard-tab__feed-icon">{ev.action==='create'?'\u2713':'\u25CF'}</span>
+                  <span className={"dashboard-tab__feed-icon " + (ev.entityType==='capture'?"dashboard-tab__feed-icon--capture-voice":ev.entityType==='observation'?"dashboard-tab__feed-icon--observation":ev.action==='create'||ev.action==='created'?"dashboard-tab__feed-icon--task-create":"dashboard-tab__feed-icon--task-complete")}>{ev.entityType==='capture'?'\uD83C\uDFA4':ev.entityType==='observation'?'\uD83D\uDC41':'\u2713'}</span>
                   <div className="dashboard-tab__feed-body">
-                    <span>{formatActivityAction(ev)}</span>
-                    <span className="dashboard-tab__feed-time">{new Date(ev.createdAt).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>
+                    <span className="dashboard-tab__feed-title">{(() => { const t = tasks.find(tk => tk.id === ev.entityId); if (t) return (ev.action === 'create' || ev.action === 'created' ? '' : 'Completed: ') + t.title; if (ev.entityType === 'capture') return 'Voice capture: ' + ev.entityId.substring(0,20); return formatActivityAction(ev); })()}</span>
+                    <span className="dashboard-tab__feed-time">{(() => { const diff = Date.now() - new Date(ev.createdAt).getTime(); const mins = Math.floor(diff/60000); if (mins < 60) return mins + ' minutes ago'; const hrs = Math.floor(mins/60); if (hrs < 24) return hrs + ' hours ago'; return new Date(ev.createdAt).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}); })()}</span>
                   </div>
                 </li>
               ))}
@@ -384,7 +378,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
         </div>
       </div>
-      {showAchievements && <div onClick={()=>setShowAchievements(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:200,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:"60px"}}><div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:"16px",width:"min(480px,92vw)",maxHeight:"80vh",overflowY:"auto",padding:"24px",boxShadow:"0 20px 60px rgba(0,0,0,0.25)"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:"16px"}}><div><h2 style={{fontSize:"1.25rem",fontWeight:700,margin:0}}>Achievements</h2><p style={{fontSize:"0.8rem",color:"#636E72",margin:"2px 0"}}>Level {Math.floor(unlockedCount/2)+1} - {unlockedCount} of {totalBadges} earned</p></div><button type="button" onClick={()=>setShowAchievements(false)} style={{background:"none",border:"none",fontSize:"1.5rem",cursor:"pointer"}}>&times;</button></div><div style={{height:8,background:"#E8E5DE",borderRadius:4,overflow:"hidden",marginBottom:20}}><div style={{height:"100%",background:"#E6A817",width:(unlockedCount/totalBadges*100)+"%"}} /></div>{(()=>{const b=JSON.parse(localStorage.getItem("admini_badges")||"{}");const defs=[{id:"first-capture",icon:"\uD83C\uDFA4",label:"First Capture",desc:"Record your first voice or tap capture"},{id:"first-task",icon:"\u2705",label:"Task Master",desc:"Create your first task"},{id:"five-tasks",icon:"\uD83C\uDF1F",label:"Getting Going",desc:"Complete 5 tasks"},{id:"ten-tasks",icon:"\uD83D\uDD25",label:"On Fire",desc:"Complete 10 tasks"},{id:"first-observation",icon:"\uD83D\uDC41",label:"Observer",desc:"Complete 10 classroom observations"},{id:"streak-3",icon:"\u26A1",label:"Capture Streak",desc:"Use voice capture 7 days in a row"},{id:"streak-7",icon:"\uD83D\uDCAA",label:"Delegator",desc:"Assign 5 tasks to team members"},{id:"first-note",icon:"\uD83D\uDCC5",label:"Calendar Pro",desc:"Keep your schedule updated for 2 weeks"},{id:"twenty-five",icon:"\u2B50",label:"Peak Admin",desc:"Earn all other achievements"}];const earned=defs.filter(d=>b[d.id]);const locked=defs.filter(d=>!b[d.id]);return(<>{earned.length>0&&<div style={{marginBottom:20}}><h3 style={{fontSize:"0.7rem",fontWeight:700,letterSpacing:"0.08em",color:"#636E72",margin:"0 0 10px"}}>EARNED</h3>{earned.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,marginBottom:8,background:"#FDFCF5",border:"1px solid #F0E9D0"}}><span style={{fontSize:"1.5rem"}}>{d.icon}</span><div style={{flex:1}}><strong>{d.label}</strong><br/><span style={{fontSize:"0.75rem",color:"#636E72"}}>{d.desc}</span></div><span style={{fontSize:"0.7rem",color:"#E6A817",fontWeight:600}}>Earned {new Date(b[d.id]).toLocaleDateString()}</span></div>)}</div>}{locked.length>0&&<div><h3 style={{fontSize:"0.7rem",fontWeight:700,letterSpacing:"0.08em",color:"#636E72",margin:"0 0 10px"}}>LOCKED</h3>{locked.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,marginBottom:8,background:"#F8F8F6",border:"1px solid #EEEDEA",opacity:0.7}}><span style={{fontSize:"1.5rem"}}>{d.icon}</span><div style={{flex:1}}><strong>{d.label}</strong><br/><span style={{fontSize:"0.75rem",color:"#636E72"}}>{d.desc}</span></div></div>)}</div>}</>);})()}</div></div>}
+      {showAchievements && <div onClick={()=>setShowAchievements(false)} className="dashboard-tab__achievements-overlay"><div onClick={e=>e.stopPropagation()} className="dashboard-tab__achievements-modal"><div className="dashboard-tab__achievements-header"><div><h2 className="dashboard-tab__achievements-title">Achievements</h2><p className="dashboard-tab__achievements-sub">Level {Math.floor(unlockedCount/2)+1} - {unlockedCount} of {totalBadges} earned</p></div><button type="button" onClick={()=>setShowAchievements(false)} className="dashboard-tab__achievements-close">&times;</button></div><div className="dashboard-tab__achievements-bar"><div className="dashboard-tab__achievements-fill" style={{width:(unlockedCount/totalBadges*100)+"%"}} /></div>{(()=>{const b=JSON.parse(localStorage.getItem("admini_badges")||"{}");const defs=[{id:"first-capture",icon:"\uD83C\uDFA4",label:"First Capture",desc:"Record your first voice or tap capture"},{id:"first-task",icon:"\u2705",label:"Task Master",desc:"Create your first task"},{id:"five-tasks",icon:"\uD83C\uDF1F",label:"Getting Going",desc:"Complete 5 tasks"},{id:"ten-tasks",icon:"\uD83D\uDD25",label:"On Fire",desc:"Complete 10 tasks"},{id:"first-observation",icon:"\uD83D\uDC41",label:"Observer",desc:"Complete 10 classroom observations"},{id:"streak-3",icon:"\u26A1",label:"Capture Streak",desc:"Use voice capture 7 days in a row"},{id:"streak-7",icon:"\uD83D\uDCAA",label:"Delegator",desc:"Assign 5 tasks to team members"},{id:"first-note",icon:"\uD83D\uDCC5",label:"Calendar Pro",desc:"Keep your schedule updated for 2 weeks"},{id:"twenty-five",icon:"\u2B50",label:"Peak Admin",desc:"Earn all other achievements"}];const earned=defs.filter(d=>b[d.id]);const locked=defs.filter(d=>!b[d.id]);return(<>{earned.length>0&&<div style={{marginBottom:20}}><h3 style={{fontSize:"0.7rem",fontWeight:700,letterSpacing:"0.08em",color:"#636E72",margin:"0 0 10px"}}>EARNED</h3>{earned.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,marginBottom:8,background:"#FDFCF5",border:"1px solid #F0E9D0"}}><span style={{fontSize:"1.5rem"}}>{d.icon}</span><div style={{flex:1}}><strong>{d.label}</strong><br/><span style={{fontSize:"0.75rem",color:"#636E72"}}>{d.desc}</span></div><span style={{fontSize:"0.7rem",color:"#E6A817",fontWeight:600}}>Earned {new Date(b[d.id]).toLocaleDateString()}</span></div>)}</div>}{locked.length>0&&<div><h3 style={{fontSize:"0.7rem",fontWeight:700,letterSpacing:"0.08em",color:"#636E72",margin:"0 0 10px"}}>LOCKED</h3>{locked.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,marginBottom:8,background:"#F8F8F6",border:"1px solid #EEEDEA",opacity:0.7}}><span style={{fontSize:"1.5rem"}}>{d.icon}</span><div style={{flex:1}}><strong>{d.label}</strong><br/><span style={{fontSize:"0.75rem",color:"#636E72"}}>{d.desc}</span></div></div>)}</div>}</>);})()}</div></div>}
     </div>
   );
 }

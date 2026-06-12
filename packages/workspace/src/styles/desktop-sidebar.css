@@ -1,105 +1,23 @@
-/* --------------------------------------------------------------------------
-   DesktopSidebar - Fixed left navigation for desktop viewports
-   --------------------------------------------------------------------------
-   Uses design tokens from @admini/ui/styles.css
-   Requirements: 4.1, 4.2, 4.3, 4.4, 4.5
-   -------------------------------------------------------------------------- */
+/* DesktopSidebar - Figma exact match */
 
-.ds-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 220px;
-  min-width: 220px;
-  height: 100dvh;
-  background: var(--color-surface, #ffffff);
-  border-right: 1px solid var(--color-border, #d4d0c8);
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-lg, 24px) 0;
-  z-index: 100;
-}
+.ds-sidebar { position:fixed; top:0; left:0; width:180px; height:100dvh; background:#fff; border-right:1px solid #E8E5DE; display:flex; flex-direction:column; padding:24px 0; z-index:100; }
 
-.ds-sidebar__brand {
-  font-family: 'Arial Rounded MT Bold', 'Avenir Next Rounded', Nunito, system-ui, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  color: var(--color-sage-deep, #4A6B4A);
-  padding: 0 var(--space-lg, 24px) var(--space-lg, 24px);
-}
+.ds-sidebar__brand { font-size:1.375rem; font-weight:800; color:#3D5C3D; padding:0 20px 24px; letter-spacing:-0.03em; }
 
-.ds-sidebar__tabs {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
+.ds-sidebar__tabs { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; flex:1; }
 
-.ds-sidebar__tab {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px var(--space-lg, 24px);
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted, #5a6b5c);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 0;
-  transition: background var(--transition-fast, 150ms ease),
-              color var(--transition-fast, 150ms ease);
-  text-align: left;
-}
+.ds-sidebar__tab { display:flex; align-items:center; gap:10px; width:100%; padding:10px 20px; border:none; background:transparent; color:#636E72; font-size:0.875rem; font-weight:500; cursor:pointer; border-radius:0; transition:background 0.15s,color 0.15s; text-align:left; }
 
-.ds-sidebar__tab:hover {
-  background: var(--color-limestone-light, #e8e4dc);
-  color: var(--color-text, #2c3e2d);
-}
+.ds-sidebar__tab:hover { background:#F5F3EE; color:#2D3436; }
 
-.ds-sidebar__tab--active {
-  background: var(--color-sage, #6B8E6B);
-  color: #ffffff;
-  font-weight: 600;
-}
+.ds-sidebar__tab--active { background:#6B8E6B; color:#fff; font-weight:600; }
 
-.ds-sidebar__tab--active:hover {
-  background: var(--color-sage-deep, #4A6B4A);
-  color: #ffffff;
-}
+.ds-sidebar__tab--active:hover { background:#5A7D5A; color:#fff; }
 
-.ds-sidebar__icon {
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-}
+.ds-sidebar__icon { font-size:1.125rem; display:flex; align-items:center; justify-content:center; width:20px; }
 
-.ds-sidebar__label {
-  white-space: nowrap;
-}
+.ds-sidebar__label { white-space:nowrap; }
 
-.ds-sidebar__sign-out {
-  margin-top: auto;
-  padding: 12px var(--space-lg, 24px);
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted, #5a6b5c);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-align: left;
-  transition: color var(--transition-fast, 150ms ease),
-              background var(--transition-fast, 150ms ease);
-}
+.ds-sidebar__sign-out { margin-top:auto; padding:10px 20px; border:none; background:transparent; color:#636E72; font-size:0.875rem; font-weight:500; cursor:pointer; text-align:left; }
 
-.ds-sidebar__sign-out:hover {
-  color: var(--color-danger, #ef4444);
-  background: rgba(239, 68, 68, 0.06);
-}
+.ds-sidebar__sign-out:hover { color:#C62828; background:rgba(198,40,40,0.05); }

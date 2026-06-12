@@ -20,11 +20,11 @@
   font-family: var(--ws-font-display);
   font-size: var(--ws-font-size-xl);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-xl);
+  margin: 0 0 32px;
 }
 
 .admin-tab__section {
-  margin-bottom: var(--ws-space-xl);
+  margin-bottom: 32px;
   background: var(--ws-color-white);
   border-radius: var(--ws-radius-card);
   padding: var(--ws-space-lg);
@@ -34,14 +34,14 @@
 .admin-tab__section-title {
   font-size: var(--ws-font-size-lg);
   font-weight: 600;
-  margin: 0 0 var(--ws-space-md);
+  margin: 0 0 12px;
   color: var(--ws-color-text);
 }
 
 .admin-tab__subsection-title {
   font-size: var(--ws-font-size-base);
   font-weight: 600;
-  margin: var(--ws-space-lg) 0 var(--ws-space-sm);
+  margin: 20px 0 8px;
 }
 
 /* Form */
@@ -60,18 +60,18 @@
 .admin-tab__field-label {
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .admin-tab__input {
-  padding: var(--ws-space-sm) var(--ws-space-md);
+  padding: var(--ws-space-sm) 12px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-md);
   font-size: var(--ws-font-size-base);
   font-family: var(--ws-font-body);
   color: var(--ws-color-text);
   background: var(--ws-color-limestone);
-  transition: border-color var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .admin-tab__input:focus {
@@ -81,7 +81,7 @@
 
 .admin-tab__submit {
   align-self: flex-start;
-  padding: var(--ws-space-sm) var(--ws-space-xl);
+  padding: var(--ws-space-sm) 32px;
   background: var(--ws-color-sage);
   color: var(--ws-color-white);
   border: none;
@@ -89,11 +89,11 @@
   font-size: var(--ws-font-size-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .admin-tab__submit:hover {
-  background: var(--ws-color-sage-dark);
+  background: var(--ws-color-sage);
 }
 
 .admin-tab__submit:disabled {
@@ -105,13 +105,13 @@
 .admin-tab__error-message {
   color: var(--ws-color-error);
   font-size: var(--ws-font-size-sm);
-  margin: var(--ws-space-sm) 0;
+  margin: 8px 0;
 }
 
 .admin-tab__success-message {
-  color: var(--ws-color-success);
+  color: #00B894;
   font-size: var(--ws-font-size-sm);
-  margin: var(--ws-space-sm) 0;
+  margin: 8px 0;
 }
 
 /* Member list */
@@ -129,7 +129,7 @@
   align-items: center;
   gap: var(--ws-space-md);
   padding: var(--ws-space-sm) 0;
-  border-bottom: 1px solid var(--ws-color-border);
+  border-bottom: 1px solid #E8E5DE;
 }
 
 .admin-tab__member-item:last-child {
@@ -150,11 +150,11 @@
 
 .admin-tab__member-email {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .admin-tab__role-select {
-  padding: var(--ws-space-xs) var(--ws-space-sm);
+  padding: var(--ws-space-xs) 8px;
   border: 1px solid var(--ws-color-border);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-font-size-sm);
@@ -164,7 +164,7 @@
 
 .admin-tab__loading-indicator {
   font-size: var(--ws-font-size-xs);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 /* Invitations */
@@ -198,7 +198,7 @@
 .admin-tab__invitation-role {
   font-size: var(--ws-font-size-xs);
   text-transform: capitalize;
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
 }
 
 .admin-tab__invitation-status {
@@ -243,7 +243,7 @@
 /* Empty state */
 .admin-tab__empty {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
+  color: var(--ws-color-text);
   font-style: italic;
 }
 
@@ -251,24 +251,24 @@
 .admin-tab__invite-btn {
   display: inline-flex;
   align-items: center;
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   background: var(--ws-color-sage);
   color: var(--ws-color-white);
   border-radius: var(--ws-radius-sm);
   text-decoration: none;
   font-weight: 600;
   font-size: var(--ws-font-size-sm);
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .admin-tab__invite-btn:hover {
-  background: var(--ws-color-sage-dark);
+  background: var(--ws-color-sage);
 }
 
 .admin-tab__section-desc {
   font-size: var(--ws-font-size-sm);
-  color: var(--ws-color-text-muted);
-  margin: 0 0 var(--ws-space-md);
+  color: var(--ws-color-text);
+  margin: 0 0 12px;
 }
 
 /* Roster Upload */
@@ -283,16 +283,16 @@
 .admin-tab__upload-btn {
   display: inline-flex;
   align-items: center;
-  padding: var(--ws-space-sm) var(--ws-space-lg);
+  padding: var(--ws-space-sm) 20px;
   background: var(--ws-color-sage);
   color: var(--ws-color-white);
   border-radius: var(--ws-radius-sm);
   font-weight: 600;
   font-size: var(--ws-font-size-sm);
   cursor: pointer;
-  transition: background var(--ws-transition-fast);
+  transition:  var(--ws-transition-fast);
 }
 
 .admin-tab__upload-btn:hover {
-  background: var(--ws-color-sage-dark);
+  background: var(--ws-color-sage);
 }
