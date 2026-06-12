@@ -265,6 +265,47 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     }
   }
 
+  async function handleEditTask(taskId: string, updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string }) {
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.id === taskId ? {
+      ...t,
+      title: updates.title ?? t.title,
+      description: updates.description ?? t.description,
+      dueAt: updates.dueAt ?? t.dueAt,
+      priority: (updates.priority as typeof t.priority) ?? t.priority,
+      assignedTo: updates.assignee ?? t.assignedTo,
+    } : t));
+    try {
+      const client = getClient();
+      const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (updates.title !== undefined) payload.title = updates.title;
+      if (updates.description !== undefined) payload.description = updates.description || null;
+      if (updates.dueAt !== undefined) payload.due_at = updates.dueAt || null;
+      if (updates.priority !== undefined) payload.priority = updates.priority;
+      if (updates.assignee !== undefined) payload.assigned_to = updates.assignee || null;
+      await client.from('tasks').update(payload).eq('id', taskId);
+      if (updates.assignee) notifyAssignee(taskId, updates.assignee, 'updated', updates.title).catch(() => {});
+      showToast('Task updated');
+    } catch {
+      showToast('Failed to update task');
+      await loadTaskList();
+    }
+  }
+
+  async function handleDeleteTask(taskId: string) {
+    const prev = tasks;
+    setTasks(p => p.filter(t => t.id !== taskId));
+    try {
+      const client = getClient();
+      await client.from('tasks').delete().eq('id', taskId);
+      localStorage.removeItem('admini_subtasks_' + taskId);
+      showToast('Task deleted');
+    } catch {
+      showToast('Failed to delete task');
+      setTasks(prev);
+    }
+  }
+
   async function handleStatusChange(taskId: string, status: string) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
@@ -409,6 +450,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                       onSubtaskToggle={(subtaskId) => handleSubtaskToggle(task.id, subtaskId)}
                       onDuplicate={() => handleDuplicate(task)}
                       onStatusChange={(status) => handleStatusChange(task.id, status)}
+                      onEdit={(updates) => handleEditTask(task.id, updates)}
+                      onDelete={() => handleDeleteTask(task.id)}
                     />
                   </li>
                 );

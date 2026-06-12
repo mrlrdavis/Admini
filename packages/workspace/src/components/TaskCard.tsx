@@ -6,6 +6,7 @@
 // Property 9: Parent checkbox disabled when any subtask.completed === false
 // Requirements: 8.1, 8.3, 8.4, 8.5, 8.6
 
+import { useState } from 'react';
 import type { CategoryRegistry } from '@admini/shared';
 import { getCategoryStyle } from '@admini/shared';
 import type { TaskWithSubtasks } from './TaskSection';
@@ -23,6 +24,8 @@ export interface TaskCardProps {
   onSubtaskToggle: (subtaskId: string) => void;
   onDuplicate: () => void;
   onStatusChange: (status: string) => void;
+  onEdit?: (updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string }) => void;
+  onDelete?: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,6 +62,8 @@ export function TaskCard({
   onSubtaskToggle,
   onDuplicate,
   onStatusChange,
+  onEdit,
+  onDelete,
 }: TaskCardProps) {
   const completedSubtasks = task.subtasks.filter(s => s.completed).length;
   const totalSubtasks = task.subtasks.length;
@@ -71,6 +76,18 @@ export function TaskCard({
 
   const dueDateStr = formatDueDate(task.dueAt);
   const overdue = isDueDateOverdue(task.dueAt) && task.status !== 'completed';
+
+  const [editing, setEditing] = useState(false);
+  const [eTitle, setETitle] = useState(task.title);
+  const [eDesc, setEDesc] = useState(task.description || '');
+  const [eDue, setEDue] = useState(task.dueAt ? (task.dueAt.split('T')[0] || '') : '');
+  const [ePriority, setEPriority] = useState(task.priority);
+  const [eAssignee, setEAssignee] = useState(task.assignee || '');
+
+  function saveEdit() {
+    onEdit?.({ title: eTitle.trim(), description: eDesc.trim(), dueAt: eDue || undefined, priority: ePriority, assignee: eAssignee.trim() || undefined });
+    setEditing(false);
+  }
 
   return (
     <article
@@ -158,27 +175,52 @@ export function TaskCard({
             <p className="task-card__block-reason">{task.blockReason}</p>
           )}
 
-          {/* Actions */}
-          <div className="task-card__actions">
-            <button
-              type="button"
-              className="task-card__action-btn"
-              onClick={onDuplicate}
-              aria-label={`Duplicate task "${task.title}"`}
-            >
-              Duplicate
-            </button>
-            <select
-              className="task-card__status-select"
-              value={task.status}
-              onChange={(e) => onStatusChange(e.target.value)}
-              aria-label="Change task status"
-            >
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
+          {/* Inline edit form */}
+          {editing ? (
+            <div className="task-card__edit-form">
+              <label className="task-card__edit-label">Title
+                <input className="task-card__edit-input" value={eTitle} onChange={(e) => setETitle(e.target.value)} />
+              </label>
+              <label className="task-card__edit-label">Description
+                <textarea className="task-card__edit-textarea" value={eDesc} onChange={(e) => setEDesc(e.target.value)} />
+              </label>
+              <div className="task-card__edit-row">
+                <label className="task-card__edit-label">Due date
+                  <input type="date" className="task-card__edit-input" value={eDue} onChange={(e) => setEDue(e.target.value)} />
+                </label>
+                <label className="task-card__edit-label">Priority
+                  <select className="task-card__edit-input" value={ePriority} onChange={(e) => setEPriority(e.target.value as typeof ePriority)}>
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </label>
+              </div>
+              <label className="task-card__edit-label">Assignee
+                <input className="task-card__edit-input" value={eAssignee} onChange={(e) => setEAssignee(e.target.value)} placeholder="Email or name" />
+              </label>
+              <div className="task-card__actions">
+                <button type="button" className="task-card__action-btn task-card__action-btn--primary" onClick={saveEdit}>Save</button>
+                <button type="button" className="task-card__action-btn" onClick={() => setEditing(false)}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div className="task-card__actions">
+              {onEdit && (
+                <button type="button" className="task-card__action-btn" onClick={() => setEditing(true)} aria-label={`Edit task "${task.title}"`}>Edit</button>
+              )}
+              <button type="button" className="task-card__action-btn" onClick={onDuplicate} aria-label={`Duplicate task "${task.title}"`}>Duplicate</button>
+              {onDelete && (
+                <button type="button" className="task-card__action-btn task-card__action-btn--danger" onClick={onDelete} aria-label={`Delete task "${task.title}"`}>Delete</button>
+              )}
+              <select className="task-card__status-select" value={task.status} onChange={(e) => onStatusChange(e.target.value)} aria-label="Change task status">
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          )}
         </div>
       )}
     </article>

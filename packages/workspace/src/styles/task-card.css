@@ -221,3 +221,15 @@
   outline: 2px solid var(--color-sage, #6B8E6B);
   outline-offset: 2px;
 }
+
+/* Task edit form + action variants */
+.task-card__edit-form { display:flex; flex-direction:column; gap:10px; padding-top:8px; }
+.task-card__edit-label { display:flex; flex-direction:column; gap:4px; font-size:0.6875rem; font-weight:600; color:#636E72; }
+.task-card__edit-input, .task-card__edit-textarea { padding:6px 10px; border:1px solid #E8E5DE; border-radius:6px; font-size:0.8125rem; font-family:inherit; color:#2D3436; background:#fff; }
+.task-card__edit-textarea { resize:vertical; min-height:60px; }
+.task-card__edit-row { display:flex; gap:10px; }
+.task-card__edit-row .task-card__edit-label { flex:1; }
+.task-card__action-btn--primary { background:#6B8E6B; color:#fff; border-color:#6B8E6B; }
+.task-card__action-btn--primary:hover { background:#5A7D5A; }
+.task-card__action-btn--danger { color:#C62828; border-color:#F5C8C8; }
+.task-card__action-btn--danger:hover { background:#FFF5F5; }
