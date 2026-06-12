@@ -78,6 +78,60 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [dashCalMonth, setDashCalMonth] = useState(new Date());
   const [unlockedCount, setUnlockedCount] = useState(0);
+  const [dayBlocks, setDayBlocks] = useState<{period:string;time:string;activities:{label:string;type:string}[]}[]>([]);
+  const [scheduleEditing, setScheduleEditing] = useState(false);
+  const [lastSync, setLastSync] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem('admini_day_structure');
+      if (s) setDayBlocks(JSON.parse(s));
+      else setDayBlocks([
+        { period: 'Morning', time: '8:00 AM - 12:00 PM', activities: [{ label: 'Deep work', type: 'focus' }] },
+        { period: 'Afternoon', time: '12:00 PM - 4:00 PM', activities: [{ label: 'Team sync', type: 'meetings' }] },
+        { period: 'End of Day', time: '4:00 PM - 5:00 PM', activities: [{ label: 'Wrap-up', type: 'wrap-up' }] },
+      ]);
+    } catch { /* ignore */ }
+    try { setLastSync(localStorage.getItem('admini_last_calendar_sync')); } catch { /* ignore */ }
+  }, []);
+
+  function persistDayBlocks(next: {period:string;time:string;activities:{label:string;type:string}[]}[]) {
+    setDayBlocks(next);
+    try { localStorage.setItem('admini_day_structure', JSON.stringify(next)); } catch { /* ignore */ }
+  }
+
+  function renameActivity(blockIdx: number, actIdx: number) {
+    const current = dayBlocks[blockIdx]?.activities[actIdx]?.label || '';
+    const next = prompt('Activity label:', current);
+    if (next === null) return;
+    persistDayBlocks(dayBlocks.map((b, i) => i !== blockIdx ? b : { ...b, activities: b.activities.map((a, j) => j !== actIdx ? a : { ...a, label: next.trim() || a.label }) }));
+  }
+
+  function addActivity(blockIdx: number) {
+    const label = prompt('New activity label:');
+    if (!label || !label.trim()) return;
+    persistDayBlocks(dayBlocks.map((b, i) => i !== blockIdx ? b : { ...b, activities: [...b.activities, { label: label.trim(), type: 'custom' }] }));
+  }
+
+  function removeActivity(blockIdx: number, actIdx: number) {
+    persistDayBlocks(dayBlocks.map((b, i) => i !== blockIdx ? b : { ...b, activities: b.activities.filter((_, j) => j !== actIdx) }));
+  }
+
+  async function handleCalendarSync() {
+    setSyncing(true);
+    try {
+      const localEvents = getLocalEvents();
+      const googleEvents = await getTodayCalendarEvents().catch(() => []);
+      const merged = mergeEvents(googleEvents, localEvents);
+      setCalendarEvents(filterTodayEvents(merged) as CalendarEvent[]);
+      const ts = new Date().toISOString();
+      localStorage.setItem('admini_last_calendar_sync', ts);
+      setLastSync(ts);
+    } finally {
+      setSyncing(false);
+    }
+  }
   const totalBadges = BADGE_DEFINITIONS.length; // total badge count
 
   // -------------------------------------------------------------------------
@@ -333,33 +387,41 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           <section className="dashboard-tab__card dashboard-tab__card--schedule">
             <div className="dashboard-tab__schedule-hdr">
               <h2 className="dashboard-tab__schedule-title"> Today's Schedule <span className="dashboard-tab__schedule-date">— {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
-              <button type="button" className="dashboard-tab__edit-link" onClick={() => onTabChange?.('pulse')}>Edit</button>
+              <div className="dashboard-tab__schedule-actions"><button type="button" className="dashboard-tab__sync-btn" onClick={handleCalendarSync} disabled={syncing} title="Sync with Google Calendar">{syncing ? 'Syncing…' : '↻ Sync'}</button><button type="button" className="dashboard-tab__edit-link" onClick={() => setScheduleEditing(v => !v)}>{scheduleEditing ? 'Done' : 'Edit'}</button></div>
             </div>
-            {(() => {
-              let dayBlocks: {period:string;time:string;activities:{label:string;type:string}[]}[] = [];
-              try { const s = localStorage.getItem('admini_day_structure'); if(s) dayBlocks=JSON.parse(s); } catch{}
-              if(!dayBlocks.length) dayBlocks=[{period:'Morning',time:'8:00 AM - 12:00 PM',activities:[{label:'Deep work',type:'focus'}]},{period:'Afternoon',time:'12:00 PM - 4:00 PM',activities:[{label:'Team sync',type:'meetings'}]},{period:'End of Day',time:'4:00 PM - 5:00 PM',activities:[{label:'Wrap-up',type:'wrap-up'}]}];
-              return dayBlocks.map(block => (
-                <div key={block.period} className="dashboard-tab__sched-block">
-                  <div className="dashboard-tab__sched-period">
-                    <strong>{block.period}</strong> <span>{block.time}</span>
-                    {block.activities.map(a => <span key={a.label} className="dashboard-tab__sched-chip">{a.label}</span>)}
-                  </div>
-                  {calendarEvents.filter(ev => {
-                    if(!ev.start) return false;
-                    const h = new Date(ev.start).getHours();
-                    if(block.period==='Morning') return h>=8&&h<12;
-                    if(block.period==='Afternoon') return h>=12&&h<16;
-                    return h>=16;
-                  }).map(ev => (
-                    <div key={ev.id} className="dashboard-tab__sched-event"><span className="dashboard-tab__sched-check" />
-                      <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
-                      <span>{ev.summary}</span>{ev.id && !ev.id.startsWith("google") ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem("admini_local_events")||"[]");const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem("admini_local_events",JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} className="dashboard-tab__sched-event-delete">×</button> : null}
-                    </div>
+            {lastSync && <div className="dashboard-tab__sync-time">Last synced {(() => { const d = Date.now() - new Date(lastSync).getTime(); const m = Math.floor(d/60000); if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; const h = Math.floor(m/60); if (h < 24) return h + 'h ago'; return new Date(lastSync).toLocaleDateString(); })()}</div>}
+            {dayBlocks.map((block, blockIdx) => (
+              <div key={block.period} className="dashboard-tab__sched-block">
+                <div className="dashboard-tab__sched-period">
+                  <span className="dashboard-tab__sched-period-name">{block.period}</span>
+                  <span className="dashboard-tab__sched-period-time">{block.time}</span>
+                  {block.activities.map((a, actIdx) => (
+                    <span key={actIdx} className="dashboard-tab__sched-chip">
+                      {scheduleEditing ? (
+                        <>
+                          <span onClick={() => renameActivity(blockIdx, actIdx)} style={{cursor:'pointer'}}>{a.label}</span>
+                          <button type="button" className="dashboard-tab__sched-chip-edit" onClick={() => removeActivity(blockIdx, actIdx)} aria-label={'Remove ' + a.label}>×</button>
+                        </>
+                      ) : a.label}
+                    </span>
                   ))}
+                  {scheduleEditing && <button type="button" className="dashboard-tab__sched-add" onClick={() => addActivity(blockIdx)}>+ activity</button>}
                 </div>
-              ));
-            })()}
+                {calendarEvents.filter(ev => {
+                  if(!ev.start) return false;
+                  const h = new Date(ev.start).getHours();
+                  if(block.period==='Morning') return h>=8&&h<12;
+                  if(block.period==='Afternoon') return h>=12&&h<16;
+                  return h>=16;
+                }).map(ev => (
+                  <div key={ev.id} className="dashboard-tab__sched-event"><span className="dashboard-tab__sched-check" />
+                    <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
+                    <span className="dashboard-tab__sched-event-title">{ev.summary}</span>
+                    {ev.id && !ev.id.startsWith('google') ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem('admini_local_events')||'[]');const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem('admini_local_events',JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} className="dashboard-tab__sched-event-delete">×</button> : null}
+                  </div>
+                ))}
+              </div>
+            ))}
           </section>
 
           <section className="dashboard-tab__card dashboard-tab__card--activity">
