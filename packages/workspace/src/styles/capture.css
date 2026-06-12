@@ -818,3 +818,13 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Tap category customization */
+.capture-tab__tap-header { display:flex; justify-content:flex-end; margin-bottom:8px; }
+.capture-tab__tap-edit-btn { background:none; border:1px solid #6B8E6B; color:#4A6B4A; font-size:0.75rem; font-weight:600; padding:4px 12px; border-radius:999px; cursor:pointer; }
+.capture-tab__tap-edit-btn:hover { background:#6B8E6B; color:#fff; }
+.capture-tab__pill-wrap { display:inline-flex; align-items:center; }
+.capture-tab__pill-remove { background:none; border:none; color:#C62828; cursor:pointer; font-size:0.9rem; margin-left:-2px; padding:0 4px; }
+.capture-tab__cat-remove { background:none; border:none; color:#C62828; cursor:pointer; font-size:0.85rem; margin-left:6px; padding:0 2px; }
+.capture-tab__pill-add-input { padding:4px 10px; border:1px dashed #C8DFC8; border-radius:999px; font-size:0.75rem; width:80px; }
+.capture-tab__cat-add-input { padding:6px 12px; border:1px dashed #C8DFC8; border-radius:8px; font-size:0.8125rem; width:100%; max-width:280px; }

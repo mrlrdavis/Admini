@@ -72,6 +72,33 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
   const [transcription, setTranscription] = useState('');
   const [selectedWords, setSelectedWords] = useState<Record<string, string[]>>({});
   const [tapFreeText, setTapFreeText] = useState('');
+  const [tapCategories, setTapCategories] = useState<Record<string, string[]>>(() => loadTapCategories());
+  const [editingTaps, setEditingTaps] = useState(false);
+
+  function persistTapCategories(next: Record<string, string[]>) {
+    setTapCategories(next);
+    try { localStorage.setItem('admini_tap_categories', JSON.stringify(next)); } catch {}
+  }
+  function addTapOption(category: string, value: string) {
+    const v = value.trim();
+    if (!v) return;
+    const next = { ...tapCategories, [category]: [...(tapCategories[category] || []), v] };
+    persistTapCategories(next);
+  }
+  function removeTapOption(category: string, value: string) {
+    const next = { ...tapCategories, [category]: (tapCategories[category] || []).filter(w => w !== value) };
+    persistTapCategories(next);
+  }
+  function addTapCategory(name: string) {
+    const n = name.trim();
+    if (!n || tapCategories[n]) return;
+    persistTapCategories({ ...tapCategories, [n]: [] });
+  }
+  function removeTapCategory(name: string) {
+    const next = { ...tapCategories };
+    delete next[name];
+    persistTapCategories(next);
+  }
   const [captures, setCaptures] = useState<QuickCapture[]>([]);
   const [expandedCaptureId, setExpandedCaptureId] = useState<string | null>(null);
   const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
@@ -505,24 +532,42 @@ export function CaptureTab({ loading, userId, organizationId }: CaptureTabProps)
           : WORD_BOARD_CATEGORIES;
         return (
         <section className="capture-tab__tap-mode">
+          <div className="capture-tab__tap-header">
+            <button type="button" className="capture-tab__tap-edit-btn" onClick={() => setEditingTaps(v => !v)}>{editingTaps ? 'Done' : 'Edit options'}</button>
+          </div>
           <div className="capture-tab__word-board">
-            {Object.entries(dynamicCategories).map(([category, words]) => (
+            {Object.entries(dynamicCategories).map(([category, words]) => {
+              const isRoster = category === 'Students' && roster.length > 0;
+              return (
               <div key={category} className="capture-tab__category-row">
-                <span className="capture-tab__category-label">{category}</span>
+                <span className="capture-tab__category-label">
+                  {category}
+                  {editingTaps && !isRoster && <button type="button" className="capture-tab__cat-remove" onClick={() => removeTapCategory(category)} aria-label={'Remove ' + category}>×</button>}
+                </span>
                 <div className="capture-tab__pills">
                   {words.map((word) => (
-                    <button
-                      key={word}
-                      type="button"
-                      className={'capture-tab__pill' + ((selectedWords[category] || []).includes(word) ? ' capture-tab__pill--active' : '')}
-                      onClick={() => handleWordSelect(category, word)}
-                    >
-                      {word}
-                    </button>
+                    <span key={word} className="capture-tab__pill-wrap">
+                      <button
+                        type="button"
+                        className={'capture-tab__pill' + ((selectedWords[category] || []).includes(word) ? ' capture-tab__pill--active' : '')}
+                        onClick={() => editingTaps ? undefined : handleWordSelect(category, word)}
+                      >
+                        {word}
+                      </button>
+                      {editingTaps && !isRoster && <button type="button" className="capture-tab__pill-remove" onClick={() => removeTapOption(category, word)} aria-label={'Remove ' + word}>×</button>}
+                    </span>
                   ))}
+                  {editingTaps && !isRoster && (
+                    <input className="capture-tab__pill-add-input" placeholder="+ add" onKeyDown={(e) => { if (e.key === 'Enter') { addTapOption(category, (e.target as HTMLInputElement).value); (e.target as HTMLInputElement).value = ''; } }} />
+                  )}
                 </div>
               </div>
-            ))}
+            ); })}
+            {editingTaps && (
+              <div className="capture-tab__category-row">
+                <input className="capture-tab__cat-add-input" placeholder="+ add category (Enter)" onKeyDown={(e) => { if (e.key === 'Enter') { addTapCategory((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).value = ''; } }} />
+              </div>
+            )}
           </div>
 
           {/* Free-text input */}
