@@ -51,6 +51,7 @@ export function RecommendationsWidget({ userId, organizationId }: Recommendation
   const [error, setError] = useState<string | null>(null);
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const [dueDates, setDueDates] = useState<Record<string, string>>({});
   const [dismissingId, setDismissingId] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------

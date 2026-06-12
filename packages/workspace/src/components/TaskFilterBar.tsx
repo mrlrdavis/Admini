@@ -11,7 +11,7 @@ import '../styles/task-filter-bar.css';
 // Types
 // ---------------------------------------------------------------------------
 
-export type FilterType = 'all' | 'open' | 'in-progress' | 'completed' | 'blocked';
+export type FilterType = 'all' | 'open' | 'in-progress' | 'completed' | 'blocked' | 'due' | 'coming-due' | 'high' | 'normal' | 'low';
 
 export interface TaskFilterBarProps {
   activeFilter: FilterType;
@@ -24,12 +24,19 @@ export interface TaskFilterBarProps {
 // Constants
 // ---------------------------------------------------------------------------
 
-const FILTERS: { value: FilterType; label: string }[] = [
+const PROGRESS_FILTERS: { value: FilterType; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'open', label: 'Open' },
   { value: 'in-progress', label: 'In Progress' },
   { value: 'completed', label: 'Completed' },
   { value: 'blocked', label: 'Blocked' },
+  { value: 'due', label: 'Due' },
+  { value: 'coming-due', label: 'Coming Due' },
+];
+
+const TYPE_FILTERS: { value: FilterType; label: string }[] = [
+  { value: 'high', label: 'High' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'low', label: 'Low' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -45,11 +52,23 @@ export function TaskFilterBar({
   return (
     <div className="task-filter-bar" role="toolbar" aria-label="Task filters">
       <div className="task-filter-bar__pills" role="group" aria-label="Filter by status">
-        {FILTERS.map(({ value, label }) => (
+        {PROGRESS_FILTERS.map(({ value, label }) => (
           <button
             key={value}
             type="button"
-            className={`task-filter-bar__pill${activeFilter === value ? ' task-filter-bar__pill--active' : ''}`}
+            className={'task-filter-bar__pill' + (activeFilter === value ? ' task-filter-bar__pill--active' : '')}
+            onClick={() => onFilterChange(value)}
+            aria-pressed={activeFilter === value}
+          >
+            {label}
+          </button>
+        ))}
+        <span className="task-filter-bar__separator" aria-hidden="true">|</span>
+        {TYPE_FILTERS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            className={'task-filter-bar__pill' + (activeFilter === value ? ' task-filter-bar__pill--active' : '')}
             onClick={() => onFilterChange(value)}
             aria-pressed={activeFilter === value}
           >
@@ -62,7 +81,7 @@ export function TaskFilterBar({
         type="button"
         className="task-filter-bar__view-toggle"
         onClick={onViewToggle}
-        aria-label={`Switch to ${activeView === 'list' ? 'calendar' : 'list'} view`}
+        aria-label={'Switch to ' + (activeView === 'list' ? 'calendar' : 'list') + ' view'}
       >
         {activeView === 'list' ? (
           <span className="task-filter-bar__view-icon" aria-hidden="true">&#x1F4C5;</span>

@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // TasksTab - Task management interface with CRUD operations.
 // ---------------------------------------------------------------------------
 // Wired to:
@@ -118,15 +118,27 @@ function toTaskWithSubtasks(task: DashboardTask): TaskWithSubtasks {
   };
 }
 
-/** Map FilterType values to DashboardTask status values */
-function filterToStatus(filter: FilterType): string | null {
+/** Map FilterType values to DashboardTask filtering logic.
+ *  Returns { status, priority, dateFilter } for flexible filtering. */
+interface TaskFilterCriteria {
+  status: string | null;
+  priority: string | null;
+  dateFilter: 'due' | 'coming-due' | null;
+}
+
+function getFilterCriteria(filter: FilterType): TaskFilterCriteria {
   switch (filter) {
-    case 'all': return null;
-    case 'open': return 'open';
-    case 'in-progress': return 'in_progress';
-    case 'completed': return 'completed';
-    case 'blocked': return 'archived';
-    default: return null;
+    case 'all': return { status: null, priority: null, dateFilter: null };
+    case 'open': return { status: 'open', priority: null, dateFilter: null };
+    case 'in-progress': return { status: 'in_progress', priority: null, dateFilter: null };
+    case 'completed': return { status: 'completed', priority: null, dateFilter: null };
+    case 'blocked': return { status: 'archived', priority: null, dateFilter: null };
+    case 'due': return { status: null, priority: null, dateFilter: 'due' };
+    case 'coming-due': return { status: null, priority: null, dateFilter: 'coming-due' };
+    case 'high': return { status: null, priority: 'high', dateFilter: null };
+    case 'normal': return { status: null, priority: 'normal', dateFilter: null };
+    case 'low': return { status: null, priority: 'low', dateFilter: null };
+    default: return { status: null, priority: null, dateFilter: null };
   }
 }
 
@@ -153,6 +165,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [newDescription, setNewDescription] = useState('');
   const [newAssignee, setNewAssignee] = useState('');
   const [newSubtasks, setNewSubtasks] = useState<{title:string;assignee:string;dueAt:string}[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
 
   // Calendar event state
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
@@ -193,6 +206,20 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     }
   }, []);
 
+  // Apply filter from dashboard navigation
+  useEffect(() => {
+    const savedFilter = localStorage.getItem('admini_task_filter');
+    if (savedFilter) {
+      localStorage.removeItem('admini_task_filter');
+      setActiveFilter(savedFilter as FilterType);
+    }
+    const savedView = localStorage.getItem('admini_tasks_view');
+    if (savedView) {
+      localStorage.removeItem('admini_tasks_view');
+      if (savedView === 'calendar') setViewMode('calendar');
+    }
+  }, []);
+
   // -------------------------------------------------------------------------
   // Load and merge calendar events
   // -------------------------------------------------------------------------
@@ -228,9 +255,28 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   // -------------------------------------------------------------------------
 
   const filteredTasks = useMemo(() => {
-    const statusFilter = filterToStatus(activeFilter);
-    if (!statusFilter) return tasks;
-    return tasks.filter(t => t.status === statusFilter);
+    const criteria = getFilterCriteria(activeFilter);
+    let result = tasks;
+    if (criteria.status) {
+      result = result.filter(t => t.status === criteria.status);
+    }
+    if (criteria.priority) {
+      const priorityValues = criteria.priority === 'high' ? ['high', 'urgent'] : [criteria.priority];
+      result = result.filter(t => priorityValues.includes(t.priority));
+    }
+    if (criteria.dateFilter === 'due') {
+      const todayStr = new Date().toDateString();
+      result = result.filter(t => t.status !== 'completed' && t.dueAt && parseLocalDate(t.dueAt).toDateString() === todayStr);
+    } else if (criteria.dateFilter === 'coming-due') {
+      const now = new Date();
+      const in7 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7);
+      result = result.filter(t => {
+        if (t.status === 'completed' || !t.dueAt) return false;
+        const due = parseLocalDate(t.dueAt);
+        return due > now && due <= in7;
+      });
+    }
+    return result;
   }, [tasks, activeFilter]);
 
   // -------------------------------------------------------------------------
@@ -290,7 +336,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
         subtasks: newSubtasks.filter(s => s.title.trim()).map(s => ({ id: crypto.randomUUID(), title: s.title.trim(), assignee: s.assignee.trim() || undefined, dueAt: s.dueAt || undefined, completed: false })),
       });
-      setNewTitle(''); setNewPriority('normal'); setNewDue(''); setNewDescription(''); setNewAssignee(''); setNewSubtasks([]); setShowAddForm(false);
+      setNewTitle(''); setNewPriority('normal'); setNewDue(''); setNewDescription(''); setNewAssignee(''); setNewSubtasks([]); setNewFiles([]); setShowAddForm(false);
       await loadTaskList();
       showToast('Task created');
     } catch { showToast('Failed to create task'); }
@@ -452,7 +498,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                 <input className="tasks-tab__subtask-input" placeholder="Subtask title" value={st.title} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, title: e.target.value} : x))} />
                 <input className="tasks-tab__subtask-input" placeholder="Assignee" value={st.assignee} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, assignee: e.target.value} : x))} style={{maxWidth:120}} />
                 <input type="date" className="tasks-tab__subtask-input" value={st.dueAt} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, dueAt: e.target.value} : x))} style={{maxWidth:130}} />
-                <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_x, j) => j !== i))}>×</button>
+                <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_x, j) => j !== i))}>Ã—</button>
               </div>
             ))}
             <button type="button" className="tasks-tab__subtask-add" onClick={() => setNewSubtasks(s => [...s, {title:'',assignee:'',dueAt:''}])}>+ Add subtask</button>

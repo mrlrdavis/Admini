@@ -37,6 +37,7 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
   const [formAttendees, setFormAttendees] = useState('');
   const [formContent, setFormContent] = useState('');
   const [saving, setSaving] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [taskModal, setTaskModal] = useState<null | { tasks: { title: string; description: string; priority: string; assignee: string; selected: boolean }[] }>(null);
   const [creatingTasks, setCreatingTasks] = useState(false);
 
@@ -117,7 +118,7 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
       const msg = err instanceof AITaskServiceError ? err.message : 'Could not analyze note';
       // Fallback: open modal with a single manual task seeded from the note
       setTaskModal({ tasks: [{ title: (note.body || note.title || '').slice(0, 80), description: note.body || '', priority: 'normal', assignee: '', selected: true }] });
-      showToast(msg + ' — review manually');
+      showToast(msg + ' â€” review manually');
     }
   }
 
@@ -173,11 +174,27 @@ export function NotesTab({ userId, organizationId, onTabChange }: NotesTabProps)
             <div className="notes-tab__toolbar">
               <button type="button" onClick={() => setFormContent(prev => prev + "**bold**")}>B</button>
               <button type="button" onClick={() => setFormContent(prev => prev + "*italic*")}><em>I</em></button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n- ")}>• List</button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n[ ] ")}>☐ Task</button>
-              <button type="button" onClick={() => setFormContent(prev => prev + "\n---\n")}>―</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n- ")}>â€¢ List</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n[ ] ")}>â˜ Task</button>
+              <button type="button" onClick={() => setFormContent(prev => prev + "\n---\n")}>â€•</button>
             </div>
             <textarea value={formContent} onChange={e => setFormContent(e.target.value)} placeholder="Meeting notes..." rows={10} className="notes-tab__editor" />
+            <div className="notes-tab__file-upload">
+              <label className="notes-tab__file-upload-btn">
+                📎 Attach Files
+                <input type="file" multiple style={{display:'none'}} onChange={(e) => { if (e.target.files) setAttachedFiles(prev => [...prev, ...Array.from(e.target.files!)]); }} />
+              </label>
+              {attachedFiles.length > 0 && (
+                <ul className="notes-tab__file-list">
+                  {attachedFiles.map((f, i) => (
+                    <li key={i} className="notes-tab__file-item">
+                      <span>{f.name}</span>
+                      <button type="button" onClick={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))} aria-label={'Remove ' + f.name}>×</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
           <div className="notes-tab__form-actions">
             <button type="button" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</button>

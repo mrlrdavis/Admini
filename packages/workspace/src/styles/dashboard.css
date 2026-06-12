@@ -234,3 +234,85 @@
 .dashboard-tab__qa-cal-row { display:flex; gap:16px; }
 .dashboard-tab__qa-cal-row > * { flex:1; min-width:0; }
 @media (max-width:900px) { .dashboard-tab__qa-cal-row { flex-direction:column; } }
+
+
+/* Ensure consistent task item padding across all widget sections */
+.dashboard-tab__section--completed .dashboard-tab__task-item,
+.dashboard-tab__section--blocked .dashboard-tab__task-item,
+.dashboard-tab__section--low .dashboard-tab__task-item {
+  padding: 10px 16px;
+}
+
+/* Clickable calendar dates */
+.dashboard-tab__mini-cal-date.--has-tasks { cursor: pointer; }
+.dashboard-tab__mini-cal-date.--has-tasks:hover { background: #EDF5ED; border-radius: 50%; }
+
+/* Filter bar separator */
+.task-filter-bar__separator { color: #d4d0c8; font-size: 0.875rem; padding: 0 4px; }
+
+/* File upload styles for notes and tasks */
+.notes-tab__file-upload,
+.tasks-tab__file-upload {
+  margin-top: 8px;
+}
+.notes-tab__file-upload-btn,
+.tasks-tab__file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px dashed #C8DFC8;
+  border-radius: 6px;
+  background: #fff;
+  color: #6B8E6B;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notes-tab__file-upload-btn:hover,
+.tasks-tab__file-upload-btn:hover {
+  background: #EDF5ED;
+}
+.notes-tab__file-list,
+.tasks-tab__file-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.notes-tab__file-item,
+.tasks-tab__file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  background: #F5F3EE;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+.notes-tab__file-item button,
+.tasks-tab__file-item button {
+  background: none;
+  border: none;
+  color: #C0392B;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  margin-left: auto;
+}
+
+/* Recommendations widget due date input */
+.recommendations-widget__due-date-input {
+  padding: 4px 8px;
+  border: 1px solid #E8E5DE;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #2D3436;
+  max-width: 130px;
+}
+.recommendations-widget__due-date-input:focus {
+  outline: 2px solid #6B8E6B;
+  outline-offset: 1px;
+}
