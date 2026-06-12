@@ -28,7 +28,7 @@
 .dashboard-tab__section--suggested .dashboard-tab__section-header { background:#F2ECFB; }
 .dashboard-tab__section .dashboard-tab__task-list, .dashboard-tab__section .dashboard-tab__empty { padding:8px 16px; }
 .dashboard-tab__section-icon { font-size:0.8125rem; line-height:1; }
-.dashboard-tab__section-title { font-size:0.4rem; font-weight:700; margin:0; letter-spacing:0.05em; text-transform:uppercase; }
+.dashboard-tab__section-title { font-size:0.4rem; font-weight:300; margin:0; letter-spacing:0.05em; text-transform:uppercase; }
 .dashboard-tab__section-title--high { color:#C0392B; }
 .dashboard-tab__section-title--due-today { color:#4A6B4A; }
 .dashboard-tab__section-title--coming { color:#D35400; }
