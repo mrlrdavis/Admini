@@ -122,6 +122,23 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   const [flagError, setFlagError] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
+  // Student/Staff Observation Roster State (stored in localStorage for Observations)
+  // -------------------------------------------------------------------------
+  const [obsRoster, setObsRoster] = useState<{ name: string; type: 'student' | 'staff'; grade?: string }[]>([]);
+  const [obsRosterUploading, setObsRosterUploading] = useState(false);
+  const [obsRosterError, setObsRosterError] = useState<string | null>(null);
+  const [obsRosterSuccess, setObsRosterSuccess] = useState<string | null>(null);
+  const obsRosterFileRef = useRef<HTMLInputElement>(null);
+
+  // Load observation roster from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('admini_roster_full');
+      if (raw) setObsRoster(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  // -------------------------------------------------------------------------
   // Google Classroom roster
   // -------------------------------------------------------------------------
   const [classroomCourses, setClassroomCourses] = useState<ClassroomCourse[]>([]);
@@ -326,6 +343,100 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     setRosterErrors([]);
     setRosterError(null);
     setRosterResult(null);
+  }
+
+  /**
+   * Handle observation roster CSV upload (students and staff for Observations feature).
+   * Expected columns: name, type (student/staff), grade (optional)
+   * Stored in localStorage for use in ObservationsTab.
+   */
+  async function handleObsRosterUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setObsRosterUploading(true);
+    setObsRosterError(null);
+    setObsRosterSuccess(null);
+
+    try {
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        throw new Error('File must contain a header row and at least one data row.');
+      }
+
+      // Parse header
+      const header = lines[0]!.toLowerCase().split(',').map(h => h.trim());
+      const nameIdx = header.findIndex(h => h === 'name');
+      const typeIdx = header.findIndex(h => h === 'type' || h === 'role');
+      const gradeIdx = header.findIndex(h => h === 'grade');
+
+      if (nameIdx === -1) {
+        throw new Error('Missing required column: name');
+      }
+
+      // Parse rows
+      const newRoster: { name: string; type: 'student' | 'staff'; grade?: string }[] = [];
+      const errors: string[] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const cells = lines[i]!.split(',').map(c => c.trim());
+        const name = cells[nameIdx] || '';
+        const typeRaw = typeIdx >= 0 ? (cells[typeIdx] || '').toLowerCase() : 'student';
+        const grade = gradeIdx >= 0 ? cells[gradeIdx] : undefined;
+
+        if (!name) {
+          errors.push('Row ' + i + ': Missing name');
+          continue;
+        }
+
+        // Map role values to student/staff
+        let type: 'student' | 'staff' = 'student';
+        if (typeRaw === 'staff' || typeRaw === 'teacher' || typeRaw === 'admin' || typeRaw === 'principal') {
+          type = 'staff';
+        } else if (typeRaw === 'student' || typeRaw === '') {
+          type = 'student';
+        } else {
+          type = 'student'; // Default unknown types to student
+        }
+
+        newRoster.push({ name, type, grade: grade || undefined });
+      }
+
+      if (newRoster.length === 0) {
+        throw new Error('No valid rows found. ' + (errors.length > 0 ? errors.slice(0, 3).join('; ') : ''));
+      }
+
+      // Save to localStorage
+      localStorage.setItem('admini_roster_full', JSON.stringify(newRoster));
+      // Also save simple names for backward compatibility
+      localStorage.setItem('admini_roster', JSON.stringify(newRoster.map(r => r.name)));
+      
+      setObsRoster(newRoster);
+      const studentCount = newRoster.filter(r => r.type === 'student').length;
+      const staffCount = newRoster.filter(r => r.type === 'staff').length;
+      setObsRosterSuccess('Imported ' + studentCount + ' students and ' + staffCount + ' staff members');
+      
+      if (errors.length > 0) {
+        setObsRosterError(errors.length + ' row(s) skipped: ' + errors.slice(0, 2).join('; '));
+      }
+    } catch (err) {
+      setObsRosterError(err instanceof Error ? err.message : 'Failed to parse file');
+    } finally {
+      setObsRosterUploading(false);
+      if (obsRosterFileRef.current) {
+        obsRosterFileRef.current.value = '';
+      }
+    }
+  }
+
+  function handleClearObsRoster() {
+    localStorage.removeItem('admini_roster_full');
+    localStorage.removeItem('admini_roster');
+    setObsRoster([]);
+    setObsRosterSuccess(null);
+    setObsRosterError(null);
   }
 
   async function handleRoleChange(profileId: string, newRole: AdminiRole) {
@@ -858,6 +969,93 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         ) : (
           <p className="admin-tab__restricted-notice" role="status">
             Only administrators and principals can manage invitations.
+          </p>
+        )}
+      </section>
+
+      {/* Student/Staff Roster Section (for Observations) */}
+      <section className="admin-tab__section" aria-labelledby="obs-roster-heading">
+        <div className="admin-tab__section-header">
+          <div>
+            <h2 id="obs-roster-heading" className="admin-tab__section-title">
+              Student & Staff Roster
+            </h2>
+            <p className="admin-tab__section-desc">
+              Upload students and staff for use in Observations. CSV with columns: name, type (student/staff), grade (optional).
+            </p>
+          </div>
+          {obsRoster.length === 0 && (
+            <button
+              type="button"
+              className="admin-tab__import-btn"
+              onClick={() => obsRosterFileRef.current?.click()}
+              disabled={obsRosterUploading}
+            >
+              {obsRosterUploading ? 'Uploading...' : '📤 Upload Roster'}
+            </button>
+          )}
+        </div>
+
+        <input
+          ref={obsRosterFileRef}
+          type="file"
+          accept=".csv"
+          onChange={handleObsRosterUpload}
+          className="admin-tab__hidden-file-input"
+        />
+
+        {obsRosterError && (
+          <p className="admin-tab__warning-message" role="alert">{obsRosterError}</p>
+        )}
+        {obsRosterSuccess && (
+          <p className="admin-tab__success-message" role="status">{obsRosterSuccess}</p>
+        )}
+
+        {obsRoster.length > 0 ? (
+          <div className="admin-tab__obs-roster">
+            <div className="admin-tab__obs-roster-summary">
+              <span className="admin-tab__obs-roster-count">
+                {obsRoster.filter(r => r.type === 'student').length} students, {obsRoster.filter(r => r.type === 'staff').length} staff
+              </span>
+              <div className="admin-tab__obs-roster-actions">
+                <button
+                  type="button"
+                  className="admin-tab__import-btn"
+                  onClick={() => obsRosterFileRef.current?.click()}
+                  disabled={obsRosterUploading}
+                >
+                  Replace Roster
+                </button>
+                <button
+                  type="button"
+                  className="admin-tab__cancel-btn"
+                  onClick={handleClearObsRoster}
+                >
+                  Clear Roster
+                </button>
+              </div>
+            </div>
+            <div className="admin-tab__obs-roster-preview">
+              <h3 className="admin-tab__subsection-title">Current Roster</h3>
+              <ul className="admin-tab__roster-list">
+                {obsRoster.slice(0, 10).map((person, idx) => (
+                  <li key={idx} className="admin-tab__roster-item">
+                    <span>{person.name}</span>
+                    <span className="admin-tab__roster-type">{person.type}</span>
+                    {person.grade && <span className="admin-tab__roster-grade">Grade {person.grade}</span>}
+                  </li>
+                ))}
+                {obsRoster.length > 10 && (
+                  <li className="admin-tab__roster-item admin-tab__roster-item--more">
+                    ...and {obsRoster.length - 10} more
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <p className="admin-tab__empty">
+            No roster uploaded yet. Upload a CSV file to populate students and staff for classroom observations.
           </p>
         )}
       </section>

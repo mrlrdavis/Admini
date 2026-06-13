@@ -446,3 +446,51 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Observation Roster Styles */
+.admin-tab__obs-roster {
+  margin-top: var(--ws-space-md);
+}
+
+.admin-tab__obs-roster-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ws-space-md);
+  margin-bottom: var(--ws-space-md);
+  flex-wrap: wrap;
+}
+
+.admin-tab__obs-roster-count {
+  font-size: var(--ws-font-size-base);
+  font-weight: 600;
+  color: var(--ws-color-sage);
+}
+
+.admin-tab__obs-roster-actions {
+  display: flex;
+  gap: var(--ws-space-sm);
+}
+
+.admin-tab__obs-roster-preview {
+  background: var(--ws-color-limestone);
+  border-radius: var(--ws-radius-md);
+  padding: var(--ws-space-md);
+}
+
+.admin-tab__roster-type {
+  font-size: var(--ws-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ws-color-text);
+  opacity: 0.7;
+  background: rgba(107, 142, 107, 0.15);
+  padding: 2px 8px;
+  border-radius: var(--ws-radius-sm);
+}
+
+.admin-tab__roster-grade {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text);
+  opacity: 0.6;
+}
