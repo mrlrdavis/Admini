@@ -588,6 +588,10 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           {rosterState === 'previewing' && (
             <div className="admin-tab__roster-preview">
               <h3 className="admin-tab__subsection-title">Preview ({rosterPreview.length} valid rows)</h3>
+              <p className="admin-tab__confirm-warning" role="alert">
+                ⚠️ Confirming will send email invitations to all {rosterPreview.length} email address(es). 
+                Recipients will appear in Pending Invitations until they accept and join your organization.
+              </p>
               <ul className="admin-tab__roster-list">
                 {rosterPreview.slice(0, 5).map((row) => (
                   <li key={row.rowIndex} className="admin-tab__roster-item">
@@ -596,7 +600,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                 ))}
               </ul>
               <div className="admin-tab__roster-actions">
-                <button type="button" className="admin-tab__submit" onClick={handleRosterConfirm}>Confirm Import</button>
+                <button type="button" className="admin-tab__submit" onClick={handleRosterConfirm}>Send Invitations</button>
                 <button type="button" className="admin-tab__cancel-btn" onClick={handleRosterCancel}>Cancel</button>
               </div>
             </div>
@@ -795,6 +799,10 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
             <h3 className="admin-tab__subsection-title">
               Preview ({rosterPreview.length} valid {rosterPreview.length === 1 ? 'row' : 'rows'})
             </h3>
+            <p className="admin-tab__confirm-warning" role="alert">
+              ⚠️ Confirming will send email invitations to all {rosterPreview.length} email address(es). 
+              Recipients will appear in Pending Invitations until they accept and join your organization.
+            </p>
             {rosterErrors.length > 0 && (
               <p className="admin-tab__warning-message" role="alert">
                 {rosterErrors.length} row(s) had errors and will be skipped.
@@ -820,7 +828,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                 className="admin-tab__submit"
                 onClick={handleRosterConfirm}
               >
-                Confirm Import
+                Send Invitations
               </button>
               <button
                 type="button"
@@ -1118,4 +1126,6 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     </div>
   );
 }
+
+
 

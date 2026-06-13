@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+ï»¿// ---------------------------------------------------------------------------
 // DashboardTab - Native React implementation of the Dashboard view
 // ---------------------------------------------------------------------------
 // Requirements: 2.1, 2.4, 7.1
@@ -83,7 +83,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
   const [scheduleEditing, setScheduleEditing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
-  const [widgetView, setWidgetView] = useState<'progress' | 'type'>('progress');
+  const [widgetView, setWidgetView] = useState<'progress' | 'priority'>('progress');
 
   useEffect(() => {
     try {
@@ -239,7 +239,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
         <div className="dashboard-tab__left">
           <div className="dashboard-tab__widget-toggle">
             <button className={'dashboard-tab__toggle-btn' + (widgetView === 'progress' ? ' dashboard-tab__toggle-btn--active' : '')} onClick={() => setWidgetView('progress')}>Progress</button>
-            <button className={'dashboard-tab__toggle-btn' + (widgetView === 'type' ? ' dashboard-tab__toggle-btn--active' : '')} onClick={() => setWidgetView('type')}>Type</button>
+            <button className={'dashboard-tab__toggle-btn' + (widgetView === 'priority' ? ' dashboard-tab__toggle-btn--active' : '')} onClick={() => setWidgetView('priority')}>Priority</button>
           </div>
           {widgetView === 'progress' && (
             <>          <section className="dashboard-tab__section dashboard-tab__section--due-today">
@@ -329,7 +329,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             </>
           )}
 
-          {widgetView === 'type' && (
+          {widgetView === 'priority' && (
             <>
           <section className="dashboard-tab__section dashboard-tab__section--high-priority">
             <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'high'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">?</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--high">High Priority</h2><span className="dashboard-tab__section-count">{highPriorityTasks.length}</span></div>
@@ -393,9 +393,9 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           <div className="dashboard-tab__qa-cal-row">
           <section className="dashboard-tab__card dashboard-tab__card--calendar">
             <div className="dashboard-tab__mini-cal-header">
-              <button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()-1,1))} aria-label="Previous month">‹</button>
+              <button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()-1,1))} aria-label="Previous month">â€¹</button>
               <span className="dashboard-tab__mini-cal-month">{dashCalMonth.toLocaleDateString(undefined, {month:'long',year:'numeric'})}</span>
-              <button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()+1,1))} aria-label="Next month">›</button>
+              <button type="button" className="dashboard-tab__mini-cal-nav" onClick={()=>setDashCalMonth(new Date(dashCalMonth.getFullYear(),dashCalMonth.getMonth()+1,1))} aria-label="Next month">â€º</button>
             </div>
             <div className="dashboard-tab__mini-cal-grid">
               {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <span key={d} className="dashboard-tab__mini-cal-dow">{d}</span>)}
@@ -461,7 +461,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                       {scheduleEditing ? (
                         <>
                           <span onClick={() => renameActivity(blockIdx, actIdx)} style={{cursor:'pointer'}}>{a.label}</span>
-                          <button type="button" className="dashboard-tab__sched-chip-edit" onClick={() => removeActivity(blockIdx, actIdx)} aria-label={'Remove ' + a.label}>×</button>
+                          <button type="button" className="dashboard-tab__sched-chip-edit" onClick={() => removeActivity(blockIdx, actIdx)} aria-label={'Remove ' + a.label}>Ã—</button>
                         </>
                       ) : a.label}
                     </span>
@@ -507,9 +507,9 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             <div className="dashboard-tab__achievements-header">
               <div>
                 <h2 className="dashboard-tab__achievements-title">Achievements</h2>
-                <p className="dashboard-tab__achievements-sub">Level {Math.floor(unlockedCount / 2) + 1} • {unlockedCount} of {totalBadges} earned</p>
+                <p className="dashboard-tab__achievements-sub">Level {Math.floor(unlockedCount / 2) + 1} â€¢ {unlockedCount} of {totalBadges} earned</p>
               </div>
-              <button type="button" className="dashboard-tab__achievements-close" onClick={() => setShowAchievements(false)}>×</button>
+              <button type="button" className="dashboard-tab__achievements-close" onClick={() => setShowAchievements(false)}>Ã—</button>
             </div>
             <div className="dashboard-tab__achievements-bar"><div className="dashboard-tab__achievements-fill" style={{ width: (unlockedCount / totalBadges * 100) + '%' }} /></div>
             {(() => {
