@@ -156,6 +156,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [filterDate, setFilterDate] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(new Set());
   const [showAddForm, setShowAddForm] = useState(false);
@@ -230,6 +231,11 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       localStorage.removeItem('admini_task_filter');
       setActiveFilter(savedFilter as FilterType);
     }
+    const savedDate = localStorage.getItem('admini_task_filter_date');
+    if (savedDate) {
+      localStorage.removeItem('admini_task_filter_date');
+      setFilterDate(savedDate);
+    }
     const savedView = localStorage.getItem('admini_tasks_view');
     if (savedView) {
       localStorage.removeItem('admini_tasks_view');
@@ -282,8 +288,8 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       result = result.filter(t => priorityValues.includes(t.priority));
     }
     if (criteria.dateFilter === 'due') {
-      const todayStr = new Date().toDateString();
-      result = result.filter(t => t.status !== 'completed' && t.dueAt && parseLocalDate(t.dueAt).toDateString() === todayStr);
+      const targetStr = filterDate ? new Date(filterDate).toDateString() : new Date().toDateString();
+      result = result.filter(t => t.status !== 'completed' && t.dueAt && parseLocalDate(t.dueAt).toDateString() === targetStr);
     } else if (criteria.dateFilter === 'coming-due') {
       const now = new Date();
       const in7 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7);
@@ -294,7 +300,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       });
     }
     return result;
-  }, [tasks, activeFilter]);
+  }, [tasks, activeFilter, filterDate]);
 
   // -------------------------------------------------------------------------
   // Overdue tasks: parseLocalDate(t.dueAt) < today && status !== 'completed'

@@ -411,7 +411,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                   const dt = new Date(n.getFullYear(), n.getMonth(), d);
                   const isToday = d === todayDate.getDate() && n.getMonth() === todayDate.getMonth() && n.getFullYear() === todayDate.getFullYear();
                   const hasTasks = tasks.some(t => t.dueAt && parseLocalDate(t.dueAt).toDateString() === dt.toDateString());
-                  cells.push(<span key={d} className={'dashboard-tab__mini-cal-date' + (isToday ? ' --today' : '') + (hasTasks ? ' --has-tasks' : '')} onClick={hasTasks ? () => { localStorage.setItem('admini_task_filter', 'due'); onTabChange?.('tasks'); } : undefined}>{d}</span>);
+                  cells.push(<span key={d} className={'dashboard-tab__mini-cal-date' + (isToday ? ' --today' : '') + (hasTasks ? ' --has-tasks' : '')} onClick={hasTasks ? () => { localStorage.setItem('admini_task_filter', 'due'); localStorage.setItem('admini_task_filter_date', dt.toISOString()); onTabChange?.('tasks'); } : undefined}>{d}</span>);
                 }
                 return cells;
               })()}
