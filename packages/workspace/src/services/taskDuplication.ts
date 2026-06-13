@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Task Duplication Service
  *
  * Implements Algorithm 3: Task Duplication from the app-ui-overhaul spec.

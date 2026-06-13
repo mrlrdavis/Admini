@@ -34,11 +34,11 @@ import type { TaskService } from '../services/taskDuplication';
 // Subtask localStorage helpers
 // ---------------------------------------------------------------------------
 
-function saveSubtasks(taskId: string, subtasks: { id: string; title: string; completed: boolean }[]) {
+function saveSubtasks(taskId: string, subtasks: { id: string; title: string; completed: boolean; assignee?: string; dueAt?: string; priority?: string }[]) {
   localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(subtasks));
 }
 
-function loadSubtasks(taskId: string): { id: string; title: string; completed: boolean }[] {
+function loadSubtasks(taskId: string): { id: string; title: string; completed: boolean; assignee?: string; dueAt?: string; priority?: string }[] {
   try {
     const raw = localStorage.getItem('admini_subtasks_' + taskId);
     return raw ? JSON.parse(raw) : [];
@@ -454,7 +454,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
   }
 
-  function handleSubtaskEdit(taskId: string, subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string }) {
+  function handleSubtaskEdit(taskId: string, subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string; priority?: string }) {
     const st = loadSubtasks(taskId);
     const updated = st.map(s => s.id === subtaskId ? { ...s, ...updates } : s);
     saveSubtasks(taskId, updated);
@@ -462,9 +462,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     showToast('Subtask updated');
   }
 
-  function handleSubtaskAdd(taskId: string, subtask: { title: string; assignee?: string; dueAt?: string }) {
+  function handleSubtaskAdd(taskId: string, subtask: { title: string; assignee?: string; dueAt?: string; priority?: string }) {
     const st = loadSubtasks(taskId);
-    const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false };
+    const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false, assignee: subtask.assignee, dueAt: subtask.dueAt, priority: subtask.priority };
     saveSubtasks(taskId, [...st, newSubtask]);
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
     showToast('Subtask added');

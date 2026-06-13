@@ -1,4 +1,4 @@
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // TaskSection - Dashboard task cards with category tags and status indicators
 // ---------------------------------------------------------------------------
 // Pure presentational component. Renders a section of task cards using

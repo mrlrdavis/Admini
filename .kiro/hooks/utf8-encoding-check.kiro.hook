@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "UTF-8 Encoding Check",
+  "description": "Checks files before writing to ensure UTF-8 encoding is used and warns about potential emoji/special character corruption",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Before writing this file, check if it contains emoji or special Unicode characters. If it does, remind yourself to use [System.IO.File]::WriteAllText() with UTF-8 encoding in PowerShell instead of Set-Content, or use fs_write tool directly. Flag any emoji characters (like 📅, 🔥, ✅, etc.) that could be corrupted by incorrect encoding."
+  }
+}
