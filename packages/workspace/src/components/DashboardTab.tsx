@@ -243,7 +243,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </div>
           {widgetView === 'progress' && (
             <>          <section className="dashboard-tab__section dashboard-tab__section--due-today">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'due'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">?</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--due-today">Due Today</h2><span className="dashboard-tab__section-count">{dueTodayTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'due'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">📅</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--due-today">Due Today</h2><span className="dashboard-tab__section-count">{dueTodayTasks.length}</span></div>
             {dueTodayTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing due today</p> : (
               <ul className="dashboard-tab__task-list">
                 {dueTodayTasks.map(task => (
@@ -260,7 +260,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__section dashboard-tab__section--coming-due">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'coming-due'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">??</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--coming">Coming Due</h2><span className="dashboard-tab__section-count">{comingDueTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'coming-due'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">📆</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--coming">Coming Due</h2><span className="dashboard-tab__section-count">{comingDueTasks.length}</span></div>
             {comingDueTasks.length === 0 ? <p className="dashboard-tab__empty">Nothing coming due</p> : (
               <ul className="dashboard-tab__task-list">
                 {comingDueTasks.slice(0, 5).map(task => (
@@ -277,7 +277,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__section dashboard-tab__section--blocked">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'blocked'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">??</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--blocked">Blocked Tasks</h2><span className="dashboard-tab__section-count">{blockedTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'blocked'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">🚫</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--blocked">Blocked Tasks</h2><span className="dashboard-tab__section-count">{blockedTasks.length}</span></div>
             {blockedTasks.length === 0 ? <p className="dashboard-tab__empty">No blocked tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {blockedTasks.slice(0, 5).map(task => (
@@ -286,7 +286,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                       <span className="dashboard-tab__task-title">{task.title}</span>
                       <div className="dashboard-tab__task-meta">
                         {task.category && <span className={'dashboard-tab__category-pill ' + categoryClass(task.category)}>{task.category}</span>}
-                        <span className="dashboard-tab__block-reason">?? {task.blockReason || 'Blocked'}</span>
+                        <span className="dashboard-tab__block-reason">🚫 {task.blockReason || 'Blocked'}</span>
                       </div>
                     </div>
                     <span className="dashboard-tab__stale-badge">{computeStaleDays(task.updatedAt)}d stale</span>
@@ -296,7 +296,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             )}
           </section>
           <section className="dashboard-tab__section dashboard-tab__section--in-progress">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'in-progress'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">?</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--in-progress">In Progress</h2><span className="dashboard-tab__section-count">{inProgressTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'in-progress'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">🔄</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--in-progress">In Progress</h2><span className="dashboard-tab__section-count">{inProgressTasks.length}</span></div>
             {inProgressTasks.length === 0 ? <p className="dashboard-tab__empty">No in-progress tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {inProgressTasks.slice(0, 5).map(task => (
@@ -312,7 +312,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__section dashboard-tab__section--completed">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'completed'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">?</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--completed">Completed</h2><span className="dashboard-tab__section-count">{completedTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'completed'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">✅</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--completed">Completed</h2><span className="dashboard-tab__section-count">{completedTasks.length}</span></div>
             {completedTasks.length === 0 ? <p className="dashboard-tab__empty">No completed tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {completedTasks.slice(0, 5).map(task => (
@@ -332,7 +332,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           {widgetView === 'priority' && (
             <>
           <section className="dashboard-tab__section dashboard-tab__section--high-priority">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'high'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">?</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--high">High Priority</h2><span className="dashboard-tab__section-count">{highPriorityTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'high'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">🔥</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--high">High Priority</h2><span className="dashboard-tab__section-count">{highPriorityTasks.length}</span></div>
             {highPriorityTasks.length === 0 ? <p className="dashboard-tab__empty">No high priority tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {highPriorityTasks.slice(0, 5).map(task => (
@@ -348,7 +348,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             )}
           </section>
           <section className="dashboard-tab__section dashboard-tab__section--normal">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'normal'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">??</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--normal">Normal Priority</h2><span className="dashboard-tab__section-count">{normalPriorityTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'normal'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">📋</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--normal">Normal Priority</h2><span className="dashboard-tab__section-count">{normalPriorityTasks.length}</span></div>
             {normalPriorityTasks.length === 0 ? <p className="dashboard-tab__empty">No normal priority tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {normalPriorityTasks.slice(0, 5).map(task => (
@@ -364,7 +364,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__section dashboard-tab__section--low">
-            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'low'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">??</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--low">Low Priority</h2><span className="dashboard-tab__section-count">{lowPriorityTasks.length}</span></div>
+            <div className="dashboard-tab__section-header" onClick={() => { localStorage.setItem('admini_task_filter', 'low'); onTabChange?.('tasks'); }}><span className="dashboard-tab__section-icon">📝</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--low">Low Priority</h2><span className="dashboard-tab__section-count">{lowPriorityTasks.length}</span></div>
             {lowPriorityTasks.length === 0 ? <p className="dashboard-tab__empty">No low priority tasks</p> : (
               <ul className="dashboard-tab__task-list">
                 {lowPriorityTasks.slice(0, 5).map(task => (
@@ -383,7 +383,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
 
           {userId && organizationId && (
             <section className="dashboard-tab__section dashboard-tab__section--suggested">
-              <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">?</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--suggested">Suggested Tasks</h2></div>
+              <div className="dashboard-tab__section-header"><span className="dashboard-tab__section-icon">💡</span><h2 className="dashboard-tab__section-title dashboard-tab__section-title--suggested">Suggested Tasks</h2></div>
               <RecommendationsWidget userId={userId} organizationId={organizationId} />
             </section>
           )}
