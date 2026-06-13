@@ -135,17 +135,7 @@
   }
 }
 
-.pwa-install-modal__browser-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
 
-.pwa-install-modal__browser-icon-large {
-  width: 48px;
-  height: 48px;
-}
 
 .pwa-install-modal__browser-name {
   font-size: 1.125rem;
@@ -218,16 +208,17 @@
 
 .pwa-install-modal__browser-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 16px;
+  justify-content: center;
+  padding: 10px 16px;
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 72px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #636E72;
 }
 
 .pwa-install-modal__browser-btn:hover {
@@ -238,6 +229,7 @@
 .pwa-install-modal__browser-btn--active {
   border-color: #6B8E6B;
   background: #EDF5ED;
+  color: #4A6B4A;
   transform: translateY(-2px);
 }
 
@@ -249,27 +241,6 @@
   opacity: 1;
 }
 
-.pwa-install-modal__browser-icon {
-  width: 32px;
-  height: 32px;
-  transition: transform 0.2s ease;
-}
-
-.pwa-install-modal__browser-btn--active .pwa-install-modal__browser-icon {
-  transform: scale(1.1);
-}
-
-.pwa-install-modal__browser-label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: #636E72;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.pwa-install-modal__browser-btn--active .pwa-install-modal__browser-label {
-  color: #4A6B4A;
-}
 
 /* Progress indicator */
 .pwa-install-modal__progress {
@@ -340,14 +311,9 @@
     padding: 16px 20px;
   }
 
-  .pwa-install-modal__browser-header {
-    margin-bottom: 16px;
-  }
 
-  .pwa-install-modal__browser-icon-large {
-    width: 40px;
-    height: 40px;
-  }
+
+
 
   .pwa-install-modal__step-number {
     width: 24px;
@@ -369,14 +335,7 @@
     min-width: 60px;
   }
 
-  .pwa-install-modal__browser-icon {
-    width: 28px;
-    height: 28px;
-  }
 
-  .pwa-install-modal__browser-label {
-    font-size: 0.625rem;
-  }
 
   .pwa-install-modal__footer {
     padding: 12px 20px 20px;
