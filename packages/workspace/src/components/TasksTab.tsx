@@ -31,14 +31,32 @@ import type { MergedEvent } from '../services/calendarMerge';
 import type { TaskService } from '../services/taskDuplication';
 
 // ---------------------------------------------------------------------------
-// Subtask localStorage helpers
+// Subtask database helpers
 // ---------------------------------------------------------------------------
 
-function saveSubtasks(taskId: string, subtasks: { id: string; title: string; completed: boolean; assignee?: string; dueAt?: string; priority?: string }[]) {
-  localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(subtasks));
+type SubtaskRow = { id: string; title: string; completed: boolean; assignee?: string; dueAt?: string; priority?: string; sortOrder?: number };
+
+async function fetchSubtasks(taskId: string): Promise<SubtaskRow[]> {
+  try {
+    const client = getClient();
+    const { data, error } = await client
+      .from('task_subtasks')
+      .select('id, title, completed, due_at, assignee, priority, sort_order')
+      .eq('task_id', taskId)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return (data ?? []).map(r => ({ id: r.id, title: r.title, completed: r.completed, assignee: r.assignee ?? undefined, dueAt: r.due_at ?? undefined, priority: r.priority ?? undefined, sortOrder: r.sort_order }));
+  } catch {
+    // Fallback to localStorage for migration period
+    try {
+      const raw = localStorage.getItem('admini_subtasks_' + taskId);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  }
 }
 
-function loadSubtasks(taskId: string): { id: string; title: string; completed: boolean; assignee?: string; dueAt?: string; priority?: string }[] {
+function loadSubtasks(taskId: string): SubtaskRow[] {
+  // Synchronous fallback for initial render - returns cached or empty
   try {
     const raw = localStorage.getItem('admini_subtasks_' + taskId);
     return raw ? JSON.parse(raw) : [];
@@ -103,7 +121,7 @@ function createTaskServiceAdapter(
 // ---------------------------------------------------------------------------
 
 /** Convert a DashboardTask into a TaskWithSubtasks for use with TaskCard */
-function toTaskWithSubtasks(task: DashboardTask): TaskWithSubtasks {
+function toTaskWithSubtasks(task: DashboardTask, subtasks?: SubtaskRow[]): TaskWithSubtasks {
   return {
     id: task.id,
     title: task.title,
@@ -114,7 +132,7 @@ function toTaskWithSubtasks(task: DashboardTask): TaskWithSubtasks {
     assignee: task.assignedTo,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
-    subtasks: loadSubtasks(task.id),
+    subtasks: subtasks ?? loadSubtasks(task.id),
   };
 }
 
@@ -153,6 +171,7 @@ export interface TasksTabProps {
 
 export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [tasks, setTasks] = useState<DashboardTask[]>([]);
+  const [subtasksMap, setSubtasksMap] = useState<Record<string, SubtaskRow[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -340,7 +359,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
 
   async function handleDuplicate(task: DashboardTask) {
     try {
-      const taskWithSubs = toTaskWithSubtasks(task);
+      const taskWithSubs = toTaskWithSubtasks(task, subtasksMap[task.id]);
       await duplicateTask(taskWithSubs, taskService);
       // Refresh the task list to show the new task
       await loadTaskList();
@@ -400,7 +419,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     try {
       const client = getClient();
       await client.from('tasks').delete().eq('id', taskId);
-      localStorage.removeItem('admini_subtasks_' + taskId);
+      // Subtasks cascade-deleted from task_subtasks table
       showToast('Task deleted');
     } catch {
       showToast('Failed to delete task');
@@ -414,7 +433,12 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
 
     // Block completion if subtasks aren't all done
     if (status === 'completed') {
-      const st = loadSubtasks(taskId);
+      let st: SubtaskRow[] = [];
+      try {
+        st = await fetchSubtasks(taskId);
+      } catch {
+        st = loadSubtasks(taskId);
+      }
       const incomplete = st.filter(s => !s.completed);
       if (incomplete.length > 0) {
         showToast(`Complete all subtasks first (${incomplete.length} remaining)`);
@@ -446,35 +470,75 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     }
   }
 
-  function handleSubtaskToggle(taskId: string, subtaskId: string) {
-    const st = loadSubtasks(taskId);
-    const updated = st.map(s => s.id === subtaskId ? { ...s, completed: !s.completed } : s);
-    saveSubtasks(taskId, updated);
-    // Force re-render by touching updatedAt
+  async function handleSubtaskToggle(taskId: string, subtaskId: string) {
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    try {
+      const client = getClient();
+      const { data } = await client.from('task_subtasks').select('completed').eq('id', subtaskId).single();
+      await client.from('task_subtasks').update({ completed: !(data?.completed) }).eq('id', subtaskId);
+    } catch {
+      // Fallback to localStorage
+      const st = loadSubtasks(taskId);
+      const updated = st.map(s => s.id === subtaskId ? { ...s, completed: !s.completed } : s);
+      localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
+    }
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
   }
 
-  function handleSubtaskEdit(taskId: string, subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string; priority?: string }) {
-    const st = loadSubtasks(taskId);
-    const updated = st.map(s => s.id === subtaskId ? { ...s, ...updates } : s);
-    saveSubtasks(taskId, updated);
+  async function handleSubtaskEdit(taskId: string, subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string; priority?: string }) {
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    try {
+      const client = getClient();
+      const payload: Record<string, unknown> = {};
+      if (updates.title !== undefined) payload.title = updates.title;
+      if (updates.assignee !== undefined) payload.assignee = updates.assignee || null;
+      if (updates.dueAt !== undefined) payload.due_at = updates.dueAt || null;
+      if (updates.priority !== undefined) payload.priority = updates.priority || null;
+      await client.from('task_subtasks').update(payload).eq('id', subtaskId);
+    } catch {
+      // Fallback to localStorage
+      const st = loadSubtasks(taskId);
+      const updated = st.map(s => s.id === subtaskId ? { ...s, ...updates } : s);
+      localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
+    }
     showToast('Subtask updated');
   }
 
-  function handleSubtaskAdd(taskId: string, subtask: { title: string; assignee?: string; dueAt?: string; priority?: string }) {
-    const st = loadSubtasks(taskId);
-    const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false, assignee: subtask.assignee, dueAt: subtask.dueAt, priority: subtask.priority };
-    saveSubtasks(taskId, [...st, newSubtask]);
+  async function handleSubtaskAdd(taskId: string, subtask: { title: string; assignee?: string; dueAt?: string; priority?: string }) {
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    try {
+      const client = getClient();
+      await client.from('task_subtasks').insert({
+        task_id: taskId,
+        title: subtask.title,
+        completed: false,
+        assignee: subtask.assignee || null,
+        due_at: subtask.dueAt || null,
+        priority: subtask.priority || null,
+        sort_order: 0,
+      });
+    } catch {
+      // Fallback to localStorage
+      const st = loadSubtasks(taskId);
+      const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false, assignee: subtask.assignee, dueAt: subtask.dueAt, priority: subtask.priority };
+      localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify([...st, newSubtask]));
+    }
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
     showToast('Subtask added');
   }
 
-  function handleSubtaskDelete(taskId: string, subtaskId: string) {
-    const st = loadSubtasks(taskId);
-    const updated = st.filter(s => s.id !== subtaskId);
-    saveSubtasks(taskId, updated);
+  async function handleSubtaskDelete(taskId: string, subtaskId: string) {
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    try {
+      const client = getClient();
+      await client.from('task_subtasks').delete().eq('id', subtaskId);
+    } catch {
+      // Fallback to localStorage
+      const st = loadSubtasks(taskId);
+      const updated = st.filter(s => s.id !== subtaskId);
+      localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
+    }
     showToast('Subtask removed');
   }
 
@@ -670,7 +734,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
           ) : (
             <ul className="tasks-tab__task-list" role="list">
               {filteredTasks.map(task => {
-                const taskWithSubs = toTaskWithSubtasks(task);
+                const taskWithSubs = toTaskWithSubtasks(task, subtasksMap[task.id]);
                 return (
                   <li key={task.id}>
                     <TaskCard
