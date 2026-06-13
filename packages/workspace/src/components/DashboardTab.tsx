@@ -227,7 +227,7 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
       <header className="dashboard-tab__topbar">
         <h1 className="dashboard-tab__greeting-text">{getTimeGreeting()}, <strong>{userName}</strong></h1>
         <div className="dashboard-tab__level-badge" onClick={() => setShowAchievements(true)}>
-          <span className="dashboard-tab__level-icon">??</span>
+          <span className="dashboard-tab__level-icon">⭐</span>
           <span className="dashboard-tab__level-num">Level {Math.floor(unlockedCount / 2) + 1}</span>
           <span className="dashboard-tab__level-sub">{unlockedCount}/{totalBadges} badges</span>
         </div>
@@ -419,23 +419,19 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           </section>
 
           <section className="dashboard-tab__card dashboard-tab__card--quick-actions">
-            <h2 className="dashboard-tab__feed-header">? Quick Actions</h2>
+            <h2 className="dashboard-tab__feed-header">⚡ Quick Actions</h2>
             <div className="dashboard-tab__quick-actions-widget">
               <button type="button" className="dashboard-tab__qa-widget-btn" onClick={() => onTabChange?.('capture')}>
-                <span className="dashboard-tab__qa-widget-icon">??</span>
-                <span className="dashboard-tab__qa-widget-label">Record Capture</span>
+                <span className="dashboard-tab__qa-widget-icon">🎙️</span><span className="dashboard-tab__qa-widget-label">Record Capture</span>
               </button>
               <button type="button" className="dashboard-tab__qa-widget-btn" onClick={() => { localStorage.setItem('admini_capture_mode', 'tap'); onTabChange?.('capture'); }}>
-                <span className="dashboard-tab__qa-widget-icon">??</span>
-                <span className="dashboard-tab__qa-widget-label">Quick Tap</span>
+                <span className="dashboard-tab__qa-widget-icon">👆</span><span className="dashboard-tab__qa-widget-label">Quick Tap</span>
               </button>
               <button type="button" className="dashboard-tab__qa-widget-btn" onClick={() => { localStorage.setItem('admini_tasks_view', 'calendar'); onTabChange?.('tasks'); }}>
-                <span className="dashboard-tab__qa-widget-icon">??</span>
-                <span className="dashboard-tab__qa-widget-label">Task Calendar</span>
+                <span className="dashboard-tab__qa-widget-icon">📅</span><span className="dashboard-tab__qa-widget-label">Task Calendar</span>
               </button>
               <button type="button" className="dashboard-tab__qa-widget-btn" onClick={() => onTabChange?.('admin')}>
-                <span className="dashboard-tab__qa-widget-icon">??</span>
-                <span className="dashboard-tab__qa-widget-label">Update Roster</span>
+                <span className="dashboard-tab__qa-widget-icon">👥</span><span className="dashboard-tab__qa-widget-label">Update Roster</span>
               </button>
             </div>
           </section>
@@ -443,9 +439,9 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
           <div className="dashboard-tab__schedule-activity-row">
           <section className="dashboard-tab__card dashboard-tab__card--schedule">
             <div className="dashboard-tab__schedule-hdr">
-              <h2 className="dashboard-tab__schedule-title">?? Today's Schedule <span className="dashboard-tab__schedule-date">?? {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
+              <h2 className="dashboard-tab__schedule-title">📆 Today's Schedule <span className="dashboard-tab__schedule-date">📌 {new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span></h2>
               <div className="dashboard-tab__schedule-actions">
-                <button type="button" className="dashboard-tab__sync-btn" onClick={handleCalendarSync} disabled={syncing} title="Sync with Google Calendar">{syncing ? 'Syncing...' : '?? Sync'}</button>
+                <button type="button" className="dashboard-tab__sync-btn" onClick={handleCalendarSync} disabled={syncing} title="Sync with Google Calendar">{syncing ? 'Syncing...' : '🔄 Sync'}</button>
                 <button type="button" className="dashboard-tab__sync-btn" onClick={() => { const summary = prompt('Event for today:'); if (!summary || !summary.trim()) return; const time = prompt('Time (HH:MM, optional):') || ''; const today = new Date().toISOString().split('T')[0]; const start = time ? today + 'T' + time + ':00' : today + 'T09:00:00'; const end = time ? today + 'T' + time + ':00' : today + 'T10:00:00'; const ev = createLocalEvent({ summary: summary.trim(), start, end }); setCalendarEvents(prev => [...prev, ev]); }} title="Add event for today">+ Add</button>
                 <button type="button" className="dashboard-tab__edit-link" onClick={() => setScheduleEditing(v => !v)}>{scheduleEditing ? 'Done' : 'Edit'}</button>
               </div>
@@ -479,18 +475,18 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
                     <span className="dashboard-tab__sched-check" />
                     <span className="dashboard-tab__sched-event-time">{new Date(ev.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span>
                     <span className="dashboard-tab__sched-event-title">{ev.summary}</span>
-                    {ev.id && !ev.id.startsWith('google') ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem('admini_local_events')||'[]');const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem('admini_local_events',JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} className="dashboard-tab__sched-event-delete">?</button> : null}
+                    {ev.id && !ev.id.startsWith('google') ? <button type="button" onClick={(e)=>{e.stopPropagation();const stored=JSON.parse(localStorage.getItem('admini_local_events')||'[]');const filtered=stored.filter((s:any)=>s.id!==ev.id);localStorage.setItem('admini_local_events',JSON.stringify(filtered));setCalendarEvents(prev=>prev.filter(x=>x.id!==ev.id));}} className="dashboard-tab__sched-event-delete">✕</button> : null}
                   </div>
                 ))}
               </div>
             ))}
           </section>
           <section className="dashboard-tab__card dashboard-tab__card--activity">
-            <h2 className="dashboard-tab__feed-header">?? Activity Feed</h2>
+            <h2 className="dashboard-tab__feed-header">📊 Activity Feed</h2>
             <ul className="dashboard-tab__feed-list">
               {activityFeedItems.map(ev => (
                 <li key={ev.id} className="dashboard-tab__feed-item">
-                  {(() => { const t = ev.entityType; const a = ev.action; let cls = 'dashboard-tab__feed-icon--default'; let icon = '??'; if (t === 'capture') { cls = 'dashboard-tab__feed-icon--capture-voice'; icon = '??'; } else if (t === 'tap_capture') { cls = 'dashboard-tab__feed-icon--capture-tap'; icon = '??'; } else if (t === 'observation') { cls = 'dashboard-tab__feed-icon--observation'; icon = '??'; } else if (t === 'note' || t === 'meeting_note') { cls = 'dashboard-tab__feed-icon--note'; icon = '??'; } else if (t === 'achievement' || t === 'badge') { cls = 'dashboard-tab__feed-icon--achievement'; icon = '??'; } else if (t === 'task') { if (a === 'create' || a === 'created') { cls = 'dashboard-tab__feed-icon--task-create'; icon = '?'; } else if (a === 'complete' || a === 'completed') { cls = 'dashboard-tab__feed-icon--task-complete'; icon = '?'; } else { cls = 'dashboard-tab__feed-icon--task-create'; icon = '??'; } } return <span className={'dashboard-tab__feed-icon ' + cls}>{icon}</span>; })()}
+                  {(() => { const t = ev.entityType; const a = ev.action; let cls = 'dashboard-tab__feed-icon--default'; let icon = '📝'; if (t === 'capture') { cls = 'dashboard-tab__feed-icon--capture-voice'; icon = '🎙️'; } else if (t === 'tap_capture') { cls = 'dashboard-tab__feed-icon--capture-tap'; icon = '👆'; } else if (t === 'observation') { cls = 'dashboard-tab__feed-icon--observation'; icon = '👁️'; } else if (t === 'note' || t === 'meeting_note') { cls = 'dashboard-tab__feed-icon--note'; icon = '📝'; } else if (t === 'achievement' || t === 'badge') { cls = 'dashboard-tab__feed-icon--achievement'; icon = '🏆'; } else if (t === 'task') { if (a === 'create' || a === 'created') { cls = 'dashboard-tab__feed-icon--task-create'; icon = '📋'; } else if (a === 'complete' || a === 'completed') { cls = 'dashboard-tab__feed-icon--task-complete'; icon = '✅'; } else { cls = 'dashboard-tab__feed-icon--task-create'; icon = '📋'; } } return <span className={'dashboard-tab__feed-icon ' + cls}>{icon}</span>; })()}
                   <div className="dashboard-tab__feed-body">
                     <span className="dashboard-tab__feed-title">{(() => { const t = tasks.find(tk => tk.id === ev.entityId); if (t) return (ev.action === 'create' || ev.action === 'created' ? '' : 'Completed: ') + t.title; if (ev.entityType === 'capture') return 'Voice capture: ' + ev.entityId.substring(0,20); return formatActivityAction(ev); })()}</span>
                     <span className="dashboard-tab__feed-time">{(() => { const diff = Date.now() - new Date(ev.createdAt).getTime(); const mins = Math.floor(diff/60000); if (mins < 60) return mins + ' minutes ago'; const hrs = Math.floor(mins/60); if (hrs < 24) return hrs + ' hours ago'; return new Date(ev.createdAt).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}); })()}</span>
