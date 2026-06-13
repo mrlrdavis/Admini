@@ -27,7 +27,7 @@ export interface TaskCardProps {
   onSubtaskDelete?: (subtaskId: string) => void;
   onDuplicate: () => void;
   onStatusChange: (status: string) => void;
-  onEdit?: (updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string }) => void;
+  onEdit?: (updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string; blockReason?: string }) => void;
   onDelete?: () => void;
   /** Staff roster names for assignee auto-suggest */
   staffRoster?: string[];
@@ -374,7 +374,7 @@ export function TaskCard({
                 <option value="completed">Completed</option>
                 <option value="archived">Blocked</option>
               </select>
-              {task.status === 'archived' && <input className="task-card__edit-input" placeholder="Block reason..." value={blockReason} onChange={(e) => setBlockReason(e.target.value)} onBlur={() => onEdit?.({ description: blockReason })} style={{marginTop:'6px',width:'100%'}} />}
+              {task.status === 'archived' && (<div style={{display:'flex',gap:'6px',marginTop:'6px',width:'100%'}}><input className="task-card__edit-input" placeholder="Block reason..." value={blockReason} onChange={(e) => setBlockReason(e.target.value)} style={{flex:1}} /><button type="button" className="task-card__action-btn" onClick={() => onEdit?.({ blockReason })} aria-label="Save block reason">Save</button></div>)}
             </div>
           )}
         </div>

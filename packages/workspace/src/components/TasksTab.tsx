@@ -365,7 +365,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     } catch { showToast('Failed to create task'); }
   }
 
-  async function handleEditTask(taskId: string, updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string }) {
+  async function handleEditTask(taskId: string, updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string; blockReason?: string }) {
     // Optimistic update
     setTasks(prev => prev.map(t => t.id === taskId ? {
       ...t,
@@ -374,6 +374,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       dueAt: updates.dueAt ?? t.dueAt,
       priority: (updates.priority as typeof t.priority) ?? t.priority,
       assignedTo: updates.assignee ?? t.assignedTo,
+      blockReason: updates.blockReason ?? t.blockReason,
     } : t));
     try {
       const client = getClient();
@@ -383,6 +384,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       if (updates.dueAt !== undefined) payload.due_at = updates.dueAt || null;
       if (updates.priority !== undefined) payload.priority = updates.priority;
       if (updates.assignee !== undefined) payload.assigned_to = updates.assignee || null;
+      if (updates.blockReason !== undefined) payload.block_reason = updates.blockReason || null;
       await client.from('tasks').update(payload).eq('id', taskId);
       if (updates.assignee) notifyAssignee(taskId, updates.assignee, 'updated', updates.title).catch(() => {});
       showToast('Task updated');

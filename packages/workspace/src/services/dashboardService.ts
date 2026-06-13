@@ -138,7 +138,7 @@ export function sortByUrgency(a: DashboardTask, b: DashboardTask): number {
 export async function getTasks(): Promise<DashboardTask[]> {
   const client = getClient();
 
-  const baseCols = 'id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at';
+  const baseCols = 'id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at, block_reason';
   try {
     // Try with category; if the column is missing (migration not applied), retry without it.
     let { data, error } = await client
