@@ -1,16 +1,36 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 
-const TAB_ICONS: Record<string, string> = {
-  capture: '\uD83D\uDCDD',
-  dashboard: '\uD83D\uDCCA',
-  tasks: '\u2705',
-  pulse: '\uD83D\uDC93',
-  more: '\u2699\uFE0F',
-  admin: '\uD83D\uDD27',
-  observations: '\uD83D\uDC41',
-  notes: '\uD83D\uDCD3',
+// Same SVG icon paths as DesktopSidebar for visual consistency
+const ICON_PATHS: Record<string, string> = {
+  capture: 'M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8',
+  dashboard: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  tasks: 'M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2',
+  notes: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5',
+  observations: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  pulse: 'M22 12h-4l-3 9L9 3l-3 9H2',
+  more: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
+  admin: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6',
 };
+
+function TabIcon({ id }: { id: string }) {
+  const d = ICON_PATHS[id] || ICON_PATHS.dashboard;
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </svg>
+  );
+}
 
 export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
   const [open, setOpen] = useState(false);
@@ -54,8 +74,8 @@ export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: Nav
                     onClick={() => handleTabSelect(tab.id)}
                     aria-selected={activeTab === tab.id}
                   >
-                    <span aria-hidden="true">{TAB_ICONS[tab.id] ?? '\uD83D\uDCC4'}</span>
-                    <span>{tab.label}</span>
+                    <span className="mobile-nav-drawer__tab-icon"><TabIcon id={tab.id} /></span>
+                    <span className="mobile-nav-drawer__tab-label">{tab.label}</span>
                   </button>
                 </li>
               );
@@ -68,7 +88,8 @@ export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: Nav
               onClick={() => { onSignOut(); setOpen(false); }}
               aria-label="Sign out"
             >
-              Sign Out
+              <LogoutIcon />
+              <span>Sign Out</span>
             </button>
           )}
         </nav>
