@@ -296,3 +296,153 @@
 .admin-tab__upload-btn:hover {
   background: var(--ws-color-sage);
 }
+
+/* Section Header - for title + button layout */
+.admin-tab__section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ws-space-md);
+  margin-bottom: var(--ws-space-md);
+}
+
+.admin-tab__section-header > div {
+  flex: 1;
+}
+
+.admin-tab__section-header .admin-tab__section-title {
+  margin-bottom: var(--ws-space-xs);
+}
+
+.admin-tab__section-header .admin-tab__section-desc {
+  margin-bottom: 0;
+}
+
+/* Import Button - prominent upload action */
+.admin-tab__import-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--ws-color-sage);
+  color: var(--ws-color-white);
+  border: none;
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--ws-transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-tab__import-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.admin-tab__import-btn:active {
+  transform: translateY(0);
+}
+
+/* Hidden file input for button-triggered uploads */
+.admin-tab__hidden-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Roster Preview */
+.admin-tab__roster-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-tab__roster-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--ws-space-md);
+  padding: var(--ws-space-sm) 0;
+  border-bottom: 1px solid #E8E5DE;
+  font-size: var(--ws-font-size-sm);
+}
+
+.admin-tab__roster-item:last-child {
+  border-bottom: none;
+}
+
+.admin-tab__roster-item--more {
+  color: var(--ws-color-text);
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+.admin-tab__roster-actions {
+  display: flex;
+  gap: var(--ws-space-md);
+  margin-top: var(--ws-space-md);
+}
+
+.admin-tab__cancel-btn {
+  padding: var(--ws-space-sm) 24px;
+  background: transparent;
+  color: var(--ws-color-text);
+  border: 1px solid var(--ws-color-border);
+  border-radius: var(--ws-radius-pill);
+  font-size: var(--ws-font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--ws-transition-fast);
+}
+
+.admin-tab__cancel-btn:hover {
+  background: var(--ws-color-limestone);
+}
+
+.admin-tab__warning-message {
+  color: #D68910;
+  font-size: var(--ws-font-size-sm);
+  margin: 8px 0;
+}
+
+.admin-tab__hint {
+  font-size: var(--ws-font-size-xs);
+  color: var(--ws-color-text);
+  opacity: 0.7;
+}
+
+.admin-tab__error-list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  font-size: var(--ws-font-size-sm);
+  color: var(--ws-color-error);
+}
+
+.admin-tab__revoke-btn {
+  padding: 4px 12px;
+  background: transparent;
+  color: var(--ws-color-error);
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--ws-transition-fast);
+}
+
+.admin-tab__revoke-btn:hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.admin-tab__revoke-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

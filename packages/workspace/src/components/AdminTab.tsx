@@ -644,28 +644,35 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
 
       {/* Roster Upload Section */}
       <section className="admin-tab__section" aria-labelledby="roster-upload-heading">
-        <h2 id="roster-upload-heading" className="admin-tab__section-title">
-          Roster Upload
-        </h2>
-        <p className="admin-tab__section-desc">
-          Upload a CSV or XLSX file to bulk-add members. Required columns: name, email, role.
-        </p>
+        <div className="admin-tab__section-header">
+          <div>
+            <h2 id="roster-upload-heading" className="admin-tab__section-title">
+              Roster Upload
+            </h2>
+            <p className="admin-tab__section-desc">
+              Upload a CSV or XLSX file to bulk-add members. Required columns: name, email, role.
+            </p>
+          </div>
+          {rosterState === 'idle' && (
+            <button
+              type="button"
+              className="admin-tab__import-btn"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              📤 Upload Roster
+            </button>
+          )}
+        </div>
 
         {rosterState === 'idle' && (
-          <label className="admin-tab__field">
-            <span className="admin-tab__field-label">Select roster file</span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv,.xlsx"
-              onChange={handleRosterFileChange}
-              className="admin-tab__input"
-              aria-describedby="roster-format-hint"
-            />
-            <span id="roster-format-hint" className="admin-tab__hint">
-              Accepted formats: .csv, .xlsx (max 5MB)
-            </span>
-          </label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.xlsx"
+            onChange={handleRosterFileChange}
+            className="admin-tab__hidden-file-input"
+            aria-describedby="roster-format-hint"
+          />
         )}
 
         {rosterState === 'validating' && (
