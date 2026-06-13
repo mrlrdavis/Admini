@@ -1,0 +1,405 @@
+﻿/* ==========================================================================
+   PWA Install Modal Styles
+   ========================================================================== */
+
+.pwa-install-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: pwa-backdrop-fade-in 0.2s ease-out;
+}
+
+.pwa-install-modal__backdrop--closing {
+  animation: pwa-backdrop-fade-out 0.2s ease-out forwards;
+}
+
+@keyframes pwa-backdrop-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pwa-backdrop-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.pwa-install-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: pwa-modal-slide-in 0.3s ease-out;
+  position: relative;
+}
+
+.pwa-install-modal--closing {
+  animation: pwa-modal-slide-out 0.2s ease-out forwards;
+}
+
+@keyframes pwa-modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pwa-modal-slide-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+/* Close button */
+.pwa-install-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #F5F3EE;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #636E72;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  z-index: 1;
+}
+
+.pwa-install-modal__close:hover {
+  background: #E8E5DE;
+  color: #2D3436;
+}
+
+/* Header */
+.pwa-install-modal__header {
+  padding: 24px 24px 16px;
+  text-align: center;
+  border-bottom: 1px solid #E8E5DE;
+}
+
+.pwa-install-modal__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2D3436;
+  margin: 0 0 8px;
+}
+
+.pwa-install-modal__subtitle {
+  font-size: 0.875rem;
+  color: #636E72;
+  margin: 0;
+}
+
+/* Content area */
+.pwa-install-modal__content {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.pwa-install-modal__instructions {
+  animation: pwa-instructions-fade 0.3s ease-out;
+}
+
+@keyframes pwa-instructions-fade {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.pwa-install-modal__browser-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.pwa-install-modal__browser-icon-large {
+  width: 48px;
+  height: 48px;
+}
+
+.pwa-install-modal__browser-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2D3436;
+  margin: 0;
+}
+
+/* Steps list */
+.pwa-install-modal__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pwa-install-modal__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pwa-install-modal__step-number {
+  width: 28px;
+  height: 28px;
+  background: #6B8E6B;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pwa-install-modal__step-text {
+  font-size: 0.9375rem;
+  color: #2D3436;
+  line-height: 1.5;
+  padding-top: 3px;
+}
+
+.pwa-install-modal__note {
+  margin: 20px 0 0;
+  padding: 12px 16px;
+  background: #EDF5ED;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: #4A6B4A;
+  line-height: 1.5;
+}
+
+.pwa-install-modal__note strong {
+  color: #3D5C3D;
+}
+
+/* Browser selector */
+.pwa-install-modal__browsers {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: #F5F3EE;
+  border-top: 1px solid #E8E5DE;
+  flex-wrap: wrap;
+}
+
+.pwa-install-modal__browser-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 72px;
+}
+
+.pwa-install-modal__browser-btn:hover {
+  border-color: #C8DFC8;
+  transform: translateY(-2px);
+}
+
+.pwa-install-modal__browser-btn--active {
+  border-color: #6B8E6B;
+  background: #EDF5ED;
+  transform: translateY(-2px);
+}
+
+.pwa-install-modal__browser-btn:not(.pwa-install-modal__browser-btn--active) {
+  opacity: 0.6;
+}
+
+.pwa-install-modal__browser-btn:not(.pwa-install-modal__browser-btn--active):hover {
+  opacity: 1;
+}
+
+.pwa-install-modal__browser-icon {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.2s ease;
+}
+
+.pwa-install-modal__browser-btn--active .pwa-install-modal__browser-icon {
+  transform: scale(1.1);
+}
+
+.pwa-install-modal__browser-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #636E72;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pwa-install-modal__browser-btn--active .pwa-install-modal__browser-label {
+  color: #4A6B4A;
+}
+
+/* Progress indicator */
+.pwa-install-modal__progress {
+  height: 3px;
+  background: #E8E5DE;
+  overflow: hidden;
+}
+
+.pwa-install-modal__progress-bar {
+  height: 100%;
+  background: #6B8E6B;
+  width: 0;
+  animation: pwa-progress-fill linear forwards;
+}
+
+@keyframes pwa-progress-fill {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Footer */
+.pwa-install-modal__footer {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #E8E5DE;
+}
+
+.pwa-install-modal__dismiss-btn {
+  padding: 10px 24px;
+  border: 1px solid #E8E5DE;
+  border-radius: 8px;
+  background: #fff;
+  color: #636E72;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pwa-install-modal__dismiss-btn:hover {
+  background: #F5F3EE;
+  color: #2D3436;
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .pwa-install-modal__backdrop {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .pwa-install-modal {
+    border-radius: 16px 16px 0 0;
+    max-height: 85vh;
+  }
+
+  .pwa-install-modal__header {
+    padding: 20px 20px 12px;
+  }
+
+  .pwa-install-modal__title {
+    font-size: 1.125rem;
+    padding-right: 32px;
+  }
+
+  .pwa-install-modal__content {
+    padding: 16px 20px;
+  }
+
+  .pwa-install-modal__browser-header {
+    margin-bottom: 16px;
+  }
+
+  .pwa-install-modal__browser-icon-large {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pwa-install-modal__step-number {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+
+  .pwa-install-modal__step-text {
+    font-size: 0.875rem;
+  }
+
+  .pwa-install-modal__browsers {
+    padding: 12px 16px;
+    gap: 6px;
+  }
+
+  .pwa-install-modal__browser-btn {
+    padding: 10px 12px;
+    min-width: 60px;
+  }
+
+  .pwa-install-modal__browser-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .pwa-install-modal__browser-label {
+    font-size: 0.625rem;
+  }
+
+  .pwa-install-modal__footer {
+    padding: 12px 20px 20px;
+  }
+
+  .pwa-install-modal__close {
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.25rem;
+  }
+}
+
+/* Very small screens - 2 rows of browsers */
+@media (max-width: 400px) {
+  .pwa-install-modal__browsers {
+    justify-content: space-evenly;
+  }
+
+  .pwa-install-modal__browser-btn {
+    flex: 0 0 calc(33% - 8px);
+    padding: 8px;
+    min-width: 0;
+  }
+}

@@ -31,6 +31,8 @@ export type { ObservationsTabProps } from './components/ObservationsTab';
 export { BadgesPanel, unlockBadge } from './components/BadgesPanel';
 export { RecommendationsWidget } from './components/RecommendationsWidget';
 export type { RecommendationsWidgetProps } from './components/RecommendationsWidget';
+export { PwaInstallModal, usePwaInstallModal } from './components/PwaInstallModal';
+export type { PwaInstallModalProps } from './components/PwaInstallModal';
 
 // Hooks
 export { useDebouncedSave } from './hooks/useDebouncedSave';

@@ -2,6 +2,8 @@
 import {
   SupabaseClientProvider,
   WorkspaceShell,
+  PwaInstallModal,
+  usePwaInstallModal,
 } from '@admini/workspace';
 import type { ProfileUpdatePayload } from '@admini/workspace';
 import { CustomInstallButton } from './components/CustomInstallButton';
@@ -59,6 +61,7 @@ export function UnifiedWorkspace({
 }: UnifiedWorkspaceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const layoutMode = useLayoutMode(containerRef);
+  const { showModal: showPwaModal, dismiss: dismissPwaModal } = usePwaInstallModal();
 
   return (
     <SupabaseClientProvider client={supabase!}>
@@ -89,6 +92,7 @@ export function UnifiedWorkspace({
         />
       </div>
       <CustomInstallButton />
+      {showPwaModal && <PwaInstallModal onDismiss={dismissPwaModal} />}
     </SupabaseClientProvider>
   );
 }
