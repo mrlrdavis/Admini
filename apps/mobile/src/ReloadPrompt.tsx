@@ -1,4 +1,4 @@
-import { useRegisterSW } from 'virtual:pwa-register/react';
+﻿import { useRegisterSW } from 'virtual:pwa-register/react';
 
 export function ReloadPrompt() {
   const {
