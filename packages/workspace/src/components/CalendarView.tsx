@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 // ---------------------------------------------------------------------------
 // CalendarView - Monthly grid with tasks and events overlaid
 // ---------------------------------------------------------------------------
@@ -76,7 +76,7 @@ function buildTaskTooltip(task: DashboardTask): string {
   
   if (task.status === 'archived') {
     lines.push('');
-    lines.push('BLOCKED: ' + (task.description || 'Waiting on dependency'));
+    lines.push('BLOCKED: ' + (task.blockReason || 'Waiting on dependency'));
   }
   
   const subtasks = loadSubtasks(task.id);
