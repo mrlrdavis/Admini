@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 // ---------------------------------------------------------------------------
 // CalendarView - Monthly grid with tasks and events overlaid
 // ---------------------------------------------------------------------------
@@ -19,6 +19,7 @@ export interface CalendarViewProps {
   mergedEvents: MergedEvent[];
   tasks: DashboardTask[];
   onAddEvent: (date: string, time?: string) => void;
+  onTaskClick?: (taskId: string) => void;
   overdueSlot?: ReactNode;
 }
 
@@ -49,11 +50,59 @@ function extractDatePart(isoStr: string): string {
   return isoStr.split('T')[0] ?? isoStr;
 }
 
+function loadSubtasks(taskId: string): { id: string; title: string; completed: boolean }[] {
+  try {
+    const raw = localStorage.getItem('admini_subtasks_' + taskId);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function buildTaskTooltip(task: DashboardTask): string {
+  const lines: string[] = [task.title];
+  
+  if (task.description) {
+    lines.push('');
+    lines.push(task.description.length > 100 ? task.description.slice(0, 100) + '...' : task.description);
+  }
+  
+  if (task.assignedTo) {
+    lines.push('');
+    lines.push('Assigned: ' + task.assignedTo);
+  }
+  
+  if (task.priority && task.priority !== 'normal') {
+    lines.push('Priority: ' + task.priority);
+  }
+  
+  if (task.status === 'archived') {
+    lines.push('');
+    lines.push('BLOCKED: ' + (task.description || 'Waiting on dependency'));
+  }
+  
+  const subtasks = loadSubtasks(task.id);
+  if (subtasks.length > 0) {
+    lines.push('');
+    const completed = subtasks.filter(s => s.completed).length;
+    lines.push('Subtasks: ' + completed + '/' + subtasks.length + ' completed');
+    subtasks.slice(0, 5).forEach(st => {
+      lines.push((st.completed ? '  [X] ' : '  [ ] ') + st.title);
+    });
+    if (subtasks.length > 5) {
+      lines.push('  ...and ' + (subtasks.length - 5) + ' more');
+    }
+  }
+  
+  lines.push('');
+  lines.push('Click to view in task list');
+  
+  return lines.join('\n');
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function CalendarView({ mergedEvents, tasks, onAddEvent, overdueSlot }: CalendarViewProps) {
+export function CalendarView({ mergedEvents, tasks, onAddEvent, onTaskClick, overdueSlot }: CalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
 
   const year = currentMonth.getFullYear();
@@ -94,6 +143,15 @@ export function CalendarView({ mergedEvents, tasks, onAddEvent, overdueSlot }: C
 
   function handleNextMonth() {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  }
+
+  function handleTaskClick(taskId: string) {
+    if (onTaskClick) {
+      onTaskClick(taskId);
+    } else {
+      // Default: store task ID and navigate would happen via parent
+      localStorage.setItem('admini_expand_task', taskId);
+    }
   }
 
   const monthLabel = currentMonth.toLocaleDateString(undefined, {
@@ -188,19 +246,28 @@ export function CalendarView({ mergedEvents, tasks, onAddEvent, overdueSlot }: C
                 {(dayTasks.length > 0 || dayEvents.length > 0) && (
                   <div className="calendar-view__cell-items">
                     {dayTasks.slice(0, 3).map(task => {
-                      const hasSubtasks = !!localStorage.getItem('admini_subtasks_' + task.id);
+                      const subtasks = loadSubtasks(task.id);
+                      const hasSubtasks = subtasks.length > 0;
                       const isAssigned = !!task.assignedTo;
                       const isHighPriority = task.priority === 'high' || task.priority === 'urgent';
+                      const isBlocked = task.status === 'archived';
+                      const tooltipText = buildTaskTooltip(task);
                       return (
                         <span
                           key={task.id}
-                          className="calendar-view__cell-item calendar-view__cell-item--task"
-                          title={task.title + (task.assignedTo ? ' \u2014 ' + task.assignedTo : '') + (isHighPriority ? ' [' + task.priority + ']' : '')}
+                          className={'calendar-view__cell-item calendar-view__cell-item--task' + (isBlocked ? ' calendar-view__cell-item--blocked' : '')}
+                          title={tooltipText}
+                          onClick={(e) => { e.stopPropagation(); handleTaskClick(task.id); }}
+                          style={{ cursor: 'pointer' }}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleTaskClick(task.id); }}
                         >
                           <span className="calendar-view__cell-item-dots">
-                            {hasSubtasks && <span className="calendar-view__dot calendar-view__dot--subtask" title="Has subtasks" />}
+                            {hasSubtasks && <span className="calendar-view__dot calendar-view__dot--subtask" title={'Has ' + subtasks.length + ' subtask(s)'} />}
                             {isAssigned && <span className="calendar-view__dot calendar-view__dot--assigned" title={'Assigned to ' + task.assignedTo} />}
                             {isHighPriority && <span className="calendar-view__dot calendar-view__dot--priority" title={task.priority} />}
+                            {isBlocked && <span className="calendar-view__dot calendar-view__dot--blocked" title="Blocked" />}
                           </span>
                           <span className="calendar-view__cell-item-text">{task.title}</span>
                         </span>

@@ -169,6 +169,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   const [showImport, setShowImport] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
 
+  // Staff roster for assignee suggestions
+  const [staffRoster, setStaffRoster] = useState<string[]>([]);
+
   // Calendar event state
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
 
@@ -198,6 +201,18 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   useEffect(() => {
     loadTaskList();
   }, [loadTaskList]);
+
+  // Load staff roster for assignee auto-suggest
+  useEffect(() => {
+    try {
+      const rosterRaw = localStorage.getItem('admini_roster_full');
+      if (rosterRaw) {
+        const roster = JSON.parse(rosterRaw) as { name: string; type: 'student' | 'staff' }[];
+        // Filter to only staff (teachers, admin, principal)
+        setStaffRoster(roster.filter(r => r.type === 'staff').map(r => r.name));
+      }
+    } catch {}
+  }, []);
 
   // Auto-expand a specific task when navigated from dashboard
   useEffect(() => {
@@ -431,6 +446,37 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
   }
 
+  function handleSubtaskEdit(taskId: string, subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string }) {
+    const st = loadSubtasks(taskId);
+    const updated = st.map(s => s.id === subtaskId ? { ...s, ...updates } : s);
+    saveSubtasks(taskId, updated);
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    showToast('Subtask updated');
+  }
+
+  function handleSubtaskAdd(taskId: string, subtask: { title: string; assignee?: string; dueAt?: string }) {
+    const st = loadSubtasks(taskId);
+    const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false };
+    saveSubtasks(taskId, [...st, newSubtask]);
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    showToast('Subtask added');
+  }
+
+  function handleSubtaskDelete(taskId: string, subtaskId: string) {
+    const st = loadSubtasks(taskId);
+    const updated = st.filter(s => s.id !== subtaskId);
+    saveSubtasks(taskId, updated);
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    showToast('Subtask removed');
+  }
+
+  function handleTaskClickFromCalendar(taskId: string) {
+    // Expand the task and switch to list view
+    setExpandedTaskIds(new Set([taskId]));
+    setViewMode('list');
+    showToast('Showing task details');
+  }
+
   function handleAddEvent(date: string, time?: string) {
     const summary = prompt('Event name:');
     if (!summary) return;
@@ -536,12 +582,17 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
               <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option>
             </select>
           </div>
-          <input className="tasks-tab__add-input" placeholder="Assignee (email or name)" value={newAssignee} onChange={(e) => setNewAssignee(e.target.value)} />
+          <input className="tasks-tab__add-input" placeholder="Assignee (email or name)" value={newAssignee} onChange={(e) => setNewAssignee(e.target.value)} list="assignee-suggestions" />
+          {staffRoster.length > 0 && (
+            <datalist id="assignee-suggestions">
+              {staffRoster.map((name) => <option key={name} value={name} />)}
+            </datalist>
+          )}
           <div className="tasks-tab__subtasks-list">
             {newSubtasks.map((st, i) => (
               <div key={i} className="tasks-tab__subtask-row">
                 <input className="tasks-tab__subtask-input" placeholder="Subtask title" value={st.title} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, title: e.target.value} : x))} />
-                <input className="tasks-tab__subtask-input" placeholder="Assignee" value={st.assignee} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, assignee: e.target.value} : x))} style={{maxWidth:120}} />
+                <input className="tasks-tab__subtask-input" placeholder="Assignee" value={st.assignee} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, assignee: e.target.value} : x))} style={{maxWidth:120}} list="assignee-suggestions" />
                 <input type="date" className="tasks-tab__subtask-input" value={st.dueAt} onChange={(e) => setNewSubtasks(s => s.map((x, j) => j === i ? {...x, dueAt: e.target.value} : x))} style={{maxWidth:130}} />
                 <button type="button" className="tasks-tab__subtask-remove" onClick={() => setNewSubtasks(s => s.filter((_x, j) => j !== i))}>X</button>
               </div>
@@ -589,6 +640,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
             mergedEvents={mergedEvents}
             tasks={filteredTasks}
             onAddEvent={handleAddEvent}
+            onTaskClick={handleTaskClickFromCalendar}
             overdueSlot={<OverdueList tasks={overdueTasks} />}
           />
         </div>
@@ -619,10 +671,14 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                       isExpanded={expandedTaskIds.has(task.id)}
                       onToggleExpand={() => handleToggleExpand(task.id)}
                       onSubtaskToggle={(subtaskId) => handleSubtaskToggle(task.id, subtaskId)}
+                      onSubtaskEdit={(subtaskId, updates) => handleSubtaskEdit(task.id, subtaskId, updates)}
+                      onSubtaskAdd={(subtask) => handleSubtaskAdd(task.id, subtask)}
+                      onSubtaskDelete={(subtaskId) => handleSubtaskDelete(task.id, subtaskId)}
                       onDuplicate={() => handleDuplicate(task)}
                       onStatusChange={(status) => handleStatusChange(task.id, status)}
                       onEdit={(updates) => handleEditTask(task.id, updates)}
                       onDelete={() => handleDeleteTask(task.id)}
+                      staffRoster={staffRoster}
                     />
                   </li>
                 );

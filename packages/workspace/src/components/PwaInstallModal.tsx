@@ -294,5 +294,10 @@ export function usePwaInstallModal() {
     localStorage.setItem(DISMISS_KEY, 'true');
   }, []);
 
-  return { showModal, dismiss };
+  /** Re-open the modal (for "Get app" button) */
+  const openModal = useCallback(() => {
+    setShowModal(true);
+  }, []);
+
+  return { showModal, dismiss, openModal };
 }

@@ -983,6 +983,9 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
             <p className="admin-tab__section-desc">
               Upload students and staff for use in Observations. CSV with columns: name, type (student/staff), grade (optional).
             </p>
+            <p className="admin-tab__section-hint">
+              <strong>How roles are used:</strong> Students appear as observation subjects. Staff appear as observers/teachers. Type values: student, staff, teacher, admin, principal (teacher/admin/principal map to staff).
+            </p>
           </div>
           {obsRoster.length === 0 && (
             <button

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 import { useInstallPrompt } from '@admini/pwa';
 
@@ -51,7 +51,7 @@ function CollapseIcon() {
 
 const CORE_TAB_IDS = ['capture', 'dashboard', 'tasks', 'notes', 'observations', 'pulse'];
 
-export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, userName, userRole, schoolName }: NavigationAdapterProps) {
+export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShowPwaInstall, userName, userRole, schoolName }: NavigationAdapterProps) {
   const { isInstallable, isStandalone, promptInstall } = useInstallPrompt();
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,7 +106,7 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, userNa
               <span className="desktop-sidebar__menu-icon">⚙</span> Profile & settings
             </button>
             {!isStandalone && (
-              <button type="button" className="desktop-sidebar__menu-item" onClick={async () => { if (isInstallable) { await promptInstall(); } else { window.alert('To install AdminI: open your browser menu and choose "Install app" or "Add to Home Screen / taskbar".'); } setMenuOpen(false); }}>
+              <button type="button" className="desktop-sidebar__menu-item" onClick={async () => { if (isInstallable) { await promptInstall(); } else if (onShowPwaInstall) { onShowPwaInstall(); } setMenuOpen(false); }}>
                 <span className="desktop-sidebar__menu-icon">⬇</span> {isInstallable ? 'Install app' : 'Get app'}
               </button>
             )}

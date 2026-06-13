@@ -233,3 +233,136 @@
 .task-card__action-btn--primary:hover { background:#5A7D5A; }
 .task-card__action-btn--danger { color:#C62828; border-color:#F5C8C8; }
 .task-card__action-btn--danger:hover { background:#FFF5F5; }
+
+/* Blocked task banner */
+.task-card__blocked-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #FFF5F5;
+  border: 1px solid #F5C8C8;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.task-card__blocked-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.task-card__blocked-text {
+  font-size: 0.8125rem;
+  color: #C62828;
+  font-weight: 500;
+}
+
+/* Subtask editing */
+.task-card__subtask-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.task-card__subtask-edit-btn,
+.task-card__subtask-delete-btn {
+  opacity: 0;
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: opacity 0.15s, background 0.15s;
+}
+.task-card__subtask:hover .task-card__subtask-edit-btn,
+.task-card__subtask:hover .task-card__subtask-delete-btn {
+  opacity: 1;
+}
+.task-card__subtask-edit-btn { color: #6B8E6B; }
+.task-card__subtask-edit-btn:hover { background: #EDF5ED; }
+.task-card__subtask-delete-btn { color: #C62828; }
+.task-card__subtask-delete-btn:hover { background: #FFF5F5; }
+
+.task-card__subtask-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.task-card__subtask-edit-input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #6B8E6B;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  outline: none;
+}
+.task-card__subtask-save-btn,
+.task-card__subtask-cancel-btn {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.task-card__subtask-save-btn { color: #2E7D32; }
+.task-card__subtask-save-btn:hover { background: #E8F5E9; }
+.task-card__subtask-cancel-btn { color: #636E72; }
+.task-card__subtask-cancel-btn:hover { background: #F5F3EE; }
+
+/* Add subtask */
+.task-card__add-subtask {
+  margin-top: 8px;
+}
+.task-card__add-subtask-btn {
+  background: none;
+  border: 1px dashed #C8DFC8;
+  color: #6B8E6B;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.task-card__add-subtask-btn:hover {
+  background: #EDF5ED;
+}
+.task-card__add-subtask-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.task-card__add-subtask-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #E8E5DE;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+}
+.task-card__add-subtask-input:focus {
+  outline: 2px solid #6B8E6B;
+  outline-offset: 1px;
+}
+.task-card__add-subtask-save,
+.task-card__add-subtask-cancel {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.task-card__add-subtask-save {
+  background: #6B8E6B;
+  color: #fff;
+  border: none;
+}
+.task-card__add-subtask-save:disabled {
+  background: #C8DFC8;
+  cursor: not-allowed;
+}
+.task-card__add-subtask-cancel {
+  background: #fff;
+  color: #636E72;
+  border: 1px solid #E8E5DE;
+}

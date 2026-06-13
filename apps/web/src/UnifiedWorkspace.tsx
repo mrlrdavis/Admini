@@ -61,7 +61,7 @@ export function UnifiedWorkspace({
 }: UnifiedWorkspaceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const layoutMode = useLayoutMode(containerRef);
-  const { showModal: showPwaModal, dismiss: dismissPwaModal } = usePwaInstallModal();
+  const { showModal: showPwaModal, dismiss: dismissPwaModal, openModal: openPwaModal } = usePwaInstallModal();
 
   return (
     <SupabaseClientProvider client={supabase!}>
@@ -84,6 +84,7 @@ export function UnifiedWorkspace({
               tabs={tabs}
               onTabChange={onTabChange}
               onSignOut={navSignOut}
+              onShowPwaInstall={openPwaModal}
               userName={navUser}
               userRole={navRole}
               schoolName={navSchool}

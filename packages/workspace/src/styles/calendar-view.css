@@ -254,3 +254,13 @@
 .calendar-view__dot--assigned { background:#E8A838; }
 .calendar-view__dot--priority { background:#D63031; }
 .calendar-view__cell-item-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Blocked task styling */
+.calendar-view__cell-item--blocked { border-left-color: #C62828; background: rgba(198, 40, 40, 0.1); }
+.calendar-view__dot--blocked { background: #C62828; }
+
+/* Task item hover and clickable behavior */
+.calendar-view__cell-item--task { cursor: pointer; transition: background 0.15s, transform 0.1s; }
+.calendar-view__cell-item--task:hover { background: rgba(107, 142, 107, 0.25); transform: translateY(-1px); }
+.calendar-view__cell-item--task:focus { outline: 2px solid var(--color-sage, #6B8E6B); outline-offset: 1px; }
+.calendar-view__cell-item--blocked:hover { background: rgba(198, 40, 40, 0.2); }

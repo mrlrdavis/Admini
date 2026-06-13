@@ -1,5 +1,5 @@
-// ---------------------------------------------------------------------------
-// TaskCard - Collapsible task card with subtask checkboxes
+﻿// ---------------------------------------------------------------------------
+// TaskCard - Collapsible task card with subtask checkboxes and editing
 // ---------------------------------------------------------------------------
 // Pure presentational component. Renders a task card that can be expanded
 // to show subtasks, category tag, and block reason.
@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import type { CategoryRegistry } from '@admini/shared';
 import { getCategoryStyle } from '@admini/shared';
-import type { TaskWithSubtasks } from './TaskSection';
+import type { TaskWithSubtasks, Subtask } from './TaskSection';
 import '../styles/task-card.css';
 
 // ---------------------------------------------------------------------------
@@ -22,10 +22,15 @@ export interface TaskCardProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onSubtaskToggle: (subtaskId: string) => void;
+  onSubtaskEdit?: (subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string }) => void;
+  onSubtaskAdd?: (subtask: { title: string; assignee?: string; dueAt?: string }) => void;
+  onSubtaskDelete?: (subtaskId: string) => void;
   onDuplicate: () => void;
   onStatusChange: (status: string) => void;
   onEdit?: (updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string }) => void;
   onDelete?: () => void;
+  /** Staff roster names for assignee auto-suggest */
+  staffRoster?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -60,10 +65,14 @@ export function TaskCard({
   isExpanded,
   onToggleExpand,
   onSubtaskToggle,
+  onSubtaskEdit,
+  onSubtaskAdd,
+  onSubtaskDelete,
   onDuplicate,
   onStatusChange,
   onEdit,
   onDelete,
+  staffRoster,
 }: TaskCardProps) {
   const completedSubtasks = task.subtasks.filter(s => s.completed).length;
   const totalSubtasks = task.subtasks.length;
@@ -84,10 +93,42 @@ export function TaskCard({
   const [ePriority, setEPriority] = useState(task.priority);
   const [eAssignee, setEAssignee] = useState(task.assignee || '');
   const [blockReason, setBlockReason] = useState(task.blockReason || '');
+  
+  // Subtask editing state
+  const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
+  const [editSubtaskTitle, setEditSubtaskTitle] = useState('');
+  const [showAddSubtask, setShowAddSubtask] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
   function saveEdit() {
     onEdit?.({ title: eTitle.trim(), description: eDesc.trim(), dueAt: eDue || undefined, priority: ePriority, assignee: eAssignee.trim() || undefined });
     setEditing(false);
+  }
+
+  function startEditSubtask(subtask: Subtask) {
+    setEditingSubtaskId(subtask.id);
+    setEditSubtaskTitle(subtask.title);
+  }
+
+  function saveSubtaskEdit(subtaskId: string) {
+    if (editSubtaskTitle.trim() && onSubtaskEdit) {
+      onSubtaskEdit(subtaskId, { title: editSubtaskTitle.trim() });
+    }
+    setEditingSubtaskId(null);
+    setEditSubtaskTitle('');
+  }
+
+  function cancelSubtaskEdit() {
+    setEditingSubtaskId(null);
+    setEditSubtaskTitle('');
+  }
+
+  function handleAddSubtask() {
+    if (newSubtaskTitle.trim() && onSubtaskAdd) {
+      onSubtaskAdd({ title: newSubtaskTitle.trim() });
+      setNewSubtaskTitle('');
+      setShowAddSubtask(false);
+    }
   }
 
   return (
@@ -137,7 +178,17 @@ export function TaskCard({
       {/* Expanded body */}
       {isExpanded && (
         <div className="task-card__body">
-          {/* Subtask checkboxes */}
+          {/* Blocked reason banner - always visible when blocked */}
+          {task.status === 'archived' && (
+            <div className="task-card__blocked-banner">
+              <span className="task-card__blocked-icon">🚫</span>
+              <span className="task-card__blocked-text">
+                {task.blockReason || task.description || 'This task is blocked'}
+              </span>
+            </div>
+          )}
+
+          {/* Subtask checkboxes with edit capability */}
           {totalSubtasks > 0 && (
             <ul className="task-card__subtasks" aria-label="Subtasks">
               {task.subtasks.map((subtask) => (
@@ -149,14 +200,111 @@ export function TaskCard({
                     onChange={() => onSubtaskToggle(subtask.id)}
                     aria-label={`Subtask: ${subtask.title}`}
                   />
-                  <span
-                    className={`task-card__subtask-label${subtask.completed ? ' task-card__subtask-label--completed' : ''}`}
-                  >
-                    {subtask.title}
-                  </span>
+                  {editingSubtaskId === subtask.id ? (
+                    <div className="task-card__subtask-edit">
+                      <input
+                        className="task-card__subtask-edit-input"
+                        value={editSubtaskTitle}
+                        onChange={(e) => setEditSubtaskTitle(e.target.value)}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveSubtaskEdit(subtask.id);
+                          if (e.key === 'Escape') cancelSubtaskEdit();
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="task-card__subtask-save-btn"
+                        onClick={() => saveSubtaskEdit(subtask.id)}
+                        aria-label="Save subtask"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        type="button"
+                        className="task-card__subtask-cancel-btn"
+                        onClick={cancelSubtaskEdit}
+                        aria-label="Cancel edit"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <span
+                      className={`task-card__subtask-label${subtask.completed ? ' task-card__subtask-label--completed' : ''}`}
+                      onDoubleClick={() => onSubtaskEdit && startEditSubtask(subtask)}
+                      title="Double-click to edit"
+                    >
+                      {subtask.title}
+                      {onSubtaskEdit && (
+                        <button
+                          type="button"
+                          className="task-card__subtask-edit-btn"
+                          onClick={(e) => { e.stopPropagation(); startEditSubtask(subtask); }}
+                          aria-label={`Edit subtask ${subtask.title}`}
+                        >
+                          ✎
+                        </button>
+                      )}
+                      {onSubtaskDelete && (
+                        <button
+                          type="button"
+                          className="task-card__subtask-delete-btn"
+                          onClick={(e) => { e.stopPropagation(); onSubtaskDelete(subtask.id); }}
+                          aria-label={`Delete subtask ${subtask.title}`}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
+          )}
+
+          {/* Add subtask form */}
+          {onSubtaskAdd && (
+            <div className="task-card__add-subtask">
+              {showAddSubtask ? (
+                <div className="task-card__add-subtask-form">
+                  <input
+                    className="task-card__add-subtask-input"
+                    placeholder="Subtask title..."
+                    value={newSubtaskTitle}
+                    onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newSubtaskTitle.trim()) handleAddSubtask();
+                      if (e.key === 'Escape') { setShowAddSubtask(false); setNewSubtaskTitle(''); }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="task-card__add-subtask-save"
+                    onClick={handleAddSubtask}
+                    disabled={!newSubtaskTitle.trim()}
+                  >
+                    Add
+                  </button>
+                  <button
+                    type="button"
+                    className="task-card__add-subtask-cancel"
+                    onClick={() => { setShowAddSubtask(false); setNewSubtaskTitle(''); }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="task-card__add-subtask-btn"
+                  onClick={() => setShowAddSubtask(true)}
+                >
+                  + Add subtask
+                </button>
+              )}
+            </div>
           )}
 
           {/* Category tag */}
@@ -172,7 +320,7 @@ export function TaskCard({
           )}
 
           {/* Block reason */}
-          {task.blockReason && (
+          {task.blockReason && task.status !== 'archived' && (
             <p className="task-card__block-reason">{task.blockReason}</p>
           )}
 
@@ -199,7 +347,12 @@ export function TaskCard({
                 </label>
               </div>
               <label className="task-card__edit-label">Assignee
-                <input className="task-card__edit-input" value={eAssignee} onChange={(e) => setEAssignee(e.target.value)} placeholder="Email or name" />
+                <input className="task-card__edit-input" value={eAssignee} onChange={(e) => setEAssignee(e.target.value)} placeholder="Email or name" list={'assignee-suggestions-' + task.id} />
+                {staffRoster && staffRoster.length > 0 && (
+                  <datalist id={'assignee-suggestions-' + task.id}>
+                    {staffRoster.map((name) => <option key={name} value={name} />)}
+                  </datalist>
+                )}
               </label>
               <div className="task-card__actions">
                 <button type="button" className="task-card__action-btn task-card__action-btn--primary" onClick={saveEdit}>Save</button>

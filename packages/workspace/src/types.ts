@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 
 // Tab identification
 export type WorkspaceTab = 'capture' | 'dashboard' | 'tasks' | 'notes' | 'pulse' | 'more' | 'admin' | 'observations';
@@ -90,6 +90,7 @@ export interface NavigationAdapterProps {
   tabs: TabItem[];
   onTabChange: (tabId: WorkspaceTab) => void;
   onSignOut?: () => void;
+  onShowPwaInstall?: () => void;
   userName?: string;
   userRole?: string;
   schoolName?: string;

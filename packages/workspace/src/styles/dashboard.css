@@ -891,3 +891,110 @@
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   NARROW WINDOW / SPLIT VIEW RESPONSIVE FIXES
+   ========================================================================== */
+
+/* Narrower breakpoint for split browser windows (600px-900px range) */
+@media (max-width: 900px) and (min-width: 601px) {
+  .dashboard-tab__columns {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .dashboard-tab__left,
+  .dashboard-tab__right {
+    height: auto;
+    overflow: visible;
+  }
+  
+  /* Stack schedule and activity vertically */
+  .dashboard-tab__schedule-activity-row {
+    flex-direction: column;
+  }
+  
+  /* Stack QA and calendar vertically */
+  .dashboard-tab__qa-cal-row {
+    flex-direction: column;
+  }
+  
+  /* Stack bottom row vertically */
+  .dashboard-tab__bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Very narrow split view (400-600px) */
+@media (max-width: 600px) and (min-width: 401px) {
+  .dashboard-tab__columns {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+    height: auto;
+  }
+  
+  .dashboard-tab__left,
+  .dashboard-tab__right {
+    height: auto;
+    overflow: visible;
+    gap: 12px;
+  }
+  
+  /* Ensure all cards are visible, stacked vertically */
+  .dashboard-tab__card,
+  .dashboard-tab__section {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  .dashboard-tab__topbar {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  
+  .dashboard-tab__level-badge {
+    margin-left: 0;
+  }
+  
+  .dashboard-tab__quick-actions-widget {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+}
+
+/* Minimum readable width (< 400px in split view) */
+@media (max-width: 400px) {
+  .dashboard-tab__columns {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .dashboard-tab__section-header {
+    padding: 8px 10px;
+  }
+  
+  .dashboard-tab__task-item {
+    padding: 8px 10px;
+  }
+  
+  .dashboard-tab__card {
+    padding: 10px 12px;
+  }
+}
+
+/* Full height only on desktop with sufficient width */
+@media (min-width: 901px) {
+  .dashboard-tab__columns {
+    height: calc(100vh - 120px);
+  }
+  
+  .dashboard-tab__left,
+  .dashboard-tab__right {
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+}

@@ -1,4 +1,4 @@
-/* --------------------------------------------------------------------------
+﻿/* --------------------------------------------------------------------------
    Desktop Sidebar Navigation
    -------------------------------------------------------------------------- */
 
@@ -322,8 +322,51 @@
 .desktop-sidebar__avatar-name { font-size:0.8125rem; font-weight:600; color:#2D3436; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .desktop-sidebar__avatar-sub { font-size:0.6875rem; color:#636E72; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-.desktop-sidebar__menu { position:absolute; bottom:calc(100% - 4px); left:12px; right:12px; background:#fff; border:1px solid #E8E5DE; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); padding:6px; z-index:120; }
+/* Profile menu - fixed width so it doesn't shrink when sidebar is collapsed */
+.desktop-sidebar__menu { 
+  position: absolute; 
+  bottom: calc(100% - 4px); 
+  left: 12px; 
+  width: 200px;
+  background: #fff; 
+  border: 1px solid #E8E5DE; 
+  border-radius: 12px; 
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12); 
+  padding: 6px; 
+  z-index: 120; 
+}
+
+/* When sidebar is collapsed, menu should overflow to the right */
+.desktop-sidebar--collapsed .desktop-sidebar__menu {
+  left: 8px;
+  width: 200px;
+}
+
 .desktop-sidebar__menu-item { display:flex; align-items:center; gap:10px; width:100%; background:none; border:none; cursor:pointer; padding:9px 10px; border-radius:8px; font-size:0.8125rem; color:#2D3436; text-align:left; }
 .desktop-sidebar__menu-item:hover { background:#F5F3EE; }
 .desktop-sidebar__menu-icon { font-size:0.9375rem; width:18px; text-align:center; }
 .desktop-sidebar__menu-item--logout { color:#C62828; border-top:1px solid #F0EEE9; margin-top:4px; padding-top:11px; }
+
+/* ==========================================================================
+   SIDEBAR COLLAPSE RESPONSIVE LAYOUT
+   ========================================================================== */
+
+/* When desktop sidebar is collapsed, content area expands to fill the space */
+.desktop-sidebar--collapsed ~ .workspace-shell__content,
+.desktop-sidebar--collapsed + .workspace-shell__content,
+body:has(.desktop-sidebar--collapsed) .workspace-shell__content {
+  margin-left: 64px;
+  transition: margin-left 0.2s ease;
+}
+
+/* Default transition for expanding back */
+.workspace-shell__content {
+  transition: margin-left 0.2s ease;
+}
+
+/* Mobile - no sidebar offset */
+@media (max-width: 768px) {
+  .workspace-shell__content {
+    margin-left: 0 !important;
+  }
+}
