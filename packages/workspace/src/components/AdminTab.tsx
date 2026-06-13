@@ -601,10 +601,10 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               </div>
             </div>
           )}
-          {rosterState === 'submitting' && <p className="admin-tab__loading-indicator">Importing members...</p>}
+          {rosterState === 'submitting' && <p className="admin-tab__loading-indicator">Sending invitations...</p>}
           {rosterState === 'success' && rosterResult && (
             <div className="admin-tab__roster-result">
-              <p className="admin-tab__success-message">Successfully added {rosterResult.added} member(s).</p>
+              <p className="admin-tab__success-message">Successfully sent {rosterResult.added} invitation(s).</p>
               <button type="button" className="admin-tab__submit" onClick={handleRosterCancel}>Upload Another</button>
             </div>
           )}
@@ -834,17 +834,17 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
 
         {rosterState === 'submitting' && (
-          <p className="admin-tab__loading-indicator">Importing members...</p>
+          <p className="admin-tab__loading-indicator">Sending invitations...</p>
         )}
 
         {rosterState === 'success' && rosterResult && (
           <div className="admin-tab__roster-result">
             <p className="admin-tab__success-message" role="status">
-              Successfully added {rosterResult.added} member(s).
+              Successfully sent {rosterResult.added} invitation(s).
             </p>
             {rosterResult.failed.length > 0 && (
               <p className="admin-tab__warning-message" role="alert">
-                {rosterResult.failed.length} row(s) failed to import.
+                {rosterResult.failed.length} invitation(s) failed to send.
               </p>
             )}
             <button
@@ -1118,3 +1118,4 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     </div>
   );
 }
+

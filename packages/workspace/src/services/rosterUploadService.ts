@@ -314,7 +314,8 @@ export function validateRosterRows(rows: RosterRow[]): ValidationResult {
 
 /**
  * Bulk add validated roster members to an organization.
- * Persists each member individually to capture per-row successes and failures.
+ * Creates invitations for each member to join the organization.
+ * Persists each invitation individually to capture per-row successes and failures.
  */
 export async function bulkAddMembers(
   organizationId: string,
@@ -326,15 +327,20 @@ export async function bulkAddMembers(
 
   for (const row of rows) {
     try {
-      const { error } = await client.rpc('add_organization_member', {
+      // Create an invitation for this roster member using the create_invitation RPC
+      const { error } = await client.rpc('create_invitation', {
         target_organization_id: organizationId,
-        member_email: row.email,
-        member_name: row.name,
-        member_role: row.role,
+        invite_email: row.email,
+        invite_role: row.role,
       });
 
       if (error) {
-        failed.push({ rowIndex: row.rowIndex, email: row.email, reason: error.message });
+        // Check for duplicate invitation error
+        if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+          failed.push({ rowIndex: row.rowIndex, email: row.email, reason: 'Invitation already pending for this email' });
+        } else {
+          failed.push({ rowIndex: row.rowIndex, email: row.email, reason: error.message });
+        }
       } else {
         added++;
       }
