@@ -188,9 +188,11 @@ export function TaskCard({
             </div>
           )}
 
-          {/* Task description */}
-          {task.description && (
+          {/* Task description - always visible when expanded */}
+          {task.description ? (
             <p className="task-card__description">{task.description}</p>
+          ) : (
+            <p className="task-card__description task-card__description--empty">No description</p>
           )}
 
           {/* Subtask checkboxes with edit capability */}
