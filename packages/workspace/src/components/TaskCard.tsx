@@ -188,6 +188,11 @@ export function TaskCard({
             </div>
           )}
 
+          {/* Task description */}
+          {task.description && (
+            <p className="task-card__description">{task.description}</p>
+          )}
+
           {/* Subtask checkboxes with edit capability */}
           {totalSubtasks > 0 && (
             <ul className="task-card__subtasks" aria-label="Subtasks">

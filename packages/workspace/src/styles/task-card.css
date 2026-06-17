@@ -1,4 +1,4 @@
-/* --------------------------------------------------------------------------
+﻿/* --------------------------------------------------------------------------
    TaskCard - Collapsible task card with subtasks
    --------------------------------------------------------------------------
    Uses design tokens from @admini/ui/styles.css
@@ -106,6 +106,14 @@
   margin-top: var(--ws-space-md);
   padding-top: 10px;
   border-top: 1px solid var(--color-border, #d4d0c8);
+}
+
+.task-card__description {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #5a6b5c);
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 .task-card__subtasks {
