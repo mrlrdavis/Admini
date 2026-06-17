@@ -93,9 +93,18 @@ function createTaskServiceAdapter(
 
       if (error) throw error;
 
-      // Save subtasks
+      // Save subtasks to database
       if (task.subtasks.length > 0) {
-        saveSubtasks(data.id, task.subtasks);
+        const subtaskRows = task.subtasks.map((s, idx) => ({
+          task_id: data.id,
+          title: s.title,
+          completed: s.completed || false,
+          assignee: s.assignee || null,
+          due_at: s.dueAt || null,
+          priority: s.priority || null,
+          sort_order: idx,
+        }));
+        await client.from('task_subtasks').insert(subtaskRows);
       }
 
       // Award badges

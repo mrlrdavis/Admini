@@ -18,6 +18,8 @@ export interface Subtask {
   title: string;
   completed: boolean;
   dueAt?: string;
+  assignee?: string;
+  priority?: string;
 }
 
 export interface TaskWithSubtasks {
