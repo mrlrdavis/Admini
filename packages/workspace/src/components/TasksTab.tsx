@@ -130,6 +130,7 @@ function toTaskWithSubtasks(task: DashboardTask, subtasks?: SubtaskRow[]): TaskW
     status: task.status,
     dueAt: task.dueAt,
     assignee: task.assignedTo,
+    blockReason: task.blockReason,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
     subtasks: subtasks ?? loadSubtasks(task.id),

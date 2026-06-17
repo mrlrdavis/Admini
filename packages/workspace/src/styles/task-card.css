@@ -295,6 +295,31 @@
 .task-card__subtask-delete-btn { color: #C62828; }
 .task-card__subtask-delete-btn:hover { background: #FFF5F5; }
 
+.task-card__subtask-details {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.task-card__subtask-detail {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #5a6b5c);
+  opacity: 0.8;
+}
+
+.task-card__subtask-title-text {
+  display: block;
+}
+
+.task-card__subtask-edit-details,
+.task-card__add-subtask-details {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
 .task-card__subtask-edit {
   display: flex;
   align-items: center;

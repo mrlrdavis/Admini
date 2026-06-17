@@ -22,8 +22,8 @@ export interface TaskCardProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onSubtaskToggle: (subtaskId: string) => void;
-  onSubtaskEdit?: (subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string }) => void;
-  onSubtaskAdd?: (subtask: { title: string; assignee?: string; dueAt?: string }) => void;
+  onSubtaskEdit?: (subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string; priority?: string }) => void;
+  onSubtaskAdd?: (subtask: { title: string; assignee?: string; dueAt?: string; priority?: string }) => void;
   onSubtaskDelete?: (subtaskId: string) => void;
   onDuplicate: () => void;
   onStatusChange: (status: string) => void;
@@ -97,8 +97,14 @@ export function TaskCard({
   // Subtask editing state
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [editSubtaskTitle, setEditSubtaskTitle] = useState('');
+  const [editSubtaskAssignee, setEditSubtaskAssignee] = useState('');
+  const [editSubtaskDueAt, setEditSubtaskDueAt] = useState('');
+  const [editSubtaskPriority, setEditSubtaskPriority] = useState('');
   const [showAddSubtask, setShowAddSubtask] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [newSubtaskAssignee, setNewSubtaskAssignee] = useState('');
+  const [newSubtaskDueAt, setNewSubtaskDueAt] = useState('');
+  const [newSubtaskPriority, setNewSubtaskPriority] = useState('normal');
 
   function saveEdit() {
     onEdit?.({ title: eTitle.trim(), description: eDesc.trim(), dueAt: eDue || undefined, priority: ePriority, assignee: eAssignee.trim() || undefined });
@@ -108,25 +114,37 @@ export function TaskCard({
   function startEditSubtask(subtask: Subtask) {
     setEditingSubtaskId(subtask.id);
     setEditSubtaskTitle(subtask.title);
+    setEditSubtaskAssignee(subtask.assignee || '');
+    setEditSubtaskDueAt(subtask.dueAt ? (subtask.dueAt.split('T')[0] || '') : '');
+    setEditSubtaskPriority(subtask.priority || 'normal');
   }
 
   function saveSubtaskEdit(subtaskId: string) {
     if (editSubtaskTitle.trim() && onSubtaskEdit) {
-      onSubtaskEdit(subtaskId, { title: editSubtaskTitle.trim() });
+      onSubtaskEdit(subtaskId, { title: editSubtaskTitle.trim(), assignee: editSubtaskAssignee.trim() || undefined, dueAt: editSubtaskDueAt || undefined, priority: editSubtaskPriority || undefined });
     }
     setEditingSubtaskId(null);
     setEditSubtaskTitle('');
+    setEditSubtaskAssignee('');
+    setEditSubtaskDueAt('');
+    setEditSubtaskPriority('');
   }
 
   function cancelSubtaskEdit() {
     setEditingSubtaskId(null);
     setEditSubtaskTitle('');
+    setEditSubtaskAssignee('');
+    setEditSubtaskDueAt('');
+    setEditSubtaskPriority('');
   }
 
   function handleAddSubtask() {
     if (newSubtaskTitle.trim() && onSubtaskAdd) {
-      onSubtaskAdd({ title: newSubtaskTitle.trim() });
+      onSubtaskAdd({ title: newSubtaskTitle.trim(), assignee: newSubtaskAssignee.trim() || undefined, dueAt: newSubtaskDueAt || undefined });
       setNewSubtaskTitle('');
+      setNewSubtaskAssignee('');
+      setNewSubtaskDueAt('');
+      setNewSubtaskPriority('normal');
       setShowAddSubtask(false);
     }
   }
@@ -214,11 +232,22 @@ export function TaskCard({
                         value={editSubtaskTitle}
                         onChange={(e) => setEditSubtaskTitle(e.target.value)}
                         autoFocus
+                        placeholder="Title"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') saveSubtaskEdit(subtask.id);
                           if (e.key === 'Escape') cancelSubtaskEdit();
                         }}
                       />
+                      <div className="task-card__subtask-edit-details">
+                        <input className="task-card__subtask-edit-input" placeholder="Assignee" value={editSubtaskAssignee} onChange={(e) => setEditSubtaskAssignee(e.target.value)} style={{maxWidth:'120px'}} />
+                        <input type="date" className="task-card__subtask-edit-input" value={editSubtaskDueAt} onChange={(e) => setEditSubtaskDueAt(e.target.value)} style={{maxWidth:'140px'}} />
+                        <select className="task-card__subtask-edit-input" value={editSubtaskPriority} onChange={(e) => setEditSubtaskPriority(e.target.value)} style={{maxWidth:'100px'}}>
+                          <option value="low">Low</option>
+                          <option value="normal">Normal</option>
+                          <option value="high">High</option>
+                          <option value="urgent">Urgent</option>
+                        </select>
+                      </div>
                       <button
                         type="button"
                         className="task-card__subtask-save-btn"
@@ -286,6 +315,10 @@ export function TaskCard({
                       if (e.key === 'Escape') { setShowAddSubtask(false); setNewSubtaskTitle(''); }
                     }}
                   />
+                  <div className="task-card__add-subtask-details">
+                    <input className="task-card__add-subtask-input" placeholder="Assignee" value={newSubtaskAssignee} onChange={(e) => setNewSubtaskAssignee(e.target.value)} style={{maxWidth:'120px'}} />
+                    <input type="date" className="task-card__add-subtask-input" value={newSubtaskDueAt} onChange={(e) => setNewSubtaskDueAt(e.target.value)} style={{maxWidth:'140px'}} />
+                  </div>
                   <button
                     type="button"
                     className="task-card__add-subtask-save"
