@@ -83,7 +83,9 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
     listOrgMembers(organizationId)
       .then((members) => {
         if (cancelled) return;
-        setStaffRoster(members.map((member) => ({ name: member.displayName || member.email, type: 'staff' as const })));
+        setStaffRoster(members
+          .filter((member) => member.role !== 'admin' && member.role !== 'principal')
+          .map((member) => ({ name: member.displayName || member.email, type: 'staff' as const })));
       })
       .catch(() => {
         if (!cancelled) setStaffRoster([]);
