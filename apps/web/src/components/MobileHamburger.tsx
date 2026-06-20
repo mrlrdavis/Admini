@@ -9,6 +9,7 @@ const ICON_PATHS: Record<string, string> = {
   notes: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5',
   observations: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
   pulse: 'M22 12h-4l-3 9L9 3l-3 9H2',
+  notifications: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0',
   more: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
   admin: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6',
 };
@@ -58,11 +59,6 @@ export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut, unrea
           <span />
           <span />
         </span>
-        {unreadNotificationCount && unreadNotificationCount > 0 && (
-          <span className="mobile-nav-trigger__badge" aria-label={String(unreadNotificationCount) + ' unread notifications'}>
-            {badgeLabel}
-          </span>
-        )}
       </button>
       <div className={drawerClass}>
         <div className="mobile-nav-drawer__backdrop" onClick={() => setOpen(false)} aria-hidden="true" />

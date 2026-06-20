@@ -93,6 +93,7 @@ export function WorkspaceShell({
       { id: 'tasks', label: 'Tasks' },
       { id: 'notes', label: 'Notes' },
       { id: 'pulse', label: 'Pulse' },
+      { id: 'notifications', label: 'Notifications' },
       { id: 'more', label: 'Settings' },
     ];
     if (canAccessAdmin) {
