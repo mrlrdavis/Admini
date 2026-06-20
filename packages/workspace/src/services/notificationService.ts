@@ -6,6 +6,20 @@
 
 export type NotificationAction = 'created' | 'updated';
 
+export interface TaskNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  metadata: {
+    task_id?: string;
+    action?: NotificationAction;
+    [key: string]: unknown;
+  };
+  read: boolean;
+  createdAt: string;
+}
+
 interface NotificationPayload {
   taskId: string;
   assigneeId: string;
@@ -84,7 +98,12 @@ export async function notifyAssignee(
       .ilike('display_name', assigneeId.trim())
       .limit(1)
       .maybeSingle<{ id: string }>()).data;
-    if (!data?.id) return;
+    if (!data?.id) {
+      throw new NotificationServiceError(
+        `Could not find an org profile for assignee "${assigneeId}".`,
+        'ASSIGNEE_NOT_FOUND',
+      );
+    }
     recipientId = data.id;
   }
 
@@ -146,6 +165,47 @@ export async function notifyAssignee(
         ? `Notification delivery failed: ${err.message}`
         : 'Failed to send notification.',
       'DELIVERY_FAILED',
+    );
+  }
+}
+
+export async function listNotifications(limit = 25): Promise<TaskNotification[]> {
+  const client = getClient();
+  const { data, error } = await client
+    .from('notifications')
+    .select('id, type, title, body, metadata, read, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new NotificationServiceError(
+      `Failed to load notifications: ${error.message}`,
+      'LIST_FAILED',
+    );
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    body: row.body,
+    metadata: (row.metadata ?? {}) as TaskNotification['metadata'],
+    read: row.read,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function markNotificationRead(notificationId: string): Promise<void> {
+  const client = getClient();
+  const { error } = await client
+    .from('notifications')
+    .update({ read: true })
+    .eq('id', notificationId);
+
+  if (error) {
+    throw new NotificationServiceError(
+      `Failed to mark notification read: ${error.message}`,
+      'MARK_READ_FAILED',
     );
   }
 }

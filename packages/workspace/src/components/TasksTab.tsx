@@ -93,6 +93,7 @@ function loadSubtasks(taskId: string): SubtaskRow[] {
 function createTaskServiceAdapter(
   userId?: string,
   organizationId?: string,
+  resolveAssignee?: (assignee?: string) => string | undefined,
 ): TaskService {
   return {
     async create(task: TaskWithSubtasks): Promise<TaskWithSubtasks> {
@@ -135,7 +136,8 @@ function createTaskServiceAdapter(
       if (task.assignee) {
         unlockBadge('first-assign');
         // Best-effort assignee notification with real task title
-        notifyAssignee(data.id, task.assignee, 'created', task.title).catch(() => {});
+        notifyAssignee(data.id, resolveAssignee?.(task.assignee) ?? task.assignee, 'created', task.title)
+          .catch((err) => showToast(err instanceof Error ? err.message : 'Failed to notify assignee'));
       }
 
       return {
@@ -231,11 +233,6 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
 
   // Task service adapter for duplicateTask
-  const taskService = useMemo(
-    () => createTaskServiceAdapter(userId, organizationId),
-    [userId, organizationId],
-  );
-
   // -------------------------------------------------------------------------
   // Load tasks via dashboardService
   // -------------------------------------------------------------------------
@@ -297,6 +294,11 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
   function canEditTask(task: DashboardTask): boolean {
     return userRole === 'admin' || userRole === 'principal' || task.createdBy === userId;
   }
+
+  const taskService = useMemo(
+    () => createTaskServiceAdapter(userId, organizationId, resolveAssigneeProfileId),
+    [userId, organizationId, orgMembers],
+  );
 
   async function loadSubtasksForTask(taskId: string): Promise<SubtaskRow[]> {
     const subtasks = await fetchSubtasks(taskId);
@@ -490,7 +492,8 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       if (updates.blockReason !== undefined) payload.block_reason = updates.blockReason || null;
       await client.from('tasks').update(payload).eq('id', taskId);
       if (updates.assignee) {
-        notifyAssignee(taskId, resolveAssigneeProfileId(updates.assignee) ?? updates.assignee, 'updated', updates.title ?? task?.title).catch(() => {});
+        notifyAssignee(taskId, resolveAssigneeProfileId(updates.assignee) ?? updates.assignee, 'updated', updates.title ?? task?.title)
+          .catch((err) => showToast(err instanceof Error ? err.message : 'Failed to notify assignee'));
       }
       showToast('Task updated');
     } catch {

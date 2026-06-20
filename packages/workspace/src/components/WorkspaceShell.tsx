@@ -12,6 +12,7 @@ import { AdminTab } from './AdminTab';
 import { CaptureTab } from './CaptureTab';
 import { TasksTab } from './TasksTab';
 import { PulseTab } from './PulseTab';
+import { NotificationsTab } from './NotificationsTab';
 import { MoreTab } from './MoreTab';
 import { NotesTab } from './NotesTab';
 import { ObservationsTab } from './ObservationsTab';
@@ -21,7 +22,7 @@ import { getAppPreferences } from '../services/appPreferencesStorage';
 
 /** Set of tabs with native React implementations. */
 export const NATIVE_TABS: ReadonlySet<WorkspaceTab> = new Set([
-  'dashboard', 'admin', 'capture', 'tasks', 'notes', 'pulse', 'more', 'observations',
+  'dashboard', 'admin', 'capture', 'tasks', 'notes', 'pulse', 'notifications', 'more', 'observations',
 ]);
 
 export function WorkspaceShell({
@@ -59,6 +60,7 @@ export function WorkspaceShell({
       { id: 'tasks', label: 'Tasks' },
       { id: 'notes', label: 'Notes' },
       { id: 'pulse', label: 'Pulse' },
+      { id: 'notifications', label: 'Alerts' },
       { id: 'more', label: 'Settings' },
     ];
     if (canAccessAdmin) {
@@ -95,6 +97,7 @@ export function WorkspaceShell({
       case 'notes': return <NotesTab userId={user.id} organizationId={organizationId} onTabChange={handleTabChange} />;
       case 'observations': return <ObservationsTab userId={user.id} organizationId={organizationId} userName={userName} userRole={userRole} />;
       case 'pulse': return <PulseTab />;
+      case 'notifications': return <NotificationsTab onTabChange={handleTabChange} />;
       case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;
       default: return null;
     }

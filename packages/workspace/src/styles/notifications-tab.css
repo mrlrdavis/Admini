@@ -1,0 +1,117 @@
+.notifications-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(880px, 100%);
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.notifications-tab__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notifications-tab__title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.notifications-tab__subtitle {
+  margin: 0.25rem 0 0;
+  color: #5f6673;
+  font-size: 0.95rem;
+}
+
+.notifications-tab__refresh,
+.notifications-tab__error button {
+  border: 1px solid #c8d0dc;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+}
+
+.notifications-tab__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notifications-tab__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid #d7dde8;
+  border-left: 4px solid transparent;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  padding: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notifications-tab__item--unread {
+  border-left-color: #2f6fed;
+  background: #f7faff;
+}
+
+.notifications-tab__item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.notifications-tab__item-title {
+  font-weight: 700;
+}
+
+.notifications-tab__item-body,
+.notifications-tab__item-time,
+.notifications-tab__empty {
+  color: #5f6673;
+}
+
+.notifications-tab__item-body {
+  overflow-wrap: anywhere;
+}
+
+.notifications-tab__item-time {
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.notifications-tab__error {
+  border: 1px solid #f0b8b8;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #8a1f1f;
+  padding: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .notifications-tab {
+    padding: 0.75rem;
+  }
+
+  .notifications-tab__header,
+  .notifications-tab__item {
+    grid-template-columns: 1fr;
+  }
+
+  .notifications-tab__header {
+    align-items: stretch;
+  }
+}
