@@ -37,6 +37,28 @@ import type { TaskService } from '../services/taskDuplication';
 
 type SubtaskRow = { id: string; title: string; completed: boolean; assignee?: string; dueAt?: string; priority?: string; sortOrder?: number };
 
+type DbSubtaskRow = {
+  id: string;
+  title: string;
+  completed: boolean;
+  due_at: string | null;
+  assignee: string | null;
+  priority: string | null;
+  sort_order: number | null;
+};
+
+function mapSubtaskRow(row: DbSubtaskRow): SubtaskRow {
+  return {
+    id: row.id,
+    title: row.title,
+    completed: row.completed,
+    assignee: row.assignee ?? undefined,
+    dueAt: row.due_at ?? undefined,
+    priority: row.priority ?? undefined,
+    sortOrder: row.sort_order ?? undefined,
+  };
+}
+
 async function fetchSubtasks(taskId: string): Promise<SubtaskRow[]> {
   try {
     const client = getClient();
@@ -46,7 +68,7 @@ async function fetchSubtasks(taskId: string): Promise<SubtaskRow[]> {
       .eq('task_id', taskId)
       .order('sort_order', { ascending: true });
     if (error) throw error;
-    return (data ?? []).map(r => ({ id: r.id, title: r.title, completed: r.completed, assignee: r.assignee ?? undefined, dueAt: r.due_at ?? undefined, priority: r.priority ?? undefined, sortOrder: r.sort_order }));
+    return (data ?? []).map((row) => mapSubtaskRow(row as DbSubtaskRow));
   } catch {
     // Fallback to localStorage for migration period
     try {
@@ -276,12 +298,19 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
     return userRole === 'admin' || userRole === 'principal' || task.createdBy === userId;
   }
 
+  async function loadSubtasksForTask(taskId: string): Promise<SubtaskRow[]> {
+    const subtasks = await fetchSubtasks(taskId);
+    setSubtasksMap((current) => ({ ...current, [taskId]: subtasks }));
+    return subtasks;
+  }
+
   // Auto-expand a specific task when navigated from dashboard
   useEffect(() => {
     const target = localStorage.getItem('admini_expand_task');
     if (target) {
       localStorage.removeItem('admini_expand_task');
       setExpandedTaskIds(new Set([target]));
+      loadSubtasksForTask(target).catch(() => undefined);
     }
   }, []);
 
@@ -388,6 +417,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
   }
 
   function handleToggleExpand(taskId: string) {
+    const shouldLoad = !expandedTaskIds.has(taskId) && !subtasksMap[taskId];
     setExpandedTaskIds(prev => {
       const next = new Set(prev);
       if (next.has(taskId)) {
@@ -397,6 +427,9 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       }
       return next;
     });
+    if (shouldLoad) {
+      loadSubtasksForTask(taskId).catch(() => undefined);
+    }
   }
 
   async function handleDuplicate(task: DashboardTask) {
@@ -533,22 +566,47 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
   }
 
   async function handleSubtaskToggle(taskId: string, subtaskId: string) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && !canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can update subtasks');
+      return;
+    }
     // Optimistic update
+    setSubtasksMap((current) => ({
+      ...current,
+      [taskId]: (current[taskId] ?? loadSubtasks(taskId)).map((subtask) =>
+        subtask.id === subtaskId ? { ...subtask, completed: !subtask.completed } : subtask
+      ),
+    }));
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
     try {
       const client = getClient();
-      const { data } = await client.from('task_subtasks').select('completed').eq('id', subtaskId).single();
-      await client.from('task_subtasks').update({ completed: !(data?.completed) }).eq('id', subtaskId);
+      const { data, error: readError } = await client.from('task_subtasks').select('completed').eq('id', subtaskId).single();
+      if (readError) throw readError;
+      const { error } = await client.from('task_subtasks').update({ completed: !(data?.completed) }).eq('id', subtaskId);
+      if (error) throw error;
     } catch {
       // Fallback to localStorage
       const st = loadSubtasks(taskId);
       const updated = st.map(s => s.id === subtaskId ? { ...s, completed: !s.completed } : s);
       localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
+      setSubtasksMap((current) => ({ ...current, [taskId]: updated }));
     }
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
   }
 
   async function handleSubtaskEdit(taskId: string, subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string; priority?: string }) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && !canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can edit subtasks');
+      return;
+    }
+    setSubtasksMap((current) => ({
+      ...current,
+      [taskId]: (current[taskId] ?? loadSubtasks(taskId)).map((subtask) =>
+        subtask.id === subtaskId ? { ...subtask, ...updates } : subtask
+      ),
+    }));
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
     try {
       const client = getClient();
@@ -557,21 +615,28 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       if (updates.assignee !== undefined) payload.assignee = updates.assignee || null;
       if (updates.dueAt !== undefined) payload.due_at = updates.dueAt || null;
       if (updates.priority !== undefined) payload.priority = updates.priority || null;
-      await client.from('task_subtasks').update(payload).eq('id', subtaskId);
+      const { error } = await client.from('task_subtasks').update(payload).eq('id', subtaskId);
+      if (error) throw error;
     } catch {
       // Fallback to localStorage
       const st = loadSubtasks(taskId);
       const updated = st.map(s => s.id === subtaskId ? { ...s, ...updates } : s);
       localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
+      setSubtasksMap((current) => ({ ...current, [taskId]: updated }));
     }
     showToast('Subtask updated');
   }
 
   async function handleSubtaskAdd(taskId: string, subtask: { title: string; assignee?: string; dueAt?: string; priority?: string }) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && !canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can add subtasks');
+      return;
+    }
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
     try {
       const client = getClient();
-      await client.from('task_subtasks').insert({
+      const { data, error } = await client.from('task_subtasks').insert({
         task_id: taskId,
         title: subtask.title,
         completed: false,
@@ -579,27 +644,49 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
         due_at: subtask.dueAt || null,
         priority: subtask.priority || null,
         sort_order: 0,
-      });
+      }).select('id, title, completed, due_at, assignee, priority, sort_order').single<DbSubtaskRow>();
+      if (error) throw error;
+      const inserted = data ? mapSubtaskRow(data) : undefined;
+      if (inserted) {
+        setSubtasksMap((current) => ({
+          ...current,
+          [taskId]: [...(current[taskId] ?? loadSubtasks(taskId)), inserted],
+        }));
+      }
     } catch {
       // Fallback to localStorage
       const st = loadSubtasks(taskId);
       const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false, assignee: subtask.assignee, dueAt: subtask.dueAt, priority: subtask.priority };
-      localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify([...st, newSubtask]));
+      const updated = [...st, newSubtask];
+      localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
+      setSubtasksMap((current) => ({ ...current, [taskId]: updated }));
     }
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
     showToast('Subtask added');
   }
 
   async function handleSubtaskDelete(taskId: string, subtaskId: string) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && !canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can delete subtasks');
+      return;
+    }
+    const previousSubtasks = subtasksMap[taskId] ?? loadSubtasks(taskId);
+    setSubtasksMap((current) => ({
+      ...current,
+      [taskId]: previousSubtasks.filter((subtask) => subtask.id !== subtaskId),
+    }));
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
     try {
       const client = getClient();
-      await client.from('task_subtasks').delete().eq('id', subtaskId);
+      const { error } = await client.from('task_subtasks').delete().eq('id', subtaskId);
+      if (error) throw error;
     } catch {
       // Fallback to localStorage
       const st = loadSubtasks(taskId);
       const updated = st.filter(s => s.id !== subtaskId);
       localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
+      setSubtasksMap((current) => ({ ...current, [taskId]: updated }));
     }
     showToast('Subtask removed');
   }
@@ -805,10 +892,10 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
                       registry={defaultRegistry}
                       isExpanded={expandedTaskIds.has(task.id)}
                       onToggleExpand={() => handleToggleExpand(task.id)}
-                      onSubtaskToggle={(subtaskId) => handleSubtaskToggle(task.id, subtaskId)}
-                      onSubtaskEdit={(subtaskId, updates) => handleSubtaskEdit(task.id, subtaskId, updates)}
-                      onSubtaskAdd={(subtask) => handleSubtaskAdd(task.id, subtask)}
-                      onSubtaskDelete={(subtaskId) => handleSubtaskDelete(task.id, subtaskId)}
+                      onSubtaskToggle={editable ? (subtaskId) => handleSubtaskToggle(task.id, subtaskId) : undefined}
+                      onSubtaskEdit={editable ? (subtaskId, updates) => handleSubtaskEdit(task.id, subtaskId, updates) : undefined}
+                      onSubtaskAdd={editable ? (subtask) => handleSubtaskAdd(task.id, subtask) : undefined}
+                      onSubtaskDelete={editable ? (subtaskId) => handleSubtaskDelete(task.id, subtaskId) : undefined}
                       onDuplicate={editable ? () => handleDuplicate(task) : undefined}
                       onStatusChange={editable ? (status) => handleStatusChange(task.id, status) : undefined}
                       onEdit={editable ? (updates) => handleEditTask(task.id, updates) : undefined}

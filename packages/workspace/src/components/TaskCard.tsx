@@ -21,7 +21,7 @@ export interface TaskCardProps {
   registry: CategoryRegistry;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onSubtaskToggle: (subtaskId: string) => void;
+  onSubtaskToggle?: (subtaskId: string) => void;
   onSubtaskEdit?: (subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string; priority?: string }) => void;
   onSubtaskAdd?: (subtask: { title: string; assignee?: string; dueAt?: string; priority?: string }) => void;
   onSubtaskDelete?: (subtaskId: string) => void;
@@ -140,7 +140,7 @@ export function TaskCard({
 
   function handleAddSubtask() {
     if (newSubtaskTitle.trim() && onSubtaskAdd) {
-      onSubtaskAdd({ title: newSubtaskTitle.trim(), assignee: newSubtaskAssignee.trim() || undefined, dueAt: newSubtaskDueAt || undefined });
+      onSubtaskAdd({ title: newSubtaskTitle.trim(), assignee: newSubtaskAssignee.trim() || undefined, dueAt: newSubtaskDueAt || undefined, priority: newSubtaskPriority || undefined });
       setNewSubtaskTitle('');
       setNewSubtaskAssignee('');
       setNewSubtaskDueAt('');
@@ -222,7 +222,8 @@ export function TaskCard({
                     type="checkbox"
                     className="task-card__subtask-checkbox"
                     checked={subtask.completed}
-                    onChange={() => onSubtaskToggle(subtask.id)}
+                    disabled={!onSubtaskToggle}
+                    onChange={() => onSubtaskToggle?.(subtask.id)}
                     aria-label={`Subtask: ${subtask.title}`}
                   />
                   {editingSubtaskId === subtask.id ? (
