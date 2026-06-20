@@ -249,11 +249,11 @@ export function App() {
       setProfileLoaded(false);
       return () => { mounted = false; };
     }
-    if (invitationFlowActiveState) {
+    const preferredOrganizationId = localStorage.getItem(preferredOrganizationStorageKey);
+    if (invitationFlowActiveState && !preferredOrganizationId) {
       setProfileLoaded(true);
       return () => { mounted = false; };
     }
-    const preferredOrganizationId = localStorage.getItem(preferredOrganizationStorageKey);
     const profilePromise = preferredOrganizationId
       ? getProfileForOrganization(preferredOrganizationId).catch(() => getOrCreateProfile())
       : getOrCreateProfile();
@@ -261,6 +261,8 @@ export function App() {
     profilePromise
       .then(async (profile: { role: string; organization_id: string; display_name: string }) => {
         if (!mounted) return;
+        setInvitationFlowActive(false);
+        setInvitationFlowActiveState(false);
         setUserRole(profile.role);
         setOrganizationId(profile.organization_id);
 
