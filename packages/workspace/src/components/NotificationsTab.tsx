@@ -4,6 +4,7 @@ import {
   markNotificationRead,
   type TaskNotification,
 } from '../services/notificationService';
+import { loadNotificationPreferences } from '../services/notificationPreferences';
 import { showToast } from './Toast';
 import '../styles/notifications-tab.css';
 
@@ -19,18 +20,26 @@ function formatNotificationTime(value: string): string {
 }
 
 export interface NotificationsTabProps {
+  userId: string;
   onTabChange?: (tabId: string) => void;
 }
 
-export function NotificationsTab({ onTabChange }: NotificationsTabProps) {
+export function NotificationsTab({ userId, onTabChange }: NotificationsTabProps) {
   const [notifications, setNotifications] = useState<TaskNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [enabled, setEnabled] = useState(true);
 
   async function loadNotifications() {
     setLoading(true);
     setError(null);
     try {
+      const preferences = await loadNotificationPreferences(userId);
+      setEnabled(preferences.pushNotifications);
+      if (!preferences.pushNotifications) {
+        setNotifications([]);
+        return;
+      }
       setNotifications(await listNotifications());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load notifications');
@@ -41,7 +50,7 @@ export function NotificationsTab({ onTabChange }: NotificationsTabProps) {
 
   useEffect(() => {
     loadNotifications();
-  }, []);
+  }, [userId]);
 
   async function openNotification(notification: TaskNotification) {
     if (!notification.read) {
@@ -65,7 +74,7 @@ export function NotificationsTab({ onTabChange }: NotificationsTabProps) {
     <section className="notifications-tab" aria-labelledby="notifications-heading">
       <header className="notifications-tab__header">
         <div>
-          <h1 id="notifications-heading" className="notifications-tab__title">Alerts</h1>
+          <h1 id="notifications-heading" className="notifications-tab__title">Notifications</h1>
           <p className="notifications-tab__subtitle">Task assignments and workspace updates.</p>
         </div>
         <button type="button" className="notifications-tab__refresh" onClick={loadNotifications}>
@@ -82,11 +91,15 @@ export function NotificationsTab({ onTabChange }: NotificationsTabProps) {
         </div>
       )}
 
-      {!loading && !error && notifications.length === 0 && (
-        <p className="notifications-tab__empty">No alerts yet.</p>
+      {!loading && !error && !enabled && (
+        <p className="notifications-tab__empty">In-app notifications are turned off in Settings.</p>
       )}
 
-      {!loading && !error && notifications.length > 0 && (
+      {!loading && !error && enabled && notifications.length === 0 && (
+        <p className="notifications-tab__empty">No notifications yet.</p>
+      )}
+
+      {!loading && !error && enabled && notifications.length > 0 && (
         <ul className="notifications-tab__list">
           {notifications.map((notification) => (
             <li key={notification.id}>

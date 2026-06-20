@@ -60,7 +60,6 @@ export function WorkspaceShell({
       { id: 'tasks', label: 'Tasks' },
       { id: 'notes', label: 'Notes' },
       { id: 'pulse', label: 'Pulse' },
-      { id: 'notifications', label: 'Alerts' },
       { id: 'more', label: 'Settings' },
     ];
     if (canAccessAdmin) {
@@ -97,7 +96,7 @@ export function WorkspaceShell({
       case 'notes': return <NotesTab userId={user.id} organizationId={organizationId} onTabChange={handleTabChange} />;
       case 'observations': return <ObservationsTab userId={user.id} organizationId={organizationId} userName={userName} userRole={userRole} />;
       case 'pulse': return <PulseTab />;
-      case 'notifications': return <NotificationsTab onTabChange={handleTabChange} />;
+      case 'notifications': return <NotificationsTab userId={user.id} onTabChange={handleTabChange} />;
       case 'more': return <MoreTab onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} userRole={userRole} userName={userName} schoolName={schoolName} email={user.email ?? ''} onProfileUpdated={onProfileUpdated} />;
       default: return null;
     }

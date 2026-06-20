@@ -1,12 +1,10 @@
 // ---------------------------------------------------------------------------
 // NotificationSettings - Toggle switches for notification preferences.
-// Renders email notifications, push notifications, and activity digest toggles.
+// Renders in-app notifications and activity digest toggles.
 // ---------------------------------------------------------------------------
 
 export interface NotificationSettingsProps {
-  /** Whether email notifications are enabled */
-  emailNotifications?: boolean;
-  /** Whether push notifications are enabled */
+  /** Whether in-app notifications are enabled */
   pushNotifications?: boolean;
   /** Whether the weekly activity digest is enabled */
   activityDigest?: boolean;
@@ -21,7 +19,6 @@ export interface NotificationSettingsProps {
 }
 
 export function NotificationSettings({
-  emailNotifications = false,
   pushNotifications = false,
   activityDigest = false,
   onChange,
@@ -49,39 +46,15 @@ export function NotificationSettings({
         </div>
       )}
 
-      {/* Email Notifications */}
-      <div className="notification-settings__row">
-        <label
-          className="notification-settings__label"
-          htmlFor="toggle-email-notifications"
-        >
-          <span className="notification-settings__title">Email Notifications</span>
-          <span className="notification-settings__description">
-            Receive email alerts for important updates
-          </span>
-        </label>
-        <button
-          id="toggle-email-notifications"
-          type="button"
-          role="switch"
-          aria-checked={emailNotifications}
-          className={`notification-settings__toggle${emailNotifications ? ' notification-settings__toggle--active' : ''}`}
-          onClick={() => onChange('emailNotifications', !emailNotifications)}
-          disabled={saving}
-        >
-          <span className="notification-settings__toggle-thumb" />
-        </button>
-      </div>
-
-      {/* Push Notifications */}
+      {/* In-app Notifications */}
       <div className="notification-settings__row">
         <label
           className="notification-settings__label"
           htmlFor="toggle-push-notifications"
         >
-          <span className="notification-settings__title">Push Notifications</span>
+          <span className="notification-settings__title">In-app Notifications</span>
           <span className="notification-settings__description">
-            Get real-time push notifications on your device
+            Show task assignment notifications in the Notifications menu
           </span>
         </label>
         <button

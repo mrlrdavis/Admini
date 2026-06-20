@@ -105,6 +105,9 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
             <button type="button" className="desktop-sidebar__menu-item" onClick={() => { onTabChange('more' as WorkspaceTab); setMenuOpen(false); }}>
               <span className="desktop-sidebar__menu-icon">⚙</span> Profile & settings
             </button>
+            <button type="button" className="desktop-sidebar__menu-item" onClick={() => { onTabChange('notifications' as WorkspaceTab); setMenuOpen(false); }}>
+              <span className="desktop-sidebar__menu-icon">🔔</span> Notifications
+            </button>
             {!isStandalone && (
               <button type="button" className="desktop-sidebar__menu-item" onClick={async () => { if (isInstallable) { await promptInstall(); } else if (onShowPwaInstall) { onShowPwaInstall(); } setMenuOpen(false); }}>
                 <span className="desktop-sidebar__menu-icon">⬇</span> {isInstallable ? 'Install app' : 'Get app'}

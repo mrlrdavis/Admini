@@ -5,13 +5,11 @@ import { getClient } from './getClient';
 // ---------------------------------------------------------------------------
 
 export interface NotificationPreferences {
-  emailNotifications: boolean;
   pushNotifications: boolean;
   activityDigest: boolean;
 }
 
 const DEFAULT_PREFERENCES: NotificationPreferences = {
-  emailNotifications: true,
   pushNotifications: true,
   activityDigest: false,
 };
@@ -37,10 +35,6 @@ function loadFromLocalStorage(userId: string): NotificationPreferences {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
         return {
-          emailNotifications:
-            typeof parsed.emailNotifications === 'boolean'
-              ? parsed.emailNotifications
-              : DEFAULT_PREFERENCES.emailNotifications,
           pushNotifications:
             typeof parsed.pushNotifications === 'boolean'
               ? parsed.pushNotifications
@@ -108,10 +102,6 @@ export async function loadNotificationPreferences(
     }
 
     return {
-      emailNotifications:
-        typeof stored.emailNotifications === 'boolean'
-          ? stored.emailNotifications
-          : DEFAULT_PREFERENCES.emailNotifications,
       pushNotifications:
         typeof stored.pushNotifications === 'boolean'
           ? stored.pushNotifications
@@ -143,7 +133,6 @@ export async function saveNotificationPreferences(
   // Load existing preferences to merge with
   const existing = await loadNotificationPreferences(userId);
   const merged: NotificationPreferences = {
-    emailNotifications: prefs.emailNotifications ?? existing.emailNotifications,
     pushNotifications: prefs.pushNotifications ?? existing.pushNotifications,
     activityDigest: prefs.activityDigest ?? existing.activityDigest,
   };

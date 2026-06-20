@@ -184,7 +184,6 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
 
   // Notification preferences state
   const [notifPrefs, setNotifPrefs] = useState<NotificationPreferences>({
-    emailNotifications: false,
     pushNotifications: false,
     activityDigest: false,
   });
@@ -735,7 +734,6 @@ export function MoreTab({ onSignOut, onDeleteAccount, loading, userRole, userNam
             </div>
           ) : (
             <NotificationSettings
-              emailNotifications={notifPrefs.emailNotifications}
               pushNotifications={notifPrefs.pushNotifications}
               activityDigest={notifPrefs.activityDigest}
               onChange={handleNotifChange}

@@ -38,7 +38,6 @@ export const DEFAULT_TABS: DesktopSidebarTabItem[] = [
   { id: 'notes', label: 'Notes', icon: '📒' },
   { id: 'observations', label: 'Observations', icon: '👁', requiredRoles: ['admin', 'principal'] },
   { id: 'pulse', label: 'Pulse', icon: '❤️' },
-  { id: 'notifications', label: 'Alerts', icon: '🔔' },
   { id: 'more', label: 'Settings', icon: '⚙' },
   { id: 'admin', label: 'Admin', icon: '🔧', requiredRoles: ['admin', 'principal'] },
 ];
