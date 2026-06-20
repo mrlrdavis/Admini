@@ -1,4 +1,4 @@
-import { mapSupabaseError } from '@admini/shared';
+﻿import { mapSupabaseError } from '@admini/shared';
 import { createClient, type Provider, type User } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
@@ -152,10 +152,16 @@ export async function signUpWithPassword(input: {
 
 export async function signInWithOAuthProvider(provider: 'google'): Promise<void> {
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  // Preserve invitation token through OAuth redirect
+  let redirectUrl = getAuthRedirectTo();
+  const pendingToken = sessionStorage.getItem('admini_invitation_token');
+  if (pendingToken) {
+    redirectUrl += '?invitation_token=' + encodeURIComponent(pendingToken);
+  }
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: getAuthRedirectTo(),
+      redirectTo: redirectUrl,
       scopes: undefined
     }
   });

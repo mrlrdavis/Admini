@@ -98,12 +98,13 @@ export function App() {
     if (token) {
       setInvitationToken(token);
       sessionStorage.setItem('admini_invitation_token', token);
+      localStorage.setItem('admini_invitation_token', token);
       params.delete('invitation_token');
       params.delete('invite');
       const nextSearch = params.toString();
       window.history.replaceState({}, '', `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`);
     } else {
-      const stored = sessionStorage.getItem('admini_invitation_token');
+      const stored = sessionStorage.getItem('admini_invitation_token') || localStorage.getItem('admini_invitation_token');
       if (stored) {
         setInvitationToken(stored);
       }
@@ -199,7 +200,7 @@ export function App() {
       return () => { mounted = false; };
     }
     // Skip profile creation if there's a pending invitation - let acceptInvitation handle org membership first
-    const pendingToken = invitationToken || sessionStorage.getItem('admini_invitation_token') || new URLSearchParams(window.location.search).get('invitation_token') || new URLSearchParams(window.location.search).get('invite');
+    const pendingToken = invitationToken || sessionStorage.getItem('admini_invitation_token') || localStorage.getItem('admini_invitation_token') || new URLSearchParams(window.location.search).get('invitation_token') || new URLSearchParams(window.location.search).get('invite');
     if (pendingToken) {
       if (!invitationToken) setInvitationToken(pendingToken);
       setProfileLoaded(true);
@@ -291,6 +292,7 @@ export function App() {
       if (result.success) {
         setInvitationToken(null);
         sessionStorage.removeItem('admini_invitation_token');
+        localStorage.removeItem('admini_invitation_token');
         if (result.organizationName) {
           setUser((prev) => prev ? { ...prev, schoolName: result.organizationName } : prev);
         }
@@ -302,6 +304,7 @@ export function App() {
         setInvitationError(result.error ?? 'This invitation link is no longer valid. Please ask your administrator to send a new one.');
         setInvitationToken(null);
         sessionStorage.removeItem('admini_invitation_token');
+        localStorage.removeItem('admini_invitation_token');
         // Still load profile even on invitation failure (user may need a new org)
         try {
           const profile = await getOrCreateProfile();
