@@ -27,7 +27,8 @@
 }
 
 .notifications-tab__refresh,
-.notifications-tab__error button {
+.notifications-tab__error button,
+.notifications-tab__actions button {
   border: 1px solid #c8d0dc;
   border-radius: 8px;
   background: #ffffff;
@@ -35,6 +36,17 @@
   font: inherit;
   padding: 0.55rem 0.8rem;
   cursor: pointer;
+}
+
+.notifications-tab__refresh:hover,
+.notifications-tab__error button:hover,
+.notifications-tab__actions button:hover {
+  background: #f4f7fb;
+}
+
+.notifications-tab__actions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .notifications-tab__list {
@@ -48,8 +60,7 @@
 
 .notifications-tab__item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1rem;
+  gap: 0.7rem;
   width: 100%;
   min-height: 72px;
   border: 1px solid #d7dde8;
@@ -58,13 +69,29 @@
   background: #ffffff;
   color: #172033;
   padding: 0.85rem;
-  text-align: left;
-  cursor: pointer;
 }
 
 .notifications-tab__item--unread {
   border-left-color: #2f6fed;
   background: #f7faff;
+}
+
+.notifications-tab__item--flagged {
+  border-color: #e0b14b;
+  border-left-color: #d8981d;
+}
+
+.notifications-tab__item-open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
 }
 
 .notifications-tab__item-main {
@@ -75,7 +102,21 @@
 }
 
 .notifications-tab__item-title {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   font-weight: 700;
+}
+
+.notifications-tab__flag-label {
+  border: 1px solid #e0b14b;
+  border-radius: 999px;
+  color: #7a5100;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.22rem 0.45rem;
 }
 
 .notifications-tab__item-body,
@@ -93,6 +134,31 @@
   font-size: 0.85rem;
 }
 
+.notifications-tab__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.notifications-tab__actions button {
+  min-height: 34px;
+  padding: 0.4rem 0.62rem;
+  font-size: 0.86rem;
+}
+
+.notifications-tab__reaction-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.notifications-tab__action--active {
+  border-color: #6b8e6b !important;
+  background: #eef5ed !important;
+  color: #2f5f32 !important;
+  font-weight: 700;
+}
+
 .notifications-tab__error {
   border: 1px solid #f0b8b8;
   border-radius: 8px;
@@ -107,11 +173,15 @@
   }
 
   .notifications-tab__header,
-  .notifications-tab__item {
+  .notifications-tab__item-open {
     grid-template-columns: 1fr;
   }
 
   .notifications-tab__header {
     align-items: stretch;
+  }
+
+  .notifications-tab__item-time {
+    white-space: normal;
   }
 }

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
 import { notificationPreferencesService, notificationService } from '@admini/workspace';
 import { useInstallPrompt } from '@admini/pwa';
@@ -59,6 +59,23 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
   const [unreadCount, setUnreadCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const loadUnreadCount = useCallback(async () => {
+    if (!userId) {
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const [preferences, count] = await Promise.all([
+        notificationPreferencesService.loadNotificationPreferences(userId),
+        notificationService.getUnreadNotificationCount(),
+      ]);
+      setUnreadCount(preferences.pushNotifications ? count : 0);
+    } catch {
+      setUnreadCount(0);
+    }
+  }, [userId]);
+
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false); };
@@ -67,34 +84,32 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
   }, [menuOpen]);
 
   useEffect(() => {
-    if (!menuOpen || !userId) return;
+    loadUnreadCount();
+  }, [loadUnreadCount]);
 
-    let cancelled = false;
+  useEffect(() => {
+    if (menuOpen) loadUnreadCount();
+  }, [menuOpen, loadUnreadCount]);
 
-    Promise.all([
-      notificationPreferencesService.loadNotificationPreferences(userId),
-      notificationService.getUnreadNotificationCount(),
-    ])
-      .then(([preferences, count]) => {
-        if (!cancelled) {
-          setUnreadCount(preferences.pushNotifications ? count : 0);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setUnreadCount(0);
-        }
-      });
-
-    return () => {
-      cancelled = true;
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadUnreadCount();
     };
-  }, [menuOpen, userId]);
+    window.addEventListener(notificationService.NOTIFICATIONS_UPDATED_EVENT, loadUnreadCount);
+    window.addEventListener('focus', loadUnreadCount);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener(notificationService.NOTIFICATIONS_UPDATED_EVENT, loadUnreadCount);
+      window.removeEventListener('focus', loadUnreadCount);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [loadUnreadCount]);
 
   const coreTabs = tabs.filter(t => CORE_TAB_IDS.includes(t.id));
   const hasAdmin = tabs.some(t => t.id === 'admin');
   const initial = (userName || 'U').trim().charAt(0).toUpperCase();
   const roleSchool = [userRole, schoolName].filter(Boolean).join(' · ');
+  const badgeLabel = unreadCount > 99 ? '99+' : String(unreadCount);
 
   return (
     <nav className={'desktop-sidebar' + (collapsed ? ' desktop-sidebar--collapsed' : '')} aria-label="Workspace navigation">
@@ -137,7 +152,7 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
               <span className="desktop-sidebar__menu-label">Notifications</span>
               {unreadCount > 0 && (
                 <span className="desktop-sidebar__menu-badge" aria-label={`${unreadCount} unread notifications`}>
-                  {unreadCount > 99 ? '99+' : unreadCount}
+                  {badgeLabel}
                 </span>
               )}
             </button>
@@ -154,7 +169,14 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
           </div>
         )}
         <button type="button" className="desktop-sidebar__avatar-btn" onClick={() => setMenuOpen(o => !o)} aria-label="Account menu">
-          <span className="desktop-sidebar__avatar">{initial}</span>
+          <span className="desktop-sidebar__avatar-wrap">
+            <span className="desktop-sidebar__avatar">{initial}</span>
+            {unreadCount > 0 && (
+              <span className="desktop-sidebar__avatar-badge" aria-label={`${unreadCount} unread notifications`}>
+                {badgeLabel}
+              </span>
+            )}
+          </span>
           {!collapsed && (
             <span className="desktop-sidebar__avatar-text">
               <span className="desktop-sidebar__avatar-name">{userName || 'Account'}</span>

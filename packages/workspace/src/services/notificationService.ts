@@ -1,10 +1,13 @@
-﻿import { getClient } from './getClient';
+import { getClient } from './getClient';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type NotificationAction = 'created' | 'updated';
+export type NotificationReaction = 'seen' | 'on_it' | 'thanks';
+
+export const NOTIFICATIONS_UPDATED_EVENT = 'admini-notifications-updated';
 
 export interface TaskNotification {
   id: string;
@@ -14,6 +17,9 @@ export interface TaskNotification {
   metadata: {
     task_id?: string;
     action?: NotificationAction;
+    flagged?: boolean;
+    reaction?: NotificationReaction;
+    reacted_at?: string;
     [key: string]: unknown;
   };
   read: boolean;
@@ -51,6 +57,69 @@ function getApiBase(): string {
       (import.meta as any).env?.VITE_CLOUDFLARE_API_BASE_URL) ||
     ''
   );
+}
+
+function notifyNotificationsUpdated(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(NOTIFICATIONS_UPDATED_EVENT));
+}
+
+function normalizeMetadata(metadata: TaskNotification['metadata'] | null | undefined): TaskNotification['metadata'] {
+  return (metadata ?? {}) as TaskNotification['metadata'];
+}
+
+async function updateNotificationMetadata(
+  notificationId: string,
+  metadata: TaskNotification['metadata'],
+): Promise<TaskNotification['metadata']> {
+  const client = getClient();
+  const { data, error } = await client
+    .from('notifications')
+    .update({ metadata })
+    .eq('id', notificationId)
+    .select('metadata')
+    .single<{ metadata: TaskNotification['metadata'] }>();
+
+  if (error) {
+    throw new NotificationServiceError(
+      `Failed to update notification: ${error.message}`,
+      'UPDATE_METADATA_FAILED',
+    );
+  }
+
+  notifyNotificationsUpdated();
+  return normalizeMetadata(data?.metadata);
+}
+
+async function recordNotificationReactionActivity(
+  notification: TaskNotification,
+  reaction: NotificationReaction,
+): Promise<void> {
+  const taskId = typeof notification.metadata.task_id === 'string' ? notification.metadata.task_id : null;
+  if (!taskId) return;
+
+  const client = getClient();
+  const { data: userData } = await client.auth.getUser();
+  const actorId = userData.user?.id;
+  if (!actorId) return;
+
+  const { data: task, error: taskError } = await client
+    .from('tasks')
+    .select('organization_id')
+    .eq('id', taskId)
+    .maybeSingle<{ organization_id: string }>();
+
+  if (taskError || !task?.organization_id) return;
+
+  await client.from('sync_events').insert({
+    organization_id: task.organization_id,
+    actor_id: actorId,
+    entity_type: 'task',
+    entity_id: taskId,
+    action: 'react',
+  });
+
+  void reaction;
 }
 
 // ---------------------------------------------------------------------------
@@ -158,6 +227,8 @@ export async function notifyAssignee(
         'PERSIST_FAILED',
       );
     }
+
+    notifyNotificationsUpdated();
   } catch (err) {
     if (err instanceof NotificationServiceError) throw err;
     throw new NotificationServiceError(
@@ -189,7 +260,7 @@ export async function listNotifications(limit = 25): Promise<TaskNotification[]>
     type: row.type,
     title: row.title,
     body: row.body,
-    metadata: (row.metadata ?? {}) as TaskNotification['metadata'],
+    metadata: normalizeMetadata(row.metadata),
     read: row.read,
     createdAt: row.created_at,
   }));
@@ -212,17 +283,61 @@ export async function getUnreadNotificationCount(): Promise<number> {
   return count ?? 0;
 }
 
-export async function markNotificationRead(notificationId: string): Promise<void> {
+export async function setNotificationRead(notificationId: string, read: boolean): Promise<void> {
   const client = getClient();
   const { error } = await client
     .from('notifications')
-    .update({ read: true })
+    .update({ read })
     .eq('id', notificationId);
 
   if (error) {
     throw new NotificationServiceError(
-      `Failed to mark notification read: ${error.message}`,
-      'MARK_READ_FAILED',
+      `Failed to mark notification ${read ? 'read' : 'unread'}: ${error.message}`,
+      read ? 'MARK_READ_FAILED' : 'MARK_UNREAD_FAILED',
     );
   }
+
+  notifyNotificationsUpdated();
+}
+
+export async function markNotificationRead(notificationId: string): Promise<void> {
+  await setNotificationRead(notificationId, true);
+}
+
+export async function markNotificationUnread(notificationId: string): Promise<void> {
+  await setNotificationRead(notificationId, false);
+}
+
+export async function setNotificationFlag(
+  notification: TaskNotification,
+  flagged: boolean,
+): Promise<TaskNotification['metadata']> {
+  return updateNotificationMetadata(notification.id, {
+    ...normalizeMetadata(notification.metadata),
+    flagged,
+  });
+}
+
+export async function setNotificationReaction(
+  notification: TaskNotification,
+  reaction: NotificationReaction | null,
+): Promise<TaskNotification['metadata']> {
+  const currentMetadata = normalizeMetadata(notification.metadata);
+  const metadata: TaskNotification['metadata'] = { ...currentMetadata };
+
+  if (reaction) {
+    metadata.reaction = reaction;
+    metadata.reacted_at = new Date().toISOString();
+  } else {
+    delete metadata.reaction;
+    delete metadata.reacted_at;
+  }
+
+  const updatedMetadata = await updateNotificationMetadata(notification.id, metadata);
+
+  if (reaction) {
+    recordNotificationReactionActivity({ ...notification, metadata: updatedMetadata }, reaction).catch(() => undefined);
+  }
+
+  return updatedMetadata;
 }

@@ -1,4 +1,4 @@
-﻿// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 // DashboardTab - Native React implementation of the Dashboard view
 // ---------------------------------------------------------------------------
 // Requirements: 2.1, 2.4, 7.1
@@ -486,9 +486,9 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
             <ul className="dashboard-tab__feed-list">
               {activityFeedItems.map(ev => (
                 <li key={ev.id} className="dashboard-tab__feed-item">
-                  {(() => { const t = ev.entityType; const a = ev.action; let cls = 'dashboard-tab__feed-icon--default'; let icon = '📝'; if (t === 'capture') { cls = 'dashboard-tab__feed-icon--capture-voice'; icon = '🎙️'; } else if (t === 'tap_capture') { cls = 'dashboard-tab__feed-icon--capture-tap'; icon = '👆'; } else if (t === 'observation') { cls = 'dashboard-tab__feed-icon--observation'; icon = '👁️'; } else if (t === 'note' || t === 'meeting_note') { cls = 'dashboard-tab__feed-icon--note'; icon = '📝'; } else if (t === 'achievement' || t === 'badge') { cls = 'dashboard-tab__feed-icon--achievement'; icon = '🏆'; } else if (t === 'task') { if (a === 'create' || a === 'created') { cls = 'dashboard-tab__feed-icon--task-create'; icon = '📋'; } else if (a === 'complete' || a === 'completed') { cls = 'dashboard-tab__feed-icon--task-complete'; icon = '✅'; } else { cls = 'dashboard-tab__feed-icon--task-create'; icon = '📋'; } } return <span className={'dashboard-tab__feed-icon ' + cls}>{icon}</span>; })()}
+                  {(() => { const t = ev.entityType; const a = ev.action; let cls = 'dashboard-tab__feed-icon--default'; let icon = '📝'; if (t === 'capture') { cls = 'dashboard-tab__feed-icon--capture-voice'; icon = '🎙️'; } else if (t === 'tap_capture') { cls = 'dashboard-tab__feed-icon--capture-tap'; icon = '👆'; } else if (t === 'observation') { cls = 'dashboard-tab__feed-icon--observation'; icon = '👁️'; } else if (t === 'note' || t === 'meeting_note') { cls = 'dashboard-tab__feed-icon--note'; icon = '📝'; } else if (t === 'achievement' || t === 'badge') { cls = 'dashboard-tab__feed-icon--achievement'; icon = '🏆'; } else if (t === 'task') { if (a === 'create' || a === 'created') { cls = 'dashboard-tab__feed-icon--task-create'; icon = '📋'; } else if (a === 'complete' || a === 'completed') { cls = 'dashboard-tab__feed-icon--task-complete'; icon = '✅'; } else if (a === 'react') { cls = 'dashboard-tab__feed-icon--task-create'; icon = '💬'; } else { cls = 'dashboard-tab__feed-icon--task-create'; icon = '📋'; } } return <span className={'dashboard-tab__feed-icon ' + cls}>{icon}</span>; })()}
                   <div className="dashboard-tab__feed-body">
-                    <span className="dashboard-tab__feed-title">{(() => { const t = tasks.find(tk => tk.id === ev.entityId); if (t) return (ev.action === 'create' || ev.action === 'created' ? '' : 'Completed: ') + t.title; if (ev.entityType === 'capture') return 'Voice capture: ' + ev.entityId.substring(0,20); return formatActivityAction(ev); })()}</span>
+                    <span className="dashboard-tab__feed-title">{(() => { const t = tasks.find(tk => tk.id === ev.entityId); if (t) return ev.action === 'react' ? 'Reacted to: ' + t.title : (ev.action === 'create' || ev.action === 'created' ? '' : 'Completed: ') + t.title; if (ev.entityType === 'capture') return 'Voice capture: ' + ev.entityId.substring(0,20); return formatActivityAction(ev); })()}</span>
                     <span className="dashboard-tab__feed-time">{(() => { const diff = Date.now() - new Date(ev.createdAt).getTime(); const mins = Math.floor(diff/60000); if (mins < 60) return mins + ' minutes ago'; const hrs = Math.floor(mins/60); if (hrs < 24) return hrs + ' hours ago'; return new Date(ev.createdAt).toLocaleString(undefined,{weekday:'short',hour:'numeric',minute:'2-digit'}); })()}</span>
                   </div>
                 </li>
@@ -546,3 +546,4 @@ export function DashboardTab({ userName, userId, organizationId, onNavigateToTab
     </div>
   );
 }
+

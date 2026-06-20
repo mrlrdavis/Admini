@@ -28,7 +28,9 @@ export function formatActivityAction(event: ActivityEvent): string {
     : event.action === 'update' ? 'Updated'
     : event.action === 'delete' ? 'Deleted'
     : event.action === 'accept' ? 'Accepted'
+    : event.action === 'react' ? 'Reacted to'
     : event.action;
 
   return `${actionLabel} a ${entityLabel}`;
 }
+
