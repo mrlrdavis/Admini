@@ -1,5 +1,6 @@
 ﻿import { useState, useRef, useEffect } from 'react';
 import type { NavigationAdapterProps, WorkspaceTab } from '@admini/workspace';
+import { notificationPreferencesService, notificationService } from '@admini/workspace';
 import { useInstallPrompt } from '@admini/pwa';
 
 const ICON_PATHS: Record<string, string> = {
@@ -51,10 +52,11 @@ function CollapseIcon() {
 
 const CORE_TAB_IDS = ['capture', 'dashboard', 'tasks', 'notes', 'observations', 'pulse'];
 
-export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShowPwaInstall, userName, userRole, schoolName }: NavigationAdapterProps) {
+export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShowPwaInstall, userId, userName, userRole, schoolName }: NavigationAdapterProps) {
   const { isInstallable, isStandalone, promptInstall } = useInstallPrompt();
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,6 +65,31 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen || !userId) return;
+
+    let cancelled = false;
+
+    Promise.all([
+      notificationPreferencesService.loadNotificationPreferences(userId),
+      notificationService.getUnreadNotificationCount(),
+    ])
+      .then(([preferences, count]) => {
+        if (!cancelled) {
+          setUnreadCount(preferences.pushNotifications ? count : 0);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUnreadCount(0);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [menuOpen, userId]);
 
   const coreTabs = tabs.filter(t => CORE_TAB_IDS.includes(t.id));
   const hasAdmin = tabs.some(t => t.id === 'admin');
@@ -106,7 +133,13 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
               <span className="desktop-sidebar__menu-icon">⚙</span> Profile & settings
             </button>
             <button type="button" className="desktop-sidebar__menu-item" onClick={() => { onTabChange('notifications' as WorkspaceTab); setMenuOpen(false); }}>
-              <span className="desktop-sidebar__menu-icon">🔔</span> Notifications
+              <span className="desktop-sidebar__menu-icon">🔔</span>
+              <span className="desktop-sidebar__menu-label">Notifications</span>
+              {unreadCount > 0 && (
+                <span className="desktop-sidebar__menu-badge" aria-label={`${unreadCount} unread notifications`}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </button>
             {!isStandalone && (
               <button type="button" className="desktop-sidebar__menu-item" onClick={async () => { if (isInstallable) { await promptInstall(); } else if (onShowPwaInstall) { onShowPwaInstall(); } setMenuOpen(false); }}>

@@ -93,6 +93,7 @@ export interface NavigationAdapterProps {
   onTabChange: (tabId: WorkspaceTab) => void;
   onSignOut?: () => void;
   onShowPwaInstall?: () => void;
+  userId?: string;
   userName?: string;
   userRole?: string;
   schoolName?: string;

@@ -104,7 +104,7 @@ export function WorkspaceShell({
 
   return (
     <>
-      {renderNavigation({ activeTab, tabs: visibleTabs, onTabChange: handleTabChange, onSignOut, userName, userRole, schoolName })}
+      {renderNavigation({ activeTab, tabs: visibleTabs, onTabChange: handleTabChange, onSignOut, userId: user.id, userName, userRole, schoolName })}
       <div className="workspace-shell__content">
         {NATIVE_TABS.has(activeTab) && renderTabContent()}
       </div>

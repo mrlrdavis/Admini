@@ -195,6 +195,23 @@ export async function listNotifications(limit = 25): Promise<TaskNotification[]>
   }));
 }
 
+export async function getUnreadNotificationCount(): Promise<number> {
+  const client = getClient();
+  const { count, error } = await client
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('read', false);
+
+  if (error) {
+    throw new NotificationServiceError(
+      `Failed to load unread notification count: ${error.message}`,
+      'COUNT_FAILED',
+    );
+  }
+
+  return count ?? 0;
+}
+
 export async function markNotificationRead(notificationId: string): Promise<void> {
   const client = getClient();
   const { error } = await client

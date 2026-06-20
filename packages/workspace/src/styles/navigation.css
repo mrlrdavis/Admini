@@ -375,6 +375,8 @@
 .desktop-sidebar__menu-item { display:flex; align-items:center; gap:10px; width:100%; background:none; border:none; cursor:pointer; padding:9px 10px; border-radius:8px; font-size:0.8125rem; color:#2D3436; text-align:left; }
 .desktop-sidebar__menu-item:hover { background:#F5F3EE; }
 .desktop-sidebar__menu-icon { font-size:0.9375rem; width:18px; text-align:center; }
+.desktop-sidebar__menu-label { flex:1; min-width:0; }
+.desktop-sidebar__menu-badge { min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:#C62828; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:0.6875rem; font-weight:700; line-height:1; }
 .desktop-sidebar__menu-item--logout { color:#C62828; border-top:1px solid #F0EEE9; margin-top:4px; padding-top:11px; }
 
 /* ==========================================================================
