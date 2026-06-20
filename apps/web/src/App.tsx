@@ -151,6 +151,13 @@ export function App() {
     const completeKey = `onboarding_complete_${user.id}`;
     const answersKey = `onboarding_answers_${user.id}`;
 
+    // Skip onboarding wizard if user has a pending invitation
+    const hasPendingInvite = invitationToken || sessionStorage.getItem('admini_invitation_token') || localStorage.getItem('admini_invitation_token');
+    if (hasPendingInvite) {
+      setOnboardingComplete(true);
+      return () => { mounted = false; };
+    }
+
     authStorage.getItem(completeKey)
       .then(async (value) => {
         if (!mounted) return;
