@@ -53,6 +53,11 @@ function hasInvitationFlowActive(invitationToken: string | null): boolean {
     || localStorage.getItem(invitationFlowStorageKey) === 'true';
 }
 
+function getPreferredOrganizationId(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(preferredOrganizationStorageKey);
+}
+
 type OnboardingAnswers = {
   role: string;
   focus: string[];
@@ -187,7 +192,8 @@ export function App() {
 
     // Skip onboarding wizard if user has a pending invitation
     const pendingInvite = getPendingInvitationToken(invitationToken);
-    if (pendingInvite || invitationFlowActiveState) {
+    const preferredOrganizationId = getPreferredOrganizationId();
+    if (pendingInvite || invitationFlowActiveState || preferredOrganizationId) {
       if (pendingInvite && !invitationToken) setInvitationToken(pendingInvite);
       setOnboardingComplete(true);
       setOnboardingAnswers(null);
@@ -249,7 +255,7 @@ export function App() {
       setProfileLoaded(false);
       return () => { mounted = false; };
     }
-    const preferredOrganizationId = localStorage.getItem(preferredOrganizationStorageKey);
+    const preferredOrganizationId = getPreferredOrganizationId();
     if (invitationFlowActiveState && !preferredOrganizationId) {
       setProfileLoaded(true);
       return () => { mounted = false; };
