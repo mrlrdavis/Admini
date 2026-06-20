@@ -294,17 +294,10 @@ export function App() {
         if (result.organizationName) {
           setUser((prev) => prev ? { ...prev, schoolName: result.organizationName } : prev);
         }
-        // Now load the profile to get the correct org membership
-        try {
-          const profile = await getOrCreateProfile();
-          if (mounted) {
-            setUserRole(profile.role);
-            setOrganizationId(profile.organization_id);
-            setProfileLoaded(true);
-          }
-        } catch {
-          if (mounted) setProfileLoaded(true);
-        }
+        // Reload the page to ensure the user lands in the correct org
+        // This is the cleanest way to resolve stale org state after invitation acceptance
+        window.location.replace(window.location.origin);
+        return;
       } else {
         setInvitationError(result.error ?? 'This invitation link is no longer valid. Please ask your administrator to send a new one.');
         setInvitationToken(null);
