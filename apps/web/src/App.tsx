@@ -35,7 +35,7 @@ export function App() {
   const [showIntegrations, setShowIntegrations] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
   const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingAnswers | null>(null);
-  const [userRole, setUserRole] = useState<string>('admin');
+  const [userRole, setUserRole] = useState<string>('staff');
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | undefined>(undefined);
 
@@ -195,7 +195,7 @@ export function App() {
     let mounted = true;
     if (!user) {
       setProfileLoaded(false);
-      setUserRole('admin');
+      setUserRole('staff');
       return () => { mounted = false; };
     }
     // Skip profile creation if there's a pending invitation - let acceptInvitation handle org membership first
@@ -228,7 +228,7 @@ export function App() {
       })
       .catch(() => {
         if (mounted) {
-          setUserRole('admin');
+          setUserRole('staff');
           setProfileLoaded(true);
         }
       });
@@ -355,7 +355,7 @@ export function App() {
     setOnboardingComplete(null);
     setOnboardingAnswers(null);
     setProfileLoaded(false);
-    setUserRole('admin');
+    setUserRole('staff');
     setOrganizationId(undefined);
     setUser(null);
   }
