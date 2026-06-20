@@ -30,7 +30,7 @@ export const supabase = supabaseUrl && supabaseAnonKey
     })
   : null;
 
-type DbProfile = {
+export type DbProfile = {
   id: string;
   organization_id: string;
   email: string;
@@ -56,6 +56,7 @@ export type UpdateProfileResult = {
 
 export type AcceptInvitationResult = {
   success: boolean;
+  organizationId?: string;
   organizationName?: string;
   role?: string;
   error?: string;
@@ -94,6 +95,35 @@ export async function getOrCreateProfile(): Promise<DbProfile> {
     .single<DbProfile>();
   if (profile.error) throw new Error(mapSupabaseError(profile.error));
   return profile.data;
+}
+
+export async function getProfileForOrganization(organizationId: string): Promise<DbProfile> {
+  if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  const user = await getRequiredCurrentUser();
+  await supabase.rpc('ensure_user_profile');
+
+  const membership = await supabase
+    .from('organization_memberships')
+    .select('organization_id, role')
+    .eq('profile_id', user.id)
+    .eq('organization_id', organizationId)
+    .single<{ organization_id: string; role: DbProfile['role'] }>();
+  if (membership.error) throw new Error(mapSupabaseError(membership.error));
+
+  const profile = await supabase
+    .from('profiles')
+    .select('id, email, display_name')
+    .eq('id', user.id)
+    .single<{ id: string; email: string; display_name: string }>();
+  if (profile.error) throw new Error(mapSupabaseError(profile.error));
+
+  return {
+    id: profile.data.id,
+    email: profile.data.email,
+    display_name: profile.data.display_name,
+    organization_id: membership.data.organization_id,
+    role: membership.data.role
+  };
 }
 
 export async function signInWithPassword(input: { email: string; password: string }): Promise<AuthUser> {
@@ -330,9 +360,10 @@ export async function acceptInvitation(token: string): Promise<AcceptInvitationR
       return { success: false, error: mapSupabaseError(error) };
     }
 
-    const result = data as { organization_name?: string; role?: string } | null;
+    const result = (Array.isArray(data) ? data[0] : data) as { organization_id?: string; organization_name?: string; role?: string } | null;
     return {
       success: true,
+      organizationId: result?.organization_id ?? undefined,
       organizationName: result?.organization_name ?? undefined,
       role: result?.role ?? undefined
     };

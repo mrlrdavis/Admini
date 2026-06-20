@@ -7,6 +7,7 @@ import {
   signOut,
   deleteAccount,
   getOrCreateProfile,
+  getProfileForOrganization,
   checkOnboardingComplete,
   markOnboardingComplete,
   updateProfile,
@@ -22,6 +23,7 @@ import { IntegrationCatalog, organizationService } from '@admini/workspace';
 const authStorage = createIndexedDbStorage('auth');
 const invitationTokenStorageKey = 'admini_invitation_token';
 const invitationFlowStorageKey = 'admini_invitation_flow_active';
+const preferredOrganizationStorageKey = 'admini_preferred_organization_id';
 
 function getPendingInvitationToken(invitationToken: string | null): string | null {
   if (invitationToken) return invitationToken;
@@ -251,7 +253,12 @@ export function App() {
       setProfileLoaded(true);
       return () => { mounted = false; };
     }
-    getOrCreateProfile()
+    const preferredOrganizationId = localStorage.getItem(preferredOrganizationStorageKey);
+    const profilePromise = preferredOrganizationId
+      ? getProfileForOrganization(preferredOrganizationId).catch(() => getOrCreateProfile())
+      : getOrCreateProfile();
+
+    profilePromise
       .then(async (profile: { role: string; organization_id: string; display_name: string }) => {
         if (!mounted) return;
         setUserRole(profile.role);
@@ -338,7 +345,7 @@ export function App() {
     setInvitationFlowActiveState(true);
     setAcceptingInvitation(true);
 
-    acceptInvitation(pendingToken).then(async (result: { success: boolean; organizationName?: string; error?: string }) => {
+    acceptInvitation(pendingToken).then(async (result: { success: boolean; organizationId?: string; organizationName?: string; role?: string; error?: string }) => {
       if (!mounted) return;
       if (result.success) {
         setInvitationToken(null);
@@ -346,6 +353,13 @@ export function App() {
         localStorage.removeItem(invitationTokenStorageKey);
         setInvitationFlowActive(false);
         setInvitationFlowActiveState(false);
+        if (result.organizationId) {
+          localStorage.setItem(preferredOrganizationStorageKey, result.organizationId);
+          setOrganizationId(result.organizationId);
+        }
+        if (result.role) {
+          setUserRole(result.role);
+        }
         if (result.organizationName) {
           setUser((prev) => prev ? { ...prev, schoolName: result.organizationName } : prev);
         }
@@ -403,6 +417,7 @@ export function App() {
     setProfileLoaded(false);
     setUserRole('staff');
     setOrganizationId(undefined);
+    localStorage.removeItem(preferredOrganizationStorageKey);
     setInvitationToken(null);
     setInvitationFlowActiveState(false);
     setUser(null);
@@ -458,6 +473,7 @@ export function App() {
             await deleteAccount();
             await clearAdminiBrowserState();
             setInvitationFlowActive(false);
+            localStorage.removeItem(preferredOrganizationStorageKey);
             setUser(null);
           }}
           onResetUserData={resetUserData}
