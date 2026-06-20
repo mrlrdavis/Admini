@@ -8,7 +8,7 @@ import type { AdminiRole, OrgDetailsForm, OrgInvitation } from '../types';
 // ---------------------------------------------------------------------------
 // AdminTab
 // ---------------------------------------------------------------------------
-// Organization Management tab: school details, members, invitations, roster upload, feature flags.
+// School Settings tab: school details, staff access, observation subjects, and school features.
 // Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 8.5, 8.6
 
 export interface AdminTabProps {
@@ -100,7 +100,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   const [inviteError, setInviteError] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
-  // Roster Upload State (state machine: idle -> validating -> previewing -> submitting -> success/error)
+  // Bulk staff invite upload state (state machine: idle -> validating -> previewing -> submitting -> success/error)
   // -------------------------------------------------------------------------
   const [rosterState, setRosterState] = useState<RosterUploadState>('idle');
   const [rosterPreview, setRosterPreview] = useState<RosterRow[]>([]);
@@ -534,11 +534,11 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           )}
         </section>
 
-        {/* Pending Invitations */}
+        {/* Pending Invites */}
         <section className="admin-tab__section">
-          <h2 className="admin-tab__section-title">Pending Invitations</h2>
+          <h2 className="admin-tab__section-title">Pending Invites</h2>
           {pendingInvitations.length === 0 ? (
-            <p className="admin-tab__empty">No pending invitations.</p>
+            <p className="admin-tab__empty">No pending invites.</p>
           ) : (
             <ul className="admin-tab__invitation-list">
               {pendingInvitations.map(inv => (
@@ -563,13 +563,13 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           )}
         </section>
 
-        {/* Roster Upload Section - also shown in error state */}
+        {/* Bulk Staff Invites Section - also shown in error state */}
         <section className="admin-tab__section" aria-labelledby="roster-upload-error-heading">
           <h2 id="roster-upload-error-heading" className="admin-tab__section-title">
-            Roster Upload
+            Bulk Staff Invites
           </h2>
           <p className="admin-tab__section-desc">
-            Upload a CSV or XLSX file to bulk-add members. Required columns: name, email, role.
+            Upload staff who need Admini accounts. This sends invitations; people appear in Staff Roster after accepting. Required columns: name, email, role.
           </p>
           {rosterState === 'idle' && (
             <label className="admin-tab__field">
@@ -589,8 +589,8 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
             <div className="admin-tab__roster-preview">
               <h3 className="admin-tab__subsection-title">Preview ({rosterPreview.length} valid rows)</h3>
               <p className="admin-tab__confirm-warning" role="alert">
-                ⚠️ Confirming will send email invitations to all {rosterPreview.length} email address(es). 
-                Recipients will appear in Pending Invitations until they accept and join your organization.
+                Confirming will send Admini workspace invitations to all {rosterPreview.length} staff email address(es).
+                Recipients appear in Pending Invites until they accept.
               </p>
               <ul className="admin-tab__roster-list">
                 {rosterPreview.slice(0, 5).map((row) => (
@@ -600,7 +600,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                 ))}
               </ul>
               <div className="admin-tab__roster-actions">
-                <button type="button" className="admin-tab__submit" onClick={handleRosterConfirm}>Send Invitations</button>
+                <button type="button" className="admin-tab__submit" onClick={handleRosterConfirm}>Send Staff Invites</button>
                 <button type="button" className="admin-tab__cancel-btn" onClick={handleRosterCancel}>Cancel</button>
               </div>
             </div>
@@ -608,8 +608,8 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           {rosterState === 'submitting' && <p className="admin-tab__loading-indicator">Sending invitations...</p>}
           {rosterState === 'success' && rosterResult && (
             <div className="admin-tab__roster-result">
-              <p className="admin-tab__success-message">Successfully sent {rosterResult.added} invitation(s).</p>
-              <button type="button" className="admin-tab__submit" onClick={handleRosterCancel}>Upload Another</button>
+              <p className="admin-tab__success-message">Sent {rosterResult.added} staff invitation(s).</p>
+              <button type="button" className="admin-tab__submit" onClick={handleRosterCancel}>Upload Another Staff List</button>
             </div>
           )}
           {rosterState === 'error' && (
@@ -627,7 +627,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
 
   return (
     <div className="admin-tab">
-      <h1 className="admin-tab__title">Organization Management</h1>
+      <h1 className="admin-tab__title">School Settings</h1>
 
       {/* School Details Section */}
       <section className="admin-tab__section" aria-labelledby="school-details-heading">
@@ -705,11 +705,14 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         </form>
       </section>
 
-      {/* Member List Section */}
+      {/* Staff Roster Section */}
       <section className="admin-tab__section" aria-labelledby="members-heading">
         <h2 id="members-heading" className="admin-tab__section-title">
-          Members
+          Staff Roster
         </h2>
+        <p className="admin-tab__section-desc">
+          Admini users who accepted an invite appear here. Use this list for workspace access, permissions, and task assignment suggestions.
+        </p>
 
         {roleError && (
           <p className="admin-tab__error-message" role="alert">
@@ -718,7 +721,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
 
         {members.length === 0 ? (
-          <p className="admin-tab__empty">No members found.</p>
+          <p className="admin-tab__empty">No staff have joined yet. Send a staff invite below to add team members.</p>
         ) : (
           <ul className="admin-tab__member-list">
             {members.map((member) => (
@@ -757,15 +760,15 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
       </section>
 
-      {/* Roster Upload Section */}
-      <section className="admin-tab__section" aria-labelledby="roster-upload-heading">
+      {/* Bulk Staff Invites Section */}
+      <section className="admin-tab__section" aria-labelledby="bulk-staff-invites-heading">
         <div className="admin-tab__section-header">
           <div>
-            <h2 id="roster-upload-heading" className="admin-tab__section-title">
-              Roster Upload
+            <h2 id="bulk-staff-invites-heading" className="admin-tab__section-title">
+              Bulk Staff Invites
             </h2>
             <p className="admin-tab__section-desc">
-              Upload a CSV or XLSX file to bulk-add members. Required columns: name, email, role.
+              Upload staff who need Admini accounts. This sends invitations; people appear in Staff Roster after accepting. Required columns: name, email, role.
             </p>
           </div>
           {rosterState === 'idle' && (
@@ -774,7 +777,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               className="admin-tab__import-btn"
               onClick={() => fileInputRef.current?.click()}
             >
-              📤 Upload Roster
+              Upload Staff List
             </button>
           )}
         </div>
@@ -800,8 +803,8 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               Preview ({rosterPreview.length} valid {rosterPreview.length === 1 ? 'row' : 'rows'})
             </h3>
             <p className="admin-tab__confirm-warning" role="alert">
-              ⚠️ Confirming will send email invitations to all {rosterPreview.length} email address(es). 
-              Recipients will appear in Pending Invitations until they accept and join your organization.
+              Confirming will send Admini workspace invitations to all {rosterPreview.length} staff email address(es).
+              Recipients appear in Pending Invites until they accept.
             </p>
             {rosterErrors.length > 0 && (
               <p className="admin-tab__warning-message" role="alert">
@@ -828,7 +831,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                 className="admin-tab__submit"
                 onClick={handleRosterConfirm}
               >
-                Send Invitations
+                Send Staff Invites
               </button>
               <button
                 type="button"
@@ -848,7 +851,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         {rosterState === 'success' && rosterResult && (
           <div className="admin-tab__roster-result">
             <p className="admin-tab__success-message" role="status">
-              Successfully sent {rosterResult.added} invitation(s).
+              Sent {rosterResult.added} staff invitation(s).
             </p>
             {rosterResult.failed.length > 0 && (
               <p className="admin-tab__warning-message" role="alert">
@@ -860,7 +863,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               className="admin-tab__submit"
               onClick={handleRosterCancel}
             >
-              Upload Another
+              Upload Another Staff List
             </button>
           </div>
         )}
@@ -888,11 +891,14 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
       </section>
 
-      {/* Invitations Section - restricted to admin/principal (REQ-16) */}
-      <section className="admin-tab__section" aria-labelledby="invitations-heading">
-        <h2 id="invitations-heading" className="admin-tab__section-title">
-          Invitations
+      {/* Team Invites Section - restricted to admin/principal (REQ-16) */}
+      <section className="admin-tab__section" aria-labelledby="team-invites-heading">
+        <h2 id="team-invites-heading" className="admin-tab__section-title">
+          Team Invites
         </h2>
+        <p className="admin-tab__section-desc">
+          Invite staff to your Admini workspace. Pending invites move to Staff Roster after the person accepts.
+        </p>
 
         {canManageInvitations ? (
           <>
@@ -903,7 +909,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   type="email"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="user@example.com"
+                  placeholder="staff@school.edu"
                   className="admin-tab__input"
                   required
                   disabled={inviteFormState === 'submitting'}
@@ -941,14 +947,14 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                 className="admin-tab__submit"
                 disabled={inviteFormState === 'submitting' || inviteFormState === 'validating'}
               >
-                {inviteFormState === 'submitting' ? 'Sending...' : inviteFormState === 'validating' ? 'Validating...' : 'Send Invitation'}
+                {inviteFormState === 'submitting' ? 'Sending...' : inviteFormState === 'validating' ? 'Validating...' : 'Send Staff Invite'}
               </button>
             </form>
 
-            {/* Pending Invitations List with Revoke */}
+            {/* Pending Invites List with Revoke */}
             {pendingInvitations.length > 0 && (
               <>
-                <h3 className="admin-tab__subsection-title">Pending Invitations</h3>
+                <h3 className="admin-tab__subsection-title">Pending Invites</h3>
                 <ul className="admin-tab__invitation-list">
                   {pendingInvitations.map((inv) => (
                     <li key={inv.id} className="admin-tab__invitation-item">
@@ -981,18 +987,18 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
       </section>
 
-      {/* Student/Staff Roster Section (for Observations) */}
+      {/* Observation Subjects Section */}
       <section className="admin-tab__section" aria-labelledby="obs-roster-heading">
         <div className="admin-tab__section-header">
           <div>
             <h2 id="obs-roster-heading" className="admin-tab__section-title">
-              Student & Staff Roster
+              Observation Subjects
             </h2>
             <p className="admin-tab__section-desc">
-              Upload students and staff for use in Observations. CSV with columns: name, type (student/staff), grade (optional).
+              Upload people who can be selected as observation subjects. CSV columns: name, type (student/staff), grade (optional).
             </p>
             <p className="admin-tab__section-hint">
-              <strong>How roles are used:</strong> Students appear as observation subjects. Staff appear as observers/teachers. Type values: student, staff, teacher, admin, principal (teacher/admin/principal map to staff).
+              <strong>Important:</strong> Staff in this roster are people who may be observed, not Admini users. Use Staff Roster and Team Invites for workspace access.
             </p>
           </div>
           {obsRoster.length === 0 && (
@@ -1002,7 +1008,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               onClick={() => obsRosterFileRef.current?.click()}
               disabled={obsRosterUploading}
             >
-              {obsRosterUploading ? 'Uploading...' : '📤 Upload Roster'}
+              {obsRosterUploading ? 'Uploading...' : 'Upload Subjects'}
             </button>
           )}
         </div>
@@ -1035,19 +1041,19 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   onClick={() => obsRosterFileRef.current?.click()}
                   disabled={obsRosterUploading}
                 >
-                  Replace Roster
+                  Replace Subjects
                 </button>
                 <button
                   type="button"
                   className="admin-tab__cancel-btn"
                   onClick={handleClearObsRoster}
                 >
-                  Clear Roster
+                  Clear Subjects
                 </button>
               </div>
             </div>
             <div className="admin-tab__obs-roster-preview">
-              <h3 className="admin-tab__subsection-title">Current Roster</h3>
+              <h3 className="admin-tab__subsection-title">Current Subjects</h3>
               <ul className="admin-tab__roster-list">
                 {obsRoster.slice(0, 10).map((person, idx) => (
                   <li key={idx} className="admin-tab__roster-item">
@@ -1066,16 +1072,19 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           </div>
         ) : (
           <p className="admin-tab__empty">
-            No roster uploaded yet. Upload a CSV file to populate students and staff for classroom observations.
+            No observation subjects uploaded yet. Upload students or staff who may be selected in classroom observations.
           </p>
         )}
       </section>
 
-      {/* Feature Flags Section */}
-      <section className="admin-tab__section" aria-labelledby="feature-flags-heading">
-        <h2 id="feature-flags-heading" className="admin-tab__section-title">
-          Feature Flags
+      {/* School Features Section */}
+      <section className="admin-tab__section" aria-labelledby="school-features-heading">
+        <h2 id="school-features-heading" className="admin-tab__section-title">
+          School Features
         </h2>
+        <p className="admin-tab__section-desc">
+          Turn optional tools on or off for this school.
+        </p>
 
         {flagError && (
           <p className="admin-tab__error-message" role="alert">
@@ -1084,7 +1093,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
 
         {featureFlags.length === 0 ? (
-          <p className="admin-tab__empty">No feature flags configured.</p>
+          <p className="admin-tab__empty">No optional school features are configured yet.</p>
         ) : (
           <ul className="admin-tab__flag-list">
             {featureFlags.map((flag) => (
@@ -1108,20 +1117,6 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
             ))}
           </ul>
         )}
-      </section>
-
-      {/* Invite Team Section */}
-      <section className="admin-tab__section">
-        <h2 className="admin-tab__section-title">Invite Team Members</h2>
-        <p className="admin-tab__section-desc">
-          Send an invitation email to add staff to your school's AdminI workspace.
-        </p>
-        <a
-          href="mailto:ladariusdvs99@gmail.com?subject=AdminI%20Team%20Invitation%20Request&body=I%27d%20like%20to%20invite%20the%20following%20people%20to%20my%20AdminI%20workspace%3A%0A%0AName%3A%20%0AEmail%3A%20%0ARole%20(admin%2C%20principal%2C%20teacher%2C%20staff)%3A%20%0A%0ASchool%3A%20"
-          className="admin-tab__invite-btn"
-        >
-          Invite via Email
-        </a>
       </section>
     </div>
   );
