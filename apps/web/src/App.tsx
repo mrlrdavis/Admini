@@ -21,14 +21,34 @@ import { IntegrationCatalog, organizationService } from '@admini/workspace';
 
 const authStorage = createIndexedDbStorage('auth');
 const invitationTokenStorageKey = 'admini_invitation_token';
+const invitationFlowStorageKey = 'admini_invitation_flow_active';
 
 function getPendingInvitationToken(invitationToken: string | null): string | null {
   if (invitationToken) return invitationToken;
+  if (typeof window === 'undefined') return null;
   const params = new URLSearchParams(window.location.search);
   return params.get('invitation_token')
     || params.get('invite')
     || sessionStorage.getItem(invitationTokenStorageKey)
     || localStorage.getItem(invitationTokenStorageKey);
+}
+
+function setInvitationFlowActive(active: boolean): void {
+  if (typeof window === 'undefined') return;
+  if (active) {
+    sessionStorage.setItem(invitationFlowStorageKey, 'true');
+    localStorage.setItem(invitationFlowStorageKey, 'true');
+  } else {
+    sessionStorage.removeItem(invitationFlowStorageKey);
+    localStorage.removeItem(invitationFlowStorageKey);
+  }
+}
+
+function hasInvitationFlowActive(invitationToken: string | null): boolean {
+  if (getPendingInvitationToken(invitationToken)) return true;
+  if (typeof window === 'undefined') return false;
+  return sessionStorage.getItem(invitationFlowStorageKey) === 'true'
+    || localStorage.getItem(invitationFlowStorageKey) === 'true';
 }
 
 type OnboardingAnswers = {
@@ -49,7 +69,8 @@ export function App() {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | undefined>(undefined);
 
-  const [invitationToken, setInvitationToken] = useState<string | null>(null);
+  const [invitationToken, setInvitationToken] = useState<string | null>(() => getPendingInvitationToken(null));
+  const [invitationFlowActiveState, setInvitationFlowActiveState] = useState(() => hasInvitationFlowActive(getPendingInvitationToken(null)));
   const [invitationError, setInvitationError] = useState<string | null>(null);
   const [acceptingInvitation, setAcceptingInvitation] = useState(false);
 
@@ -110,6 +131,8 @@ export function App() {
       setInvitationToken(token);
       sessionStorage.setItem(invitationTokenStorageKey, token);
       localStorage.setItem(invitationTokenStorageKey, token);
+      setInvitationFlowActive(true);
+      setInvitationFlowActiveState(true);
       params.delete('invitation_token');
       params.delete('invite');
       const nextSearch = params.toString();
@@ -118,6 +141,8 @@ export function App() {
       const stored = sessionStorage.getItem(invitationTokenStorageKey) || localStorage.getItem(invitationTokenStorageKey);
       if (stored) {
         setInvitationToken(stored);
+        setInvitationFlowActive(true);
+        setInvitationFlowActiveState(true);
       }
     }
   }, []);
@@ -163,9 +188,9 @@ export function App() {
     const answersKey = `onboarding_answers_${user.id}`;
 
     // Skip onboarding wizard if user has a pending invitation
-    const hasPendingInvite = getPendingInvitationToken(invitationToken);
-    if (hasPendingInvite) {
-      if (!invitationToken) setInvitationToken(hasPendingInvite);
+    const pendingInvite = getPendingInvitationToken(invitationToken);
+    if (pendingInvite || invitationFlowActiveState) {
+      if (pendingInvite && !invitationToken) setInvitationToken(pendingInvite);
       setOnboardingComplete(true);
       setOnboardingAnswers(null);
       return () => { mounted = false; };
@@ -209,7 +234,7 @@ export function App() {
     return () => {
       mounted = false;
     };
-  }, [user, invitationToken]);
+  }, [user, invitationToken, invitationFlowActiveState]);
 
   // Fetch profile from Supabase to obtain role, display name, and organization
   useEffect(() => {
@@ -224,6 +249,10 @@ export function App() {
     if (pendingToken) {
       if (!invitationToken) setInvitationToken(pendingToken);
       setProfileLoaded(false);
+      return () => { mounted = false; };
+    }
+    if (invitationFlowActiveState) {
+      setProfileLoaded(true);
       return () => { mounted = false; };
     }
     getOrCreateProfile()
@@ -256,7 +285,7 @@ export function App() {
         }
       });
     return () => { mounted = false; };
-  }, [user?.id, invitationToken]);
+  }, [user?.id, invitationToken, invitationFlowActiveState]);
 
   // Listen for auth state changes (token refresh failures, sign-out from another tab)
   useEffect(() => {
@@ -309,6 +338,8 @@ export function App() {
     if (!pendingToken) return;
     if (!invitationToken) setInvitationToken(pendingToken);
     let mounted = true;
+    setInvitationFlowActive(true);
+    setInvitationFlowActiveState(true);
     setAcceptingInvitation(true);
 
     acceptInvitation(pendingToken).then(async (result: { success: boolean; organizationName?: string; error?: string }) => {
@@ -317,6 +348,8 @@ export function App() {
         setInvitationToken(null);
         sessionStorage.removeItem(invitationTokenStorageKey);
         localStorage.removeItem(invitationTokenStorageKey);
+        setInvitationFlowActive(false);
+        setInvitationFlowActiveState(false);
         if (result.organizationName) {
           setUser((prev) => prev ? { ...prev, schoolName: result.organizationName } : prev);
         }
@@ -329,6 +362,8 @@ export function App() {
         setInvitationToken(null);
         sessionStorage.removeItem(invitationTokenStorageKey);
         localStorage.removeItem(invitationTokenStorageKey);
+        setOnboardingComplete(true);
+        setOnboardingAnswers(null);
         setProfileLoaded(true);
       }
     }).finally(() => {
@@ -364,6 +399,7 @@ export function App() {
 
   async function resetUserData() {
     await clearAdminiBrowserState();
+    setInvitationFlowActive(false);
     await signOut().catch(() => undefined);
     setShowIntegrations(false);
     setOnboardingComplete(null);
@@ -371,6 +407,8 @@ export function App() {
     setProfileLoaded(false);
     setUserRole('staff');
     setOrganizationId(undefined);
+    setInvitationToken(null);
+    setInvitationFlowActiveState(false);
     setUser(null);
   }
 
@@ -423,6 +461,7 @@ export function App() {
           onDeleteAccount={async () => {
             await deleteAccount();
             await clearAdminiBrowserState();
+            setInvitationFlowActive(false);
             setUser(null);
           }}
           onResetUserData={resetUserData}

@@ -154,9 +154,17 @@ export async function signInWithOAuthProvider(provider: 'google'): Promise<void>
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
   // Preserve invitation token through OAuth redirect
   let redirectUrl = getAuthRedirectTo();
-  const pendingToken = sessionStorage.getItem('admini_invitation_token');
+  const params = new URLSearchParams(window.location.search);
+  const pendingToken = params.get('invitation_token')
+    || params.get('invite')
+    || sessionStorage.getItem('admini_invitation_token')
+    || localStorage.getItem('admini_invitation_token');
   if (pendingToken) {
     redirectUrl += '?invitation_token=' + encodeURIComponent(pendingToken);
+    sessionStorage.setItem('admini_invitation_token', pendingToken);
+    localStorage.setItem('admini_invitation_token', pendingToken);
+    sessionStorage.setItem('admini_invitation_flow_active', 'true');
+    localStorage.setItem('admini_invitation_flow_active', 'true');
   }
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
