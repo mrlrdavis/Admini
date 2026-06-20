@@ -129,6 +129,13 @@ function createTaskServiceAdapter(
           sort_order: idx,
         }));
         await client.from('task_subtasks').insert(subtaskRows);
+
+        for (const subtask of task.subtasks) {
+          if (subtask.assignee) {
+            notifyAssignee(data.id, resolveAssignee?.(subtask.assignee) ?? subtask.assignee, 'created', task.title + ': ' + subtask.title)
+              .catch((err) => showToast(err instanceof Error ? err.message : 'Failed to notify subtask assignee'));
+          }
+        }
       }
 
       // Award badges
@@ -300,6 +307,13 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
     if (!trimmed) return undefined;
     const member = resolveAssigneeMember(trimmed);
     return member?.displayName || trimmed;
+  }
+
+  function notifySubtaskAssignee(taskId: string, taskTitle: string, subtaskTitle: string, assignee?: string, action: 'created' | 'updated' = 'updated'): void {
+    if (!assignee) return;
+    const assigneeMember = resolveAssigneeMember(assignee);
+    notifyAssignee(taskId, assigneeMember?.profileId ?? assignee, action, taskTitle + ': ' + subtaskTitle)
+      .catch((err) => showToast(err instanceof Error ? err.message : 'Failed to notify subtask assignee'));
   }
 
   function canEditTask(task: DashboardTask): boolean {
@@ -617,6 +631,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       showToast('Only task creators, admins, and principals can edit subtasks');
       return;
     }
+    const existingSubtask = (subtasksMap[taskId] ?? loadSubtasks(taskId)).find((subtask) => subtask.id === subtaskId);
     const normalizedUpdates = { ...updates };
     if (updates.assignee !== undefined) {
       normalizedUpdates.assignee = getAssigneeSaveValue(updates.assignee);
@@ -643,6 +658,9 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       const updated = st.map(s => s.id === subtaskId ? { ...s, ...normalizedUpdates } : s);
       localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
       setSubtasksMap((current) => ({ ...current, [taskId]: updated }));
+    }
+    if (updates.assignee) {
+      notifySubtaskAssignee(taskId, task?.title ?? 'Task', normalizedUpdates.title ?? existingSubtask?.title ?? 'Subtask', normalizedUpdates.assignee, 'updated');
     }
     showToast('Subtask updated');
   }
@@ -682,6 +700,9 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       setSubtasksMap((current) => ({ ...current, [taskId]: updated }));
     }
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
+    if (subtask.assignee) {
+      notifySubtaskAssignee(taskId, task?.title ?? 'Task', subtask.title, getAssigneeSaveValue(subtask.assignee), 'created');
+    }
     showToast('Subtask added');
   }
 

@@ -86,6 +86,53 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   };
 }
 
+async function getProfileFromLatestMembership(): Promise<DbProfile | null> {
+  if (!supabase) throw new Error('Supabase is not configured for this environment.');
+  const user = await getRequiredCurrentUser();
+
+  const acceptedInvitation = await supabase
+    .from('invitations')
+    .select('organization_id, accepted_at')
+    .eq('accepted_by', user.id)
+    .eq('status', 'accepted')
+    .order('accepted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle<{ organization_id: string; accepted_at: string }>();
+
+  const membershipQuery = supabase
+    .from('organization_memberships')
+    .select('organization_id, role, joined_at')
+    .eq('profile_id', user.id);
+
+  const membership = acceptedInvitation.data?.organization_id
+    ? await membershipQuery
+        .eq('organization_id', acceptedInvitation.data.organization_id)
+        .limit(1)
+        .maybeSingle<{ organization_id: string; role: DbProfile['role']; joined_at: string }>()
+    : await membershipQuery
+        .order('joined_at', { ascending: false })
+        .limit(1)
+        .maybeSingle<{ organization_id: string; role: DbProfile['role']; joined_at: string }>();
+
+  if (membership.error || !membership.data?.organization_id) return null;
+
+  const profile = await supabase
+    .from('profiles')
+    .select('id, email, display_name')
+    .eq('id', user.id)
+    .single<{ id: string; email: string; display_name: string }>();
+
+  if (profile.error) throw new Error(mapSupabaseError(profile.error));
+
+  return {
+    id: profile.data.id,
+    email: profile.data.email,
+    display_name: profile.data.display_name,
+    organization_id: membership.data.organization_id,
+    role: membership.data.role
+  };
+}
+
 export async function getOrCreateProfile(): Promise<DbProfile> {
   if (!supabase) throw new Error('Supabase is not configured for this environment.');
   await getRequiredCurrentUser();
@@ -94,7 +141,8 @@ export async function getOrCreateProfile(): Promise<DbProfile> {
     .rpc('ensure_user_profile')
     .single<DbProfile>();
   if (profile.error) throw new Error(mapSupabaseError(profile.error));
-  return profile.data;
+
+  return await getProfileFromLatestMembership() ?? profile.data;
 }
 
 export async function getProfileForOrganization(organizationId: string): Promise<DbProfile> {

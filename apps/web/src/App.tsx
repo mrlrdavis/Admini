@@ -268,6 +268,9 @@ export function App() {
         setInvitationFlowActiveState(false);
         setUserRole(profile.role);
         setOrganizationId(profile.organization_id);
+        if (profile.organization_id) {
+          localStorage.setItem(preferredOrganizationStorageKey, profile.organization_id);
+        }
 
         if (profile.display_name && profile.display_name !== user?.displayName) {
           setUser((prev) => prev ? { ...prev, displayName: profile.display_name } : prev);
@@ -278,6 +281,7 @@ export function App() {
             const orgDetails = await organizationService.getOrgDetails(profile.organization_id);
             if (mounted && orgDetails?.name && orgDetails.name !== user?.schoolName) {
               setUser((prev) => prev ? { ...prev, schoolName: orgDetails.name } : prev);
+              supabase?.auth.updateUser({ data: { school_name: orgDetails.name } }).catch(() => undefined);
             }
           } catch {
             // Non-critical: fall back to auth metadata for school name
