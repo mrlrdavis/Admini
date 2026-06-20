@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { getClassroomCourses, getClassroomStudents, getGoogleToken, type ClassroomCourse, type ClassroomStudent } from '../services/googleIntegrationService';
 import { sendInvitation, getPendingInvitations, revokeInvitation as revokeInvitationSvc } from '../services/invitationService';
 import { parseRosterFile, validateRosterRows, bulkAddMembers, type RosterRow, type RowError, type BulkAddResult } from '../services/rosterUploadService';
@@ -22,6 +22,9 @@ export interface AdminTabProps {
 // ---------------------------------------------------------------------------
 type InviteFormState = 'idle' | 'validating' | 'submitting' | 'success' | 'error';
 type RosterUploadState = 'idle' | 'validating' | 'previewing' | 'submitting' | 'success' | 'error';
+
+type ObservationRosterPerson = { name: string; type: 'student' | 'staff'; grade?: string };
+type StoredObservation = { name?: string; observeeType?: 'student' | 'staff'; createdAt?: string; timestamp?: string };
 
 /**
  * Determines if an error represents a 403 authorization error.
@@ -126,10 +129,11 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   // -------------------------------------------------------------------------
   // Student/Staff Observation Roster State (stored in localStorage for Observations)
   // -------------------------------------------------------------------------
-  const [obsRoster, setObsRoster] = useState<{ name: string; type: 'student' | 'staff'; grade?: string }[]>([]);
+  const [obsRoster, setObsRoster] = useState<ObservationRosterPerson[]>([]);
   const [obsRosterUploading, setObsRosterUploading] = useState(false);
   const [obsRosterError, setObsRosterError] = useState<string | null>(null);
   const [obsRosterSuccess, setObsRosterSuccess] = useState<string | null>(null);
+  const [storedObservations, setStoredObservations] = useState<StoredObservation[]>([]);
   const obsRosterFileRef = useRef<HTMLInputElement>(null);
 
   // Load observation roster from localStorage
@@ -137,6 +141,8 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     try {
       const raw = localStorage.getItem('admini_roster_full');
       if (raw) setObsRoster(JSON.parse(raw));
+      const observationsRaw = localStorage.getItem('admini_observations_v2');
+      if (observationsRaw) setStoredObservations(JSON.parse(observationsRaw));
     } catch {}
   }, []);
 
@@ -379,7 +385,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
       }
 
       // Parse rows
-      const newRoster: { name: string; type: 'student' | 'staff'; grade?: string }[] = [];
+      const newRoster: ObservationRosterPerson[] = [];
       const errors: string[] = [];
 
       for (let i = 1; i < lines.length; i++) {
@@ -431,6 +437,29 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         obsRosterFileRef.current.value = '';
       }
     }
+  }
+
+  function persistObsRoster(nextRoster: ObservationRosterPerson[]) {
+    localStorage.setItem('admini_roster_full', JSON.stringify(nextRoster));
+    localStorage.setItem('admini_roster', JSON.stringify(nextRoster.map(r => r.name)));
+    setObsRoster(nextRoster);
+  }
+
+  function handleRemoveObsRosterPerson(person: ObservationRosterPerson) {
+    const confirmed = window.confirm('Remove ' + person.name + ' from Observations? Existing saved observations will remain.');
+    if (!confirmed) return;
+
+    const targetKey = person.type + ':' + person.name.trim().toLowerCase();
+    const nextRoster = obsRoster.filter((item) => item.type + ':' + item.name.trim().toLowerCase() !== targetKey);
+    if (nextRoster.length > 0) {
+      persistObsRoster(nextRoster);
+    } else {
+      localStorage.removeItem('admini_roster_full');
+      localStorage.removeItem('admini_roster');
+      setObsRoster([]);
+    }
+    setObsRosterSuccess('Removed ' + person.name + ' from Observations');
+    setObsRosterError(null);
   }
 
   function handleClearObsRoster() {
@@ -648,6 +677,34 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         </section>
       </div>
     );
+  }
+
+  const lastObservedByObservee = useMemo(() => {
+    const byObservee = new Map<string, string>();
+
+    storedObservations.forEach((observation) => {
+      if (!observation.name) return;
+      const key = (observation.observeeType || 'student') + ':' + observation.name.trim().toLowerCase();
+      const value = observation.createdAt || observation.timestamp;
+      if (!value) return;
+
+      const previous = byObservee.get(key);
+      if (!previous || new Date(value).getTime() > new Date(previous).getTime()) {
+        byObservee.set(key, value);
+      }
+    });
+
+    return byObservee;
+  }, [storedObservations]);
+
+  function formatLastObserved(person: ObservationRosterPerson): string {
+    const value = lastObservedByObservee.get(person.type + ':' + person.name.trim().toLowerCase());
+    if (!value) return 'Never';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Never';
+
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   const roleLabel = (name: string) => 'Role for ' + name;
@@ -1084,26 +1141,39 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   className="admin-tab__cancel-btn"
                   onClick={handleClearObsRoster}
                 >
-                  Clear Subjects
+                  Clear Observees
                 </button>
               </div>
             </div>
             <div className="admin-tab__obs-roster-preview">
               <h3 className="admin-tab__subsection-title">Current Observees</h3>
-              <ul className="admin-tab__roster-list">
-                {obsRoster.slice(0, 10).map((person, idx) => (
-                  <li key={idx} className="admin-tab__roster-item">
-                    <span>{person.name}</span>
-                    <span className="admin-tab__roster-type">{person.type}</span>
-                    {person.grade && <span className="admin-tab__roster-grade">Grade {person.grade}</span>}
-                  </li>
+              <div className="admin-tab__observee-table" role="table" aria-label="Observation observees">
+                <div className="admin-tab__observee-row admin-tab__observee-row--header" role="row">
+                  <span role="columnheader">Name</span>
+                  <span role="columnheader">Type</span>
+                  <span role="columnheader">Grade</span>
+                  <span role="columnheader">Last observed</span>
+                  <span role="columnheader">Manage</span>
+                </div>
+                {obsRoster.map((person) => (
+                  <div key={person.type + ':' + person.name} className="admin-tab__observee-row" role="row">
+                    <span role="cell" className="admin-tab__observee-name">{person.name}</span>
+                    <span role="cell" className="admin-tab__roster-type">{person.type}</span>
+                    <span role="cell" className="admin-tab__roster-grade">{person.grade ? 'Grade ' + person.grade : '-'}</span>
+                    <span role="cell" className="admin-tab__observee-date">{formatLastObserved(person)}</span>
+                    <span role="cell">
+                      <button
+                        type="button"
+                        className="admin-tab__remove-member-btn"
+                        onClick={() => handleRemoveObsRosterPerson(person)}
+                        aria-label={'Remove ' + person.name + ' from Observations'}
+                      >
+                        Remove
+                      </button>
+                    </span>
+                  </div>
                 ))}
-                {obsRoster.length > 10 && (
-                  <li className="admin-tab__roster-item admin-tab__roster-item--more">
-                    ...and {obsRoster.length - 10} more
-                  </li>
-                )}
-              </ul>
+              </div>
             </div>
           </div>
         ) : (

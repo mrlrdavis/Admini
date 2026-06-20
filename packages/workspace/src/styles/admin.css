@@ -508,6 +508,45 @@
   padding: var(--ws-space-md);
 }
 
+.admin-tab__observee-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.admin-tab__observee-row {
+  align-items: center;
+  border-bottom: 1px solid #E8E5DE;
+  display: grid;
+  gap: var(--ws-space-md);
+  grid-template-columns: minmax(160px, 1.4fr) minmax(82px, 0.7fr) minmax(76px, 0.6fr) minmax(120px, 0.9fr) auto;
+  min-width: 680px;
+  padding: var(--ws-space-sm) 0;
+}
+
+.admin-tab__observee-row:last-child {
+  border-bottom: none;
+}
+
+.admin-tab__observee-row--header {
+  color: var(--ws-color-text);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-tab__observee-name {
+  color: var(--ws-color-text);
+  font-weight: 600;
+}
+
+.admin-tab__observee-date {
+  color: var(--ws-color-text);
+  font-size: var(--ws-font-size-sm);
+}
+
 .admin-tab__roster-type {
   font-size: var(--ws-font-size-xs);
   text-transform: uppercase;
