@@ -246,6 +246,7 @@ export function App() {
     if (!user) {
       setProfileLoaded(false);
       setUserRole('staff');
+      setOrganizationId(undefined);
       return () => { mounted = false; };
     }
     // Skip profile creation if there's a pending invitation - let acceptInvitation handle org membership first
@@ -256,10 +257,6 @@ export function App() {
       return () => { mounted = false; };
     }
     const preferredOrganizationId = getPreferredOrganizationId();
-    if (invitationFlowActiveState && !preferredOrganizationId) {
-      setProfileLoaded(true);
-      return () => { mounted = false; };
-    }
     const profilePromise = preferredOrganizationId
       ? getProfileForOrganization(preferredOrganizationId).catch(() => getOrCreateProfile())
       : getOrCreateProfile();

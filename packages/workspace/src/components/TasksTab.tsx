@@ -264,8 +264,8 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
           if (cancelled) return;
           setOrgMembers(members);
           setStaffRoster(Array.from(new Set(members.flatMap((member) => [
-            member.email,
             member.displayName,
+            member.email,
           ].filter(Boolean)))));
         })
         .catch(() => {});
@@ -282,13 +282,24 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
     return () => { cancelled = true; };
   }, [organizationId]);
 
-  function resolveAssigneeProfileId(assignee?: string): string | undefined {
+  function resolveAssigneeMember(assignee?: string): OrgMember | undefined {
     const normalized = assignee?.trim().toLowerCase();
     if (!normalized) return undefined;
     return orgMembers.find((member) =>
       member.email.toLowerCase() === normalized
       || member.displayName.toLowerCase() === normalized
-    )?.profileId;
+    );
+  }
+
+  function resolveAssigneeProfileId(assignee?: string): string | undefined {
+    return resolveAssigneeMember(assignee)?.profileId;
+  }
+
+  function getAssigneeSaveValue(assignee?: string): string | undefined {
+    const trimmed = assignee?.trim();
+    if (!trimmed) return undefined;
+    const member = resolveAssigneeMember(trimmed);
+    return member?.displayName || trimmed;
   }
 
   function canEditTask(task: DashboardTask): boolean {
@@ -455,9 +466,9 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
     try {
       await taskService.create({
         id: '', title: newTitle.trim(), description: newDescription.trim() || undefined, priority: newPriority,
-        status: 'open', dueAt: newDue || undefined, assignee: newAssignee.trim() || undefined,
+        status: 'open', dueAt: newDue || undefined, assignee: getAssigneeSaveValue(newAssignee),
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-        subtasks: newSubtasks.filter(s => s.title.trim()).map(s => ({ id: crypto.randomUUID(), title: s.title.trim(), assignee: s.assignee.trim() || undefined, dueAt: s.dueAt || undefined, completed: false })),
+        subtasks: newSubtasks.filter(s => s.title.trim()).map(s => ({ id: crypto.randomUUID(), title: s.title.trim(), assignee: getAssigneeSaveValue(s.assignee), dueAt: s.dueAt || undefined, completed: false })),
       });
       setNewTitle(''); setNewPriority('normal'); setNewDue(''); setNewDescription(''); setNewAssignee(''); setNewSubtasks([]); setNewFiles([]); setShowAddForm(false);
       await loadTaskList();
@@ -467,6 +478,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
 
   async function handleEditTask(taskId: string, updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string; blockReason?: string }) {
     const task = tasks.find(t => t.id === taskId);
+    const normalizedAssignee = updates.assignee !== undefined ? getAssigneeSaveValue(updates.assignee) : undefined;
     if (task && !canEditTask(task)) {
       showToast('Only task creators, admins, and principals can edit this task');
       return;
@@ -478,7 +490,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       description: updates.description ?? t.description,
       dueAt: updates.dueAt ?? t.dueAt,
       priority: (updates.priority as typeof t.priority) ?? t.priority,
-      assignedTo: updates.assignee ?? t.assignedTo,
+      assignedTo: updates.assignee !== undefined ? normalizedAssignee : t.assignedTo,
       blockReason: updates.blockReason ?? t.blockReason,
     } : t));
     try {
@@ -488,11 +500,12 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       if (updates.description !== undefined) payload.description = updates.description || null;
       if (updates.dueAt !== undefined) payload.due_at = updates.dueAt || null;
       if (updates.priority !== undefined) payload.priority = updates.priority;
-      if (updates.assignee !== undefined) payload.assigned_to = updates.assignee || null;
+      if (updates.assignee !== undefined) payload.assigned_to = normalizedAssignee || null;
       if (updates.blockReason !== undefined) payload.block_reason = updates.blockReason || null;
       await client.from('tasks').update(payload).eq('id', taskId);
       if (updates.assignee) {
-        notifyAssignee(taskId, resolveAssigneeProfileId(updates.assignee) ?? updates.assignee, 'updated', updates.title ?? task?.title)
+        const assigneeMember = resolveAssigneeMember(updates.assignee);
+        notifyAssignee(taskId, assigneeMember?.profileId ?? updates.assignee, 'updated', updates.title ?? task?.title)
           .catch((err) => showToast(err instanceof Error ? err.message : 'Failed to notify assignee'));
       }
       showToast('Task updated');
@@ -604,10 +617,14 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       showToast('Only task creators, admins, and principals can edit subtasks');
       return;
     }
+    const normalizedUpdates = { ...updates };
+    if (updates.assignee !== undefined) {
+      normalizedUpdates.assignee = getAssigneeSaveValue(updates.assignee);
+    }
     setSubtasksMap((current) => ({
       ...current,
       [taskId]: (current[taskId] ?? loadSubtasks(taskId)).map((subtask) =>
-        subtask.id === subtaskId ? { ...subtask, ...updates } : subtask
+        subtask.id === subtaskId ? { ...subtask, ...normalizedUpdates } : subtask
       ),
     }));
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, updatedAt: new Date().toISOString() } : t));
@@ -615,7 +632,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
       const client = getClient();
       const payload: Record<string, unknown> = {};
       if (updates.title !== undefined) payload.title = updates.title;
-      if (updates.assignee !== undefined) payload.assignee = updates.assignee || null;
+      if (updates.assignee !== undefined) payload.assignee = normalizedUpdates.assignee || null;
       if (updates.dueAt !== undefined) payload.due_at = updates.dueAt || null;
       if (updates.priority !== undefined) payload.priority = updates.priority || null;
       const { error } = await client.from('task_subtasks').update(payload).eq('id', subtaskId);
@@ -623,7 +640,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
     } catch {
       // Fallback to localStorage
       const st = loadSubtasks(taskId);
-      const updated = st.map(s => s.id === subtaskId ? { ...s, ...updates } : s);
+      const updated = st.map(s => s.id === subtaskId ? { ...s, ...normalizedUpdates } : s);
       localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
       setSubtasksMap((current) => ({ ...current, [taskId]: updated }));
     }
@@ -643,7 +660,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
         task_id: taskId,
         title: subtask.title,
         completed: false,
-        assignee: subtask.assignee || null,
+        assignee: getAssigneeSaveValue(subtask.assignee) || null,
         due_at: subtask.dueAt || null,
         priority: subtask.priority || null,
         sort_order: 0,
@@ -659,7 +676,7 @@ export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTa
     } catch {
       // Fallback to localStorage
       const st = loadSubtasks(taskId);
-      const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false, assignee: subtask.assignee, dueAt: subtask.dueAt, priority: subtask.priority };
+      const newSubtask = { id: crypto.randomUUID(), title: subtask.title, completed: false, assignee: getAssigneeSaveValue(subtask.assignee), dueAt: subtask.dueAt, priority: subtask.priority };
       const updated = [...st, newSubtask];
       localStorage.setItem('admini_subtasks_' + taskId, JSON.stringify(updated));
       setSubtasksMap((current) => ({ ...current, [taskId]: updated }));

@@ -196,6 +196,12 @@ export function TaskCard({
       {/* Expanded body */}
       {isExpanded && (
         <div className="task-card__body">
+          {staffRoster && staffRoster.length > 0 && (
+            <datalist id={'assignee-suggestions-' + task.id}>
+              {staffRoster.map((name) => <option key={name} value={name} />)}
+            </datalist>
+          )}
+
           {/* Blocked reason banner - always visible when blocked */}
           {task.status === 'archived' && (
             <div className="task-card__blocked-banner">
@@ -240,7 +246,7 @@ export function TaskCard({
                         }}
                       />
                       <div className="task-card__subtask-edit-details">
-                        <input className="task-card__subtask-edit-input" placeholder="Assignee" value={editSubtaskAssignee} onChange={(e) => setEditSubtaskAssignee(e.target.value)} style={{maxWidth:'120px'}} />
+                        <input className="task-card__subtask-edit-input" placeholder="Assignee" value={editSubtaskAssignee} onChange={(e) => setEditSubtaskAssignee(e.target.value)} style={{maxWidth:'120px'}} list={'assignee-suggestions-' + task.id} />
                         <input type="date" className="task-card__subtask-edit-input" value={editSubtaskDueAt} onChange={(e) => setEditSubtaskDueAt(e.target.value)} style={{maxWidth:'140px'}} />
                         <select className="task-card__subtask-edit-input" value={editSubtaskPriority} onChange={(e) => setEditSubtaskPriority(e.target.value)} style={{maxWidth:'100px'}}>
                           <option value="low">Low</option>
@@ -272,7 +278,13 @@ export function TaskCard({
                       onDoubleClick={() => onSubtaskEdit && startEditSubtask(subtask)}
                       title="Double-click to edit"
                     >
-                      {subtask.title}
+                      <span className="task-card__subtask-title-text">{subtask.title}</span>
+                      {(subtask.assignee || subtask.dueAt) && (
+                        <span className="task-card__subtask-details">
+                          {subtask.assignee && <span className="task-card__subtask-detail">Assigned to {subtask.assignee}</span>}
+                          {subtask.dueAt && <span className="task-card__subtask-detail">Due {formatDueDate(subtask.dueAt)}</span>}
+                        </span>
+                      )}
                       {onSubtaskEdit && (
                         <button
                           type="button"
@@ -317,7 +329,7 @@ export function TaskCard({
                     }}
                   />
                   <div className="task-card__add-subtask-details">
-                    <input className="task-card__add-subtask-input" placeholder="Assignee" value={newSubtaskAssignee} onChange={(e) => setNewSubtaskAssignee(e.target.value)} style={{maxWidth:'120px'}} />
+                    <input className="task-card__add-subtask-input" placeholder="Assignee" value={newSubtaskAssignee} onChange={(e) => setNewSubtaskAssignee(e.target.value)} style={{maxWidth:'120px'}} list={'assignee-suggestions-' + task.id} />
                     <input type="date" className="task-card__add-subtask-input" value={newSubtaskDueAt} onChange={(e) => setNewSubtaskDueAt(e.target.value)} style={{maxWidth:'140px'}} />
                   </div>
                   <button
@@ -389,11 +401,7 @@ export function TaskCard({
               </div>
               <label className="task-card__edit-label">Assignee
                 <input className="task-card__edit-input" value={eAssignee} onChange={(e) => setEAssignee(e.target.value)} placeholder="Email or name" list={'assignee-suggestions-' + task.id} />
-                {staffRoster && staffRoster.length > 0 && (
-                  <datalist id={'assignee-suggestions-' + task.id}>
-                    {staffRoster.map((name) => <option key={name} value={name} />)}
-                  </datalist>
-                )}
+
               </label>
               <div className="task-card__actions">
                 <button type="button" className="task-card__action-btn task-card__action-btn--primary" onClick={saveEdit}>Save</button>

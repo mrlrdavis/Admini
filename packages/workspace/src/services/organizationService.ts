@@ -18,10 +18,12 @@ type DbMembership = {
   profile_id: string;
   role: AdminiRole;
   created_at: string;
-  profiles: {
-    email: string;
-    display_name: string;
-  };
+};
+
+type DbMemberProfile = {
+  id: string;
+  email: string | null;
+  display_name: string | null;
 };
 
 type DbFeatureFlag = {
@@ -108,20 +110,41 @@ export async function updateOrgDetails(orgId: string, form: OrgDetailsForm): Pro
  */
 export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
   const client = getClient();
-  const { data, error } = await client
+  const { data: memberships, error } = await client
     .from('organization_memberships')
-    .select('profile_id, role, created_at, profiles(email, display_name)')
+    .select('profile_id, role, created_at')
     .eq('organization_id', orgId)
+    .order('created_at', { ascending: true })
     .returns<DbMembership[]>();
 
   if (error) wrapError(error, 'Failed to fetch organization members.');
-  return (data ?? []).map((row) => ({
-    profileId: row.profile_id,
-    email: row.profiles.email,
-    displayName: row.profiles.display_name,
-    role: row.role,
-    joinedAt: row.created_at,
-  }));
+
+  const profileIds = (memberships ?? []).map((row) => row.profile_id);
+  if (profileIds.length === 0) return [];
+
+  const { data: profiles, error: profileError } = await client
+    .from('profiles')
+    .select('id, email, display_name')
+    .in('id', profileIds)
+    .returns<DbMemberProfile[]>();
+
+  if (profileError) wrapError(profileError, 'Failed to fetch organization member profiles.');
+
+  const profilesById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+
+  return (memberships ?? []).map((row) => {
+    const profile = profilesById.get(row.profile_id);
+    const email = profile?.email ?? '';
+    const displayName = profile?.display_name?.trim() || email.split('@')[0] || 'Team member';
+
+    return {
+      profileId: row.profile_id,
+      email,
+      displayName,
+      role: row.role,
+      joinedAt: row.created_at,
+    };
+  });
 }
 
 /**
