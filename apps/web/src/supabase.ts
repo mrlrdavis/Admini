@@ -1,4 +1,4 @@
-﻿import { mapSupabaseError } from '@admini/shared';
+import { mapSupabaseError } from '@admini/shared';
 import { createClient, type Provider, type User } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
@@ -275,7 +275,17 @@ export async function checkOnboardingComplete(): Promise<boolean> {
   if (!supabase) return false;
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return false;
-  return data.user.user_metadata?.onboarding_complete === true;
+  if (data.user.user_metadata?.onboarding_complete === true) return true;
+
+  // Existing org membership is authoritative. Invited users may not have
+  // onboarding metadata, especially after clearing browser storage.
+  const existingMembership = await getProfileFromLatestMembership().catch(() => null);
+  if (existingMembership?.organization_id) {
+    supabase.auth.updateUser({ data: { onboarding_complete: true } }).catch(() => undefined);
+    return true;
+  }
+
+  return false;
 }
 
 export async function markOnboardingComplete(): Promise<void> {

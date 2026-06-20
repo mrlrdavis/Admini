@@ -1,10 +1,11 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import {
   getOrgDetails,
   updateOrgDetails as updateOrgDetailsSvc,
   listOrgMembers,
   updateMemberRole as updateMemberRoleSvc,
+  removeOrgMember as removeOrgMemberSvc,
   listFeatureFlags,
   toggleFeatureFlag as toggleFeatureFlagSvc,
 } from '../services/organizationService';
@@ -45,6 +46,7 @@ export interface UseOrgDataReturn {
   // Mutation functions
   updateOrgDetails: (form: OrgDetailsForm) => Promise<void>;
   updateMemberRole: (profileId: string, role: AdminiRole) => Promise<void>;
+  removeOrgMember: (profileId: string) => Promise<void>;
   createInvitation: (email: string, role: AdminiRole) => Promise<void>;
   revokeInvitation: (invitationId: string) => Promise<void>;
   toggleFeatureFlag: (flagId: string, enabled: boolean) => Promise<void>;
@@ -158,6 +160,17 @@ export function useOrgData(orgId: string): UseOrgDataReturn {
   );
 
   /**
+   * Remove a member from this organization. On success, local state is updated.
+   * Throws on failure.
+   */
+  const removeOrgMember = useCallback(
+    async (profileId: string): Promise<void> => {
+      await removeOrgMemberSvc(orgId, profileId);
+      setMembers((prev) => prev.filter((m) => m.profileId !== profileId));
+    },
+    [orgId],
+  );
+  /**
    * Create an invitation. On success, the new invitation is prepended to the
    * invitations list. Throws on failure.
    */
@@ -212,6 +225,7 @@ export function useOrgData(orgId: string): UseOrgDataReturn {
     error,
     updateOrgDetails,
     updateMemberRole,
+    removeOrgMember,
     createInvitation,
     revokeInvitation,
     toggleFeatureFlag,

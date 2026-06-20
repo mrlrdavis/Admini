@@ -168,6 +168,26 @@ export async function updateMemberRole(
 /**
  * List all feature flags for an organization.
  */
+/**
+ * Remove a member from an organization.
+ */
+export async function removeOrgMember(
+  orgId: string,
+  profileId: string,
+): Promise<void> {
+  const client = getClient();
+  const { error } = await client
+    .from('organization_memberships')
+    .delete()
+    .eq('organization_id', orgId)
+    .eq('profile_id', profileId);
+
+  if (error) wrapError(error, 'Failed to remove member from organization.');
+}
+
+/**
+ * List all feature flags for an organization.
+ */
 export async function listFeatureFlags(orgId: string): Promise<OrgFeatureFlag[]> {
   const client = getClient();
   const { data, error } = await client

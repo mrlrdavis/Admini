@@ -1,4 +1,4 @@
-﻿import { integrationCatalog } from '@admini/integrations';
+import { integrationCatalog } from '@admini/integrations';
 import { clearAdminiBrowserState, createIndexedDbStorage } from '@admini/shared';
 import { useEffect, useState } from 'react';
 import {
@@ -299,13 +299,25 @@ export function App() {
     return () => { mounted = false; };
   }, [user?.id, invitationToken, invitationFlowActiveState]);
 
-  // Listen for auth state changes (token refresh failures, sign-out from another tab)
+  // Listen for auth state changes (OAuth callbacks, token refresh failures, sign-out from another tab)
   useEffect(() => {
     if (!supabase) return;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
+      }
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          displayName: session.user.user_metadata?.display_name
+            ?? session.user.user_metadata?.full_name
+            ?? session.user.user_metadata?.name
+            ?? null,
+          schoolName: session.user.user_metadata?.school_name ?? null,
+        });
+        setLoadingUser(false);
       }
       // Capture Google provider token whenever it appears
       if (session?.provider_token) {

@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    AdminTab styles
    ========================================================================== */
 
@@ -437,6 +437,25 @@
   color: var(--ws-color-error);
 }
 
+.admin-tab__remove-member-btn {
+  padding: 4px 12px;
+  background: transparent;
+  color: var(--ws-color-error);
+  border: 1px solid var(--ws-color-error);
+  border-radius: var(--ws-radius-sm);
+  font-size: var(--ws-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-tab__remove-member-btn:hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.admin-tab__remove-member-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 .admin-tab__revoke-btn {
   padding: 4px 12px;
   background: transparent;

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getClassroomCourses, getClassroomStudents, getGoogleToken, type ClassroomCourse, type ClassroomStudent } from '../services/googleIntegrationService';
 import { sendInvitation, getPendingInvitations, revokeInvitation as revokeInvitationSvc } from '../services/invitationService';
 import { parseRosterFile, validateRosterRows, bulkAddMembers, type RosterRow, type RowError, type BulkAddResult } from '../services/rosterUploadService';
@@ -63,6 +63,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     error,
     updateOrgDetails,
     updateMemberRole,
+    removeOrgMember,
     createInvitation,
     revokeInvitation,
     toggleFeatureFlag,
@@ -113,6 +114,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
   // Member Role Change State
   // -------------------------------------------------------------------------
   const [roleChanging, setRoleChanging] = useState<string | null>(null);
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const [roleError, setRoleError] = useState<string | null>(null);
 
   // -------------------------------------------------------------------------
@@ -452,6 +454,22 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     }
   }
 
+  async function handleRemoveMember(profileId: string, displayName: string) {
+    const confirmed = window.confirm(`Remove ${displayName} from this school? They will lose access to this workspace.`);
+    if (!confirmed) return;
+
+    setRemovingMemberId(profileId);
+    setRoleError(null);
+
+    try {
+      await removeOrgMember(profileId);
+    } catch (err) {
+      setRoleError(getErrorMessage(err));
+    } finally {
+      setRemovingMemberId(null);
+    }
+  }
+
   async function handleFlagToggle(flagId: string, enabled: boolean) {
     setFlagToggling(flagId);
     setFlagError(null);
@@ -528,6 +546,15 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                     <option value="teacher">Teacher</option>
                     <option value="staff">Staff</option>
                   </select>
+                  <button
+                    type="button"
+                    className="admin-tab__remove-member-btn"
+                    disabled={removingMemberId === member.profileId || roleChanging === member.profileId}
+                    onClick={() => handleRemoveMember(member.profileId, member.displayName)}
+                    aria-label={`Remove ${member.displayName} from Staff Roster`}
+                  >
+                    {removingMemberId === member.profileId ? 'Removing...' : 'Remove'}
+                  </button>
                 </li>
               ))}
             </ul>
@@ -751,6 +778,15 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   <option value="teacher">Teacher</option>
                   <option value="staff">Staff</option>
                 </select>
+                <button
+                  type="button"
+                  className="admin-tab__remove-member-btn"
+                  disabled={removingMemberId === member.profileId || roleChanging === member.profileId}
+                  onClick={() => handleRemoveMember(member.profileId, member.displayName)}
+                  aria-label={`Remove ${member.displayName} from Staff Roster`}
+                >
+                  {removingMemberId === member.profileId ? 'Removing...' : 'Remove'}
+                </button>
                 {roleChanging === member.profileId && (
                   <span className="admin-tab__loading-indicator">Updating...</span>
                 )}
