@@ -133,10 +133,6 @@ export function App() {
       localStorage.setItem(invitationTokenStorageKey, token);
       setInvitationFlowActive(true);
       setInvitationFlowActiveState(true);
-      params.delete('invitation_token');
-      params.delete('invite');
-      const nextSearch = params.toString();
-      window.history.replaceState({}, '', `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`);
     } else {
       const stored = sessionStorage.getItem(invitationTokenStorageKey) || localStorage.getItem(invitationTokenStorageKey);
       if (stored) {
