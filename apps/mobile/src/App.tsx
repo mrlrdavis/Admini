@@ -270,7 +270,7 @@ export function App() {
     if (!user || !invitationToken) return;
     let mounted = true;
 
-    acceptInvitation(invitationToken).then((result) => {
+    acceptInvitation(invitationToken).then(async (result) => {
       if (!mounted) return;
       if (result.success) {
         // Clear the invitation token from state and sessionStorage

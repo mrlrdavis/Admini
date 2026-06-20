@@ -1,4 +1,4 @@
-import { integrationCatalog } from '@admini/integrations';
+﻿import { integrationCatalog } from '@admini/integrations';
 import { clearAdminiBrowserState, createIndexedDbStorage } from '@admini/shared';
 import { useEffect, useState } from 'react';
 import {
@@ -198,6 +198,11 @@ export function App() {
       setUserRole('admin');
       return () => { mounted = false; };
     }
+    // Skip profile creation if there's a pending invitation - let acceptInvitation handle org membership first
+    if (invitationToken) {
+      setProfileLoaded(true);
+      return () => { mounted = false; };
+    }
     getOrCreateProfile()
       .then(async (profile: { role: string; organization_id: string; display_name: string }) => {
         if (!mounted) return;
@@ -279,7 +284,7 @@ export function App() {
     if (!user || !invitationToken) return;
     let mounted = true;
 
-    acceptInvitation(invitationToken).then((result: { success: boolean; organizationName?: string; error?: string }) => {
+    acceptInvitation(invitationToken).then(async (result: { success: boolean; organizationName?: string; error?: string }) => {
       if (!mounted) return;
       if (result.success) {
         setInvitationToken(null);
@@ -287,10 +292,32 @@ export function App() {
         if (result.organizationName) {
           setUser((prev) => prev ? { ...prev, schoolName: result.organizationName } : prev);
         }
+        // Now load the profile to get the correct org membership
+        try {
+          const profile = await getOrCreateProfile();
+          if (mounted) {
+            setUserRole(profile.role);
+            setOrganizationId(profile.organization_id);
+            setProfileLoaded(true);
+          }
+        } catch {
+          if (mounted) setProfileLoaded(true);
+        }
       } else {
         setInvitationError(result.error ?? 'This invitation link is no longer valid. Please ask your administrator to send a new one.');
         setInvitationToken(null);
         sessionStorage.removeItem('admini_invitation_token');
+        // Still load profile even on invitation failure (user may need a new org)
+        try {
+          const profile = await getOrCreateProfile();
+          if (mounted) {
+            setUserRole(profile.role);
+            setOrganizationId(profile.organization_id);
+            setProfileLoaded(true);
+          }
+        } catch {
+          if (mounted) setProfileLoaded(true);
+        }
       }
     });
 
