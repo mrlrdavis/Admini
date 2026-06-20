@@ -512,6 +512,34 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
     }
   }
 
+  const lastObservedByObservee = useMemo(() => {
+    const byObservee = new Map<string, string>();
+
+    storedObservations.forEach((observation) => {
+      if (!observation.name) return;
+      const key = (observation.observeeType || 'student') + ':' + observation.name.trim().toLowerCase();
+      const value = observation.createdAt || observation.timestamp;
+      if (!value) return;
+
+      const previous = byObservee.get(key);
+      if (!previous || new Date(value).getTime() > new Date(previous).getTime()) {
+        byObservee.set(key, value);
+      }
+    });
+
+    return byObservee;
+  }, [storedObservations]);
+
+  function formatLastObserved(person: ObservationRosterPerson): string {
+    const value = lastObservedByObservee.get(person.type + ':' + person.name.trim().toLowerCase());
+    if (!value) return 'Never';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Never';
+
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
@@ -677,34 +705,6 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         </section>
       </div>
     );
-  }
-
-  const lastObservedByObservee = useMemo(() => {
-    const byObservee = new Map<string, string>();
-
-    storedObservations.forEach((observation) => {
-      if (!observation.name) return;
-      const key = (observation.observeeType || 'student') + ':' + observation.name.trim().toLowerCase();
-      const value = observation.createdAt || observation.timestamp;
-      if (!value) return;
-
-      const previous = byObservee.get(key);
-      if (!previous || new Date(value).getTime() > new Date(previous).getTime()) {
-        byObservee.set(key, value);
-      }
-    });
-
-    return byObservee;
-  }, [storedObservations]);
-
-  function formatLastObserved(person: ObservationRosterPerson): string {
-    const value = lastObservedByObservee.get(person.type + ':' + person.name.trim().toLowerCase());
-    if (!value) return 'Never';
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Never';
-
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   const roleLabel = (name: string) => 'Role for ' + name;
