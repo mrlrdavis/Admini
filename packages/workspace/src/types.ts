@@ -75,6 +75,7 @@ export interface ActivityEvent {
   id: string;
   organizationId: string;
   actorId: string;
+  actorName?: string;
   entityType: string;
   entityId: string;
   action: string;
@@ -97,6 +98,7 @@ export interface NavigationAdapterProps {
   userName?: string;
   userRole?: string;
   schoolName?: string;
+  unreadNotificationCount?: number;
 }
 
 // Auth user (minimal shape expected by workspace)

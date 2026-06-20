@@ -52,7 +52,7 @@ function CollapseIcon() {
 
 const CORE_TAB_IDS = ['capture', 'dashboard', 'tasks', 'notes', 'observations', 'pulse'];
 
-export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShowPwaInstall, userId, userName, userRole, schoolName }: NavigationAdapterProps) {
+export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShowPwaInstall, userId, userName, userRole, schoolName, unreadNotificationCount }: NavigationAdapterProps) {
   const { isInstallable, isStandalone, promptInstall } = useInstallPrompt();
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -109,7 +109,8 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
   const hasAdmin = tabs.some(t => t.id === 'admin');
   const initial = (userName || 'U').trim().charAt(0).toUpperCase();
   const roleSchool = [userRole, schoolName].filter(Boolean).join(' · ');
-  const badgeLabel = unreadCount > 99 ? '99+' : String(unreadCount);
+  const displayUnreadCount = unreadNotificationCount ?? unreadCount;
+  const badgeLabel = displayUnreadCount > 99 ? '99+' : String(displayUnreadCount);
 
   return (
     <nav className={'desktop-sidebar' + (collapsed ? ' desktop-sidebar--collapsed' : '')} aria-label="Workspace navigation">
@@ -150,8 +151,8 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
             <button type="button" className="desktop-sidebar__menu-item" onClick={() => { onTabChange('notifications' as WorkspaceTab); setMenuOpen(false); }}>
               <span className="desktop-sidebar__menu-icon">🔔</span>
               <span className="desktop-sidebar__menu-label">Notifications</span>
-              {unreadCount > 0 && (
-                <span className="desktop-sidebar__menu-badge" aria-label={`${unreadCount} unread notifications`}>
+              {displayUnreadCount > 0 && (
+                <span className="desktop-sidebar__menu-badge" aria-label={`${displayUnreadCount} unread notifications`}>
                   {badgeLabel}
                 </span>
               )}
@@ -171,8 +172,8 @@ export function DesktopSidebar({ activeTab, tabs, onTabChange, onSignOut, onShow
         <button type="button" className="desktop-sidebar__avatar-btn" onClick={() => setMenuOpen(o => !o)} aria-label="Account menu">
           <span className="desktop-sidebar__avatar-wrap">
             <span className="desktop-sidebar__avatar">{initial}</span>
-            {unreadCount > 0 && (
-              <span className="desktop-sidebar__avatar-badge" aria-label={`${unreadCount} unread notifications`}>
+            {displayUnreadCount > 0 && (
+              <span className="desktop-sidebar__avatar-badge" aria-label={`${displayUnreadCount} unread notifications`}>
                 {badgeLabel}
               </span>
             )}

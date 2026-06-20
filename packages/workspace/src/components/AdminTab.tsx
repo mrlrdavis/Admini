@@ -1023,15 +1023,15 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
         )}
       </section>
 
-      {/* Observation Subjects Section */}
+      {/* Observations Section */}
       <section className="admin-tab__section" aria-labelledby="obs-roster-heading">
         <div className="admin-tab__section-header">
           <div>
             <h2 id="obs-roster-heading" className="admin-tab__section-title">
-              Observation Subjects
+              Observations
             </h2>
             <p className="admin-tab__section-desc">
-              Upload people who can be selected as observation subjects. CSV columns: name, type (student/staff), grade (optional).
+              Upload people who can be selected as observees. CSV columns: name, type (student/staff), grade (optional).
             </p>
             <p className="admin-tab__section-hint">
               <strong>Important:</strong> Staff in this roster are people who may be observed, not Admini users. Use Staff Roster and Team Invites for workspace access.
@@ -1044,7 +1044,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               onClick={() => obsRosterFileRef.current?.click()}
               disabled={obsRosterUploading}
             >
-              {obsRosterUploading ? 'Uploading...' : 'Upload Subjects'}
+              {obsRosterUploading ? 'Uploading...' : 'Upload Observees'}
             </button>
           )}
         </div>
@@ -1077,7 +1077,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
                   onClick={() => obsRosterFileRef.current?.click()}
                   disabled={obsRosterUploading}
                 >
-                  Replace Subjects
+                  Replace Observees
                 </button>
                 <button
                   type="button"
@@ -1089,7 +1089,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
               </div>
             </div>
             <div className="admin-tab__obs-roster-preview">
-              <h3 className="admin-tab__subsection-title">Current Subjects</h3>
+              <h3 className="admin-tab__subsection-title">Current Observees</h3>
               <ul className="admin-tab__roster-list">
                 {obsRoster.slice(0, 10).map((person, idx) => (
                   <li key={idx} className="admin-tab__roster-item">
@@ -1108,7 +1108,7 @@ export function AdminTab({ organizationId, userRole }: AdminTabProps) {
           </div>
         ) : (
           <p className="admin-tab__empty">
-            No observation subjects uploaded yet. Upload students or staff who may be selected in classroom observations.
+            No observees uploaded yet. Upload students or staff who may be selected in classroom observations.
           </p>
         )}
       </section>

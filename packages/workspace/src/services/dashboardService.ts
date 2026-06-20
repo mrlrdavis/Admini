@@ -33,6 +33,12 @@ type DbSyncEvent = {
   created_at: string;
 };
 
+type DbActorProfile = {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+};
+
 // ---------------------------------------------------------------------------
 // Errors
 // ---------------------------------------------------------------------------
@@ -78,11 +84,12 @@ export function mapTask(row: DbTask): DashboardTask {
   };
 }
 
-export function mapSyncEvent(row: DbSyncEvent): ActivityEvent {
+export function mapSyncEvent(row: DbSyncEvent, actorName?: string): ActivityEvent {
   return {
     id: row.id,
     organizationId: row.organization_id,
     actorId: row.actor_id,
+    actorName,
     entityType: row.entity_type,
     entityId: row.entity_id,
     action: row.action,
@@ -193,7 +200,24 @@ export async function getActivityEvents(): Promise<ActivityEvent[]> {
       throw new DashboardServiceError(error.message, error.code);
     }
 
-    return (data ?? []).map(mapSyncEvent);
+    const rows = data ?? [];
+    const actorIds = Array.from(new Set(rows.map((row) => row.actor_id).filter(Boolean)));
+    let actorNames = new Map<string, string>();
+
+    if (actorIds.length > 0) {
+      const { data: profiles } = await client
+        .from('profiles')
+        .select('id, email, display_name')
+        .in('id', actorIds)
+        .returns<DbActorProfile[]>();
+
+      actorNames = new Map((profiles ?? []).map((profile) => [
+        profile.id,
+        profile.display_name?.trim() || profile.email?.split('@')[0] || 'Someone',
+      ]));
+    }
+
+    return rows.map((row) => mapSyncEvent(row, actorNames.get(row.actor_id)));
   } catch (err) {
     if (err instanceof DashboardServiceError) throw err;
     throw new DashboardServiceError(

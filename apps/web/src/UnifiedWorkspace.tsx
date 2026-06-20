@@ -77,7 +77,7 @@ export function UnifiedWorkspace({
           onDeleteAccount={onDeleteAccount}
           onResetUserData={onResetUserData}
           onProfileUpdated={onProfileUpdated}
-          renderNavigation={({ activeTab, tabs, onTabChange, onSignOut: navSignOut, userName: navUser, userRole: navRole, schoolName: navSchool }) => (
+          renderNavigation={({ activeTab, tabs, onTabChange, onSignOut: navSignOut, userId: navUserId, userName: navUser, userRole: navRole, schoolName: navSchool, unreadNotificationCount }) => (
             <NavigationRenderer
               layoutMode={layoutMode}
               activeTab={activeTab}
@@ -85,9 +85,11 @@ export function UnifiedWorkspace({
               onTabChange={onTabChange}
               onSignOut={navSignOut}
               onShowPwaInstall={openPwaModal}
+              userId={navUserId}
               userName={navUser}
               userRole={navRole}
               schoolName={navSchool}
+              unreadNotificationCount={unreadNotificationCount}
             />
           )}
         />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   listNotifications,
   markNotificationRead,
@@ -17,6 +17,8 @@ const REACTION_OPTIONS: Array<{ value: NotificationReaction; label: string }> = 
   { value: 'on_it', label: 'On it' },
   { value: 'thanks', label: 'Thanks' },
 ];
+
+type NotificationFilter = 'all' | 'unread' | 'flagged';
 
 function formatNotificationTime(value: string): string {
   const date = new Date(value);
@@ -40,6 +42,7 @@ export function NotificationsTab({ userId, onTabChange }: NotificationsTabProps)
   const [error, setError] = useState<string | null>(null);
   const [enabled, setEnabled] = useState(true);
   const [savingIds, setSavingIds] = useState<Set<string>>(() => new Set());
+  const [filter, setFilter] = useState<NotificationFilter>('all');
 
   async function loadNotifications() {
     setLoading(true);
@@ -125,6 +128,14 @@ export function NotificationsTab({ userId, onTabChange }: NotificationsTabProps)
     }
   }
 
+  const unreadCount = useMemo(() => notifications.filter((notification) => !notification.read).length, [notifications]);
+  const flaggedCount = useMemo(() => notifications.filter((notification) => notification.metadata.flagged).length, [notifications]);
+  const visibleNotifications = useMemo(() => {
+    if (filter === 'unread') return notifications.filter((notification) => !notification.read);
+    if (filter === 'flagged') return notifications.filter((notification) => notification.metadata.flagged);
+    return notifications;
+  }, [filter, notifications]);
+
   async function chooseReaction(notification: TaskNotification, reaction: NotificationReaction) {
     const nextReaction = notification.metadata.reaction === reaction ? null : reaction;
     const optimisticMetadata = { ...notification.metadata };
@@ -180,8 +191,17 @@ export function NotificationsTab({ userId, onTabChange }: NotificationsTabProps)
       )}
 
       {!loading && !error && enabled && notifications.length > 0 && (
+        <>
+          <div className="notifications-tab__filters" role="group" aria-label="Notification filters">
+            <button type="button" className={filter === 'all' ? 'notifications-tab__filter-btn notifications-tab__filter-btn--active' : 'notifications-tab__filter-btn'} onClick={() => setFilter('all')}>All <span>{notifications.length}</span></button>
+            <button type="button" className={filter === 'unread' ? 'notifications-tab__filter-btn notifications-tab__filter-btn--active' : 'notifications-tab__filter-btn'} onClick={() => setFilter('unread')}>Unread <span>{unreadCount}</span></button>
+            <button type="button" className={filter === 'flagged' ? 'notifications-tab__filter-btn notifications-tab__filter-btn--active' : 'notifications-tab__filter-btn'} onClick={() => setFilter('flagged')}>Flagged <span>{flaggedCount}</span></button>
+          </div>
+          {visibleNotifications.length === 0 ? (
+            <p className="notifications-tab__empty">No {filter} notifications.</p>
+          ) : (
         <ul className="notifications-tab__list">
-          {notifications.map((notification) => {
+          {visibleNotifications.map((notification) => {
             const saving = savingIds.has(notification.id);
             return (
               <li
@@ -234,6 +254,8 @@ export function NotificationsTab({ userId, onTabChange }: NotificationsTabProps)
             );
           })}
         </ul>
+          )}
+        </>
       )}
     </section>
   );

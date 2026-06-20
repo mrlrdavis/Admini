@@ -32,7 +32,7 @@ function LogoutIcon() {
   );
 }
 
-export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: NavigationAdapterProps) {
+export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut, unreadNotificationCount }: NavigationAdapterProps) {
   const [open, setOpen] = useState(false);
 
   function handleTabSelect(tabId: string) {
@@ -42,6 +42,7 @@ export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: Nav
 
   const triggerClass = 'mobile-nav-trigger' + (open ? ' mobile-nav-trigger--open' : '');
   const drawerClass = 'mobile-nav-drawer' + (open ? ' mobile-nav-drawer--open' : '');
+  const badgeLabel = unreadNotificationCount && unreadNotificationCount > 99 ? '99+' : String(unreadNotificationCount ?? 0);
 
   return (
     <>
@@ -57,6 +58,11 @@ export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: Nav
           <span />
           <span />
         </span>
+        {unreadNotificationCount && unreadNotificationCount > 0 && (
+          <span className="mobile-nav-trigger__badge" aria-label={String(unreadNotificationCount) + ' unread notifications'}>
+            {badgeLabel}
+          </span>
+        )}
       </button>
       <div className={drawerClass}>
         <div className="mobile-nav-drawer__backdrop" onClick={() => setOpen(false)} aria-hidden="true" />
@@ -76,6 +82,11 @@ export function MobileHamburger({ activeTab, tabs, onTabChange, onSignOut }: Nav
                   >
                     <span className="mobile-nav-drawer__tab-icon"><TabIcon id={tab.id} /></span>
                     <span className="mobile-nav-drawer__tab-label">{tab.label}</span>
+                    {tab.id === 'notifications' && unreadNotificationCount && unreadNotificationCount > 0 && (
+                      <span className="mobile-nav-drawer__badge" aria-label={String(unreadNotificationCount) + ' unread notifications'}>
+                        {badgeLabel}
+                      </span>
+                    )}
                   </button>
                 </li>
               );

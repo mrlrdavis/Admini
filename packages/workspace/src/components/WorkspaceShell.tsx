@@ -5,7 +5,7 @@
 // and IframeFallback for unconverted tabs.
 // Requirements: 4.1, 4.4, 4.5, 6.2, 6.4, 7.2
 
-import { useState, useMemo, useEffect, type ReactNode } from 'react';
+import { useState, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import type { WorkspaceTab, TabItem, WorkspaceShellProps } from '../types';
 import { DashboardTab } from './DashboardTab';
 import { AdminTab } from './AdminTab';
@@ -19,6 +19,8 @@ import { ObservationsTab } from './ObservationsTab';
 import { IframeFallback } from './IframeFallback';
 import { ToastContainer } from './Toast';
 import { getAppPreferences } from '../services/appPreferencesStorage';
+import { loadNotificationPreferences } from '../services/notificationPreferences';
+import { getUnreadNotificationCount, NOTIFICATIONS_UPDATED_EVENT } from '../services/notificationService';
 
 /** Set of tabs with native React implementations. */
 export const NATIVE_TABS: ReadonlySet<WorkspaceTab> = new Set([
@@ -39,6 +41,37 @@ export function WorkspaceShell({
   renderNavigation,
 }: WorkspaceShellProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('dashboard');
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+
+  const loadUnreadNotificationCount = useCallback(async () => {
+    try {
+      const [preferences, count] = await Promise.all([
+        loadNotificationPreferences(user.id),
+        getUnreadNotificationCount(),
+      ]);
+      setUnreadNotificationCount(preferences.pushNotifications ? count : 0);
+    } catch {
+      setUnreadNotificationCount(0);
+    }
+  }, [user.id]);
+
+  useEffect(() => {
+    loadUnreadNotificationCount();
+  }, [loadUnreadNotificationCount]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadUnreadNotificationCount();
+    };
+    window.addEventListener(NOTIFICATIONS_UPDATED_EVENT, loadUnreadNotificationCount);
+    window.addEventListener('focus', loadUnreadNotificationCount);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener(NOTIFICATIONS_UPDATED_EVENT, loadUnreadNotificationCount);
+      window.removeEventListener('focus', loadUnreadNotificationCount);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [loadUnreadNotificationCount]);
 
   // Dashboard is always the landing tab
 
@@ -104,7 +137,7 @@ export function WorkspaceShell({
 
   return (
     <>
-      {renderNavigation({ activeTab, tabs: visibleTabs, onTabChange: handleTabChange, onSignOut, userId: user.id, userName, userRole, schoolName })}
+      {renderNavigation({ activeTab, tabs: visibleTabs, onTabChange: handleTabChange, onSignOut, userId: user.id, userName, userRole, schoolName, unreadNotificationCount })}
       <div className="workspace-shell__content">
         {NATIVE_TABS.has(activeTab) && renderTabContent()}
       </div>

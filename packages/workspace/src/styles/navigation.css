@@ -100,6 +100,25 @@
   background: #F5F3EE;
 }
 
+.mobile-nav-trigger__badge {
+  align-items: center;
+  background: #C62828;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.625rem;
+  font-weight: 800;
+  height: 18px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 18px;
+  padding: 0 5px;
+  position: absolute;
+  right: -5px;
+  top: -5px;
+}
+
 .mobile-nav-trigger__icon {
   width: 20px;
   height: 14px;
@@ -228,6 +247,21 @@
 
 .mobile-nav-drawer__tab-label {
   flex: 1;
+}
+
+.mobile-nav-drawer__badge {
+  align-items: center;
+  background: #C62828;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  height: 20px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 20px;
+  padding: 0 6px;
 }
 
 .mobile-nav-drawer__sign-out {

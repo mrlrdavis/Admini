@@ -49,6 +49,40 @@
   opacity: 0.62;
 }
 
+.notifications-tab__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.notifications-tab__filter-btn {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #c8d0dc;
+  border-radius: 999px;
+  color: #172033;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.88rem;
+  gap: 0.35rem;
+  min-height: 34px;
+  padding: 0 0.75rem;
+}
+
+.notifications-tab__filter-btn span {
+  color: #5f6673;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.notifications-tab__filter-btn--active {
+  border-color: #6b8e6b;
+  background: #eef5ed;
+  color: #2f5f32;
+  font-weight: 700;
+}
+
 .notifications-tab__list {
   display: flex;
   flex-direction: column;

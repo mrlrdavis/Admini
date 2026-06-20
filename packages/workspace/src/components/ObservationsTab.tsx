@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { saveCapture } from '../services/captureService';
 import { showToast } from './Toast';
 import { sendEmail } from '../services/googleIntegrationService';
 import { unlockBadge } from './BadgesPanel';
 import { generateTaskFromContent, AITaskServiceError } from '../services/aiTaskService';
+import { listOrgMembers } from '../services/organizationService';
 
 // Types
 interface Observation {
@@ -36,6 +37,7 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
   const canAccess = userRole === 'admin' || userRole === 'principal';
 
   const [roster, setRoster] = useState<{ name: string; type: 'student' | 'staff'; grade?: string }[]>([]);
+  const [staffRoster, setStaffRoster] = useState<{ name: string; type: 'staff'; grade?: string }[]>([]);
   const [observations, setObservations] = useState<Observation[]>([]);
   const [observeeType, setObserveeType] = useState<'student' | 'staff'>('student');
   const [name, setName] = useState('');
@@ -71,6 +73,28 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
       if (obsRaw) setObservations(JSON.parse(obsRaw));
     } catch {}
   }, []);
+  useEffect(() => {
+    if (!organizationId) {
+      setStaffRoster([]);
+      return;
+    }
+
+    let cancelled = false;
+    listOrgMembers(organizationId)
+      .then((members) => {
+        if (cancelled) return;
+        setStaffRoster(members.map((member) => ({ name: member.displayName || member.email, type: 'staff' as const })));
+      })
+      .catch(() => {
+        if (!cancelled) setStaffRoster([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [organizationId]);
+
+
 
   // Timer elapsed update
   useEffect(() => {
@@ -248,7 +272,16 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
     : observations.filter(o => o.observeeType === filterType);
 
   const categories = observeeType === 'staff' ? STAFF_CATEGORIES : STUDENT_CATEGORIES;
-  const rosterFiltered = roster.filter(r => r.type === observeeType);
+  const observationRoster = useMemo(() => {
+    const seen = new Set<string>();
+    return [...roster, ...staffRoster].filter((person) => {
+      const key = person.type + ':' + person.name.trim().toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [roster, staffRoster]);
+  const rosterFiltered = observationRoster.filter(r => r.type === observeeType);
 
   if (!canAccess) {
     return (
@@ -274,10 +307,10 @@ export function ObservationsTab({ userId, organizationId, userName, userRole }: 
       <section className="observations-tab__roster">
         <div className="observations-tab__roster-header">
           <span className="observations-tab__roster-count">
-            {roster.length > 0 ? roster.filter(r => r.type === 'student').length + ' students, ' + roster.filter(r => r.type === 'staff').length + ' staff' : 'No roster available'}
+            {observationRoster.length > 0 ? observationRoster.filter(r => r.type === 'student').length + ' students, ' + observationRoster.filter(r => r.type === 'staff').length + ' staff' : 'No roster available'}
           </span>
         </div>
-        {roster.length === 0 && <p className="observations-tab__roster-hint">Upload your roster from School settings or connect Google Classroom to populate students and staff here.</p>}
+        {observationRoster.length === 0 && <p className="observations-tab__roster-hint">Upload observees from School settings or connect Google Classroom to populate students and staff here.</p>}
       </section>
 
       {/* Observee Type Toggle */}
