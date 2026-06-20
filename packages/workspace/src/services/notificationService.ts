@@ -65,9 +65,32 @@ export async function notifyAssignee(
     );
   }
 
+  let recipientId = assigneeId;
+
+  // Task assignees are entered as free text in the UI. If the value looks like
+  // an email or display name, resolve it to a profile id before inserting.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assigneeId)) {
+    const client = getClient();
+    const normalized = assigneeId.trim().toLowerCase();
+    const emailMatch = await client
+      .from('profiles')
+      .select('id')
+      .eq('email', normalized)
+      .limit(1)
+      .maybeSingle<{ id: string }>();
+    const data = emailMatch.data ?? (await client
+      .from('profiles')
+      .select('id')
+      .ilike('display_name', assigneeId.trim())
+      .limit(1)
+      .maybeSingle<{ id: string }>()).data;
+    if (!data?.id) return;
+    recipientId = data.id;
+  }
+
   const payload: NotificationPayload = {
     taskId,
-    assigneeId,
+    assigneeId: recipientId,
     action,
     timestamp: new Date().toISOString(),
   };
@@ -99,7 +122,7 @@ export async function notifyAssignee(
   try {
     const client = getClient();
     const { error } = await client.from('notifications').insert({
-      recipient_id: assigneeId,
+      recipient_id: recipientId,
       type: 'task_assignment',
       title: action === 'created' ? 'New task assigned' : 'Task updated',
       body: taskTitle

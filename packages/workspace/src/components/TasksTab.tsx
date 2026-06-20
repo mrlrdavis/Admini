@@ -13,6 +13,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { parseLocalDate, defaultRegistry } from '@admini/shared';
 import { getTasks } from '../services/dashboardService';
+import { listOrgMembers } from '../services/organizationService';
 import { mergeEvents } from '../services/calendarMerge';
 import { duplicateTask } from '../services/taskDuplication';
 import { getLocalEvents, createLocalEvent } from '../services/localEventService';
@@ -26,7 +27,7 @@ import { TaskCard } from './TaskCard';
 import { CalendarView } from './CalendarView';
 import { OverdueList } from './OverdueList';
 import type { TaskWithSubtasks } from './TaskSection';
-import type { DashboardTask } from '../types';
+import type { DashboardTask, OrgMember } from '../types';
 import type { MergedEvent } from '../services/calendarMerge';
 import type { TaskService } from '../services/taskDuplication';
 
@@ -177,9 +178,10 @@ function getFilterCriteria(filter: FilterType): TaskFilterCriteria {
 export interface TasksTabProps {
   userId?: string;
   organizationId?: string;
+  userRole?: string;
 }
 
-export function TasksTab({ userId, organizationId }: TasksTabProps) {
+export function TasksTab({ userId, organizationId, userRole = 'staff' }: TasksTabProps) {
   const [tasks, setTasks] = useState<DashboardTask[]>([]);
   const [subtasksMap, setSubtasksMap] = useState<Record<string, SubtaskRow[]>>({});
   const [loading, setLoading] = useState(true);
@@ -201,6 +203,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
 
   // Staff roster for assignee suggestions
   const [staffRoster, setStaffRoster] = useState<string[]>([]);
+  const [orgMembers, setOrgMembers] = useState<OrgMember[]>([]);
 
   // Calendar event state
   const [mergedEvents, setMergedEvents] = useState<MergedEvent[]>([]);
@@ -232,17 +235,46 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
     loadTaskList();
   }, [loadTaskList]);
 
-  // Load staff roster for assignee auto-suggest
+  // Load real org members for assignee auto-suggest. The local roster is only
+  // a fallback for older observation-only data.
   useEffect(() => {
+    let cancelled = false;
+    if (organizationId) {
+      listOrgMembers(organizationId)
+        .then((members) => {
+          if (cancelled) return;
+          setOrgMembers(members);
+          setStaffRoster(Array.from(new Set(members.flatMap((member) => [
+            member.email,
+            member.displayName,
+          ].filter(Boolean)))));
+        })
+        .catch(() => {});
+    }
+
     try {
       const rosterRaw = localStorage.getItem('admini_roster_full');
-      if (rosterRaw) {
+      if (rosterRaw && !organizationId) {
         const roster = JSON.parse(rosterRaw) as { name: string; type: 'student' | 'staff' }[];
         // Filter to only staff (teachers, admin, principal)
         setStaffRoster(roster.filter(r => r.type === 'staff').map(r => r.name));
       }
     } catch {}
-  }, []);
+    return () => { cancelled = true; };
+  }, [organizationId]);
+
+  function resolveAssigneeProfileId(assignee?: string): string | undefined {
+    const normalized = assignee?.trim().toLowerCase();
+    if (!normalized) return undefined;
+    return orgMembers.find((member) =>
+      member.email.toLowerCase() === normalized
+      || member.displayName.toLowerCase() === normalized
+    )?.profileId;
+  }
+
+  function canEditTask(task: DashboardTask): boolean {
+    return userRole === 'admin' || userRole === 'principal' || task.createdBy === userId;
+  }
 
   // Auto-expand a specific task when navigated from dashboard
   useEffect(() => {
@@ -368,6 +400,10 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   }
 
   async function handleDuplicate(task: DashboardTask) {
+    if (!canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can duplicate this task');
+      return;
+    }
     try {
       const taskWithSubs = toTaskWithSubtasks(task, subtasksMap[task.id]);
       await duplicateTask(taskWithSubs, taskService);
@@ -395,6 +431,11 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   }
 
   async function handleEditTask(taskId: string, updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string; blockReason?: string }) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && !canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can edit this task');
+      return;
+    }
     // Optimistic update
     setTasks(prev => prev.map(t => t.id === taskId ? {
       ...t,
@@ -415,7 +456,9 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
       if (updates.assignee !== undefined) payload.assigned_to = updates.assignee || null;
       if (updates.blockReason !== undefined) payload.block_reason = updates.blockReason || null;
       await client.from('tasks').update(payload).eq('id', taskId);
-      if (updates.assignee) notifyAssignee(taskId, updates.assignee, 'updated', updates.title).catch(() => {});
+      if (updates.assignee) {
+        notifyAssignee(taskId, resolveAssigneeProfileId(updates.assignee) ?? updates.assignee, 'updated', updates.title ?? task?.title).catch(() => {});
+      }
       showToast('Task updated');
     } catch {
       showToast('Failed to update task');
@@ -424,6 +467,11 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   }
 
   async function handleDeleteTask(taskId: string) {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && !canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can delete this task');
+      return;
+    }
     const prev = tasks;
     setTasks(p => p.filter(t => t.id !== taskId));
     try {
@@ -440,6 +488,10 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
   async function handleStatusChange(taskId: string, status: string) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
+    if (!canEditTask(task)) {
+      showToast('Only task creators, admins, and principals can change this task');
+      return;
+    }
 
     // Block completion if subtasks aren't all done
     if (status === 'completed') {
@@ -745,6 +797,7 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
             <ul className="tasks-tab__task-list" role="list">
               {filteredTasks.map(task => {
                 const taskWithSubs = toTaskWithSubtasks(task, subtasksMap[task.id]);
+                const editable = canEditTask(task);
                 return (
                   <li key={task.id}>
                     <TaskCard
@@ -756,10 +809,10 @@ export function TasksTab({ userId, organizationId }: TasksTabProps) {
                       onSubtaskEdit={(subtaskId, updates) => handleSubtaskEdit(task.id, subtaskId, updates)}
                       onSubtaskAdd={(subtask) => handleSubtaskAdd(task.id, subtask)}
                       onSubtaskDelete={(subtaskId) => handleSubtaskDelete(task.id, subtaskId)}
-                      onDuplicate={() => handleDuplicate(task)}
-                      onStatusChange={(status) => handleStatusChange(task.id, status)}
-                      onEdit={(updates) => handleEditTask(task.id, updates)}
-                      onDelete={() => handleDeleteTask(task.id)}
+                      onDuplicate={editable ? () => handleDuplicate(task) : undefined}
+                      onStatusChange={editable ? (status) => handleStatusChange(task.id, status) : undefined}
+                      onEdit={editable ? (updates) => handleEditTask(task.id, updates) : undefined}
+                      onDelete={editable ? () => handleDeleteTask(task.id) : undefined}
                       staffRoster={staffRoster}
                     />
                   </li>

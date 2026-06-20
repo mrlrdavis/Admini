@@ -25,8 +25,8 @@ export interface TaskCardProps {
   onSubtaskEdit?: (subtaskId: string, updates: { title?: string; assignee?: string; dueAt?: string; priority?: string }) => void;
   onSubtaskAdd?: (subtask: { title: string; assignee?: string; dueAt?: string; priority?: string }) => void;
   onSubtaskDelete?: (subtaskId: string) => void;
-  onDuplicate: () => void;
-  onStatusChange: (status: string) => void;
+  onDuplicate?: () => void;
+  onStatusChange?: (status: string) => void;
   onEdit?: (updates: { title?: string; description?: string; dueAt?: string; priority?: string; assignee?: string; blockReason?: string }) => void;
   onDelete?: () => void;
   /** Staff roster names for assignee auto-suggest */
@@ -170,8 +170,8 @@ export function TaskCard({
           type="checkbox"
           className="task-card__parent-checkbox"
           checked={task.status === 'completed'}
-          disabled={hasIncompleteSubtasks}
-          onChange={() => onStatusChange(task.status === 'completed' ? 'open' : 'completed')}
+          disabled={hasIncompleteSubtasks || !onStatusChange}
+          onChange={() => onStatusChange?.(task.status === 'completed' ? 'open' : 'completed')}
           onClick={(e) => e.stopPropagation()}
           aria-label={`Mark "${task.title}" as ${task.status === 'completed' ? 'open' : 'completed'}`}
           title={hasIncompleteSubtasks ? 'Complete all subtasks first' : undefined}
@@ -404,16 +404,20 @@ export function TaskCard({
               {onEdit && (
                 <button type="button" className="task-card__action-btn" onClick={() => setEditing(true)} aria-label={`Edit task "${task.title}"`}>Edit</button>
               )}
-              <button type="button" className="task-card__action-btn" onClick={onDuplicate} aria-label={`Duplicate task "${task.title}"`}>Duplicate</button>
+              {onDuplicate && (
+                <button type="button" className="task-card__action-btn" onClick={onDuplicate} aria-label={`Duplicate task "${task.title}"`}>Duplicate</button>
+              )}
               {onDelete && (
                 <button type="button" className="task-card__action-btn task-card__action-btn--danger" onClick={onDelete} aria-label={`Delete task "${task.title}"`}>Delete</button>
               )}
-              <select className="task-card__status-select" value={task.status} onChange={(e) => onStatusChange(e.target.value)} aria-label="Change task status">
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="archived">Blocked</option>
-              </select>
+              {onStatusChange && (
+                <select className="task-card__status-select" value={task.status} onChange={(e) => onStatusChange(e.target.value)} aria-label="Change task status">
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="archived">Blocked</option>
+                </select>
+              )}
               {task.status === 'archived' && (<div style={{display:'flex',gap:'6px',marginTop:'6px',width:'100%'}}><input className="task-card__edit-input" placeholder="Block reason..." value={blockReason} onChange={(e) => setBlockReason(e.target.value)} style={{flex:1}} /><button type="button" className="task-card__action-btn" onClick={() => onEdit?.({ blockReason })} aria-label="Save block reason">Save</button></div>)}
             </div>
           )}

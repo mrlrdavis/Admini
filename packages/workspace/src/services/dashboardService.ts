@@ -18,6 +18,7 @@ type DbTask = {
   created_at: string;
   updated_at: string;
   assigned_to: string | null;
+  block_reason?: string | null;
   category?: string | null;
 };
 
@@ -72,6 +73,7 @@ export function mapTask(row: DbTask): DashboardTask {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     assignedTo: row.assigned_to ?? undefined,
+    blockReason: row.block_reason ?? undefined,
     category: row.category ?? undefined,
   };
 }
@@ -138,7 +140,7 @@ export function sortByUrgency(a: DashboardTask, b: DashboardTask): number {
 export async function getTasks(): Promise<DashboardTask[]> {
   const client = getClient();
 
-  const baseCols = 'id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at, block_reason';
+  const baseCols = 'id, organization_id, created_by, title, description, priority, status, due_at, created_at, updated_at, assigned_to, block_reason';
   try {
     // Try with category; if the column is missing (migration not applied), retry without it.
     let { data, error } = await client
