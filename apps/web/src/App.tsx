@@ -199,7 +199,9 @@ export function App() {
       return () => { mounted = false; };
     }
     // Skip profile creation if there's a pending invitation - let acceptInvitation handle org membership first
-    if (invitationToken) {
+    const pendingToken = invitationToken || sessionStorage.getItem('admini_invitation_token') || new URLSearchParams(window.location.search).get('invitation_token') || new URLSearchParams(window.location.search).get('invite');
+    if (pendingToken) {
+      if (!invitationToken) setInvitationToken(pendingToken);
       setProfileLoaded(true);
       return () => { mounted = false; };
     }
