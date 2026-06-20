@@ -64,6 +64,9 @@ DECLARE
   current_user_id uuid;
   current_email text;
   target_invitation public.invitations%rowtype;
+  accepted_organization_id uuid;
+  accepted_membership_id uuid;
+  accepted_role public.admini_role;
 BEGIN
   current_user_id := (SELECT auth.uid());
   current_email := lower(trim(public.current_user_email()));
@@ -92,18 +95,30 @@ BEGIN
     RAISE EXCEPTION 'Invitation email does not match the signed-in user';
   END IF;
 
-  INSERT INTO public.organization_memberships (organization_id, profile_id, role, invited_by)
-  VALUES (target_invitation.organization_id, current_user_id, target_invitation.role, target_invitation.invited_by)
-  ON CONFLICT (organization_id, profile_id) DO UPDATE
-  SET role = excluded.role
-  RETURNING organization_memberships.organization_id, organization_memberships.id, organization_memberships.role
-  INTO organization_id, membership_id, role;
+  UPDATE public.organization_memberships AS om
+  SET role = target_invitation.role,
+      invited_by = target_invitation.invited_by
+  WHERE om.organization_id = target_invitation.organization_id
+    AND om.profile_id = current_user_id
+  RETURNING om.organization_id, om.id, om.role
+  INTO accepted_organization_id, accepted_membership_id, accepted_role;
+
+  IF accepted_membership_id IS NULL THEN
+    INSERT INTO public.organization_memberships (organization_id, profile_id, role, invited_by)
+    VALUES (target_invitation.organization_id, current_user_id, target_invitation.role, target_invitation.invited_by)
+    RETURNING organization_memberships.organization_id, organization_memberships.id, organization_memberships.role
+    INTO accepted_organization_id, accepted_membership_id, accepted_role;
+  END IF;
 
   UPDATE public.invitations
   SET status = 'accepted',
       accepted_by = current_user_id,
       accepted_at = now()
   WHERE id = target_invitation.id;
+
+  organization_id := accepted_organization_id;
+  membership_id := accepted_membership_id;
+  role := accepted_role;
 
   RETURN NEXT;
 END;

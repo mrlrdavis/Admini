@@ -20,6 +20,16 @@ import { UnifiedWorkspace } from './UnifiedWorkspace';
 import { IntegrationCatalog, organizationService } from '@admini/workspace';
 
 const authStorage = createIndexedDbStorage('auth');
+const invitationTokenStorageKey = 'admini_invitation_token';
+
+function getPendingInvitationToken(invitationToken: string | null): string | null {
+  if (invitationToken) return invitationToken;
+  const params = new URLSearchParams(window.location.search);
+  return params.get('invitation_token')
+    || params.get('invite')
+    || sessionStorage.getItem(invitationTokenStorageKey)
+    || localStorage.getItem(invitationTokenStorageKey);
+}
 
 type OnboardingAnswers = {
   role: string;
@@ -41,6 +51,7 @@ export function App() {
 
   const [invitationToken, setInvitationToken] = useState<string | null>(null);
   const [invitationError, setInvitationError] = useState<string | null>(null);
+  const [acceptingInvitation, setAcceptingInvitation] = useState(false);
 
   // Handle OAuth callback for integrations - capture provider token
   useEffect(() => {
@@ -97,14 +108,14 @@ export function App() {
     const token = params.get('invitation_token') ?? params.get('invite');
     if (token) {
       setInvitationToken(token);
-      sessionStorage.setItem('admini_invitation_token', token);
-      localStorage.setItem('admini_invitation_token', token);
+      sessionStorage.setItem(invitationTokenStorageKey, token);
+      localStorage.setItem(invitationTokenStorageKey, token);
       params.delete('invitation_token');
       params.delete('invite');
       const nextSearch = params.toString();
       window.history.replaceState({}, '', `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`);
     } else {
-      const stored = sessionStorage.getItem('admini_invitation_token') || localStorage.getItem('admini_invitation_token');
+      const stored = sessionStorage.getItem(invitationTokenStorageKey) || localStorage.getItem(invitationTokenStorageKey);
       if (stored) {
         setInvitationToken(stored);
       }
@@ -152,9 +163,11 @@ export function App() {
     const answersKey = `onboarding_answers_${user.id}`;
 
     // Skip onboarding wizard if user has a pending invitation
-    const hasPendingInvite = invitationToken || sessionStorage.getItem('admini_invitation_token') || localStorage.getItem('admini_invitation_token');
+    const hasPendingInvite = getPendingInvitationToken(invitationToken);
     if (hasPendingInvite) {
+      if (!invitationToken) setInvitationToken(hasPendingInvite);
       setOnboardingComplete(true);
+      setOnboardingAnswers(null);
       return () => { mounted = false; };
     }
 
@@ -196,7 +209,7 @@ export function App() {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [user, invitationToken]);
 
   // Fetch profile from Supabase to obtain role, display name, and organization
   useEffect(() => {
@@ -207,10 +220,10 @@ export function App() {
       return () => { mounted = false; };
     }
     // Skip profile creation if there's a pending invitation - let acceptInvitation handle org membership first
-    const pendingToken = invitationToken || sessionStorage.getItem('admini_invitation_token') || localStorage.getItem('admini_invitation_token') || new URLSearchParams(window.location.search).get('invitation_token') || new URLSearchParams(window.location.search).get('invite');
+    const pendingToken = getPendingInvitationToken(invitationToken);
     if (pendingToken) {
       if (!invitationToken) setInvitationToken(pendingToken);
-      setProfileLoaded(true);
+      setProfileLoaded(false);
       return () => { mounted = false; };
     }
     getOrCreateProfile()
@@ -243,7 +256,7 @@ export function App() {
         }
       });
     return () => { mounted = false; };
-  }, [user?.id]);
+  }, [user?.id, invitationToken]);
 
   // Listen for auth state changes (token refresh failures, sign-out from another tab)
   useEffect(() => {
@@ -291,15 +304,19 @@ export function App() {
 
   // Accept pending invitation after user is authenticated
   useEffect(() => {
-    if (!user || !invitationToken) return;
+    if (!user) return;
+    const pendingToken = getPendingInvitationToken(invitationToken);
+    if (!pendingToken) return;
+    if (!invitationToken) setInvitationToken(pendingToken);
     let mounted = true;
+    setAcceptingInvitation(true);
 
-    acceptInvitation(invitationToken).then(async (result: { success: boolean; organizationName?: string; error?: string }) => {
+    acceptInvitation(pendingToken).then(async (result: { success: boolean; organizationName?: string; error?: string }) => {
       if (!mounted) return;
       if (result.success) {
         setInvitationToken(null);
-        sessionStorage.removeItem('admini_invitation_token');
-        localStorage.removeItem('admini_invitation_token');
+        sessionStorage.removeItem(invitationTokenStorageKey);
+        localStorage.removeItem(invitationTokenStorageKey);
         if (result.organizationName) {
           setUser((prev) => prev ? { ...prev, schoolName: result.organizationName } : prev);
         }
@@ -310,20 +327,12 @@ export function App() {
       } else {
         setInvitationError(result.error ?? 'This invitation link is no longer valid. Please ask your administrator to send a new one.');
         setInvitationToken(null);
-        sessionStorage.removeItem('admini_invitation_token');
-        localStorage.removeItem('admini_invitation_token');
-        // Still load profile even on invitation failure (user may need a new org)
-        try {
-          const profile = await getOrCreateProfile();
-          if (mounted) {
-            setUserRole(profile.role);
-            setOrganizationId(profile.organization_id);
-            setProfileLoaded(true);
-          }
-        } catch {
-          if (mounted) setProfileLoaded(true);
-        }
+        sessionStorage.removeItem(invitationTokenStorageKey);
+        localStorage.removeItem(invitationTokenStorageKey);
+        setProfileLoaded(true);
       }
+    }).finally(() => {
+      if (mounted) setAcceptingInvitation(false);
     });
 
     return () => { mounted = false; };
@@ -367,6 +376,7 @@ export function App() {
 
   if (loadingUser) return <div className="auth-page auth-page-home"><LogoLockup /><p>Checking session...</p></div>;
   if (!user) return <AuthScreen onAuthenticated={setUser} />;
+  if (acceptingInvitation || getPendingInvitationToken(invitationToken)) return <div className="auth-page auth-page-home"><LogoLockup /><p>Accepting invitation...</p></div>;
   if (onboardingComplete === null) return <div className="auth-page auth-page-home"><LogoLockup /><p>Preparing your workspace...</p></div>;
 
   const userName = user.displayName ?? user.email?.split('@')[0] ?? 'Admin';
